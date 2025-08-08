@@ -14,7 +14,7 @@ interface GymLayoutProps {
 function GymLayoutContent({ children }: GymLayoutProps) {
   const { gymSlug } = useParams()
   const { isLoading, error } = useBranding()
-  const [isValidGym, setIsValidGym] = useState<boolean | null>(null)
+  const [isValidGym, setIsValidGym] = useState<boolean | null>(true) // Temporarily start as true to skip loading
 
   useEffect(() => {
     // Temporarily skip gym validation to fix UI loading issue
@@ -58,21 +58,22 @@ function GymLayoutContent({ children }: GymLayoutProps) {
     notFound()
   }
 
-  // Show loading state while branding loads
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--brand-primary)] mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading branding...</p>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    )
-  }
+  // Temporarily skip branding loading to fix UI loading issue
+  // TODO: Fix branding context loading for proper branding
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen flex flex-col">
+  //       <Header />
+  //       <main className="flex-1 flex items-center justify-center">
+  //         <div className="text-center">
+  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--brand-primary)] mx-auto mb-4"></div>
+  //           <p className="text-gray-600">Loading branding...</p>
+  //         </div>
+  //       </main>
+  //       <Footer />
+  //     </div>
+  //   )
+  // }
 
   // Show error state
   if (error) {
