@@ -1,0 +1,239 @@
+'use client'
+
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Modal } from '@/components/ui/modal'
+import { BrandedButton } from '@/components/ui/branded-button'
+import { useToast } from '@/components/ui/toast'
+import { updatePostApproval } from '@/lib/database'
+import type { SocialMediaPost } from '@/types'
+
+const approvalSchema = z.object({
+  approvalType: z.enum(['story', 'post']),
+  carouselAction: z.enum(['current', 'all']).optional(),
+})
+
+type ApprovalFormData = z.infer<typeof approvalSchema>
+
+interface ApprovalModalProps {
+  isOpen: boolean
+  onClose: () => void
+  post: SocialMediaPost
+  carouselPosts: SocialMediaPost[]
+  onSuccess?: () => void
+}
+
+export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess }: ApprovalModalProps) {
+  const [isLoading, setIsLoading] = useState(false)
+  const { showToast } = useToast()
+  
+  const isCarousel = post['Carousel Group'] && carouselPosts.length > 1
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<ApprovalFormData>({
+    resolver: zodResolver(approvalSchema),
+    defaultValues: {
+      approvalType: 'post',
+      carouselAction: isCarousel ? 'current' : undefined,
+    },
+  })
+
+  const watchedApprovalType = watch('approvalType')
+  const watchedCarouselAction = watch('carouselAction')
+
+  const onSubmit = async (data: ApprovalFormData) => {
+    setIsLoading(true)
+    
+    try {
+      if (isCarousel && data.carouselAction === 'all') {
+        // Approve all carousel posts
+        const carouselGroup = post['Carousel Group']
+        const postsToApprove = carouselPosts.filter(p => p['Carousel Group'] === carouselGroup)
+        
+        for (const carouselPost of postsToApprove) {
+          await updatePostApproval(carouselPost.id, 'approved')
+        }
+        
+        showToast({
+          type: 'success',
+          title: 'Carousel approved',
+          message: `Approved all ${postsToApprove.length} slides as ${data.approvalType}`
+        })
+      } else {
+        // Approve single post or current carousel slide
+        await updatePostApproval(post.id, 'approved')
+        
+        showToast({
+          type: 'success',
+          title: 'Post approved',
+          message: `Approved as ${data.approvalType}`
+        })
+      }
+      
+      onSuccess?.()
+      onClose()
+    } catch (error) {
+      console.error('Error approving post:', error)
+      showToast({
+        type: 'error',
+        title: 'Approval failed',
+        message: 'Unable to approve post. Please try again.'
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Approve Content"
+      size="md"
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Post Preview */}
+        <div className="bg-gray-50 rounded-lg p-4">
+          <div className="flex items-center space-x-3 mb-3">
+            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+              <span className="text-green-600 font-semibold">
+                {post['Asset Type']?.toLowerCase() === 'video' ? '🎥' : '📷'}
+              </span>
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-900">
+                {post['Content Type'] || 'Social Media Post'}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {post['Asset Type'] || 'Image'} • {isCarousel ? `Carousel (${carouselPosts.length} slides)` : 'Single'}
+              </p>
+            </div>
+          </div>
+          
+          {post['Post Caption'] && (
+            <p className="text-sm text-gray-700 line-clamp-2">
+              {post['Post Caption']}
+            </p>
+          )}
+        </div>
+
+        {/* Approval Type */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Approve as:
+          </label>
+          <div className="space-y-3">
+            <label className="flex items-center space-x-3">
+              <input
+                type="radio"
+                value="post"
+                {...register('approvalType')}
+                className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+              />
+              <div>
+                <div className="font-medium text-gray-900">Post</div>
+                <div className="text-sm text-gray-500">Regular social media post</div>
+              </div>
+            </label>
+            <label className="flex items-center space-x-3">
+              <input
+                type="radio"
+                value="story"
+                {...register('approvalType')}
+                className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+              />
+              <div>
+                <div className="font-medium text-gray-900">Story</div>
+                <div className="text-sm text-gray-500">24-hour story content</div>
+              </div>
+            </label>
+          </div>
+          {errors.approvalType && (
+            <p className="mt-1 text-sm text-red-600">{errors.approvalType.message}</p>
+          )}
+        </div>
+
+        {/* Carousel Options */}
+        {isCarousel && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Carousel Action:
+            </label>
+            <div className="space-y-3">
+              <label className="flex items-center space-x-3">
+                <input
+                  type="radio"
+                  value="current"
+                  {...register('carouselAction')}
+                  className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                />
+                <div>
+                  <div className="font-medium text-gray-900">Approve current slide</div>
+                  <div className="text-sm text-gray-500">Only approve this slide ({post['Carousel Order']} of {carouselPosts.length})</div>
+                </div>
+              </label>
+              <label className="flex items-center space-x-3">
+                <input
+                  type="radio"
+                  value="all"
+                  {...register('carouselAction')}
+                  className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                />
+                <div>
+                  <div className="font-medium text-gray-900">Approve all slides</div>
+                  <div className="text-sm text-gray-500">Approve all {carouselPosts.length} slides in this carousel</div>
+                </div>
+              </label>
+            </div>
+            {errors.carouselAction && (
+              <p className="mt-1 text-sm text-red-600">{errors.carouselAction.message}</p>
+            )}
+          </div>
+        )}
+
+        {/* Summary */}
+        <div className="bg-blue-50 rounded-lg p-4">
+          <h4 className="font-medium text-blue-900 mb-2">Summary</h4>
+          <p className="text-sm text-blue-700">
+            {isCarousel && watchedCarouselAction === 'all' 
+              ? `Approve all ${carouselPosts.length} carousel slides as ${watchedApprovalType}`
+              : `Approve ${isCarousel ? 'current slide' : 'post'} as ${watchedApprovalType}`
+            }
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center justify-end space-x-3 pt-4 border-t">
+          <BrandedButton
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={isLoading}
+          >
+            Cancel
+          </BrandedButton>
+          <BrandedButton
+            type="submit"
+            disabled={isLoading}
+            className="bg-green-600 hover:bg-green-700 text-white"
+          >
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Approving...</span>
+              </div>
+            ) : (
+              'Approve Content'
+            )}
+          </BrandedButton>
+        </div>
+      </form>
+    </Modal>
+  )
+}
