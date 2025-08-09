@@ -60,17 +60,17 @@ export function PostCard({ post, carouselPosts = [], className = '', priority = 
         <div className="relative group overflow-hidden rounded-t-2xl">
           <MediaDisplay post={post} carouselPosts={carouselPosts} priority={priority} />
           
-          {/* Asset Type Badge - Shows on hover */}
-          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          {/* Asset Type Badge - Shows on hover - Top Left */}
+          <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-black bg-opacity-50 text-white shadow-sm backdrop-blur-sm">
               <span className="mr-1.5">{badge.icon}</span>
               {badge.label}
             </span>
           </div>
 
-          {/* Carousel Indicator */}
+          {/* Carousel Indicator - Shows on hover - Bottom Left */}
           {post['Carousel Group'] && post['Carousel Order'] && (
-            <div className="absolute bottom-3 right-3 z-10">
+            <div className="absolute bottom-8 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-black bg-opacity-60 text-white backdrop-blur-sm">
                 {post['Carousel Order']} of {post['Carousel Group']}
               </span>

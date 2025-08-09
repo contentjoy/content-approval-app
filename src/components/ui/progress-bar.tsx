@@ -24,10 +24,10 @@ export function ProgressBar({ current, total, goal, className = '' }: ProgressBa
       setHasReachedGoal(true)
       setShowConfetti(true)
       
-      // Hide confetti after 2.5 seconds
+      // Hide confetti after 1.5 seconds
       const timer = setTimeout(() => {
         setShowConfetti(false)
-      }, 2500)
+      }, 1500)
 
       return () => clearTimeout(timer)
     }
@@ -110,7 +110,7 @@ export function ProgressBar({ current, total, goal, className = '' }: ProgressBa
         {showConfetti && (
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            animate={{ opacity: 0.2 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 pointer-events-none z-50"
           >

@@ -50,62 +50,32 @@ export function Logo({
     )
   }
 
-  // Temporary hardcoded test for the known logo URL
-  const testLogoUrl = 'https://pub-8ca27ad93a114ad7b4d6e6ff4549cf90.r2.dev/Gym%20Launch%20Logo%20Gold%20Black.png'
+  // Force render the logo with known URL for now while debugging branding context
+  const knownLogoUrl = 'https://pub-8ca27ad93a114ad7b4d6e6ff4549cf90.r2.dev/Gym%20Launch%20Logo%20Gold%20Black.png'
   
-  // Test with hardcoded URL if no logo from branding context
-  if (!logo && !isLoading) {
-    console.log('🧪 Testing with hardcoded logo URL:', testLogoUrl)
+  // Always show the logo (debugging) - remove this once branding context works
+  if (!isLoading) {
+    const logoSrc = logo || knownLogoUrl
+    console.log('🖼️ Rendering logo with URL:', logoSrc)
     return (
       <div className={`${sizeClasses[size]} ${className} relative`}>
         <Image
-          src={testLogoUrl}
-          alt="Test Logo"
+          src={logoSrc}
+          alt={agencyName || gymName || 'Agency Logo'}
           fill
           className="object-contain"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onLoad={() => console.log('✅ Test logo loaded successfully')}
+          onLoad={() => console.log('✅ Logo loaded successfully:', logoSrc)}
           onError={(e) => {
-            console.error('❌ Test logo failed to load:', e)
-            console.error('❌ Failed test logo URL:', testLogoUrl)
+            console.error('❌ Logo failed to load:', e)
+            console.error('❌ Failed logo URL:', logoSrc)
           }}
         />
       </div>
     )
   }
 
-  // If we have a logo, display it
-  if (logo) {
-    console.log('✅ Rendering logo:', logo)
-    return (
-      <div className={`${sizeClasses[size]} ${className} relative`}>
-        <Image
-          src={logo}
-          alt={agencyName || gymName || 'Logo'}
-          fill
-          className="object-contain"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onLoad={() => console.log('✅ Logo image loaded successfully')}
-          onError={(e) => {
-            console.error('❌ Logo image failed to load:', e)
-            console.error('❌ Failed logo URL:', logo)
-          }}
-        />
-      </div>
-    )
-  }
-
-  // Fallback to text if no logo or if showFallback is true
-  if (showFallback && fallbackText !== '') {
-    const displayText = fallbackText || agencyName || gymName || 'ContentJoy'
-    console.log('📝 Using text fallback:', displayText)
-    return (
-      <div className={`${textSizes[size]} ${className} font-semibold text-gray-900`}>
-        {displayText}
-      </div>
-    )
-  }
-
-  console.log('🚫 Logo component returning null')
+  // Loading state fallback (shouldn't reach here with current logic)
+  console.log('🚫 Logo component fallback')
   return null
 }
