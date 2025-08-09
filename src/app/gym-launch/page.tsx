@@ -9,6 +9,7 @@ import Image from 'next/image'
 import type { Agency } from '@/types'
 
 export default function GymLaunchPage() {
+  const [gymName, setGymName] = useState('')
   const [email, setEmail] = useState('')
   const [passcode, setPasscode] = useState('')
   const [showPasscode, setShowPasscode] = useState(false)
@@ -50,7 +51,11 @@ export default function GymLaunchPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim() || !passcode.trim()) {
+    if (isSignUp && (!gymName.trim() || !email.trim() || !passcode.trim())) {
+      setError('Please fill in all fields')
+      return
+    }
+    if (!isSignUp && (!email.trim() || !passcode.trim())) {
       setError('Please enter both email and passcode')
       return
     }
@@ -80,17 +85,18 @@ export default function GymLaunchPage() {
 
       if (isSignUp) {
         // Sign-up flow
-        const gymName = email.toLowerCase().replace(/[^a-z0-9]/g, '-')
+        // Convert gym name to URL-friendly slug
+        const gymSlug = gymName.toLowerCase().replace(/[^a-z0-9]/g, '-')
         
         // Check if gym name already exists
         const { data: existingGym } = await supabase
           .from('gyms')
           .select('id')
-          .eq('Gym Name', gymName)
+          .eq('Gym Name', gymSlug)
           .single()
 
         if (existingGym) {
-          setError('An account with this email already exists')
+          setError('A gym with this name already exists')
           return
         }
 
@@ -98,7 +104,7 @@ export default function GymLaunchPage() {
         const { data: newGym, error: createError } = await supabase
           .from('gyms')
           .insert({
-            'Gym Name': gymName,
+            'Gym Name': gymSlug,
             'Agency': agencyData.id, // Use the agency UUID
             'Email': email,
             'passcode': passcode,
@@ -135,7 +141,7 @@ export default function GymLaunchPage() {
         localStorage.setItem('gym_id', newGym.id)
         
         // Redirect to onboarding
-        router.push(`/${gymName}/onboarding`)
+        router.push(`/${gymSlug}/onboarding`)
       } else {
         // Sign-in flow
         const { data: gym, error: gymError } = await supabase
@@ -159,7 +165,7 @@ export default function GymLaunchPage() {
         const { error: sessionError } = await supabase
           .from('user_sessions')
           .insert({
-            user_id: gym.gym_id,
+            user_id: gym.id,
             session_token: sessionToken,
             expires_at: expiresAt.toISOString()
           })
@@ -250,6 +256,26 @@ export default function GymLaunchPage() {
 
           {/* Sign In/Up Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Gym Name Field - Only show during signup */}
+            {isSignUp && (
+              <div>
+                <label htmlFor="gymName" className="block text-sm font-medium text-text mb-2">
+                  Gym Name
+                </label>
+                <div className="relative">
+                  <input
+                    id="gymName"
+                    type="text"
+                    value={gymName}
+                    onChange={(e) => setGymName(e.target.value)}
+                    className="block w-full px-3 py-3 border border-card-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-text placeholder-text-secondary bg-background"
+                    placeholder="Enter your gym name"
+                    disabled={isLoading}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-text mb-2">
@@ -318,7 +344,7 @@ export default function GymLaunchPage() {
             {/* Submit Button */}
             <motion.button
               type="submit"
-              disabled={isLoading || !email.trim() || !passcode.trim()}
+              disabled={isLoading || !email.trim() || !passcode.trim() || (isSignUp && !gymName.trim())}
               className="w-full text-white py-3 px-4 rounded-lg font-medium hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               style={{ 
                 backgroundColor: agencyData?.['Primary Color'] || '#000000',
