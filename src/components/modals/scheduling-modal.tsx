@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { CheckCircle } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 import { BrandedButton } from '@/components/ui/branded-button'
 import { useToast } from '@/components/ui/toast'
@@ -132,16 +133,16 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Approved Posts Summary */}
-        <div className="bg-green-50 rounded-lg p-4">
+        <div className="bg-[var(--brand-primary)] bg-opacity-10 rounded-lg p-4">
           <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <span className="text-green-600 font-semibold">✓</span>
+            <div className="w-10 h-10 bg-[var(--brand-primary)] bg-opacity-20 rounded-lg flex items-center justify-center">
+              <CheckCircle className="w-5 h-5 text-[var(--brand-primary)]" />
             </div>
             <div>
-              <h3 className="font-medium text-green-900">
+              <h3 className="font-medium text-[var(--brand-primary)]">
                 {approvedPosts.length} Posts Ready to Schedule
               </h3>
-              <p className="text-sm text-green-700">
+              <p className="text-sm text-[var(--brand-primary)] opacity-80">
                 All posts have been approved and are ready for scheduling
               </p>
             </div>
@@ -199,7 +200,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
               id="startDate"
               {...register('startDate')}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
+              className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
             />
             {errors.startDate && (
               <p className="mt-1 text-sm text-red-600">{errors.startDate.message}</p>
@@ -214,7 +215,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
               type="time"
               id="startTime"
               {...register('startTime')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
+              className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
             />
             {errors.startTime && (
               <p className="mt-1 text-sm text-red-600">{errors.startTime.message}</p>
@@ -253,7 +254,6 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
           <BrandedButton
             type="submit"
             disabled={isLoading}
-            className="bg-green-600 hover:bg-green-700 text-white"
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">

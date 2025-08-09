@@ -254,8 +254,8 @@ export default function GymPage() {
                 <p className="text-sm font-medium text-gray-600">Total Posts</p>
                 <p className="text-2xl font-bold text-gray-900">{posts.length}</p>
               </div>
-              <div className="w-8 h-8 bg-[var(--brand-primary)] bg-opacity-65 rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-4 h-4 text-[var(--brand-primary)]" />
+              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-4 h-4 text-gray-600" />
               </div>
             </div>
           </div>
