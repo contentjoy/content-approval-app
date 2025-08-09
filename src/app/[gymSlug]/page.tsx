@@ -12,6 +12,7 @@ import { PostFilters, type FilterType } from '@/components/posts/post-filters'
 import { ProgressBar } from '@/components/ui/progress-bar'
 import { useModalStore } from '@/hooks/use-modal-store'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Plus, BarChart3 } from 'lucide-react'
 import type { SocialMediaPost } from '@/types'
 
 export default function GymPage() {
@@ -222,19 +223,16 @@ export default function GymPage() {
             <BrandedButton
               onClick={handleSchedulePosts}
               disabled={approvedPosts.length === 0}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-black hover:bg-gray-800 text-white rounded-full"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               Schedule Posts ({approvedPosts.length})
             </BrandedButton>
-            <BrandedButton>
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Upload Content
-            </BrandedButton>
+            <button className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors">
+              <Plus className="w-5 h-5 text-gray-600" />
+            </button>
           </div>
         </div>
 
@@ -256,10 +254,8 @@ export default function GymPage() {
                 <p className="text-sm font-medium text-gray-600">Total Posts</p>
                 <p className="text-2xl font-bold text-gray-900">{posts.length}</p>
               </div>
-              <div className="w-8 h-8 bg-[var(--brand-primary)] bg-opacity-10 rounded-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-[var(--brand-primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+              <div className="w-8 h-8 bg-[var(--brand-primary)] bg-opacity-65 rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-4 h-4 text-[var(--brand-primary)]" />
               </div>
             </div>
           </div>
@@ -268,12 +264,12 @@ export default function GymPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-yellow-600">
+                <p className="text-2xl font-bold text-gray-900">
                   {posts.filter(p => p['Approval Status']?.toLowerCase() === 'pending').length}
                 </p>
               </div>
-              <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -284,12 +280,12 @@ export default function GymPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Approved</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold text-gray-900">
                   {posts.filter(p => p['Approval Status']?.toLowerCase() === 'approved').length}
                 </p>
               </div>
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -300,12 +296,12 @@ export default function GymPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Rejected</p>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-2xl font-bold text-gray-900">
                   {posts.filter(p => p['Approval Status']?.toLowerCase() === 'disapproved' || p['Approval Status']?.toLowerCase() === 'rejected').length}
                 </p>
               </div>
-              <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </div>

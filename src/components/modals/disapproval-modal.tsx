@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { XCircle } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 import { BrandedButton } from '@/components/ui/branded-button'
 import { useToast } from '@/components/ui/toast'
@@ -99,12 +100,10 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Post Preview */}
-        <div className="bg-gray-50 rounded-lg p-4">
+        <div className="bg-gray-100 rounded-lg p-4">
           <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-              <span className="text-red-600 font-semibold">
-                {post['Asset Type']?.toLowerCase() === 'video' ? '🎥' : '📷'}
-              </span>
+            <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center">
+              <XCircle className="w-5 h-5 text-white" />
             </div>
             <div>
               <h3 className="font-medium text-gray-900">
