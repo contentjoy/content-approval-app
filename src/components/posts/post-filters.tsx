@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { FileText, Image, Video, Grid3X3, Clock, CheckCircle, XCircle } from 'lucide-react'
 import type { SocialMediaPost } from '@/types'
 
-export type FilterType = 'all' | 'photos' | 'videos' | 'carousels' | 'approved' | 'disapproved' | 'pending'
+export type FilterType = 'all' | 'photos' | 'videos' | 'carousels' | 'approved' | 'disapproved'
 
 interface PostFiltersProps {
   activeFilter: FilterType
@@ -37,8 +37,6 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
         return posts.filter(p => p['Approval Status']?.toLowerCase() === 'approved').length
       case 'disapproved':
         return posts.filter(p => p['Approval Status']?.toLowerCase() === 'disapproved' || p['Approval Status']?.toLowerCase() === 'rejected').length
-      case 'pending':
-        return posts.filter(p => p['Approval Status']?.toLowerCase() === 'pending').length
       default:
         return posts.filter(p => p['Approval Status']?.toLowerCase() === 'pending').length
     }
@@ -49,7 +47,6 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
     { key: 'photos', label: 'Photos', icon: <Image className="w-4 h-4" /> },
     { key: 'videos', label: 'Videos', icon: <Video className="w-4 h-4" /> },
     { key: 'carousels', label: 'Carousels', icon: <Grid3X3 className="w-4 h-4" /> },
-    { key: 'pending', label: 'Pending', icon: <Clock className="w-4 h-4" /> },
     { key: 'approved', label: 'Approved', icon: <CheckCircle className="w-4 h-4" /> },
     { key: 'disapproved', label: 'Disapproved', icon: <XCircle className="w-4 h-4" /> },
   ]

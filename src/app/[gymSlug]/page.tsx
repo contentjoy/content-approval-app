@@ -107,10 +107,14 @@ export default function GymPage() {
 
   // Calculate progress
   const approvedPosts = useMemo(() => {
-    return posts.filter(post => post['Approval Status']?.toLowerCase() === 'approved')
-  }, [posts])
+    return displayPosts.filter(post => post['Approval Status']?.toLowerCase() === 'approved')
+  }, [displayPosts])
 
-  const totalPosts = posts.length
+  const pendingPosts = useMemo(() => {
+    return displayPosts.filter(post => post['Approval Status']?.toLowerCase() === 'pending')
+  }, [displayPosts])
+
+  const totalPosts = pendingPosts.length  // Use pending posts for progress calculation
   const approvedCount = approvedPosts.length
   const goal = 30 // Goal is 30 approved posts
 
@@ -252,7 +256,7 @@ export default function GymPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Posts</p>
-                <p className="text-2xl font-bold text-gray-900">{posts.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{displayPosts.length}</p>
               </div>
               <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
                 <BarChart3 className="w-4 h-4 text-gray-600" />
@@ -265,7 +269,7 @@ export default function GymPage() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Pending</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {posts.filter(p => p['Approval Status']?.toLowerCase() === 'pending').length}
+                  {displayPosts.filter(p => p['Approval Status']?.toLowerCase() === 'pending').length}
                 </p>
               </div>
               <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -281,7 +285,7 @@ export default function GymPage() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Approved</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {posts.filter(p => p['Approval Status']?.toLowerCase() === 'approved').length}
+                  {displayPosts.filter(p => p['Approval Status']?.toLowerCase() === 'approved').length}
                 </p>
               </div>
               <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -297,7 +301,7 @@ export default function GymPage() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Rejected</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {posts.filter(p => p['Approval Status']?.toLowerCase() === 'disapproved' || p['Approval Status']?.toLowerCase() === 'rejected').length}
+                  {displayPosts.filter(p => p['Approval Status']?.toLowerCase() === 'disapproved' || p['Approval Status']?.toLowerCase() === 'rejected').length}
                 </p>
               </div>
               <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
