@@ -44,7 +44,7 @@ class AyrshareService {
   }
 
   // Post content to social media platforms
-  async createPost(postData: AyrsharePostData): Promise<{ success: boolean; id?: string; errors?: any }> {
+  async createPost(postData: AyrsharePostData): Promise<{ success: boolean; id?: string; errors?: unknown }> {
     try {
       const payload = {
         post: postData.post,

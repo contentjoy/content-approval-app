@@ -54,7 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           )
         `)
         .eq('session_token', sessionToken)
-        .eq('expires_at', 'gte', new Date().toISOString())
+        .gte('expires_at', new Date().toISOString())
         .single()
 
       if (error || !session) {

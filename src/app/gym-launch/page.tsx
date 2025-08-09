@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, Mail, Lock, LogIn, UserPlus } from 'lucide-react'
@@ -138,9 +138,9 @@ export default function GymLaunchPage() {
         // Redirect to dashboard
         router.push(`/${gym['Gym Name']}`)
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Authentication error:', err)
-      setError(err.message || 'Authentication failed. Please try again.')
+      setError((err as Error).message || 'Authentication failed. Please try again.')
     } finally {
       setIsLoading(false)
     }

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ayrshareService } from '@/lib/ayrshare'
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,10 +43,10 @@ export async function POST(request: NextRequest) {
       profileKey: `${gymId}-${platform}`
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Ayrshare JWT generation error:', error)
     return NextResponse.json(
-      { error: error.message || 'Failed to generate JWT' },
+      { error: (error as Error).message || 'Failed to generate JWT' },
       { status: 500 }
     )
   }

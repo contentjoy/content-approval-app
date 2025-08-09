@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
       headers: { 'Content-Type': 'text/html' }
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Ayrshare callback error:', error)
     return new NextResponse(`
       <html>
@@ -117,14 +117,14 @@ export async function GET(request: NextRequest) {
             if (window.opener) {
               window.opener.postMessage({
                 type: 'AYRSHARE_AUTH_ERROR',
-                error: '${error.message || 'Authentication failed'}'
+                error: '${(error as Error).message || 'Authentication failed'}'
               }, '*');
             }
             window.close();
           </script>
           <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
             <h2 style="color: #EF4444;">✗ Connection Failed</h2>
-            <p>${error.message || 'Authentication failed'}. You can close this window.</p>
+            <p>${(error as Error).message || 'Authentication failed'}. You can close this window.</p>
           </div>
         </body>
       </html>

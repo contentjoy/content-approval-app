@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
@@ -105,7 +105,6 @@ export default function OnboardingPage() {
   // Load existing data if available
   useEffect(() => {
     const loadGymData = async () => {
-      const sessionToken = localStorage.getItem('session_token')
       const storedGymId = localStorage.getItem('gym_id')
       
       if (storedGymId) {
@@ -134,7 +133,7 @@ export default function OnboardingPage() {
     loadGymData()
   }, [])
 
-  const updateFormData = (field: keyof FormData, value: any) => {
+  const updateFormData = (field: keyof FormData, value: string | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
