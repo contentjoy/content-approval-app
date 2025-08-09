@@ -24,6 +24,7 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
       case 'videos':
         return posts.filter(p => 
           p['Asset Type']?.toLowerCase() === 'video' &&
+          !p['Carousel Group'] &&
           p['Approval Status']?.toLowerCase() === 'pending'
         ).length
       case 'carousels':

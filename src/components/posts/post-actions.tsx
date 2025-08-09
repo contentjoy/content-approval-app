@@ -132,7 +132,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
           <button
             onClick={handleApprove}
             disabled={isLoading}
-            className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-green-600 hover:bg-green-700 text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Approve
           </button>
@@ -140,7 +140,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
           <button
             onClick={handleReject}
             disabled={isLoading}
-            className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border-2 border-[var(--brand-primary)] text-[var(--brand-primary)] bg-transparent hover:bg-[var(--brand-primary)] hover:text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Reject
           </button>
@@ -176,7 +176,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -10 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-[100] overflow-visible"
+              className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-[9999] overflow-visible"
               style={{ 
                 boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)' 
               }}

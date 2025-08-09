@@ -113,9 +113,10 @@ export default function GymPage() {
         )
         break
       case 'videos':
-        // Only show pending videos
+        // Only show pending videos (exclude carousel posts)
         filtered = displayPosts.filter(post => 
           post['Asset Type']?.toLowerCase() === 'video' &&
+          !post['Carousel Group'] &&
           post['Approval Status']?.toLowerCase() === 'pending'
         )
         break

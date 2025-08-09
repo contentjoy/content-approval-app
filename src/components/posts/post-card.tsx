@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MediaDisplay, PostActions, PostStatus } from './index'
 import type { SocialMediaPost } from '@/types'
@@ -12,6 +13,8 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, carouselPosts = [], className = '', priority = false }: PostCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  
   const getAssetTypeBadge = () => {
     const assetType = post['Asset Type']?.toLowerCase() || 'photo'
     const isCarousel = post['Carousel Group']
@@ -65,16 +68,13 @@ export function PostCard({ post, carouselPosts = [], className = '', priority = 
             </span>
           </div>
 
-          {/* Post Caption Overlay - Shows on hover */}
-          {post['Post Caption'] && (
-            <div className="absolute top-2 right-2 max-w-[70%] z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="bg-black/50 text-white px-2 py-1 rounded text-xs font-medium backdrop-blur-sm">
-                <p className="line-clamp-2">
-                  {post['Post Caption']}
-                </p>
-              </div>
-            </div>
-          )}
+          {/* Asset Type Badge - Shows on hover */}
+          <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${badge.color} shadow-sm backdrop-blur-sm`}>
+              <span className="mr-1.5">{badge.icon}</span>
+              {badge.label}
+            </span>
+          </div>
 
           {/* Carousel Indicator */}
           {post['Carousel Group'] && post['Carousel Order'] && (
@@ -91,12 +91,15 @@ export function PostCard({ post, carouselPosts = [], className = '', priority = 
           {/* Post Caption */}
           {post['Post Caption'] && (
             <div className="mb-4">
-              <p className="text-gray-700 text-sm leading-relaxed line-clamp-3 font-medium">
+              <p className={`text-gray-700 text-sm leading-relaxed font-medium ${isExpanded ? '' : 'line-clamp-3'}`}>
                 {post['Post Caption']}
               </p>
               {post['Post Caption'].length > 150 && (
-                <button className="text-[var(--brand-primary)] text-xs font-semibold mt-2 hover:underline transition-colors">
-                  Read more
+                <button 
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="text-[var(--brand-primary)] text-xs font-semibold mt-2 hover:underline transition-colors"
+                >
+                  {isExpanded ? 'Show less' : 'Read more'}
                 </button>
               )}
             </div>

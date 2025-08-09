@@ -24,10 +24,10 @@ export function ProgressBar({ current, total, goal, className = '' }: ProgressBa
       setHasReachedGoal(true)
       setShowConfetti(true)
       
-      // Hide confetti after 5 seconds
+      // Hide confetti after 2.5 seconds
       const timer = setTimeout(() => {
         setShowConfetti(false)
-      }, 5000)
+      }, 2500)
 
       return () => clearTimeout(timer)
     }
@@ -141,7 +141,7 @@ function ConfettiCelebration() {
       y: -20,
       color: colors[Math.floor(Math.random() * colors.length)],
       size: Math.random() * 8 + 4,
-      speed: Math.random() * 3 + 2
+      speed: Math.random() * 6 + 4
     }))
     
     setParticles(newParticles)
@@ -153,7 +153,7 @@ function ConfettiCelebration() {
           y: particle.y + particle.speed
         })).filter(particle => particle.y < window.innerHeight + 50)
       )
-    }, 50)
+    }, 30)
 
     return () => clearInterval(interval)
   }, [])
@@ -176,7 +176,7 @@ function ConfettiCelebration() {
             scale: [1, 0.8, 1]
           }}
           transition={{
-            duration: 2,
+            duration: 1,
             repeat: Infinity,
             ease: "easeInOut"
           }}
