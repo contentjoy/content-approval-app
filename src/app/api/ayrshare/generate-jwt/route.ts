@@ -11,6 +11,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Debug environment variables
+    console.log('🔧 Environment check:', {
+      hasApiKey: !!process.env.AYRSHARE_API_KEY,
+      hasPrivateKey: !!process.env.AYRSHARE_PRIVATE_KEY,
+      hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
+      apiKeyLength: process.env.AYRSHARE_API_KEY?.length || 0,
+      privateKeyLength: process.env.AYRSHARE_PRIVATE_KEY?.length || 0
+    })
+
+    if (!process.env.AYRSHARE_API_KEY || !process.env.AYRSHARE_PRIVATE_KEY) {
+      console.log('⚠️ Ayrshare credentials not configured - using demo mode')
+      
+      // Demo mode for testing without Ayrshare credentials
+      const demoAuthUrl = `https://app.ayrshare.com/auth/${platform}?demo=true&redirect=${encodeURIComponent(process.env.NEXTAUTH_URL || 'http://localhost:3000')}/api/ayrshare/callback&state=${gymId}-${platform}`
+      
+      return NextResponse.json({
+        authUrl: demoAuthUrl,
+        jwt: 'demo-jwt-token',
+        profileKey: `${gymId}-${platform}`,
+        demo: true
+      })
+    }
+
     // Generate JWT for the platform
     const jwtResponse = await fetch('https://app.ayrshare.com/api/generateJWT', {
       method: 'POST',
@@ -20,13 +43,17 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         domain: process.env.NEXTAUTH_URL || 'http://localhost:3000',
-        privateKey: process.env.AYRSHARE_PRIVATE_KEY || 'default-key',
+        privateKey: process.env.AYRSHARE_PRIVATE_KEY,
         profileKey: `${gymId}-${platform}`,
       })
     })
 
+    console.log('📡 Ayrshare API response status:', jwtResponse.status)
+    
     if (!jwtResponse.ok) {
-      throw new Error('Failed to generate JWT')
+      const errorText = await jwtResponse.text()
+      console.error('❌ Ayrshare API error:', errorText)
+      throw new Error(`Ayrshare API error: ${jwtResponse.status} - ${errorText}`)
     }
 
     const { jwt } = await jwtResponse.json()

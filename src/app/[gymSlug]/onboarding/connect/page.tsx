@@ -108,7 +108,13 @@ export default function SocialConnectPage() {
       const responseData = await response.json()
       console.log('📋 JWT response data:', responseData)
       
-      const { authUrl, jwt } = responseData
+      const { authUrl, jwt, demo } = responseData
+
+      if (demo) {
+        console.log('🎭 Demo mode - showing Ayrshare connection flow')
+        setError('🎭 Demo Mode: Ayrshare credentials not configured yet. This will work once you add your API keys on Monday!')
+        return
+      }
 
       // Store JWT for callback handling
       localStorage.setItem(`ayrshare_jwt_${platformId}`, jwt)
@@ -119,6 +125,10 @@ export default function SocialConnectPage() {
         'ayrshare_auth',
         'width=600,height=700,scrollbars=yes,resizable=yes'
       )
+
+      if (!authWindow) {
+        throw new Error('Popup blocked! Please allow popups for this site.')
+      }
 
       // Poll for window closure (successful auth)
       const checkWindow = setInterval(() => {
