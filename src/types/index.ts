@@ -19,14 +19,6 @@ export interface Gym {
   "Last name": string
   "Status": string
   "passcode"?: string | null
-  "social_accounts"?: {
-    facebook?: { page_id: string; access_token: string }
-    instagram?: { account_id: string; access_token: string }
-    tiktok?: { account_id: string; access_token: string }
-    twitter?: { account_id: string; access_token: string }
-    linkedin?: { account_id: string; access_token: string }
-    youtube?: { channel_id: string; access_token: string }
-  } | null
 }
 
 // Social Media Post types
@@ -69,7 +61,6 @@ export interface AuthUser {
   gymId: string
   gymName: string
   agency: string
-  socialAccounts?: Gym['social_accounts']
   primaryColor?: string | null
 }
 

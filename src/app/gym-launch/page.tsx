@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, Mail, Lock, LogIn, UserPlus } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import Image from 'next/image'
+import type { Agency } from '@/types'
 
 export default function GymLaunchPage() {
   const [email, setEmail] = useState('')
@@ -13,9 +15,38 @@ export default function GymLaunchPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
+  const [agencyData, setAgencyData] = useState<Agency | null>(null)
+  const [loadingAgency, setLoadingAgency] = useState(true)
   
   const router = useRouter()
-  const agency = 'gym-launch'
+  const agencyPartnerName = 'Gym Launch' // This should match the "Partner name" in agencies table
+
+  // Load agency data on component mount
+  useEffect(() => {
+    async function loadAgencyData() {
+      try {
+        const { data: agency, error } = await supabase
+          .from('agencies')
+          .select('*')
+          .eq('Partner name', agencyPartnerName)
+          .single()
+
+        if (error) {
+          console.error('Error loading agency:', error)
+          setError(`Agency "${agencyPartnerName}" not found in database`)
+        } else {
+          setAgencyData(agency)
+        }
+      } catch (err) {
+        console.error('Error loading agency data:', err)
+        setError('Failed to load agency information')
+      } finally {
+        setLoadingAgency(false)
+      }
+    }
+
+    loadAgencyData()
+  }, [agencyPartnerName])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,7 +69,12 @@ export default function GymLaunchPage() {
         localStorage.setItem('session_token', sessionToken)
         localStorage.setItem('admin_user', 'true')
         
-        router.push(`/${agency}`)
+        router.push(`/movement-society`) // Default gym for admin
+        return
+      }
+
+      if (!agencyData) {
+        setError('Agency data not loaded. Please try again.')
         return
       }
 
@@ -63,14 +99,13 @@ export default function GymLaunchPage() {
           .from('gyms')
           .insert({
             'Gym Name': gymName,
-            'Agency': agency,
+            'Agency': agencyData.id, // Use the agency UUID
             'Email': email,
             'passcode': passcode,
             'Status': 'pending',
             'First name': '',
             'Last name': '',
-            'Primary color': null,
-            'social_accounts': null
+            'Primary color': null
           })
           .select('gym_id')
           .single()
@@ -108,7 +143,7 @@ export default function GymLaunchPage() {
           .select('*')
           .eq('Email', email)
           .eq('passcode', passcode)
-          .eq('Agency', agency)
+          .eq('Agency', agencyData.id) // Use the agency UUID
           .single()
 
         if (gymError || !gym) {
@@ -146,6 +181,17 @@ export default function GymLaunchPage() {
     }
   }
 
+  if (loadingAgency) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-text-secondary">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <motion.div
@@ -157,25 +203,47 @@ export default function GymLaunchPage() {
         <div className="bg-card-bg border border-card-border rounded-lg p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.3 }}
-              className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4"
-            >
-              {isSignUp ? (
-                <UserPlus className="w-8 h-8 text-white" />
-              ) : (
-                <LogIn className="w-8 h-8 text-white" />
-              )}
-            </motion.div>
+            {/* Agency Logo */}
+            {agencyData?.Logo && (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1, duration: 0.3 }}
+                className="w-20 h-20 mx-auto mb-6 relative rounded-lg overflow-hidden"
+              >
+                <Image
+                  src={agencyData.Logo}
+                  alt={`${agencyData['Partner name']} Logo`}
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </motion.div>
+            )}
+            
+            {/* Fallback Icon */}
+            {!agencyData?.Logo && (
+              <motion.div
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.3 }}
+                className="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4"
+                style={{ backgroundColor: agencyData?.['Primary Color'] || '#000000' }}
+              >
+                {isSignUp ? (
+                  <UserPlus className="w-8 h-8 text-white" />
+                ) : (
+                  <LogIn className="w-8 h-8 text-white" />
+                )}
+              </motion.div>
+            )}
             <h1 className="text-2xl font-bold text-text mb-2">
               {isSignUp ? 'Create Account' : 'Welcome Back'}
             </h1>
             <p className="text-text-secondary">
               {isSignUp 
-                ? `Join Gym Launch and start managing your content`
-                : `Sign in to your Gym Launch dashboard`
+                ? `Join ${agencyData?.['Partner name'] || 'Gym Launch'} and start managing your content`
+                : `Sign in to your ${agencyData?.['Partner name'] || 'Gym Launch'} dashboard`
               }
             </p>
           </div>
@@ -251,7 +319,11 @@ export default function GymLaunchPage() {
             <motion.button
               type="submit"
               disabled={isLoading || !email.trim() || !passcode.trim()}
-              className="w-full bg-primary text-white py-3 px-4 rounded-lg font-medium hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="w-full text-white py-3 px-4 rounded-lg font-medium hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              style={{ 
+                backgroundColor: agencyData?.['Primary Color'] || '#000000',
+                '--tw-ring-color': agencyData?.['Primary Color'] || '#000000'
+              } as React.CSSProperties}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -273,7 +345,8 @@ export default function GymLaunchPage() {
                 setIsSignUp(!isSignUp)
                 setError('')
               }}
-              className="text-sm text-primary hover:underline"
+              className="text-sm hover:underline"
+              style={{ color: agencyData?.['Primary Color'] || '#000000' }}
             >
               {isSignUp 
                 ? 'Already have an account? Sign in'
