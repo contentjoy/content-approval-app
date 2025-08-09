@@ -1,13 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
+  /* Light mode theme colors (default) */
+  --background: #FFFFFF;
+  --navbar: #F5F5F5;
+  --sidebar: #FAFAFA;
+  --text: #1A1A1A;
+  --text-secondary: #6B7280;
+  --card-bg: #F9F9F9;
+  --card-border: #E0E0E0;
+  --pill-bg: #D3D8DC;
+  --pill-border: #E0E0E0;
+  --primary: var(--brand-primary, #000000);
+  
   /* Default brand colors - will be overridden by JavaScript */
-  --brand-primary: #3b82f6;
-  --brand-primary-rgb: 59, 130, 246;
-  --brand-primary-light: #60a5fa;
-  --brand-primary-dark: #2563eb;
+  --brand-primary: #000000;
+  --brand-primary-rgb: 0, 0, 0;
+  --brand-primary-light: #333333;
+  --brand-primary-dark: #000000;
+}
+
+[data-theme="dark"] {
+  /* Dark mode theme colors */
+  --background: #191A1A;
+  --navbar: #191A1A;
+  --sidebar: #1F2121;
+  --text: #E8E8E6;
+  --text-secondary: #9CA3AF;
+  --card-bg: #1F2121;
+  --card-border: #2E2F30;
+  --pill-bg: #919AA1;
+  --pill-border: #2E2F30;
+  --primary: var(--brand-primary, #FFFFFF);
+}
+
+html {
+  font-family: 'Inter', sans-serif;
+  background: var(--background);
+  color: var(--text);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--background);
+  color: var(--text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Brand color utility classes */

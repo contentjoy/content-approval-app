@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { BrandingProvider } from "@/contexts/branding-context";
+import { AuthProvider } from "@/contexts/auth-context";
+import { ThemeProvider } from "@/contexts/theme-context";
 import { ToastProvider } from "@/components/ui/toast";
 import { ModalContainer } from "@/components/modals/modal-container";
 
@@ -31,14 +33,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <ToastProvider>
-          <BrandingProvider>
-            <main className="flex-1">
-              {children}
-            </main>
-            <ModalContainer />
-          </BrandingProvider>
-        </ToastProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <ToastProvider>
+              <BrandingProvider>
+                <main className="flex-1">
+                  {children}
+                </main>
+                <ModalContainer />
+              </BrandingProvider>
+            </ToastProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

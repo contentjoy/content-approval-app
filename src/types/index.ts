@@ -18,6 +18,15 @@ export interface Gym {
   "First name": string
   "Last name": string
   "Status": string
+  "passcode"?: string | null
+  "social_accounts"?: {
+    facebook?: { page_id: string; access_token: string }
+    instagram?: { account_id: string; access_token: string }
+    tiktok?: { account_id: string; access_token: string }
+    twitter?: { account_id: string; access_token: string }
+    linkedin?: { account_id: string; access_token: string }
+    youtube?: { channel_id: string; access_token: string }
+  } | null
 }
 
 // Social Media Post types
@@ -32,6 +41,7 @@ export interface SocialMediaPost {
   "Asset Type": string | null
   "Content Type": string | null
   "Gym Name": string
+  "Scheduled"?: string | null // scheduled_date timestamp
   created_at?: string
   updated_at?: string
 }
@@ -42,6 +52,42 @@ export interface Discovery {
   title: string
   link: string
   month: string
+}
+
+// User Session types
+export interface UserSession {
+  id: string
+  user_id: string // references gyms(gym_id)
+  session_token: string
+  expires_at: string
+  created_at?: string
+  updated_at?: string
+}
+
+// Authentication types
+export interface AuthUser {
+  gymId: string
+  gymName: string
+  agency: string
+  socialAccounts?: Gym['social_accounts']
+  primaryColor?: string | null
+}
+
+// Ayrshare types
+export interface AyrshareProfile {
+  id: string
+  type: 'facebook' | 'instagram' | 'twitter' | 'linkedin' | 'tiktok' | 'youtube'
+  username?: string
+  name?: string
+  url?: string
+}
+
+export interface AyrsharePostData {
+  post: string
+  platforms: string[]
+  mediaUrls?: string[]
+  scheduleDate?: string
+  profiles?: string[]
 }
 
 // Database types for Supabase
@@ -67,6 +113,11 @@ export interface Database {
         Row: Discovery
         Insert: Omit<Discovery, 'id'>
         Update: Partial<Omit<Discovery, 'id'>>
+      }
+      user_sessions: {
+        Row: UserSession
+        Insert: Omit<UserSession, 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Omit<UserSession, 'id'>>
       }
     }
   }
