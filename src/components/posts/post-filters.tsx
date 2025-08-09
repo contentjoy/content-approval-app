@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { FileText, Image, Video, Grid3X3, Clock, CheckCircle, XCircle } from 'lucide-react'
 import type { SocialMediaPost } from '@/types'
 
 export type FilterType = 'all' | 'photos' | 'videos' | 'carousels' | 'approved' | 'disapproved' | 'pending'
@@ -43,14 +44,14 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
     }
   }
 
-  const filters: { key: FilterType; label: string; icon: string }[] = [
-    { key: 'all', label: 'All', icon: '📄' },
-    { key: 'photos', label: 'Photos', icon: '📷' },
-    { key: 'videos', label: 'Videos', icon: '🎥' },
-    { key: 'carousels', label: 'Carousels', icon: '🖼️' },
-    { key: 'pending', label: 'Pending', icon: '⏳' },
-    { key: 'approved', label: 'Approved', icon: '✅' },
-    { key: 'disapproved', label: 'Disapproved', icon: '❌' },
+  const filters: { key: FilterType; label: string; icon: React.ReactNode }[] = [
+    { key: 'all', label: 'All', icon: <FileText className="w-4 h-4" /> },
+    { key: 'photos', label: 'Photos', icon: <Image className="w-4 h-4" /> },
+    { key: 'videos', label: 'Videos', icon: <Video className="w-4 h-4" /> },
+    { key: 'carousels', label: 'Carousels', icon: <Grid3X3 className="w-4 h-4" /> },
+    { key: 'pending', label: 'Pending', icon: <Clock className="w-4 h-4" /> },
+    { key: 'approved', label: 'Approved', icon: <CheckCircle className="w-4 h-4" /> },
+    { key: 'disapproved', label: 'Disapproved', icon: <XCircle className="w-4 h-4" /> },
   ]
 
   return (
@@ -65,13 +66,13 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
             onClick={() => onFilterChange(filter.key)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+            className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
               isActive
                 ? 'bg-[var(--brand-primary)] text-white shadow-md'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
             }`}
           >
-            <span className="text-base">{filter.icon}</span>
+            <span>{filter.icon}</span>
             <span>{filter.label}</span>
             <span className={`px-2 py-0.5 rounded-full text-xs ${
               isActive 

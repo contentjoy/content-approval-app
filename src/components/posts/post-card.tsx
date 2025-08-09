@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Video, Image as ImageIcon, Grid3X3 } from 'lucide-react'
 import { MediaDisplay, PostActions, PostStatus } from './index'
 import type { SocialMediaPost } from '@/types'
 
@@ -23,7 +24,7 @@ export function PostCard({ post, carouselPosts = [], className = '', priority = 
       return {
         label: 'Carousel',
         color: 'bg-purple-100 text-purple-800',
-        icon: '🖼️'
+        icon: <Grid3X3 className="w-3 h-3" />
       }
     }
     
@@ -32,14 +33,14 @@ export function PostCard({ post, carouselPosts = [], className = '', priority = 
         return {
           label: 'Video',
           color: 'bg-blue-100 text-blue-800',
-          icon: '🎥'
+          icon: <Video className="w-3 h-3" />
         }
       case 'photo':
       default:
         return {
           label: 'Photo',
           color: 'bg-green-100 text-green-800',
-          icon: '📷'
+          icon: <ImageIcon className="w-3 h-3" />
         }
     }
   }
