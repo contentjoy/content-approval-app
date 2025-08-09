@@ -10,9 +10,10 @@ interface MediaDisplayProps {
   post: SocialMediaPost
   className?: string
   priority?: boolean // Add priority prop for LCP images
+  carouselPosts?: SocialMediaPost[] // Add carousel posts for swiping
 }
 
-export function MediaDisplay({ post, className = '', priority = false }: MediaDisplayProps) {
+export function MediaDisplay({ post, className = '', priority = false, carouselPosts = [] }: MediaDisplayProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [isVideo, setIsVideo] = useState(false)
@@ -43,7 +44,7 @@ export function MediaDisplay({ post, className = '', priority = false }: MediaDi
 
   // If it's a carousel, use the CarouselDisplay component
   if (post['Carousel Group']) {
-    return <CarouselDisplay post={post} className={className} priority={priority} />
+    return <CarouselDisplay post={post} carouselPosts={carouselPosts} className={className} priority={priority} />
   }
 
   // Handle video with 9:16 aspect ratio

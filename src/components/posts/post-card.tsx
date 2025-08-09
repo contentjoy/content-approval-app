@@ -58,7 +58,7 @@ export function PostCard({ post, carouselPosts = [], className = '', priority = 
       >
         {/* Media Section with proper aspect ratios */}
         <div className="relative group overflow-hidden rounded-t-2xl">
-          <MediaDisplay post={post} priority={priority} />
+          <MediaDisplay post={post} carouselPosts={carouselPosts} priority={priority} />
           
           {/* Asset Type Badge - Shows on hover */}
           <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
