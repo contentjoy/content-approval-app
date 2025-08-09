@@ -62,14 +62,14 @@ export function Logo({
     return (
       <div 
         className={`${sizeClasses[size]} ${className} relative`}
-        style={{ minWidth: '48px', minHeight: '48px' }}
+        style={{ width: '120px', height: '48px' }}
       >
         <Image
           src={logoSrc}
           alt={agencyName || gymName || 'Agency Logo'}
           fill
           className="object-contain"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          sizes="120px"
           onLoad={() => console.log('✅ Logo loaded successfully:', logoSrc)}
           onError={(e) => {
             console.error('❌ Logo failed to load:', e)
