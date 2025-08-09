@@ -13,7 +13,8 @@ export function Header() {
     <header className="border-b bg-white">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
-          <Logo size="md" />
+          {/* Replace ContentJoy text with agency logo */}
+          <Logo size="md" fallbackText="" />
           {gymName && !isLoading && (
             <span className="text-sm text-gray-500 hidden sm:inline">
               • {gymName}
@@ -31,7 +32,12 @@ export function Header() {
           <Link href="/approvals" className="text-gray-600 hover:text-[var(--brand-primary)] transition-colors">
             Approvals
           </Link>
-          <BrandedButton variant="primary" size="sm">
+          {/* Keep only the branded button with primary color */}
+          <BrandedButton 
+            variant="primary" 
+            size="sm"
+            className="bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white"
+          >
             Sign In
           </BrandedButton>
         </nav>

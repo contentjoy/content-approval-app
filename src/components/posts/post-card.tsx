@@ -50,10 +50,11 @@ export function PostCard({ post, carouselPosts = [], className = '', priority = 
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className={`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-gray-200 transition-all duration-300 group ${className}`}
+        whileHover={{ y: -4, scale: 1.02 }}
+        className={`bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-gray-200 transition-all duration-300 group ${className}`}
       >
         {/* Media Section with proper aspect ratios */}
-        <div className="relative">
+        <div className="relative group overflow-hidden rounded-t-2xl">
           <MediaDisplay post={post} priority={priority} />
           
           {/* Asset Type Badge */}
@@ -64,9 +65,20 @@ export function PostCard({ post, carouselPosts = [], className = '', priority = 
             </span>
           </div>
 
+          {/* Post Title Overlay - Shows on hover */}
+          {post['Post Caption'] && (
+            <div className="absolute top-2 right-2 max-w-[70%] z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="bg-black/50 text-white px-2 py-1 rounded text-xs font-medium backdrop-blur-sm">
+                <p className="line-clamp-2">
+                  {post['Post Caption']}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Carousel Indicator */}
           {post['Carousel Group'] && post['Carousel Order'] && (
-            <div className="absolute top-3 right-3 z-10">
+            <div className="absolute bottom-3 right-3 z-10">
               <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-black bg-opacity-60 text-white backdrop-blur-sm">
                 {post['Carousel Order']} of {post['Carousel Group']}
               </span>
@@ -76,20 +88,6 @@ export function PostCard({ post, carouselPosts = [], className = '', priority = 
 
         {/* Content Section */}
         <div className="p-5">
-          {/* Caption */}
-          {post['Post Caption'] && (
-            <div className="mb-4">
-              <p className="text-gray-700 text-sm leading-relaxed line-clamp-3 font-medium">
-                {post['Post Caption']}
-              </p>
-              {post['Post Caption'].length > 150 && (
-                <button className="text-[var(--brand-primary)] text-xs font-semibold mt-2 hover:underline transition-colors">
-                  Read more
-                </button>
-              )}
-            </div>
-          )}
-
           {/* Status and Actions */}
           <div className="flex items-center justify-between">
             <PostStatus status={post['Approval Status']} />

@@ -153,7 +153,8 @@ export default function GymPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
-            <Logo size="lg" />
+            {/* Agency logo in second nav */}
+            <Logo size="sm" fallbackText="" />
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
                 {gymName || 'Content Approval'}

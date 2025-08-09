@@ -134,9 +134,6 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
             disabled={isLoading}
             className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-green-600 hover:bg-green-700 text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
             Approve
           </button>
           
@@ -145,9 +142,6 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
             disabled={isLoading}
             className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
             Reject
           </button>
         </>
@@ -156,18 +150,12 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
       {/* Status-specific actions */}
       {status === 'approved' && (
         <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
           Approved
         </span>
       )}
 
       {status === 'rejected' || status === 'disapproved' ? (
         <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-red-100 text-red-800">
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
           Rejected
         </span>
       ) : null}
@@ -188,7 +176,10 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -10 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50"
+              className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-[60] overflow-visible"
+              style={{ 
+                boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)' 
+              }}
             >
               {menuItems.map((item) => (
                 <button

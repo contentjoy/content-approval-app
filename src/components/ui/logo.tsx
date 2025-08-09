@@ -55,7 +55,7 @@ export function Logo({
   }
 
   // Fallback to text if no logo or if showFallback is true
-  if (showFallback) {
+  if (showFallback && fallbackText !== '') {
     const displayText = fallbackText || agencyName || gymName || 'ContentJoy'
     return (
       <div className={`${textSizes[size]} ${className} font-semibold text-gray-900`}>
