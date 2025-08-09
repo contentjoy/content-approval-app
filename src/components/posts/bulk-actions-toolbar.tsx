@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, X, Archive, Calendar, ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import type { SocialMediaPost } from '@/types'
 
 interface BulkActionsToolbarProps {

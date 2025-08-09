@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { EllipsisHorizontalIcon, ShareIcon, ArrowDownTrayIcon, PencilIcon } from '@heroicons/react/24/outline'
 import { useToast } from '@/components/ui/toast'

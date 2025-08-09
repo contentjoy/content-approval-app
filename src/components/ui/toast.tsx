@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, createContext, useContext, ReactNode } from 'react'
+import React, { useState, createContext, useContext, ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 
