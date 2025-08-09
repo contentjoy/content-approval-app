@@ -50,15 +50,12 @@ export default function GymPage() {
   const { carouselGroups, displayPosts } = useMemo(() => {
     const groups: Record<string, SocialMediaPost[]> = {}
     const display: SocialMediaPost[] = []
-    const processedCarousels = new Set<string>()
-    
-    console.log('🔄 Processing posts for carousel grouping:', posts.length, 'total posts')
+    const seenCarouselGroups = new Set<string>()
     
     // First, group all carousel posts
     posts.forEach(post => {
       if (post['Carousel Group']) {
         const groupId = post['Carousel Group']
-        console.log('🎠 Found carousel post:', post.id, 'group:', groupId, 'order:', post['Carousel Order'])
         if (!groups[groupId]) {
           groups[groupId] = []
         }
@@ -66,40 +63,29 @@ export default function GymPage() {
       }
     })
     
-    console.log('🎯 Carousel groups found:', Object.keys(groups).length, groups)
-    
-    // Sort carousel groups by order within each group
+    // Sort carousel groups by carousel order
     Object.keys(groups).forEach(groupId => {
       groups[groupId].sort((a, b) => {
         const orderA = parseInt(a['Carousel Order']?.toString() || '0')
         const orderB = parseInt(b['Carousel Order']?.toString() || '0')
         return orderA - orderB
       })
-      console.log('📋 Sorted group', groupId, ':', groups[groupId].map(p => ({ id: p.id, order: p['Carousel Order'] })))
     })
     
-    // Now create display posts - one per carousel group, plus individual posts
+    // Create display posts - one per carousel group + individual posts
     posts.forEach(post => {
       if (post['Carousel Group']) {
-        // For carousel posts, only add the first one from each group
         const groupId = post['Carousel Group']
-        if (!processedCarousels.has(groupId)) {
-          // Use the first post in the sorted group
-          const firstPost = groups[groupId][0]
-          console.log('✅ Adding representative post for carousel group', groupId, ':', firstPost.id)
-          display.push(firstPost)
-          processedCarousels.add(groupId)
-        } else {
-          console.log('⏭️ Skipping duplicate carousel post for group', groupId, ':', post.id)
+        if (!seenCarouselGroups.has(groupId)) {
+          // Add the first post from this carousel group
+          display.push(groups[groupId][0])
+          seenCarouselGroups.add(groupId)
         }
       } else {
-        // For non-carousel posts, add directly
-        console.log('📄 Adding individual post:', post.id)
+        // Add individual posts
         display.push(post)
       }
     })
-    
-    console.log('🏁 Final display posts:', display.length, 'posts (from', posts.length, 'original)')
     
     return { carouselGroups: groups, displayPosts: display }
   }, [posts])
