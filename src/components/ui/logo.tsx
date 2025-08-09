@@ -50,6 +50,30 @@ export function Logo({
     )
   }
 
+  // Temporary hardcoded test for the known logo URL
+  const testLogoUrl = 'https://pub-8ca27ad93a114ad7b4d6e6ff4549cf90.r2.dev/Gym%20Launch%20Logo%20Gold%20Black.png'
+  
+  // Test with hardcoded URL if no logo from branding context
+  if (!logo && !isLoading) {
+    console.log('🧪 Testing with hardcoded logo URL:', testLogoUrl)
+    return (
+      <div className={`${sizeClasses[size]} ${className} relative`}>
+        <Image
+          src={testLogoUrl}
+          alt="Test Logo"
+          fill
+          className="object-contain"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          onLoad={() => console.log('✅ Test logo loaded successfully')}
+          onError={(e) => {
+            console.error('❌ Test logo failed to load:', e)
+            console.error('❌ Failed test logo URL:', testLogoUrl)
+          }}
+        />
+      </div>
+    )
+  }
+
   // If we have a logo, display it
   if (logo) {
     console.log('✅ Rendering logo:', logo)
