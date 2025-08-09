@@ -60,31 +60,19 @@ export function Logo({
     console.log('🎨 Logo container classes:', `${sizeClasses[size]} ${className} relative`)
     
     return (
-      <div 
-        className={`${sizeClasses[size]} ${className} relative bg-red-100 border-2 border-red-500`}
-        style={{ minWidth: '32px', minHeight: '32px' }}
-        onClick={() => console.log('🖱️ Logo container clicked')}
-      >
+      <div className={`${sizeClasses[size]} ${className} relative`}>
         <Image
           src={logoSrc}
           alt={agencyName || gymName || 'Agency Logo'}
           fill
           className="object-contain"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onLoad={(e) => {
-            console.log('✅ Logo loaded successfully:', logoSrc)
-            console.log('✅ Image element:', e.target)
-          }}
+          onLoad={() => console.log('✅ Logo loaded successfully:', logoSrc)}
           onError={(e) => {
             console.error('❌ Logo failed to load:', e)
             console.error('❌ Failed logo URL:', logoSrc)
-            console.error('❌ Image element:', e.target)
           }}
         />
-        {/* Fallback visible element for debugging */}
-        <div className="absolute inset-0 flex items-center justify-center text-xs text-red-600 pointer-events-none">
-          LOGO
-        </div>
       </div>
     )
   }

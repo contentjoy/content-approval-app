@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import { useBranding } from '@/contexts/branding-context'
 import { getPostsForGymBySlug } from '@/lib/database'
 import { BrandedButton } from '@/components/ui/branded-button'
-import { Logo } from '@/components/ui/logo'
+
 import { PostCard } from '@/components/posts/post-card'
 import { PostFilters, type FilterType } from '@/components/posts/post-filters'
 import { ProgressBar } from '@/components/ui/progress-bar'
@@ -208,8 +208,6 @@ export default function GymPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-4">
-            {/* Agency logo in second nav */}
-            <Logo size="sm" fallbackText="" />
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
                 {gymName || 'Content Approval'}
