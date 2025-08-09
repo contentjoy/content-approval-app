@@ -52,9 +52,25 @@ export default function SocialConnectPage() {
   }, [])
 
   const loadConnectedAccounts = async (gymId: string) => {
-    // Disabled - social_accounts column does not exist in current schema
-    // Will need to be implemented when social accounts feature is added
-    return
+    try {
+      const { data: gym } = await supabase
+        .from('gyms')
+        .select('social_accounts, ayrshare_profiles')
+        .eq('gym_id', gymId)
+        .single()
+
+      if (gym?.social_accounts || gym?.ayrshare_profiles) {
+        setPlatforms(prev => prev.map(platform => ({
+          ...platform,
+          connected: !!(
+            gym.social_accounts?.[platform.id as keyof typeof gym.social_accounts] ||
+            gym.ayrshare_profiles?.[platform.id as keyof typeof gym.ayrshare_profiles]
+          )
+        })))
+      }
+    } catch (error) {
+      console.error('Failed to load connected accounts:', error)
+    }
   }
 
   const connectPlatform = async (platformId: string) => {
@@ -108,9 +124,31 @@ export default function SocialConnectPage() {
   }
 
   const checkConnectionStatus = async (platformId: string) => {
-    // Disabled - social_accounts column does not exist in current schema  
-    // Will need to be implemented when social accounts feature is added
-    return
+    if (!gymId) return
+
+    try {
+      // Check if the platform was successfully connected
+      const { data: gym } = await supabase
+        .from('gyms')
+        .select('social_accounts, ayrshare_profiles')
+        .eq('gym_id', gymId)
+        .single()
+
+      const isConnected = !!(
+        gym?.social_accounts?.[platformId as keyof typeof gym.social_accounts] ||
+        gym?.ayrshare_profiles?.[platformId as keyof typeof gym.ayrshare_profiles]
+      )
+
+      if (isConnected) {
+        setPlatforms(prev => prev.map(platform => 
+          platform.id === platformId 
+            ? { ...platform, connected: true }
+            : platform
+        ))
+      }
+    } catch (error) {
+      console.error('Failed to check connection status:', error)
+    }
   }
 
   const handleContinue = () => {

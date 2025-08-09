@@ -11,6 +11,8 @@ interface AuthContextType {
   isAuthenticated: boolean
   login: (gymName: string, passcode: string) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
+  updateSocialAccounts: (accounts: Gym['social_accounts']) => Promise<void>
+  updateAyrshareProfiles: (profiles: Gym['ayrshare_profiles']) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -48,7 +50,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
             gym_id,
             "Gym Name",
             "Agency",
-            "Primary color"
+            "Primary color",
+            "social_accounts",
+            "ayrshare_profiles"
           )
         `)
         .eq('session_token', sessionToken)
@@ -66,7 +70,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         gymId: gym.gym_id,
         gymName: gym['Gym Name'],
         agency: gym['Agency'],
-        primaryColor: gym['Primary color']
+        primaryColor: gym['Primary color'],
+        socialAccounts: gym['social_accounts'],
+        ayrshareProfiles: gym['ayrshare_profiles']
       })
     } catch (error) {
       console.error('Session check failed:', error)
@@ -121,7 +127,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         gymId: gym.gym_id,
         gymName: gym['Gym Name'],
         agency: gym['Agency'],
-        primaryColor: gym['Primary color']
+        primaryColor: gym['Primary color'],
+        socialAccounts: gym['social_accounts'],
+        ayrshareProfiles: gym['ayrshare_profiles']
       })
 
       return { success: true }
@@ -155,7 +163,41 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  const updateSocialAccounts = async (accounts: Gym['social_accounts']) => {
+    if (!user) return
 
+    try {
+      const { error } = await supabase
+        .from('gyms')
+        .update({ 'social_accounts': accounts })
+        .eq('gym_id', user.gymId)
+
+      if (error) throw error
+
+      setUser(prev => prev ? { ...prev, socialAccounts: accounts } : null)
+    } catch (error) {
+      console.error('Failed to update social accounts:', error)
+      throw error
+    }
+  }
+
+  const updateAyrshareProfiles = async (profiles: Gym['ayrshare_profiles']) => {
+    if (!user) return
+
+    try {
+      const { error } = await supabase
+        .from('gyms')
+        .update({ 'ayrshare_profiles': profiles })
+        .eq('gym_id', user.gymId)
+
+      if (error) throw error
+
+      setUser(prev => prev ? { ...prev, ayrshareProfiles: profiles } : null)
+    } catch (error) {
+      console.error('Failed to update Ayrshare profiles:', error)
+      throw error
+    }
+  }
 
   return (
     <AuthContext.Provider
@@ -164,7 +206,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading,
         isAuthenticated,
         login,
-        logout
+        logout,
+        updateSocialAccounts,
+        updateAyrshareProfiles
       }}
     >
       {children}

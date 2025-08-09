@@ -19,6 +19,22 @@ export interface Gym {
   "Last name": string
   "Status": string
   "passcode"?: string | null
+  "social_accounts"?: {
+    facebook?: { page_id: string; access_token: string; connected_at: string }
+    instagram?: { account_id: string; access_token: string; connected_at: string }
+    tiktok?: { account_id: string; access_token: string; connected_at: string }
+    twitter?: { account_id: string; access_token: string; connected_at: string }
+    linkedin?: { account_id: string; access_token: string; connected_at: string }
+    youtube?: { channel_id: string; access_token: string; connected_at: string }
+  } | null
+  "ayrshare_profiles"?: {
+    facebook?: { profile_key: string; platform_id: string; platform_username?: string }
+    instagram?: { profile_key: string; platform_id: string; platform_username?: string }
+    tiktok?: { profile_key: string; platform_id: string; platform_username?: string }
+    twitter?: { profile_key: string; platform_id: string; platform_username?: string }
+    linkedin?: { profile_key: string; platform_id: string; platform_username?: string }
+    youtube?: { profile_key: string; platform_id: string; platform_username?: string }
+  } | null
 }
 
 // Social Media Post types
@@ -62,6 +78,8 @@ export interface AuthUser {
   gymName: string
   agency: string
   primaryColor?: string | null
+  socialAccounts?: Gym['social_accounts']
+  ayrshareProfiles?: Gym['ayrshare_profiles']
 }
 
 // Ayrshare types

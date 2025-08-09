@@ -54,8 +54,64 @@ export async function GET(request: NextRequest) {
 
     const tokenData = await tokenResponse.json()
 
-    // Social accounts feature disabled - column does not exist in current schema
-    // TODO: Implement when social accounts feature is added
+    // Get current gym data
+    const { data: gym, error: gymError } = await supabase
+      .from('gyms')
+      .select('social_accounts, ayrshare_profiles')
+      .eq('gym_id', gymId)
+      .single()
+
+    if (gymError) {
+      throw gymError
+    }
+
+    // Create Ayrshare profile and get profile key
+    const profileResponse = await fetch('https://app.ayrshare.com/api/profiles/create-profile', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.AYRSHARE_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title: `${gymId}-${platform}`,
+        profileKey: `${gymId}-${platform}-${Date.now()}`
+      })
+    })
+
+    if (!profileResponse.ok) {
+      throw new Error('Failed to create Ayrshare profile')
+    }
+
+    const profileData = await profileResponse.json()
+
+    // Update social accounts and ayrshare profiles in database
+    const socialAccounts = gym?.social_accounts || {}
+    const ayrshareProfiles = gym?.ayrshare_profiles || {}
+
+    socialAccounts[platform as keyof typeof socialAccounts] = {
+      access_token: tokenData.access_token,
+      connected_at: new Date().toISOString(),
+      platform_id: tokenData.platform_id || tokenData.user_id,
+      ...tokenData.profile_data
+    }
+
+    ayrshareProfiles[platform as keyof typeof ayrshareProfiles] = {
+      profile_key: profileData.profileKey,
+      platform_id: tokenData.platform_id || tokenData.user_id,
+      platform_username: tokenData.username || tokenData.name
+    }
+
+    const { error: updateError } = await supabase
+      .from('gyms')
+      .update({ 
+        social_accounts: socialAccounts,
+        ayrshare_profiles: ayrshareProfiles
+      })
+      .eq('gym_id', gymId)
+
+    if (updateError) {
+      throw updateError
+    }
 
     // Return success page that closes the popup
     return new NextResponse(`
