@@ -7,12 +7,13 @@ import { getPostsForGymBySlug } from '@/lib/database'
 import { BrandedButton } from '@/components/ui/branded-button'
 
 
-import { PostCard } from '@/components/posts/post-card'
+import { PostCard, BulkActionsToolbar, EnhancedFilters } from '@/components/posts/index'
 import { PostFilters, type FilterType } from '@/components/posts/post-filters'
 import { ProgressBar } from '@/components/ui/progress-bar'
 import { useModalStore } from '@/hooks/use-modal-store'
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, BarChart3 } from 'lucide-react'
+import { Plus, BarChart3, CheckSquare } from 'lucide-react'
 import type { SocialMediaPost } from '@/types'
 
 export default function GymPage() {
@@ -23,6 +24,15 @@ export default function GymPage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
   const [isLoadingPosts, setIsLoadingPosts] = useState(true)
   const [gymError, setGymError] = useState<string | null>(null)
+  
+  // Enhanced UX State
+  const [searchQuery, setSearchQuery] = useState('')
+  const [dateRange, setDateRange] = useState<{ start: string; end: string } | null>(null)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [selectedPosts, setSelectedPosts] = useState<Set<string>>(new Set())
+  const [isBulkMode, setIsBulkMode] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  
   const { openModal } = useModalStore()
 
   useEffect(() => {
@@ -118,52 +128,85 @@ export default function GymPage() {
   const approvedCount = approvedPosts.length
   const goal = 30 // Goal is 30 approved posts
 
-  // Filter posts based on active filter
+  // Enhanced filtering logic with search, date range, and tags
   useEffect(() => {
     let filtered = displayPosts
 
+    // 1. First apply status/type filter
     switch (activeFilter) {
       case 'photos':
-        // Only show pending photos (no carousel posts)
-        filtered = displayPosts.filter(post => 
+        filtered = filtered.filter(post => 
           (post['Asset Type']?.toLowerCase() === 'photo' || !post['Asset Type']) && 
           !post['Carousel Group'] &&
           post['Approval Status']?.toLowerCase() === 'pending'
         )
         break
       case 'videos':
-        // Only show pending videos (exclude carousel posts)
-        filtered = displayPosts.filter(post => 
+        filtered = filtered.filter(post => 
           post['Asset Type']?.toLowerCase() === 'video' &&
           !post['Carousel Group'] &&
           post['Approval Status']?.toLowerCase() === 'pending'
         )
         break
       case 'carousels':
-        // Only show pending carousels
-        filtered = displayPosts.filter(post => 
+        filtered = filtered.filter(post => 
           post['Carousel Group'] &&
           post['Approval Status']?.toLowerCase() === 'pending'
         )
         break
       case 'approved':
-        // Only show approved posts
-        filtered = displayPosts.filter(post => post['Approval Status']?.toLowerCase() === 'approved')
+        filtered = filtered.filter(post => post['Approval Status']?.toLowerCase() === 'approved')
         break
       case 'disapproved':
-        // Only show disapproved posts
-        filtered = displayPosts.filter(post => 
+        filtered = filtered.filter(post => 
           post['Approval Status']?.toLowerCase() === 'disapproved' || 
           post['Approval Status']?.toLowerCase() === 'rejected'
         )
         break
       default:
-        // All filter - only show pending posts (note: 'pending' case removed from FilterType)
-        filtered = displayPosts.filter(post => post['Approval Status']?.toLowerCase() === 'pending')
+        filtered = filtered.filter(post => post['Approval Status']?.toLowerCase() === 'pending')
+    }
+
+    // 2. Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(post => {
+        const caption = (post['Post Caption'] || '').toLowerCase()
+        const assetType = (post['Asset Type'] || '').toLowerCase()
+        const carouselGroup = (post['Carousel Group'] || '').toLowerCase()
+        
+        return caption.includes(query) || 
+               assetType.includes(query) || 
+               carouselGroup.includes(query)
+      })
+    }
+
+    // 3. Apply date range filter
+    if (dateRange) {
+      filtered = filtered.filter(post => {
+        const createdAt = post.created_at || post.updated_at
+        if (!createdAt) return false
+        
+        const postDate = new Date(createdAt).toISOString().split('T')[0]
+        return postDate >= dateRange.start && postDate <= dateRange.end
+      })
+    }
+
+    // 4. Apply tags filter
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter(post => {
+        const caption = post['Post Caption'] || ''
+        return selectedTags.some(tag => caption.toLowerCase().includes(`#${tag.toLowerCase()}`))
+      })
     }
 
     setFilteredPosts(filtered)
-  }, [activeFilter, displayPosts])
+    
+    // Reset selection when filters change
+    if (selectedIndex >= filtered.length) {
+      setSelectedIndex(Math.max(0, filtered.length - 1))
+    }
+  }, [activeFilter, displayPosts, searchQuery, dateRange, selectedTags, selectedIndex])
 
   const handleSchedulePosts = () => {
     if (approvedPosts.length === 0) {
@@ -172,6 +215,108 @@ export default function GymPage() {
     }
     openModal('schedule', undefined, undefined, approvedPosts)
   }
+
+  // Bulk operations handlers
+  const handleBulkApprove = (posts: SocialMediaPost[]) => {
+    if (posts.length === 1) {
+      openModal('approve', posts[0])
+    } else {
+      // For bulk approval, we'll need a special bulk approval modal
+      // For now, approve them directly
+      console.log('Bulk approving posts:', posts.length)
+      // TODO: Implement bulk approval logic
+    }
+  }
+
+  const handleBulkDisapprove = (posts: SocialMediaPost[]) => {
+    if (posts.length === 1) {
+      openModal('disapprove', posts[0])
+    } else {
+      // For bulk disapproval, we'll need a special bulk disapproval modal
+      console.log('Bulk disapproving posts:', posts.length)
+      // TODO: Implement bulk disapproval logic
+    }
+  }
+
+  const handleSelectionChange = (postId: string, selected: boolean) => {
+    setSelectedPosts(prev => {
+      const newSet = new Set(prev)
+      if (selected) {
+        newSet.add(postId)
+      } else {
+        newSet.delete(postId)
+      }
+      return newSet
+    })
+  }
+
+  const handleSelectAll = () => {
+    setSelectedPosts(new Set(filteredPosts.map(post => post.id || '')))
+  }
+
+  const handleDeselectAll = () => {
+    setSelectedPosts(new Set())
+  }
+
+  const handleClearSelection = () => {
+    setSelectedPosts(new Set())
+    setIsBulkMode(false)
+  }
+
+  // Keyboard shortcuts handlers
+  const handleNavigateUp = () => {
+    setSelectedIndex(prev => Math.max(0, prev - 1))
+  }
+
+  const handleNavigateDown = () => {
+    setSelectedIndex(prev => Math.min(filteredPosts.length - 1, prev + 1))
+  }
+
+  const handleApproveSelected = (post: SocialMediaPost) => {
+    openModal('approve', post)
+  }
+
+  const handleDisapproveSelected = (post: SocialMediaPost) => {
+    openModal('disapprove', post)
+  }
+
+  const handleToggleSelection = (post: SocialMediaPost) => {
+    if (post.id) {
+      handleSelectionChange(post.id, !selectedPosts.has(post.id))
+    }
+  }
+
+  const handleToggleBulkMode = () => {
+    setIsBulkMode(prev => !prev)
+    if (isBulkMode) {
+      setSelectedPosts(new Set())
+    }
+  }
+
+  const handleEscape = () => {
+    if (isBulkMode) {
+      setIsBulkMode(false)
+      setSelectedPosts(new Set())
+    }
+  }
+
+  // Setup keyboard shortcuts
+  useKeyboardShortcuts({
+    posts: filteredPosts,
+    selectedIndex,
+    onNavigateUp: handleNavigateUp,
+    onNavigateDown: handleNavigateDown,
+    onApprove: handleApproveSelected,
+    onDisapprove: handleDisapproveSelected,
+    onToggleSelection: handleToggleSelection,
+    onBulkMode: handleToggleBulkMode,
+    onEscape: handleEscape,
+    isEnabled: !isLoadingPosts,
+    isBulkMode
+  })
+
+  // Convert selected posts set to array for components
+  const selectedPostsArray = filteredPosts.filter(post => post.id && selectedPosts.has(post.id))
 
   if (isLoading || isLoadingPosts) {
     return (
@@ -311,13 +456,59 @@ export default function GymPage() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="mb-6">
-        <PostFilters
+      {/* Enhanced Filters */}
+      <div className="mb-6 space-y-4">
+        <EnhancedFilters
+          posts={displayPosts}
           activeFilter={activeFilter}
           onFilterChange={setActiveFilter}
-          posts={displayPosts}
+          onSearchChange={setSearchQuery}
+          onDateRangeChange={setDateRange}
+          onTagsChange={setSelectedTags}
+          searchQuery={searchQuery}
+          dateRange={dateRange}
+          selectedTags={selectedTags}
         />
+        
+        {/* Filter Tabs and Bulk Mode Toggle */}
+        <div className="flex items-center justify-between">
+          <PostFilters
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+            posts={displayPosts}
+          />
+          
+          {/* Bulk Mode Toggle */}
+          <div className="flex items-center space-x-3">
+            {filteredPosts.length > 0 && (
+              <>
+                <span className="text-sm text-gray-500">
+                  {filteredPosts.length} posts
+                </span>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleToggleBulkMode}
+                  className={`
+                    flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200
+                    ${isBulkMode
+                      ? 'bg-[var(--brand-primary)] text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }
+                  `}
+                >
+                  <CheckSquare className="w-4 h-4" />
+                  <span>{isBulkMode ? 'Exit Bulk' : 'Bulk Select'}</span>
+                  {selectedPosts.size > 0 && (
+                    <span className="bg-white/20 text-xs px-2 py-0.5 rounded-full">
+                      {selectedPosts.size}
+                    </span>
+                  )}
+                </motion.button>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Content Grid */}
@@ -361,12 +552,27 @@ export default function GymPage() {
                   post={post}
                   carouselPosts={carouselPosts}
                   priority={priority}
+                  isBulkMode={isBulkMode}
+                  isSelected={post.id ? selectedPosts.has(post.id) : false}
+                  onSelectionChange={handleSelectionChange}
+                  className={index === selectedIndex ? 'ring-2 ring-[var(--brand-primary)] ring-offset-2' : ''}
                 />
               )
             })}
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Bulk Actions Toolbar */}
+      <BulkActionsToolbar
+        selectedPosts={selectedPostsArray}
+        onApprove={handleBulkApprove}
+        onDisapprove={handleBulkDisapprove}
+        onClearSelection={handleClearSelection}
+        onSelectAll={handleSelectAll}
+        onDeselectAll={handleDeselectAll}
+        totalPosts={filteredPosts.length}
+      />
     </div>
   )
 }

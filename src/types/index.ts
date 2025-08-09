@@ -32,6 +32,8 @@ export interface SocialMediaPost {
   "Asset Type": string | null
   "Content Type": string | null
   "Gym Name": string
+  created_at?: string
+  updated_at?: string
 }
 
 // Discovery types
