@@ -33,16 +33,6 @@ export function Logo({
 }: LogoProps) {
   const { logo, agencyName, gymName, isLoading } = useBranding()
 
-  // Debug logging
-  console.log('🖼️ Logo component render:', { 
-    logo, 
-    agencyName, 
-    gymName, 
-    isLoading, 
-    showFallback, 
-    fallbackText 
-  })
-
   if (isLoading) {
     return (
       <div className={`${sizeClasses[size]} ${className} animate-pulse bg-gray-200 rounded`} />
@@ -51,7 +41,6 @@ export function Logo({
 
   // If we have a logo, display it
   if (logo) {
-    console.log('✅ Displaying logo:', logo)
     return (
       <div className={`${sizeClasses[size]} ${className} relative`}>
         <Image
@@ -60,8 +49,6 @@ export function Logo({
           fill
           className="object-contain"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onError={(e) => console.error('❌ Logo failed to load:', e)}
-          onLoad={() => console.log('✅ Logo loaded successfully')}
         />
       </div>
     )
@@ -70,7 +57,6 @@ export function Logo({
   // Fallback to text if no logo or if showFallback is true
   if (showFallback && fallbackText !== '') {
     const displayText = fallbackText || agencyName || gymName || 'ContentJoy'
-    console.log('📝 Using text fallback:', displayText)
     return (
       <div className={`${textSizes[size]} ${className} font-semibold text-gray-900`}>
         {displayText}
@@ -78,6 +64,5 @@ export function Logo({
     )
   }
 
-  console.log('🚫 Logo returning null')
   return null
 }

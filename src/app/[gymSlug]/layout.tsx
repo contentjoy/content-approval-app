@@ -13,8 +13,16 @@ interface GymLayoutProps {
 
 function GymLayoutContent({ children }: GymLayoutProps) {
   const { gymSlug } = useParams()
-  const { isLoading, error } = useBranding()
+  const { isLoading, error, setGymSlug } = useBranding()
   const [isValidGym, setIsValidGym] = useState<boolean | null>(true) // Temporarily start as true to skip loading
+
+  // Ensure the gym slug is set in the branding context
+  useEffect(() => {
+    if (typeof gymSlug === 'string') {
+      console.log('🏋️ Setting gym slug in branding context:', gymSlug)
+      setGymSlug(gymSlug)
+    }
+  }, [gymSlug, setGymSlug])
 
   useEffect(() => {
     // Temporarily skip gym validation to fix UI loading issue
