@@ -44,7 +44,7 @@ export default function SocialConnectPage() {
   const gymSlug = params.gymSlug as string
 
   useEffect(() => {
-    const storedGymId = localStorage.getItem('gym_id')
+    const storedGymId = localStorage.getItem('id')
     if (storedGymId) {
       setGymId(storedGymId)
       loadConnectedAccounts(storedGymId)
@@ -56,7 +56,7 @@ export default function SocialConnectPage() {
       const { data: gym } = await supabase
         .from('gyms')
         .select('social_accounts, ayrshare_profiles')
-        .eq('gym_id', gymId)
+        .eq('id', gymId)
         .single()
 
       if (gym?.social_accounts || gym?.ayrshare_profiles) {
@@ -131,7 +131,7 @@ export default function SocialConnectPage() {
       const { data: gym } = await supabase
         .from('gyms')
         .select('social_accounts, ayrshare_profiles')
-        .eq('gym_id', gymId)
+        .eq('id', gymId)
         .single()
 
       const isConnected = !!(

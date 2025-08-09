@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     const { data: gym, error: gymError } = await supabase
       .from('gyms')
       .select('social_accounts, ayrshare_profiles')
-      .eq('gym_id', gymId)
+      .eq('id', gymId)
       .single()
 
     if (gymError) {
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
         social_accounts: socialAccounts,
         ayrshare_profiles: ayrshareProfiles
       })
-      .eq('gym_id', gymId)
+      .eq('id', gymId)
 
     if (updateError) {
       throw updateError

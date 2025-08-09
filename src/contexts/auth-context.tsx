@@ -47,7 +47,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         .select(`
           *,
           gyms!user_sessions_user_id_fkey (
-            gym_id,
+            id,
             "Gym Name",
             "Agency",
             "Primary color",
@@ -67,7 +67,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       const gym = session.gyms as unknown as Gym
       setUser({
-        gymId: gym.gym_id,
+        gymId: gym.id,
         gymName: gym['Gym Name'],
         agency: gym['Agency'],
         primaryColor: gym['Primary color'],
@@ -107,13 +107,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       expiresAt.setDate(expiresAt.getDate() + 30) // 30 days
 
       // Create session in database
-      const { error: sessionError } = await supabase
-        .from('user_sessions')
-        .insert({
-          user_id: gym.gym_id,
-          session_token: sessionToken,
-          expires_at: expiresAt.toISOString()
-        })
+              const { error: sessionError } = await supabase
+          .from('user_sessions')
+          .insert({
+            user_id: gym.id,
+            session_token: sessionToken,
+            expires_at: expiresAt.toISOString()
+          })
 
       if (sessionError) {
         throw sessionError
@@ -124,7 +124,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Set user
       setUser({
-        gymId: gym.gym_id,
+        gymId: gym.id,
         gymName: gym['Gym Name'],
         agency: gym['Agency'],
         primaryColor: gym['Primary color'],
@@ -170,7 +170,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const { error } = await supabase
         .from('gyms')
         .update({ 'social_accounts': accounts })
-        .eq('gym_id', user.gymId)
+        .eq('id', user.gymId)
 
       if (error) throw error
 
@@ -188,7 +188,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const { error } = await supabase
         .from('gyms')
         .update({ 'ayrshare_profiles': profiles })
-        .eq('gym_id', user.gymId)
+        .eq('id', user.gymId)
 
       if (error) throw error
 

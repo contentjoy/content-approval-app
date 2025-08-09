@@ -7,10 +7,9 @@ export interface Agency {
   "Passcode": string | null
 }
 
-// Gym types
+// Gym types  
 export interface Gym {
   id: string
-  gym_id: string
   "Gym Name": string
   "Agency": string
   "Email": string
@@ -40,7 +39,7 @@ export interface Gym {
 // Social Media Post types
 export interface SocialMediaPost {
   id: string
-  gym_id: string
+  gym_id: string // This should reference gyms.id
   "Asset URL": string
   "Post Caption": string | null
   "Approval Status": string
@@ -65,7 +64,7 @@ export interface Discovery {
 // User Session types
 export interface UserSession {
   id: string
-  user_id: string // references gyms(gym_id)
+  user_id: string // references gyms(id)
   session_token: string
   expires_at: string
   created_at?: string

@@ -85,7 +85,7 @@ export default function GymLaunchPage() {
         // Check if gym name already exists
         const { data: existingGym } = await supabase
           .from('gyms')
-          .select('gym_id')
+          .select('id')
           .eq('Gym Name', gymName)
           .single()
 
@@ -94,14 +94,10 @@ export default function GymLaunchPage() {
           return
         }
 
-        // Generate a unique gym_id if it doesn't auto-generate
-        const generatedGymId = `gym_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
-        // Create new gym record
+        // Create new gym record (id will be auto-generated as UUID)
         const { data: newGym, error: createError } = await supabase
           .from('gyms')
           .insert({
-            'gym_id': generatedGymId, // Explicitly set gym_id
             'Gym Name': gymName,
             'Agency': agencyData.id, // Use the agency UUID
             'Email': email,
@@ -111,7 +107,7 @@ export default function GymLaunchPage() {
             'Last name': '',
             'Primary color': null
           })
-          .select('id, gym_id')
+          .select('id')
           .single()
 
         if (createError) {
@@ -126,7 +122,7 @@ export default function GymLaunchPage() {
         const { error: sessionError } = await supabase
           .from('user_sessions')
           .insert({
-            user_id: newGym.gym_id, // This should now exist
+            user_id: newGym.id, // Use the auto-generated UUID id
             session_token: sessionToken,
             expires_at: expiresAt.toISOString()
           })
@@ -136,7 +132,7 @@ export default function GymLaunchPage() {
         }
 
         localStorage.setItem('session_token', sessionToken)
-        localStorage.setItem('gym_id', newGym.gym_id)
+        localStorage.setItem('gym_id', newGym.id)
         
         // Redirect to onboarding
         router.push(`/${gymName}/onboarding`)
