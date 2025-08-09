@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { useBranding } from '@/contexts/branding-context'
 import { getPostsForGymBySlug } from '@/lib/database'
