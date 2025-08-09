@@ -60,7 +60,10 @@ export function Logo({
     console.log('🎨 Logo container classes:', `${sizeClasses[size]} ${className} relative`)
     
     return (
-      <div className={`${sizeClasses[size]} ${className} relative`}>
+      <div 
+        className={`${sizeClasses[size]} ${className} relative`}
+        style={{ minWidth: '48px', minHeight: '48px' }}
+      >
         <Image
           src={logoSrc}
           alt={agencyName || gymName || 'Agency Logo'}
