@@ -107,6 +107,13 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
         error: null
       }
 
+      console.log('🎨 Branding data fetched:', {
+        gymSlug: slug,
+        gym: gym,
+        agency: agency,
+        brandingData: newBrandingData
+      })
+
       setBrandingData(newBrandingData)
 
       // Apply CSS custom properties for dynamic colors
