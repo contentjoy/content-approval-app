@@ -32,6 +32,19 @@ export default function GymPage() {
           console.log('🔍 Loading posts for gym slug:', gymSlug)
           const gymPosts = await getPostsForGymBySlug(gymSlug)
           console.log('✅ Loaded posts:', gymPosts.length)
+          
+          // Debug: Show first few posts if any found
+          if (gymPosts.length > 0) {
+            console.log('📊 Sample posts:', gymPosts.slice(0, 3).map(p => ({
+              id: p.id,
+              gymName: p['Gym Name'],
+              caption: p['Post Caption']?.substring(0, 50),
+              assetType: p['Asset Type'],
+              carouselGroup: p['Carousel Group']
+            })))
+          } else {
+            console.log('❌ No posts found for gym slug:', gymSlug)
+          }
           setPosts(gymPosts)
           setFilteredPosts(gymPosts)
         } catch (error) {

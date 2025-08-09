@@ -130,6 +130,7 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
   }, [applyBrandingToCSS])
 
   const handleSetGymSlug = useCallback((slug: string) => {
+    console.log('🏋️ Setting gym slug in branding context:', slug)
     setGymSlug(slug)
     fetchBranding(slug)
   }, [fetchBranding])
