@@ -74,8 +74,12 @@ export default function SocialConnectPage() {
   }
 
   const connectPlatform = async (platformId: string) => {
-    if (!gymId) return
+    if (!gymId) {
+      console.error('No gym ID available for connection')
+      return
+    }
 
+    console.log('🔗 Connecting platform:', platformId, 'for gym:', gymId)
     setIsConnecting(platformId)
     setError('')
 
@@ -90,11 +94,18 @@ export default function SocialConnectPage() {
         })
       })
 
+      console.log('📡 JWT generation response status:', response.status)
+
       if (!response.ok) {
-        throw new Error('Failed to generate authentication URL')
+        const errorData = await response.text()
+        console.error('❌ JWT generation failed:', errorData)
+        throw new Error(`Failed to generate authentication URL: ${errorData}`)
       }
 
-      const { authUrl, jwt } = await response.json()
+      const responseData = await response.json()
+      console.log('📋 JWT response data:', responseData)
+      
+      const { authUrl, jwt } = responseData
 
       // Store JWT for callback handling
       localStorage.setItem(`ayrshare_jwt_${platformId}`, jwt)

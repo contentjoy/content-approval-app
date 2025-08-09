@@ -20,9 +20,7 @@ interface FormData {
   // Business Details
   firstName: string
   lastName: string
-  email: string
   phone: string
-  businessName: string
   website: string
   city: string
   address: string
@@ -84,9 +82,7 @@ export default function OnboardingPage() {
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
-    email: '',
     phone: '',
-    businessName: '',
     website: '',
     city: '',
     address: '',
@@ -161,9 +157,20 @@ export default function OnboardingPage() {
         .update({
           'First name': formData.firstName,
           'Last name': formData.lastName,
-          'Email': formData.email,
-          'Gym Name': formData.businessName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+          'Phone': formData.phone,
+          'Website': formData.website,
+          'City': formData.city,
+          'Address': formData.address,
           'Primary color': formData.brandColor,
+          'Brand Profile': formData.brandStyle,
+          'Target Demographic': formData.audience,
+          'Offerings': formData.services,
+          'Clients Desired Result': formData.results,
+          'Google Map URL': formData.googleMapUrl,
+          'Instagram URL': formData.instagramUrl,
+          'Social Platforms': formData.socialPlatforms.join(', '),
+          'Primary offer': formData.cta,
+          'Client Info': formData.testimonial,
           'Status': 'active'
         })
         .eq('id', gymId)
@@ -175,8 +182,7 @@ export default function OnboardingPage() {
       // Send data to onboarding webhook
       const webhookData = {
         id: gymId,
-        ...formData,
-        businessName: formData.businessName.toLowerCase().replace(/[^a-z0-9]/g, '-')
+        ...formData
       }
 
       const webhookUrl = process.env.ONBOARDING_WEBHOOK_URL || process.env.NEXT_PUBLIC_ONBOARDING_WEBHOOK_URL
@@ -244,37 +250,14 @@ export default function OnboardingPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-text mb-2">Email</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => updateFormData('email', e.target.value)}
-                  className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
-                  placeholder="john@example.com"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-text mb-2">Phone</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => updateFormData('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
-                  placeholder="+1 (555) 123-4567"
-                />
-              </div>
-            </div>
-
             <div>
-              <label className="block text-sm font-medium text-text mb-2">Business Name</label>
+              <label className="block text-sm font-medium text-text mb-2">Phone</label>
               <input
-                type="text"
-                value={formData.businessName}
-                onChange={(e) => updateFormData('businessName', e.target.value)}
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => updateFormData('phone', e.target.value)}
                 className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
-                placeholder="Your Gym Name"
+                placeholder="+1 (555) 123-4567"
               />
             </div>
 
@@ -378,7 +361,7 @@ export default function OnboardingPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text mb-2">Results & Achievements</label>
+              <label className="block text-sm font-medium text-text mb-2">Clients desired result</label>
               <textarea
                 value={formData.results}
                 onChange={(e) => updateFormData('results', e.target.value)}
