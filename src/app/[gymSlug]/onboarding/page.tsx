@@ -114,7 +114,7 @@ export default function OnboardingPage() {
         const { data: gym } = await supabase
           .from('gyms')
           .select('*')
-          .eq('gym_id', storedGymId)
+          .eq('id', storedGymId)
           .single()
 
         if (gym) {
@@ -166,7 +166,7 @@ export default function OnboardingPage() {
           'Primary color': formData.brandColor,
           'Status': 'active'
         })
-        .eq('gym_id', gymId)
+        .eq('id', gymId)
 
       if (updateError) {
         throw updateError
@@ -174,7 +174,7 @@ export default function OnboardingPage() {
 
       // Send data to onboarding webhook
       const webhookData = {
-        gym_id: gymId,
+        id: gymId,
         ...formData,
         businessName: formData.businessName.toLowerCase().replace(/[^a-z0-9]/g, '-')
       }
