@@ -18,12 +18,7 @@ const sizeClasses = {
   xl: 'h-16 w-auto'
 }
 
-const textSizes = {
-  sm: 'text-lg font-semibold',
-  md: 'text-xl font-semibold',
-  lg: 'text-2xl font-bold',
-  xl: 'text-3xl font-bold'
-}
+// textSizes removed as it's unused in current implementation
 
 export function Logo({ 
   size = 'md', 

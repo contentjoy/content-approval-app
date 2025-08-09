@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, notFound } from 'next/navigation'
 import { BrandingProvider, useBranding } from '@/contexts/branding-context'
-import { getGymBySlug } from '@/lib/database'
+// import { getGymBySlug } from '@/lib/database' // Temporarily unused
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 
@@ -13,7 +13,7 @@ interface GymLayoutProps {
 
 function GymLayoutContent({ children }: GymLayoutProps) {
   const { gymSlug } = useParams()
-  const { isLoading, error, setGymSlug } = useBranding()
+  const { error, setGymSlug } = useBranding() // isLoading temporarily unused
   const [isValidGym, setIsValidGym] = useState<boolean | null>(true) // Temporarily start as true to skip loading
 
   // Ensure the gym slug is set in the branding context

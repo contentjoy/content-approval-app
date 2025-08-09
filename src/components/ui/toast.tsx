@@ -2,7 +2,7 @@
 
 import { useState, createContext, useContext, ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { XMarkIcon } from '@heroicons/react/24/outline'
+import { X } from 'lucide-react'
 
 interface Toast {
   id: string
@@ -88,7 +88,7 @@ function ToastContainer({ toasts, hideToast }: ToastContainerProps) {
                   onClick={() => hideToast(toast.id)}
                   className="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600"
                 >
-                  <XMarkIcon className="h-4 w-4" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
             </div>

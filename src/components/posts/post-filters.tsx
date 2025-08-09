@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { FileText, Image, Video, Grid3X3, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { FileText, Image as ImageIcon, Video, Grid3X3, CheckCircle, XCircle } from 'lucide-react'
 import type { SocialMediaPost } from '@/types'
 
 export type FilterType = 'all' | 'photos' | 'videos' | 'carousels' | 'approved' | 'disapproved'
@@ -44,7 +44,7 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
 
   const filters: { key: FilterType; label: string; icon: React.ReactNode }[] = [
     { key: 'all', label: 'All', icon: <FileText className="w-4 h-4" /> },
-    { key: 'photos', label: 'Photos', icon: <Image className="w-4 h-4" /> },
+    { key: 'photos', label: 'Photos', icon: <ImageIcon className="w-4 h-4" /> },
     { key: 'videos', label: 'Videos', icon: <Video className="w-4 h-4" /> },
     { key: 'carousels', label: 'Carousels', icon: <Grid3X3 className="w-4 h-4" /> },
     { key: 'approved', label: 'Approved', icon: <CheckCircle className="w-4 h-4" /> },

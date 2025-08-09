@@ -7,7 +7,7 @@ import { Logo } from '@/components/ui/logo'
 import { useBranding } from '@/contexts/branding-context'
 
 export function Header() {
-  const { gymName, isLoading } = useBranding()
+  const { } = useBranding() // gymName and isLoading temporarily unused
 
   return (
     <header className="border-b bg-white">
