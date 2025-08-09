@@ -5,7 +5,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://app.ayrshare.com https://*.ayrshare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://app.ayrshare.com https://*.ayrshare.com https://*.supabase.co; frame-src 'self' https://app.ayrshare.com https://*.ayrshare.com;"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://app.ayrshare.com https://*.ayrshare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://app.ayrshare.com https://*.ayrshare.com https://*.supabase.co; frame-src 'self' https://app.ayrshare.com https://*.ayrshare.com;"
         }
       ]
     }
