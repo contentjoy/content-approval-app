@@ -102,7 +102,7 @@ export default function GymLaunchPage() {
             'Agency': agencyData.id, // Use the agency UUID
             'Email': email,
             'passcode': passcode,
-            'Status': 'pending',
+            'Status': 'active',
             'First name': '',
             'Last name': '',
             'Primary color': null
