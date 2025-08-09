@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Video, Image as ImageIcon, Grid3X3 } from 'lucide-react'
 import { MediaDisplay, PostActions, PostStatus } from './index'
@@ -86,7 +86,7 @@ export function PostCard({
                   <input
                     type="checkbox"
                     checked={isSelected}
-                    onChange={(e) => onSelectionChange(post.id || '', e.target.checked)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSelectionChange(post.id || '', e.target.checked)}
                     className="sr-only"
                   />
                   <div className={`
