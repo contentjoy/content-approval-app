@@ -11,7 +11,6 @@ interface AuthContextType {
   isAuthenticated: boolean
   login: (gymName: string, passcode: string) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
-  updateSocialAccounts: (accounts: Gym['social_accounts']) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -49,8 +48,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             gym_id,
             "Gym Name",
             "Agency",
-            "Primary color",
-            "social_accounts"
+            "Primary color"
           )
         `)
         .eq('session_token', sessionToken)
@@ -68,7 +66,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         gymId: gym.gym_id,
         gymName: gym['Gym Name'],
         agency: gym['Agency'],
-        socialAccounts: gym['social_accounts'],
         primaryColor: gym['Primary color']
       })
     } catch (error) {
@@ -124,7 +121,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         gymId: gym.gym_id,
         gymName: gym['Gym Name'],
         agency: gym['Agency'],
-        socialAccounts: gym['social_accounts'],
         primaryColor: gym['Primary color']
       })
 
@@ -159,23 +155,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  const updateSocialAccounts = async (accounts: Gym['social_accounts']) => {
-    if (!user) return
 
-    try {
-      const { error } = await supabase
-        .from('gyms')
-        .update({ 'social_accounts': accounts })
-        .eq('gym_id', user.gymId)
-
-      if (error) throw error
-
-      setUser(prev => prev ? { ...prev, socialAccounts: accounts } : null)
-    } catch (error) {
-      console.error('Failed to update social accounts:', error)
-      throw error
-    }
-  }
 
   return (
     <AuthContext.Provider
@@ -184,8 +164,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isLoading,
         isAuthenticated,
         login,
-        logout,
-        updateSocialAccounts
+        logout
       }}
     >
       {children}

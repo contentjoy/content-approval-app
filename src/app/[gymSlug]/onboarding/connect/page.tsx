@@ -52,22 +52,9 @@ export default function SocialConnectPage() {
   }, [])
 
   const loadConnectedAccounts = async (gymId: string) => {
-    try {
-      const { data: gym } = await supabase
-        .from('gyms')
-        .select('social_accounts')
-        .eq('gym_id', gymId)
-        .single()
-
-      if (gym?.social_accounts) {
-        setPlatforms(prev => prev.map(platform => ({
-          ...platform,
-          connected: !!gym.social_accounts?.[platform.id as keyof typeof gym.social_accounts]
-        })))
-      }
-    } catch (error) {
-      console.error('Failed to load connected accounts:', error)
-    }
+    // Disabled - social_accounts column does not exist in current schema
+    // Will need to be implemented when social accounts feature is added
+    return
   }
 
   const connectPlatform = async (platformId: string) => {
@@ -121,26 +108,9 @@ export default function SocialConnectPage() {
   }
 
   const checkConnectionStatus = async (platformId: string) => {
-    if (!gymId) return
-
-    try {
-      // Check if the platform was successfully connected
-      const { data: gym } = await supabase
-        .from('gyms')
-        .select('social_accounts')
-        .eq('gym_id', gymId)
-        .single()
-
-      if (gym?.social_accounts?.[platformId as keyof typeof gym.social_accounts]) {
-        setPlatforms(prev => prev.map(platform => 
-          platform.id === platformId 
-            ? { ...platform, connected: true }
-            : platform
-        ))
-      }
-    } catch (error) {
-      console.error('Failed to check connection status:', error)
-    }
+    // Disabled - social_accounts column does not exist in current schema  
+    // Will need to be implemented when social accounts feature is added
+    return
   }
 
   const handleContinue = () => {

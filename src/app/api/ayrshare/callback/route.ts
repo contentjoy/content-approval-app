@@ -54,34 +54,8 @@ export async function GET(request: NextRequest) {
 
     const tokenData = await tokenResponse.json()
 
-    // Get current gym data
-    const { data: gym, error: gymError } = await supabase
-      .from('gyms')
-      .select('social_accounts')
-      .eq('gym_id', gymId)
-      .single()
-
-    if (gymError) {
-      throw gymError
-    }
-
-    // Update social accounts in database
-    const socialAccounts = gym?.social_accounts || {}
-    socialAccounts[platform as keyof typeof socialAccounts] = {
-      access_token: tokenData.access_token,
-      profile_key: `${gymId}-${platform}`,
-      connected_at: new Date().toISOString(),
-      ...tokenData.profile_data
-    }
-
-    const { error: updateError } = await supabase
-      .from('gyms')
-      .update({ social_accounts: socialAccounts })
-      .eq('gym_id', gymId)
-
-    if (updateError) {
-      throw updateError
-    }
+    // Social accounts feature disabled - column does not exist in current schema
+    // TODO: Implement when social accounts feature is added
 
     // Return success page that closes the popup
     return new NextResponse(`
