@@ -94,10 +94,14 @@ export default function GymLaunchPage() {
           return
         }
 
+        // Generate a unique gym_id if it doesn't auto-generate
+        const generatedGymId = `gym_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
         // Create new gym record
         const { data: newGym, error: createError } = await supabase
           .from('gyms')
           .insert({
+            'gym_id': generatedGymId, // Explicitly set gym_id
             'Gym Name': gymName,
             'Agency': agencyData.id, // Use the agency UUID
             'Email': email,
@@ -107,7 +111,7 @@ export default function GymLaunchPage() {
             'Last name': '',
             'Primary color': null
           })
-          .select('gym_id')
+          .select('id, gym_id')
           .single()
 
         if (createError) {
@@ -122,7 +126,7 @@ export default function GymLaunchPage() {
         const { error: sessionError } = await supabase
           .from('user_sessions')
           .insert({
-            user_id: newGym.gym_id,
+            user_id: newGym.gym_id, // This should now exist
             session_token: sessionToken,
             expires_at: expiresAt.toISOString()
           })
