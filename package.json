@@ -10,15 +10,18 @@
     "generate-passcodes": "node scripts/generate-passcodes.js"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^3.3.4",
     "@supabase/supabase-js": "^2.39.3",
+    "clsx": "^2.1.0",
     "framer-motion": "^11.3.8",
     "lucide-react": "^0.429.0",
     "next": "15.4.6",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.48.2",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "zustand": "^4.5.0"
   },
   "devDependencies": {
     "@types/node": "^20",
