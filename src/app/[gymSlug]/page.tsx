@@ -52,16 +52,21 @@ export default function GymPage() {
     const display: SocialMediaPost[] = []
     const processedCarousels = new Set<string>()
     
+    console.log('🔄 Processing posts for carousel grouping:', posts.length, 'total posts')
+    
     // First, group all carousel posts
     posts.forEach(post => {
       if (post['Carousel Group']) {
         const groupId = post['Carousel Group']
+        console.log('🎠 Found carousel post:', post.id, 'group:', groupId, 'order:', post['Carousel Order'])
         if (!groups[groupId]) {
           groups[groupId] = []
         }
         groups[groupId].push(post)
       }
     })
+    
+    console.log('🎯 Carousel groups found:', Object.keys(groups).length, groups)
     
     // Sort carousel groups by order within each group
     Object.keys(groups).forEach(groupId => {
@@ -70,6 +75,7 @@ export default function GymPage() {
         const orderB = parseInt(b['Carousel Order']?.toString() || '0')
         return orderA - orderB
       })
+      console.log('📋 Sorted group', groupId, ':', groups[groupId].map(p => ({ id: p.id, order: p['Carousel Order'] })))
     })
     
     // Now create display posts - one per carousel group, plus individual posts
@@ -80,14 +86,20 @@ export default function GymPage() {
         if (!processedCarousels.has(groupId)) {
           // Use the first post in the sorted group
           const firstPost = groups[groupId][0]
+          console.log('✅ Adding representative post for carousel group', groupId, ':', firstPost.id)
           display.push(firstPost)
           processedCarousels.add(groupId)
+        } else {
+          console.log('⏭️ Skipping duplicate carousel post for group', groupId, ':', post.id)
         }
       } else {
         // For non-carousel posts, add directly
+        console.log('📄 Adding individual post:', post.id)
         display.push(post)
       }
     })
+    
+    console.log('🏁 Final display posts:', display.length, 'posts (from', posts.length, 'original)')
     
     return { carouselGroups: groups, displayPosts: display }
   }, [posts])

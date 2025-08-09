@@ -8,9 +8,14 @@ interface PostStatusProps {
 }
 
 export function PostStatus({ status, className = '' }: PostStatusProps) {
+  const lowerStatus = status.toLowerCase()
+  
+  // Don't show anything for pending status
+  if (lowerStatus === 'pending') {
+    return null
+  }
+  
   const getStatusConfig = (status: string) => {
-    const lowerStatus = status.toLowerCase()
-    
     switch (lowerStatus) {
       case 'approved':
         return {
@@ -26,13 +31,6 @@ export function PostStatus({ status, className = '' }: PostStatusProps) {
           color: 'bg-red-100 text-red-800 border-red-200',
           icon: '✗',
           animation: 'rejected'
-        }
-      case 'pending':
-        return {
-          label: 'Pending',
-          color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-          icon: '⏳',
-          animation: 'pending'
         }
       case 'draft':
         return {

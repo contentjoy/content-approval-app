@@ -13,13 +13,8 @@ export function Header() {
     <header className="border-b bg-white">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center space-x-3">
-          {/* Agency logo replaces gym name */}
-          <Logo size="md" fallbackText="" />
-          {gymName && !isLoading && (
-            <h1 className="text-xl font-bold text-gray-900">
-              {gymName}
-            </h1>
-          )}
+          {/* Agency logo only - no gym name text */}
+          <Logo size="md" fallbackText="" showFallback={false} />
         </Link>
         
         <nav className="flex items-center space-x-4">

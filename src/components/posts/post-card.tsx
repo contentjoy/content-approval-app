@@ -65,7 +65,7 @@ export function PostCard({ post, carouselPosts = [], className = '', priority = 
             </span>
           </div>
 
-          {/* Post Title Overlay - Shows on hover */}
+          {/* Post Caption Overlay - Shows on hover */}
           {post['Post Caption'] && (
             <div className="absolute top-2 right-2 max-w-[70%] z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div className="bg-black/50 text-white px-2 py-1 rounded text-xs font-medium backdrop-blur-sm">
@@ -88,6 +88,20 @@ export function PostCard({ post, carouselPosts = [], className = '', priority = 
 
         {/* Content Section */}
         <div className="p-5">
+          {/* Post Caption */}
+          {post['Post Caption'] && (
+            <div className="mb-4">
+              <p className="text-gray-700 text-sm leading-relaxed line-clamp-3 font-medium">
+                {post['Post Caption']}
+              </p>
+              {post['Post Caption'].length > 150 && (
+                <button className="text-[var(--brand-primary)] text-xs font-semibold mt-2 hover:underline transition-colors">
+                  Read more
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Status and Actions */}
           <div className="flex items-center justify-between">
             <PostStatus status={post['Approval Status']} />
