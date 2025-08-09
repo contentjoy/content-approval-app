@@ -46,10 +46,13 @@ export default function GymPage() {
     loadPosts()
   }, [gymSlug])
 
-  // Group posts by carousel group
-  const carouselGroups = useMemo(() => {
+  // Group posts by carousel group and create display posts
+  const { carouselGroups, displayPosts } = useMemo(() => {
     const groups: Record<string, SocialMediaPost[]> = {}
+    const display: SocialMediaPost[] = []
+    const processedCarousels = new Set<string>()
     
+    // First, group all carousel posts
     posts.forEach(post => {
       if (post['Carousel Group']) {
         const groupId = post['Carousel Group']
@@ -60,7 +63,33 @@ export default function GymPage() {
       }
     })
     
-    return groups
+    // Sort carousel groups by order within each group
+    Object.keys(groups).forEach(groupId => {
+      groups[groupId].sort((a, b) => {
+        const orderA = parseInt(a['Carousel Order']?.toString() || '0')
+        const orderB = parseInt(b['Carousel Order']?.toString() || '0')
+        return orderA - orderB
+      })
+    })
+    
+    // Now create display posts - one per carousel group, plus individual posts
+    posts.forEach(post => {
+      if (post['Carousel Group']) {
+        // For carousel posts, only add the first one from each group
+        const groupId = post['Carousel Group']
+        if (!processedCarousels.has(groupId)) {
+          // Use the first post in the sorted group
+          const firstPost = groups[groupId][0]
+          display.push(firstPost)
+          processedCarousels.add(groupId)
+        }
+      } else {
+        // For non-carousel posts, add directly
+        display.push(post)
+      }
+    })
+    
+    return { carouselGroups: groups, displayPosts: display }
   }, [posts])
 
   // Calculate progress
@@ -74,38 +103,52 @@ export default function GymPage() {
 
   // Filter posts based on active filter
   useEffect(() => {
-    let filtered = posts
+    let filtered = displayPosts
 
     switch (activeFilter) {
       case 'photos':
-        filtered = posts.filter(post => 
-          (post['Asset Type']?.toLowerCase() === 'photo' || !post['Asset Type']) && !post['Carousel Group']
+        // Only show pending photos (no carousel posts)
+        filtered = displayPosts.filter(post => 
+          (post['Asset Type']?.toLowerCase() === 'photo' || !post['Asset Type']) && 
+          !post['Carousel Group'] &&
+          post['Approval Status']?.toLowerCase() === 'pending'
         )
         break
       case 'videos':
-        filtered = posts.filter(post => post['Asset Type']?.toLowerCase() === 'video')
+        // Only show pending videos
+        filtered = displayPosts.filter(post => 
+          post['Asset Type']?.toLowerCase() === 'video' &&
+          post['Approval Status']?.toLowerCase() === 'pending'
+        )
         break
       case 'carousels':
-        filtered = posts.filter(post => post['Carousel Group'])
+        // Only show pending carousels
+        filtered = displayPosts.filter(post => 
+          post['Carousel Group'] &&
+          post['Approval Status']?.toLowerCase() === 'pending'
+        )
         break
       case 'approved':
-        filtered = posts.filter(post => post['Approval Status']?.toLowerCase() === 'approved')
+        // Only show approved posts
+        filtered = displayPosts.filter(post => post['Approval Status']?.toLowerCase() === 'approved')
         break
       case 'disapproved':
-        filtered = posts.filter(post => 
+        // Only show disapproved posts
+        filtered = displayPosts.filter(post => 
           post['Approval Status']?.toLowerCase() === 'disapproved' || 
           post['Approval Status']?.toLowerCase() === 'rejected'
         )
         break
       case 'pending':
-        filtered = posts.filter(post => post['Approval Status']?.toLowerCase() === 'pending')
+        filtered = displayPosts.filter(post => post['Approval Status']?.toLowerCase() === 'pending')
         break
       default:
-        filtered = posts
+        // All filter - only show pending posts
+        filtered = displayPosts.filter(post => post['Approval Status']?.toLowerCase() === 'pending')
     }
 
     setFilteredPosts(filtered)
-  }, [activeFilter, posts])
+  }, [activeFilter, displayPosts])
 
   const handleSchedulePosts = () => {
     if (approvedPosts.length === 0) {
@@ -265,7 +308,7 @@ export default function GymPage() {
         <PostFilters
           activeFilter={activeFilter}
           onFilterChange={setActiveFilter}
-          posts={posts}
+          posts={displayPosts}
         />
       </div>
 

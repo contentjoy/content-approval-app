@@ -16,11 +16,21 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
   const getFilterCount = (filter: FilterType) => {
     switch (filter) {
       case 'photos':
-        return posts.filter(p => p['Asset Type']?.toLowerCase() === 'photo' || (!p['Asset Type'] && !p['Carousel Group'])).length
+        return posts.filter(p => 
+          (p['Asset Type']?.toLowerCase() === 'photo' || !p['Asset Type']) && 
+          !p['Carousel Group'] &&
+          p['Approval Status']?.toLowerCase() === 'pending'
+        ).length
       case 'videos':
-        return posts.filter(p => p['Asset Type']?.toLowerCase() === 'video').length
+        return posts.filter(p => 
+          p['Asset Type']?.toLowerCase() === 'video' &&
+          p['Approval Status']?.toLowerCase() === 'pending'
+        ).length
       case 'carousels':
-        return posts.filter(p => p['Carousel Group']).length
+        return posts.filter(p => 
+          p['Carousel Group'] &&
+          p['Approval Status']?.toLowerCase() === 'pending'
+        ).length
       case 'approved':
         return posts.filter(p => p['Approval Status']?.toLowerCase() === 'approved').length
       case 'disapproved':
@@ -28,7 +38,7 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
       case 'pending':
         return posts.filter(p => p['Approval Status']?.toLowerCase() === 'pending').length
       default:
-        return posts.length
+        return posts.filter(p => p['Approval Status']?.toLowerCase() === 'pending').length
     }
   }
 

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { BrandingProvider } from "@/contexts/branding-context";
 import { ToastProvider } from "@/components/ui/toast";
@@ -34,7 +33,6 @@ export default function RootLayout({
       >
         <ToastProvider>
           <BrandingProvider>
-            <Header />
             <main className="flex-1">
               {children}
             </main>

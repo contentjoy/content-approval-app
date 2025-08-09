@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button'
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Tailwind Test - Remove after confirming styles work */}
-      <div className="bg-blue-500 text-white p-4 rounded">Tailwind Test</div>
       <div className="container mx-auto px-4 py-16">
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">

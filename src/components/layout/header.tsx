@@ -12,13 +12,13 @@ export function Header() {
   return (
     <header className="border-b bg-white">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center space-x-2">
-          {/* Replace ContentJoy text with agency logo */}
+        <Link href="/" className="flex items-center space-x-3">
+          {/* Agency logo replaces gym name */}
           <Logo size="md" fallbackText="" />
           {gymName && !isLoading && (
-            <span className="text-sm text-gray-500 hidden sm:inline">
-              • {gymName}
-            </span>
+            <h1 className="text-xl font-bold text-gray-900">
+              {gymName}
+            </h1>
           )}
         </Link>
         
