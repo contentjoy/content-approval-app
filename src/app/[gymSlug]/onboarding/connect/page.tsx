@@ -44,10 +44,13 @@ export default function SocialConnectPage() {
   const gymSlug = params.gymSlug as string
 
   useEffect(() => {
-    const storedGymId = localStorage.getItem('id')
+    const storedGymId = localStorage.getItem('gym_id')
     if (storedGymId) {
       setGymId(storedGymId)
       loadConnectedAccounts(storedGymId)
+      console.log('🔑 Found gym ID in localStorage:', storedGymId)
+    } else {
+      console.error('❌ No gym_id found in localStorage')
     }
   }, [])
 
