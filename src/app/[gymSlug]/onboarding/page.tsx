@@ -208,7 +208,7 @@ export default function OnboardingPage() {
   const isStepValid = () => {
     switch (currentStep) {
       case 1:
-        return formData.firstName && formData.lastName && formData.email && formData.businessName
+        return formData.firstName && formData.lastName && formData.phone
       case 2:
         return formData.brandColor && formData.brandStyle
       case 3:
