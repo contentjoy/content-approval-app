@@ -158,7 +158,7 @@ export default function GymPage() {
         )
         break
       default:
-        // All filter - only show pending posts
+        // All filter - only show pending posts (note: 'pending' case removed from FilterType)
         filtered = displayPosts.filter(post => post['Approval Status']?.toLowerCase() === 'pending')
     }
 
