@@ -225,75 +225,49 @@ export async function getPostsForGymBySlug(slug: string, status?: string): Promi
 }
 
 /**
- * Get gym by slug - CORRECT APPROACH
- * Get gym_id from posts, then query gyms table
+ * Get gym by slug - DIRECT APPROACH
+ * Query gyms table directly by slug name
  */
 export async function getGymBySlug(slug: string): Promise<Gym | null> {
-  // Convert slug format "gym-name" to lowercase "movement society"
-  const gymName = slug.replace(/-/g, ' ').toLowerCase()
+  console.log('🔍 Looking for gym with slug:', slug)
   
-  console.log('🔍 Looking for gym with name:', gymName)
-  
-  // First, get a post to find the gym_id
-  const { data: posts, error: postsError } = await supabase
-    .from('social_media_posts')
-    .select('"Gym Name", gym_id')
-    .eq('"Gym Name"', gymName) // Exact match with lowercase name
-    .limit(1)
-
-  if (postsError) {
-    console.error('❌ Error searching posts table:', postsError)
-    return null
-  }
-
-  if (!posts || posts.length === 0) {
-    console.error('❌ No posts found for gym name:', gymName)
-    return null
-  }
-  
-  console.log(`📊 Found ${posts.length} posts for gym:`, gymName)
-  console.log('📝 Sample posts:', posts.map(p => ({ gymName: p['Gym Name'], gymId: p.gym_id })))
-
-  const post = posts[0]
-  const gymId = post.gym_id
-  
-  if (!gymId) {
-    console.error('❌ No gym_id found in post for gym:', gymName)
-    console.log('📝 Post data:', post)
-    return null
-  }
-  
-  console.log('🔑 Found gym_id:', gymId, 'for gym:', gymName)
-  
-  // Now get the full gym record using the gym_id from the post
-  console.log('🔍 Querying gyms table for gym_id:', gymId)
-  const { data: gym, error: gymError } = await supabase
-    .from('gyms')
-    .select('*')
-    .eq('id', gymId) // Use 'id' column, not 'gym_id'
-    .single()
-
-  if (gymError) {
-    console.error('❌ Error fetching gym from gym_id:', gymError)
-    console.log('🔍 Debug: Trying to find any gyms in the table...')
-    
-    // Debug: Let's see what's in the gyms table
-    const { data: allGyms, error: debugError } = await supabase
+  try {
+    // Query gyms table directly using the slug as the Gym Name
+    const { data: gym, error: gymError } = await supabase
       .from('gyms')
-      .select('id, "Gym Name"')
-      .limit(5)
-    
-    if (debugError) {
-      console.error('❌ Cannot access gyms table:', debugError)
-    } else if (allGyms) {
-      console.log('📋 Sample gyms in table:', allGyms)
+      .select('*')
+      .eq('"Gym Name"', slug) // Use slug directly since we store it as the gym name
+      .single()
+
+    if (gymError) {
+      console.error('❌ Error fetching gym by slug:', gymError)
+      
+      // Debug: Try to get all gyms to see what exists
+      const { data: allGyms, error: allError } = await supabase
+        .from('gyms')
+        .select('id, "Gym Name"')
+        .limit(10)
+        
+      if (allError) {
+        console.error('❌ Error fetching all gyms:', allError)
+      } else {
+        console.log('🏋️ Available gyms in database:', allGyms?.map(g => ({ id: g.id, name: g['Gym Name'] })))
+      }
+      
+      return null
     }
-    
+
+    if (!gym) {
+      console.error('❌ No gym found with slug:', slug)
+      return null
+    }
+
+    console.log('✅ Found gym by slug:', { id: gym.id, name: gym['Gym Name'] })
+    return gym
+  } catch (error) {
+    console.error('❌ Exception in getGymBySlug:', error)
     return null
   }
-
-  console.log('✅ Found gym via posts table:', gym)
-  return gym
 }
 
 /**
