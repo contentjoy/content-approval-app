@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { EllipsisHorizontalIcon, ShareIcon, ArrowDownTrayIcon, PencilIcon } from '@heroicons/react/24/outline'
+import { EllipsisHorizontalIcon, ShareIcon, ArrowDownTrayIcon, PencilIcon, ChatBubbleLeftEllipsisIcon, HandThumbUpIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useToast } from '@/components/ui/toast'
 import { useModalStore } from '@/hooks/use-modal-store'
 import type { SocialMediaPost } from '@/types'
@@ -38,6 +38,18 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
 
   const handleReject = () => {
     openModal('disapprove', post, carouselPosts)
+  }
+
+  const handleComments = () => {
+    openModal('comments', post, carouselPosts)
+  }
+
+  const handleRegenerate = () => {
+    openModal('regenerate', post, carouselPosts)
+  }
+
+  const handleFeedback = () => {
+    openModal('feedback', post, carouselPosts)
   }
 
   const handleEditCaption = () => {
@@ -122,11 +134,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
       icon: PencilIcon,
       onClick: handleEditCaption,
     },
-    {
-      label: 'Regenerate',
-      icon: PencilIcon,
-      onClick: () => openModal('edit-caption', post, carouselPosts),
-    },
+    { label: 'Regenerate', icon: PencilIcon, onClick: handleRegenerate },
   ]
 
   return (
@@ -139,7 +147,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
             disabled={isLoading}
             className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-accent hover:bg-accent/90 text-background shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Approve
+            <HandThumbUpIcon className="w-4 h-4 mr-2" /> Approve
           </button>
           
           <button
@@ -147,22 +155,26 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
             disabled={isLoading}
             className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border-2 border-accent text-accent bg-transparent hover:bg-accent hover:text-background shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Disapprove
+            <XMarkIcon className="w-4 h-4 mr-2" /> Disapprove
           </button>
         </>
       )}
 
       {/* Status-specific actions */}
       {status === 'approved' && (
-        <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-accent/10 text-accent">
-          Approved
-        </span>
+        <div className="flex items-center space-x-2">
+          <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-accent/10 text-accent">Approved</span>
+          <button onClick={handleReject} className="text-accent text-sm underline">Disapprove</button>
+          <button onClick={handleFeedback} className="text-text text-sm underline">Feedback</button>
+        </div>
       )}
 
       {status === 'rejected' || status === 'disapproved' ? (
-        <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-destructive/10 text-destructive">
-          Disapproved
-        </span>
+        <div className="flex items-center space-x-2">
+          <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-destructive/10 text-destructive">Disapproved</span>
+          <button onClick={handleApprove} className="text-accent text-sm underline">Approve</button>
+          <button onClick={handleFeedback} className="text-text text-sm underline">Feedback</button>
+        </div>
       ) : null}
 
       {/* Three-dot Menu */}
@@ -196,6 +208,12 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
                   {item.label}
                 </button>
               ))}
+              <button
+                onClick={handleComments}
+                className="w-full flex items-center px-4 py-3 text-sm text-text hover:bg-bg-elev-1 transition-colors duration-150"
+              >
+                <ChatBubbleLeftEllipsisIcon className="w-4 h-4 mr-3" /> Comments
+              </button>
             </motion.div>
           )}
         </AnimatePresence>

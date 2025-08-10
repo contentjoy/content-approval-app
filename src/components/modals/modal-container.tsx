@@ -5,9 +5,9 @@ import { ApprovalModal } from './approval-modal'
 import { DisapprovalModal } from './disapproval-modal'
 import { EditCaptionModal } from './edit-caption-modal'
 import { SchedulingModal } from './scheduling-modal'
-// Future: import { CommentsModal } from './comments-modal'
-// Future: import { RegenerateModal } from './regenerate-modal'
-// Future: import { FeedbackModal } from './feedback-modal'
+import { CommentsModal } from './comments-modal'
+import { RegenerateModal } from './regenerate-modal'
+import { FeedbackModal } from './feedback-modal'
 
 export function ModalContainer() {
   const { isOpen, modalType, post, carouselPosts, approvedPosts, closeModal } = useModalStore()
@@ -64,6 +64,21 @@ export function ModalContainer() {
           approvedPosts={approvedPosts}
           onSuccess={handleSuccess}
         />
+      )
+    case 'comments':
+      if (!post) return null
+      return (
+        <CommentsModal isOpen={isOpen} onClose={closeModal} post={post} onSuccess={handleSuccess} />
+      )
+    case 'regenerate':
+      if (!post) return null
+      return (
+        <RegenerateModal isOpen={isOpen} onClose={closeModal} post={post} onSuccess={handleSuccess} />
+      )
+    case 'feedback':
+      if (!post) return null
+      return (
+        <FeedbackModal isOpen={isOpen} onClose={closeModal} post={post} carouselPosts={carouselPosts} onSuccess={handleSuccess} />
       )
     // case 'comments':
     //   if (!post) return null

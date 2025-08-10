@@ -505,6 +505,32 @@ export async function sendRegenerateRequest(payload: { feedback: string; gymName
   })
 }
 
+export async function updatePostReason(postId: string, reason: string): Promise<{ success: boolean; error?: string }> {
+  const { error } = await supabase
+    .from('social_media_posts')
+    .update({ 'Reason': reason } as any)
+    .eq('id', postId)
+
+  if (error) {
+    console.error('Error updating reason:', error)
+    return { success: false, error: error.message }
+  }
+  return { success: true }
+}
+
+export async function updateCarouselGroupReason(group: string, reason: string): Promise<{ success: boolean; error?: string }> {
+  const { error } = await supabase
+    .from('social_media_posts')
+    .update({ 'Reason': reason } as any)
+    .eq('Carousel Group', group)
+
+  if (error) {
+    console.error('Error updating group reason:', error)
+    return { success: false, error: error.message }
+  }
+  return { success: true }
+}
+
 /**
  * Get gym by email
  */
