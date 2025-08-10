@@ -5,24 +5,24 @@ import { useBranding } from '@/contexts/branding-context'
 import { cn } from '@/lib/utils'
 
 interface BrandedButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive'
-  size?: 'sm' | 'md' | 'lg'
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
   children: React.ReactNode
 }
 
 const BrandedButton = React.forwardRef<HTMLButtonElement, BrandedButtonProps>(
-  ({ className, variant = 'primary', size = 'md', children, ...props }, ref) => {
+  ({ className, variant = 'default', size = 'md', children, ...props }, ref) => {
     const { primaryColor, isLoading } = useBranding()
 
-    const baseStyles = 'inline-flex items-center justify-center rounded-full font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none'
+    const baseStyles = 'inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 focus-ring disabled:opacity-50 disabled:pointer-events-none'
     
     const getVariantStyles = () => {
-      if (primaryColor && variant === 'primary') {
-        return `bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-dark)] focus-visible:ring-[var(--brand-primary)]`
+      if (primaryColor && variant === 'default') {
+        return `bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-dark)] shadow-soft hover:shadow-medium focus:ring-[var(--brand-primary)]`
       }
       
       if (primaryColor && variant === 'outline') {
-        return `border border-[var(--brand-primary)] bg-transparent text-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-white`
+        return `border border-[var(--brand-primary)] bg-transparent text-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-white shadow-soft hover:shadow-medium`
       }
       
       if (primaryColor && variant === 'ghost') {
@@ -31,25 +31,28 @@ const BrandedButton = React.forwardRef<HTMLButtonElement, BrandedButtonProps>(
 
       // Default styles if no branding
       switch (variant) {
-        case 'primary':
-          return 'bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500'
+        case 'default':
+          return 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft hover:shadow-medium'
         case 'secondary':
-          return 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+          return 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
         case 'outline':
-          return 'border border-gray-300 bg-transparent hover:bg-gray-50'
+          return 'border border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground'
         case 'ghost':
-          return 'hover:bg-gray-100'
+          return 'hover:bg-accent hover:text-accent-foreground'
         case 'destructive':
-          return 'bg-red-600 text-white hover:bg-red-700'
+          return 'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-soft hover:shadow-medium'
+        case 'link':
+          return 'text-primary underline-offset-4 hover:underline'
         default:
-          return 'bg-blue-600 text-white hover:bg-blue-700'
+          return 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft hover:shadow-medium'
       }
     }
     
     const sizes = {
-      sm: 'h-8 px-3 text-sm',
-      md: 'h-10 px-4 py-2',
-      lg: 'h-12 px-8 text-lg'
+      sm: 'h-8 px-3 text-xs',
+      md: 'h-10 px-4 py-2 text-sm',
+      lg: 'h-11 px-8 text-sm',
+      xl: 'h-12 px-10 text-base'
     }
     
     return (

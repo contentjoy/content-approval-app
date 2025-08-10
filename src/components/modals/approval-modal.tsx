@@ -100,23 +100,23 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess 
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Post Preview */}
-        <div className="bg-gray-100 rounded-lg p-4">
+        <div className="bg-bg-elev-1 rounded-2xl p-4">
           <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-accent rounded-2xl flex items-center justify-center">
               <CheckCircle className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-medium text-gray-900">
+              <h3 className="font-medium text-text">
                 {post['Content Type'] || 'Social Media Post'}
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-text">
                 {post['Asset Type'] || 'Image'} • {isCarousel ? `Carousel (${carouselPosts.length} slides)` : 'Single'}
               </p>
             </div>
           </div>
           
           {post['Post Caption'] && (
-            <p className="text-sm text-gray-700 line-clamp-2">
+            <p className="text-sm text-muted-text line-clamp-2">
               {post['Post Caption']}
             </p>
           )}
@@ -124,7 +124,7 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess 
 
         {/* Approval Type */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
+          <label className="block text-sm font-medium text-text mb-3">
             Approve as:
           </label>
           <div className="space-y-3">
@@ -133,11 +133,11 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess 
                 type="radio"
                 value="post"
                 {...register('approvalType')}
-                className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                className="text-accent focus:ring-accent"
               />
               <div>
-                <div className="font-medium text-gray-900">Post</div>
-                <div className="text-sm text-gray-500">Regular social media post</div>
+                <div className="font-medium text-text">Post</div>
+                <div className="text-sm text-muted-text">Regular social media post</div>
               </div>
             </label>
             <label className="flex items-center space-x-3">
@@ -145,23 +145,23 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess 
                 type="radio"
                 value="story"
                 {...register('approvalType')}
-                className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                className="text-accent focus:ring-accent"
               />
               <div>
-                <div className="font-medium text-gray-900">Story</div>
-                <div className="text-sm text-gray-500">24-hour story content</div>
+                <div className="font-medium text-text">Story</div>
+                <div className="text-sm text-muted-text">24-hour story content</div>
               </div>
             </label>
           </div>
           {errors.approvalType && (
-            <p className="mt-1 text-sm text-red-600">{errors.approvalType.message}</p>
+            <p className="mt-1 text-sm text-destructive">{errors.approvalType.message}</p>
           )}
         </div>
 
         {/* Carousel Options */}
         {isCarousel && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-text mb-3">
               Carousel Action:
             </label>
             <div className="space-y-3">
@@ -170,11 +170,11 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess 
                   type="radio"
                   value="current"
                   {...register('carouselAction')}
-                  className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                  className="text-accent focus:ring-accent"
                 />
                 <div>
-                  <div className="font-medium text-gray-900">Approve current slide</div>
-                  <div className="text-sm text-gray-500">Only approve this slide ({post['Carousel Order']} of {carouselPosts.length})</div>
+                  <div className="font-medium text-text">Approve current slide</div>
+                  <div className="text-sm text-muted-text">Only approve this slide ({post['Carousel Order']} of {carouselPosts.length})</div>
                 </div>
               </label>
               <label className="flex items-center space-x-3">
@@ -182,24 +182,24 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess 
                   type="radio"
                   value="all"
                   {...register('carouselAction')}
-                  className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                  className="text-accent focus:ring-accent"
                 />
                 <div>
-                  <div className="font-medium text-gray-900">Approve all slides</div>
-                  <div className="text-sm text-gray-500">Approve all {carouselPosts.length} slides in this carousel</div>
+                  <div className="font-medium text-text">Approve all slides</div>
+                  <div className="text-sm text-muted-text">Approve all {carouselPosts.length} slides in this carousel</div>
                 </div>
               </label>
             </div>
             {errors.carouselAction && (
-              <p className="mt-1 text-sm text-red-600">{errors.carouselAction.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.carouselAction.message}</p>
             )}
           </div>
         )}
 
         {/* Summary */}
-        <div className="bg-gray-100 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-2">Summary</h4>
-          <p className="text-sm text-gray-700">
+        <div className="bg-bg-elev-1 rounded-2xl p-4">
+          <h4 className="font-medium text-text mb-2">Summary</h4>
+          <p className="text-sm text-muted-text">
             {isCarousel && watchedCarouselAction === 'all' 
               ? `Approve all ${carouselPosts.length} carousel slides as ${watchedApprovalType}`
               : `Approve ${isCarousel ? 'current slide' : 'post'} as ${watchedApprovalType}`
@@ -208,7 +208,7 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess 
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end space-x-3 pt-4 border-t">
+        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-border">
           <BrandedButton
             type="button"
             variant="outline"

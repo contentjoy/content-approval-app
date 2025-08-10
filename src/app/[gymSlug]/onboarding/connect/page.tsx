@@ -28,11 +28,11 @@ interface SocialPlatform {
 
 export default function SocialConnectPage() {
   const [platforms, setPlatforms] = useState<SocialPlatform[]>([
-    { id: 'facebook', name: 'Facebook', icon: Facebook, color: 'bg-blue-600', connected: false },
+    { id: 'facebook', name: 'Facebook', icon: Facebook, color: 'bg-accent', connected: false },
     { id: 'instagram', name: 'Instagram', icon: Instagram, color: 'bg-gradient-to-r from-purple-500 to-pink-500', connected: false },
-    { id: 'twitter', name: 'Twitter', icon: Twitter, color: 'bg-sky-500', connected: false },
-    { id: 'linkedin', name: 'LinkedIn', icon: Linkedin, color: 'bg-blue-700', connected: false },
-    { id: 'youtube', name: 'YouTube', icon: Youtube, color: 'bg-red-600', connected: false },
+    { id: 'twitter', name: 'Twitter', icon: Twitter, color: 'bg-accent', connected: false },
+    { id: 'linkedin', name: 'LinkedIn', icon: Linkedin, color: 'bg-accent-strong', connected: false },
+    { id: 'youtube', name: 'YouTube', icon: Youtube, color: 'bg-destructive', connected: false },
   ])
   
   const [error, setError] = useState('')
@@ -217,11 +217,11 @@ export default function SocialConnectPage() {
           </div>
 
           {/* Progress Indicator */}
-          {hasConnections && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            {hasConnections && (
+            <div className="mb-6 p-4 bg-accent/10 border border-accent/20 rounded-lg">
               <div className="flex items-center">
-                <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                <span className="text-green-800 font-medium">
+                <CheckCircle className="w-5 h-5 text-accent mr-2" />
+                <span className="text-accent font-medium">
                   {connectedCount} platform{connectedCount !== 1 ? 's' : ''} connected
                 </span>
               </div>
@@ -229,15 +229,15 @@ export default function SocialConnectPage() {
           )}
 
           {/* Error Message */}
-          {error && (
+            {error && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg"
+              className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg"
             >
               <div className="flex items-center">
-                <AlertCircle className="w-5 h-5 text-red-600 mr-2" />
-                <span className="text-red-800">{error}</span>
+                <AlertCircle className="w-5 h-5 text-destructive mr-2" />
+                <span className="text-destructive">{error}</span>
               </div>
             </motion.div>
           )}
@@ -278,7 +278,7 @@ export default function SocialConnectPage() {
                   </div>
 
                   {platform.connected ? (
-                    <div className="flex items-center text-green-600">
+                    <div className="flex items-center text-accent">
                       <CheckCircle className="w-5 h-5 mr-2" />
                       <span className="text-sm font-medium">Connected</span>
                     </div>
@@ -304,9 +304,9 @@ export default function SocialConnectPage() {
           </div>
 
           {/* Information Box */}
-          <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-semibold text-blue-900 mb-2">How it works:</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
+            <div className="mb-8 p-4 bg-bg-elev-1 border border-border rounded-lg">
+            <h4 className="font-semibold text-text mb-2">How it works:</h4>
+            <ul className="text-sm text-muted-text space-y-1">
               <li>• Click &quot;Connect&quot; to authorize access to your social media accounts</li>
               <li>• You&apos;ll be redirected to each platform&apos;s secure login page</li>
               <li>• Once connected, you can publish content directly from your dashboard</li>
@@ -318,7 +318,7 @@ export default function SocialConnectPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <button
               onClick={handleSkip}
-              className="flex-1 px-6 py-3 border border-card-border text-text-secondary hover:text-text hover:border-primary rounded-lg transition-colors"
+              className="flex-1 px-6 py-3 border border-border text-muted-text hover:text-text hover:border-accent rounded-lg transition-colors"
             >
               Skip for Now
             </button>
@@ -326,7 +326,7 @@ export default function SocialConnectPage() {
             <button
               onClick={handleContinue}
               disabled={!hasConnections}
-              className="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="flex-1 px-6 py-3 bg-accent text-background rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {hasConnections ? 'Continue to Dashboard' : 'Connect at least one platform'}
             </button>

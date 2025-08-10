@@ -44,9 +44,9 @@ export function BulkActionsToolbar({
         transition={{ duration: 0.3, ease: 'easeOut' }}
         className={`
           fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50
-          bg-white border border-gray-200 rounded-2xl shadow-2xl
+          bg-bg border border-border rounded-2xl shadow-large
           px-6 py-4 flex items-center space-x-4
-          backdrop-blur-sm bg-white/95
+          backdrop-blur-sm bg-bg/95
           ${className}
         `}
       >
@@ -55,7 +55,7 @@ export function BulkActionsToolbar({
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
+              className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-text hover:text-text border border-border rounded-lg hover:border-accent transition-colors"
             >
               <span>{selectedCount} selected</span>
               <ChevronDown className="w-4 h-4" />
@@ -69,14 +69,14 @@ export function BulkActionsToolbar({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute bottom-full mb-2 left-0 bg-white border border-gray-200 rounded-lg shadow-lg py-2 w-48 z-10"
+                  className="absolute bottom-full mb-2 left-0 bg-bg border border-border rounded-lg shadow-large py-2 w-48 z-10"
                 >
                   <button
                     onClick={() => {
                       onSelectAll()
                       setShowDropdown(false)
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="w-full text-left px-4 py-2 text-sm text-text hover:bg-bg-elev-1 transition-colors"
                     disabled={isAllSelected}
                   >
                     Select all ({totalPosts})
@@ -86,7 +86,7 @@ export function BulkActionsToolbar({
                       onDeselectAll()
                       setShowDropdown(false)
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="w-full text-left px-4 py-2 text-sm text-text hover:bg-bg-elev-1 transition-colors"
                   >
                     Deselect all
                   </button>
@@ -96,7 +96,7 @@ export function BulkActionsToolbar({
                       onClearSelection()
                       setShowDropdown(false)
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="w-full text-left px-4 py-2 text-sm text-text hover:bg-bg-elev-1 transition-colors"
                   >
                     Clear selection
                   </button>
@@ -113,7 +113,7 @@ export function BulkActionsToolbar({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onApprove(selectedPosts)}
-            className="flex items-center space-x-2 px-4 py-2 bg-[var(--brand-primary)] text-white rounded-lg hover:bg-[var(--brand-primary)]/90 transition-colors font-medium"
+            className="flex items-center space-x-2 px-4 py-2 bg-accent text-background rounded-lg hover:bg-accent/90 transition-colors font-medium"
           >
             <Check className="w-4 h-4" />
             <span>Approve ({selectedCount})</span>
@@ -124,20 +124,20 @@ export function BulkActionsToolbar({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onDisapprove(selectedPosts)}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+            className="flex items-center space-x-2 px-4 py-2 bg-bg-elev-1 text-text rounded-lg hover:bg-bg transition-colors font-medium border border-border"
           >
             <X className="w-4 h-4" />
             <span>Disapprove</span>
           </motion.button>
 
           {/* Additional Actions */}
-          <div className="h-6 w-px bg-gray-300" />
+          <div className="h-6 w-px bg-border" />
           
           {/* Archive Action */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-muted-text hover:text-text hover:bg-bg-elev-1 rounded-lg transition-colors"
             title="Archive selected"
           >
             <Archive className="w-4 h-4" />
@@ -147,7 +147,7 @@ export function BulkActionsToolbar({
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-muted-text hover:text-text hover:bg-bg-elev-1 rounded-lg transition-colors"
             title="Schedule selected"
           >
             <Calendar className="w-4 h-4" />
@@ -159,7 +159,7 @@ export function BulkActionsToolbar({
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={onClearSelection}
-          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 text-muted-text hover:text-text hover:bg-bg-elev-1 rounded-lg transition-colors"
           title="Clear selection"
         >
           <X className="w-4 h-4" />

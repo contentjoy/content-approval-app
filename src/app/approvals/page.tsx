@@ -31,60 +31,73 @@ export default function ApprovalsPage() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high':
-        return 'bg-red-100 text-red-800'
+        return 'bg-destructive/10 text-destructive border-destructive/20'
       case 'medium':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'bg-accent-strong/10 text-accent-strong border-accent-strong/20'
       case 'low':
-        return 'bg-green-100 text-green-800'
+        return 'bg-accent/10 text-accent border-accent/20'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-muted-text/10 text-muted-text border-muted-text/20'
     }
   }
+
+  // const getStatusColor = (status: string) => {
+  //   switch (status.toLowerCase()) {
+  //     case 'approved':
+  //       return 'bg-accent/10 text-accent border-accent/20'
+  //     case 'rejected':
+  //       return 'bg-destructive/10 text-destructive border-destructive/20'
+  //     case 'pending':
+  //       return 'bg-accent-strong/10 text-accent-strong border-accent-strong/20'
+  //     default:
+  //       return 'bg-muted-text/10 text-muted-text border-muted-text/20'
+  //   }
+  // }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Approvals</h1>
-        <p className="text-gray-600">Review and approve pending content</p>
+        <h1 className="text-3xl font-bold text-text mb-2">Approvals</h1>
+        <p className="text-muted-text">Review and approve pending content</p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-bg p-6 rounded-3xl border border-border shadow-soft">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Pending Reviews</p>
-              <p className="text-2xl font-bold text-yellow-600">8</p>
+              <p className="text-sm font-medium text-muted-text">Pending Reviews</p>
+              <p className="text-2xl font-bold text-accent-strong">8</p>
             </div>
-            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-accent-strong/10 rounded-2xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-accent-strong" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-bg p-6 rounded-3xl border border-border shadow-soft">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Approved Today</p>
-              <p className="text-2xl font-bold text-green-600">3</p>
+              <p className="text-sm font-medium text-muted-text">Approved Today</p>
+              <p className="text-2xl font-bold text-accent">3</p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-accent/10 rounded-2xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
+        <div className="bg-bg p-6 rounded-3xl border border-border shadow-soft">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Rejected Today</p>
-              <p className="text-2xl font-bold text-red-600">1</p>
+              <p className="text-sm font-medium text-muted-text">Rejected Today</p>
+              <p className="text-2xl font-bold text-destructive">1</p>
             </div>
-            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-destructive/10 rounded-2xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
@@ -92,25 +105,25 @@ export default function ApprovalsPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-semibold">Pending Approvals</h2>
+      <div className="bg-bg rounded-3xl border border-border shadow-soft">
+        <div className="p-6 border-b border-border">
+          <h2 className="text-xl font-semibold text-text">Pending Approvals</h2>
         </div>
 
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-border">
           {mockApprovals.map((approval) => (
-            <div key={approval.id} className="p-6 hover:bg-gray-50 transition-colors">
+            <div key={approval.id} className="p-6 hover:bg-bg-elev-1 transition-colors">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-text">
                       {approval.contentTitle}
                     </h3>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(approval.priority)}`}>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getPriorityColor(approval.priority)}`}>
                       {approval.priority.charAt(0).toUpperCase() + approval.priority.slice(1)} Priority
                     </span>
                   </div>
-                  <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
+                  <div className="flex items-center space-x-4 text-sm text-muted-text mb-4">
                     <span>By {approval.author}</span>
                     <span>•</span>
                     <span>Submitted {new Date(approval.submittedAt).toLocaleDateString()}</span>
@@ -132,7 +145,7 @@ export default function ApprovalsPage() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2 ml-4">
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                  <Button size="sm" className="bg-accent text-background hover:bg-accent/90">
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>

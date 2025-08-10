@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import type { SocialMediaPost } from '@/types'
 
 interface KeyboardShortcutsConfig {

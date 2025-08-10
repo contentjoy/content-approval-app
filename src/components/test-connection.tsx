@@ -8,17 +8,17 @@ import { supabase } from '@/lib/supabase'
 // Tailwind CSS Test Component
 function TailwindTest() {
   return (
-    <div className="p-4 mb-4 bg-blue-500 text-white rounded-lg shadow-lg">
+    <div className="p-4 mb-4 bg-accent text-background rounded-2xl shadow-soft">
       <h2 className="text-xl font-bold mb-2">🎨 Tailwind CSS Test</h2>
-      <p className="text-blue-100">
+      <p className="opacity-90">
         If you can see this styled box with blue background, white text, and rounded corners, 
         then Tailwind CSS is working properly!
       </p>
       <div className="mt-3 flex gap-2">
-        <button className="px-4 py-2 bg-green-500 hover:bg-green-600 rounded-md transition-colors">
+        <button className="px-4 py-2 bg-bg text-text border border-border hover:bg-bg-elev-1 rounded-full transition-colors">
           Green Button
         </button>
-        <button className="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-md transition-colors">
+        <button className="px-4 py-2 bg-destructive text-background hover:bg-destructive/90 rounded-full transition-colors">
           Red Button
         </button>
       </div>
@@ -198,8 +198,8 @@ export function TestConnection() {
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Database Connection Test</h3>
+    <div className="bg-bg p-6 rounded-3xl shadow-soft border border-border">
+      <h3 className="text-lg font-semibold text-text mb-4">Database Connection Test</h3>
       
       {/* Tailwind CSS Test */}
       <TailwindTest />
@@ -213,11 +213,11 @@ export function TestConnection() {
       </BrandedButton>
       
       {results.length > 0 && (
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h4 className="font-medium text-gray-900 mb-2">Test Results:</h4>
+        <div className="bg-muted p-4 rounded-2xl border border-border">
+          <h4 className="font-medium text-text mb-2">Test Results:</h4>
           <div className="space-y-1">
             {results.map((result, index) => (
-              <div key={index} className="text-sm font-mono text-gray-700">
+              <div key={index} className="text-sm font-mono text-muted-text">
                 {result}
               </div>
             ))}

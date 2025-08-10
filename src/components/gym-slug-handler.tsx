@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useBranding } from '@/contexts/branding-context'
 

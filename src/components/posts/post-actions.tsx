@@ -132,7 +132,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
           <button
             onClick={handleApprove}
             disabled={isLoading}
-            className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-accent hover:bg-accent/90 text-background shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Approve
           </button>
@@ -140,7 +140,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
           <button
             onClick={handleReject}
             disabled={isLoading}
-            className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border-2 border-[var(--brand-primary)] text-[var(--brand-primary)] bg-transparent hover:bg-[var(--brand-primary)] hover:text-white shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border-2 border-accent text-accent bg-transparent hover:bg-accent hover:text-background shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Reject
           </button>
@@ -149,13 +149,13 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
 
       {/* Status-specific actions */}
       {status === 'approved' && (
-        <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+        <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-accent/10 text-accent">
           Approved
         </span>
       )}
 
       {status === 'rejected' || status === 'disapproved' ? (
-        <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-red-100 text-red-800">
+        <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-destructive/10 text-destructive">
           Rejected
         </span>
       ) : null}
@@ -164,7 +164,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
       <div className="relative" ref={menuRef}>
         <button
           onClick={() => setShowMenu(!showMenu)}
-          className="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all duration-200 hover:shadow-sm"
+          className="p-2.5 text-muted-text hover:text-text hover:bg-bg-elev-1 rounded-full transition-all duration-200 hover:shadow-sm"
         >
           <EllipsisHorizontalIcon className="w-4 h-4" />
         </button>
@@ -176,7 +176,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -10 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-[9999] overflow-visible"
+              className="absolute right-0 top-full mt-2 w-48 bg-bg rounded-xl shadow-large border border-border py-2 z-[9999] overflow-visible"
               style={{ 
                 boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)' 
               }}
@@ -185,7 +185,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
                 <button
                   key={item.label}
                   onClick={item.onClick}
-                  className="w-full flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  className="w-full flex items-center px-4 py-3 text-sm text-text hover:bg-bg-elev-1 transition-colors duration-150"
                 >
                   <item.icon className="w-4 h-4 mr-3" />
                   {item.label}

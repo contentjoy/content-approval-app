@@ -100,23 +100,23 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Post Preview */}
-        <div className="bg-gray-100 rounded-lg p-4">
+        <div className="bg-muted rounded-lg p-4">
           <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center">
-              <XCircle className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-destructive/10 rounded-lg flex items-center justify-center">
+              <XCircle className="w-5 h-5 text-destructive" />
             </div>
             <div>
-              <h3 className="font-medium text-gray-900">
+              <h3 className="font-medium text-foreground">
                 {post['Content Type'] || 'Social Media Post'}
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {post['Asset Type'] || 'Image'} • {isCarousel ? `Carousel (${carouselPosts.length} slides)` : 'Single'}
               </p>
             </div>
           </div>
           
           {post['Post Caption'] && (
-            <p className="text-sm text-gray-700 line-clamp-2">
+            <p className="text-sm text-muted-foreground line-clamp-2">
               {post['Post Caption']}
             </p>
           )}
@@ -124,20 +124,20 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
 
         {/* Feedback */}
         <div>
-          <label htmlFor="feedback" className="block text-sm font-medium text-gray-700 mb-2">
-            Feedback <span className="text-red-500">*</span>
+          <label htmlFor="feedback" className="block text-sm font-medium text-foreground mb-2">
+            Feedback <span className="text-destructive">*</span>
           </label>
           <textarea
             id="feedback"
             rows={4}
             {...register('feedback')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent resize-none"
+            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none bg-bg text-text placeholder:text-muted-text"
             placeholder="Please provide specific feedback on why this content is being disapproved..."
           />
           {errors.feedback && (
-            <p className="mt-1 text-sm text-red-600">{errors.feedback.message}</p>
+            <p className="mt-1 text-sm text-destructive">{errors.feedback.message}</p>
           )}
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             {watchedFeedback.length}/10 characters minimum
           </p>
         </div>
@@ -145,7 +145,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
         {/* Carousel Options */}
         {isCarousel && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+            <label className="block text-sm font-medium text-foreground mb-3">
               Carousel Action:
             </label>
             <div className="space-y-3">
@@ -154,11 +154,11 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
                   type="radio"
                   value="current"
                   {...register('carouselAction')}
-                  className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                  className="text-accent focus:ring-accent"
                 />
                 <div>
-                  <div className="font-medium text-gray-900">Disapprove current slide</div>
-                  <div className="text-sm text-gray-500">Only disapprove this slide ({post['Carousel Order']} of {carouselPosts.length})</div>
+                  <div className="font-medium text-foreground">Disapprove current slide</div>
+                  <div className="text-sm text-muted-foreground">Only disapprove this slide ({post['Carousel Order']} of {carouselPosts.length})</div>
                 </div>
               </label>
               <label className="flex items-center space-x-3">
@@ -166,24 +166,24 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
                   type="radio"
                   value="all"
                   {...register('carouselAction')}
-                  className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                  className="text-accent focus:ring-accent"
                 />
                 <div>
-                  <div className="font-medium text-gray-900">Disapprove all slides</div>
-                  <div className="text-sm text-gray-500">Disapprove all {carouselPosts.length} slides in this carousel</div>
+                  <div className="font-medium text-foreground">Disapprove all slides</div>
+                  <div className="text-sm text-muted-foreground">Disapprove all {carouselPosts.length} slides in this carousel</div>
                 </div>
               </label>
             </div>
             {errors.carouselAction && (
-              <p className="mt-1 text-sm text-red-600">{errors.carouselAction.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.carouselAction.message}</p>
             )}
           </div>
         )}
 
         {/* Summary */}
-        <div className="bg-red-50 rounded-lg p-4">
-          <h4 className="font-medium text-red-900 mb-2">Summary</h4>
-          <p className="text-sm text-red-700">
+        <div className="bg-destructive/10 rounded-lg p-4 border border-destructive/20">
+          <h4 className="font-medium text-destructive mb-2">Summary</h4>
+          <p className="text-sm text-destructive">
             {isCarousel && watchedCarouselAction === 'all' 
               ? `Disapprove all ${carouselPosts.length} carousel slides with feedback`
               : `Disapprove ${isCarousel ? 'current slide' : 'post'} with feedback`
@@ -204,7 +204,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
           <BrandedButton
             type="submit"
             disabled={isLoading || watchedFeedback.length < 10}
-            className="bg-red-600 hover:bg-red-700 text-white"
+            className="bg-destructive hover:bg-destructive/90 text-background"
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">

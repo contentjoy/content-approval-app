@@ -77,21 +77,21 @@ export function EnhancedFilters({
         {/* Search Input */}
         <div className="flex-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+            <Search className="h-5 w-5 text-muted-text" />
           </div>
           <input
             type="text"
             placeholder="Search captions, content, or hashtags..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent text-sm placeholder-gray-500 bg-white"
+            className="block w-full pl-10 pr-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-accent focus:border-transparent text-sm placeholder-muted-text bg-bg"
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange('')}
               className="absolute inset-y-0 right-0 pr-3 flex items-center"
             >
-              <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+              <X className="h-4 w-4 text-muted-text hover:text-text" />
             </button>
           )}
         </div>
@@ -104,8 +104,8 @@ export function EnhancedFilters({
           className={`
             flex items-center space-x-2 px-4 py-3 rounded-xl border font-medium transition-all duration-200
             ${showAdvanced || hasActiveFilters
-              ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
-              : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+              ? 'bg-accent text-white border-accent'
+              : 'bg-bg text-text border-border hover:border-accent'
             }
           `}
         >
@@ -127,7 +127,7 @@ export function EnhancedFilters({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleReset}
-            className="flex items-center space-x-2 px-3 py-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors"
+            className="flex items-center space-x-2 px-3 py-3 text-muted-text hover:text-text hover:bg-bg-elev-1 rounded-xl transition-colors"
             title="Reset all filters"
           >
             <RotateCcw className="w-4 h-4" />
@@ -143,17 +143,17 @@ export function EnhancedFilters({
             animate={{ opacity: 1, height: 'auto', y: 0 }}
             exit={{ opacity: 0, height: 0, y: -10 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="bg-gray-50 border border-gray-200 rounded-xl p-6 space-y-6"
+            className="bg-bg-elev-1 border border-border rounded-xl p-6 space-y-6"
           >
             {/* Date Range Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-sm font-medium text-text mb-3">
                 <Calendar className="w-4 h-4 inline mr-2" />
                 Date Range
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">From</label>
+                  <label className="block text-xs text-muted-text mb-1">From</label>
                   <input
                     type="date"
                     value={dateRange?.start || ''}
@@ -161,11 +161,11 @@ export function EnhancedFilters({
                       start: e.target.value, 
                       end: dateRange?.end || e.target.value 
                     })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-sm bg-bg"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 mb-1">To</label>
+                  <label className="block text-xs text-muted-text mb-1">To</label>
                   <input
                     type="date"
                     value={dateRange?.end || ''}
@@ -173,14 +173,14 @@ export function EnhancedFilters({
                       start: dateRange?.start || e.target.value, 
                       end: e.target.value 
                     })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent text-sm"
+                    className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-sm bg-bg"
                   />
                 </div>
               </div>
               {dateRange && (
                 <button
                   onClick={() => onDateRangeChange(null)}
-                  className="mt-2 text-xs text-gray-500 hover:text-gray-700 flex items-center space-x-1"
+                  className="mt-2 text-xs text-muted-text hover:text-text flex items-center space-x-1"
                 >
                   <X className="w-3 h-3" />
                   <span>Clear date range</span>
@@ -191,7 +191,7 @@ export function EnhancedFilters({
             {/* Tags Filter */}
             {customTags.length > 0 && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
+                <label className="block text-sm font-medium text-text mb-3">
                   <Tag className="w-4 h-4 inline mr-2" />
                   Popular Hashtags
                 </label>
@@ -210,8 +210,8 @@ export function EnhancedFilters({
                       className={`
                         px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
                         ${selectedTags.includes(tag)
-                          ? 'bg-[var(--brand-primary)] text-white'
-                          : 'bg-white text-gray-600 border border-gray-300 hover:border-[var(--brand-primary)]'
+                          ? 'bg-accent text-white'
+                          : 'bg-bg text-text border border-border hover:border-accent'
                         }
                       `}
                     >
@@ -222,7 +222,7 @@ export function EnhancedFilters({
                 {selectedTags.length > 0 && (
                   <button
                     onClick={() => onTagsChange([])}
-                    className="mt-3 text-xs text-gray-500 hover:text-gray-700 flex items-center space-x-1"
+                    className="mt-3 text-xs text-muted-text hover:text-text flex items-center space-x-1"
                   >
                     <X className="w-3 h-3" />
                     <span>Clear tags ({selectedTags.length})</span>
@@ -233,7 +233,7 @@ export function EnhancedFilters({
 
             {/* Quick Filters */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-sm font-medium text-text mb-3">
                 <Filter className="w-4 h-4 inline mr-2" />
                 Quick Filters
               </label>
@@ -243,7 +243,7 @@ export function EnhancedFilters({
                     start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                     end: new Date().toISOString().split('T')[0]
                   })}
-                  className="px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg hover:border-[var(--brand-primary)] transition-colors"
+                  className="px-3 py-2 text-xs bg-bg border border-border rounded-lg hover:border-accent transition-colors"
                 >
                   Last 7 days
                 </button>
@@ -252,7 +252,7 @@ export function EnhancedFilters({
                     start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                     end: new Date().toISOString().split('T')[0]
                   })}
-                  className="px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg hover:border-[var(--brand-primary)] transition-colors"
+                  className="px-3 py-2 text-xs bg-bg border border-border rounded-lg hover:border-accent transition-colors"
                 >
                   Last 30 days
                 </button>
@@ -261,7 +261,7 @@ export function EnhancedFilters({
                     start: new Date().toISOString().split('T')[0],
                     end: new Date().toISOString().split('T')[0]
                   })}
-                  className="px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg hover:border-[var(--brand-primary)] transition-colors"
+                  className="px-3 py-2 text-xs bg-bg border border-border rounded-lg hover:border-accent transition-colors"
                 >
                   Today
                 </button>
@@ -270,7 +270,7 @@ export function EnhancedFilters({
                     start: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                     end: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
                   })}
-                  className="px-3 py-2 text-xs bg-white border border-gray-300 rounded-lg hover:border-[var(--brand-primary)] transition-colors"
+                  className="px-3 py-2 text-xs bg-bg border border-border rounded-lg hover:border-accent transition-colors"
                 >
                   Yesterday
                 </button>

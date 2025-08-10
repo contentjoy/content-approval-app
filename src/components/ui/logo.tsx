@@ -41,7 +41,7 @@ export function Logo({
   if (isLoading) {
     console.log('⏳ Logo loading...')
     return (
-      <div className={`${sizeClasses[size]} ${className} animate-pulse bg-gray-200 rounded`} />
+      <div className={`${sizeClasses[size]} ${className} animate-pulse bg-bg-elev-1 rounded`} />
     )
   }
 

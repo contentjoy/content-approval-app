@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { getPostsForGymBySlug } from '@/lib/database'
-import { SocialMediaPost } from '@/types'
+// import { SocialMediaPost } from '@/types'
 
 interface PostStats {
   total: number

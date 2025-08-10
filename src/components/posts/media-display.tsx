@@ -50,20 +50,20 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
   // Handle video with 9:16 aspect ratio
   if (isVideo && post['Asset URL']) {
     return (
-      <div className={`relative w-full bg-gray-100 ${className}`} style={{ aspectRatio: '9/16' }}>
+      <div className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: '9/16' }}>
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--brand-primary)]"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
           </div>
         )}
         
         {hasError ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+          <div className="absolute inset-0 flex items-center justify-center bg-bg-elev-1">
             <div className="text-center">
-              <svg className="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-12 h-12 text-muted-text mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
               </svg>
-              <p className="text-sm text-gray-500">Video not available</p>
+              <p className="text-sm text-muted-text">Video not available</p>
             </div>
           </div>
         ) : (
@@ -87,7 +87,7 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
   // Handle image with 4:5 aspect ratio
   if (post['Asset URL']) {
     return (
-      <div className={`relative w-full bg-gray-100 ${className}`} style={{ aspectRatio: '4/5' }}>
+      <div className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: '4/5' }}>
         <AnimatePresence>
           {isLoading && (
             <motion.div
@@ -95,18 +95,18 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
               exit={{ opacity: 0 }}
               className="absolute inset-0 flex items-center justify-center"
             >
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--brand-primary)]"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
             </motion.div>
           )}
         </AnimatePresence>
 
         {hasError ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+          <div className="absolute inset-0 flex items-center justify-center bg-bg-elev-1">
             <div className="text-center">
-              <svg className="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-12 h-12 text-muted-text mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <p className="text-sm text-gray-500">Image not available</p>
+              <p className="text-sm text-muted-text">Image not available</p>
             </div>
           </div>
         ) : (

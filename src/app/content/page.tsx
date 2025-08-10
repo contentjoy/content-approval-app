@@ -32,15 +32,15 @@ export default function ContentPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'approved':
-        return 'bg-green-100 text-green-800'
+        return 'bg-accent/10 text-accent border-accent/20'
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'bg-accent-strong/10 text-accent-strong border-accent-strong/20'
       case 'rejected':
-        return 'bg-red-100 text-red-800'
+        return 'bg-destructive/10 text-destructive border-destructive/20'
       case 'draft':
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-muted-text/10 text-muted-text border-muted-text/20'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-muted-text/10 text-muted-text border-muted-text/20'
     }
   }
 
@@ -48,8 +48,8 @@ export default function ContentPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Content</h1>
-          <p className="text-gray-600">Manage and review your content</p>
+          <h1 className="text-3xl font-bold text-text mb-2">Content</h1>
+          <p className="text-muted-text">Manage and review your content</p>
         </div>
         <Link href="/content/new">
           <Button>
@@ -61,18 +61,18 @@ export default function ContentPage() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="p-6 border-b">
+      <div className="bg-bg rounded-3xl border border-border shadow-soft">
+        <div className="p-6 border-b border-border">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center space-x-4">
               <input
                 type="text"
                 placeholder="Search content..."
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-bg text-text placeholder:text-muted-text"
               />
             </div>
             <div className="flex items-center space-x-2">
-              <select className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <select className="px-3 py-2 border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-bg text-text">
                 <option value="">All Status</option>
                 <option value="draft">Draft</option>
                 <option value="pending">Pending</option>
@@ -83,21 +83,21 @@ export default function ContentPage() {
           </div>
         </div>
 
-        <div className="divide-y divide-gray-200">
+        <div className="divide-y divide-border">
           {mockContent.map((content) => (
-            <div key={content.id} className="p-6 hover:bg-gray-50 transition-colors">
+            <div key={content.id} className="p-6 hover:bg-bg-elev-1 transition-colors">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold text-text">
                       {content.title}
                     </h3>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(content.status)}`}>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getStatusColor(content.status)}`}>
                       {content.status.charAt(0).toUpperCase() + content.status.slice(1)}
                     </span>
                   </div>
-                  <p className="text-gray-600 mb-2">{content.description}</p>
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                  <p className="text-muted-text mb-2">{content.description}</p>
+                  <div className="flex items-center space-x-4 text-sm text-muted-text">
                     <span>By {content.author}</span>
                     <span>•</span>
                     <span>{new Date(content.updatedAt).toLocaleDateString()}</span>

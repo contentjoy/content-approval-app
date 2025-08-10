@@ -83,18 +83,18 @@ export function EditCaptionModal({ isOpen, onClose, post, onSuccess }: EditCapti
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Post Preview */}
-        <div className="bg-gray-50 rounded-lg p-4">
+        <div className="bg-muted rounded-lg p-4">
           <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <span className="text-blue-600 font-semibold">
+            <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+              <span className="text-accent font-semibold">
                 {post['Asset Type']?.toLowerCase() === 'video' ? '🎥' : '📷'}
               </span>
             </div>
             <div>
-              <h3 className="font-medium text-gray-900">
+              <h3 className="font-medium text-foreground">
                 {post['Content Type'] || 'Social Media Post'}
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {post['Asset Type'] || 'Image'} • {post['Carousel Group'] ? `Carousel slide ${post['Carousel Order']}` : 'Single'}
               </p>
             </div>
@@ -103,25 +103,25 @@ export function EditCaptionModal({ isOpen, onClose, post, onSuccess }: EditCapti
 
         {/* Caption */}
         <div>
-          <label htmlFor="caption" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="caption" className="block text-sm font-medium text-foreground mb-2">
             Caption
           </label>
           <textarea
             id="caption"
             rows={6}
             {...register('caption')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent resize-none"
+            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none bg-bg text-text placeholder:text-muted-text"
             placeholder="Write your post caption here..."
           />
           {errors.caption && (
-            <p className="mt-1 text-sm text-red-600">{errors.caption.message}</p>
+            <p className="mt-1 text-sm text-destructive">{errors.caption.message}</p>
           )}
           <div className="flex justify-between items-center mt-1">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               {watchedCaption.length}/2200 characters
             </p>
             {watchedCaption.length > 2000 && (
-              <p className="text-sm text-yellow-600">
+              <p className="text-sm text-accent-strong">
                 {watchedCaption.length > 2200 ? 'Over limit' : 'Approaching limit'}
               </p>
             )}
@@ -130,12 +130,12 @@ export function EditCaptionModal({ isOpen, onClose, post, onSuccess }: EditCapti
 
         {/* Character Count Warning */}
         {watchedCaption.length > 2000 && (
-          <div className="bg-yellow-50 rounded-lg p-4">
+          <div className="bg-accent-strong/10 rounded-lg p-4 border border-accent-strong/20">
             <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-accent-strong" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
-              <p className="text-sm text-yellow-800">
+              <p className="text-sm text-accent-strong">
                 {watchedCaption.length > 2200 
                   ? 'Caption exceeds the maximum character limit'
                   : 'Caption is approaching the maximum character limit'

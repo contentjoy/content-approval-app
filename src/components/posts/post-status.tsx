@@ -20,7 +20,7 @@ export function PostStatus({ status, className = '' }: PostStatusProps) {
       case 'approved':
         return {
           label: 'Approved',
-          color: 'bg-green-100 text-green-800 border-green-200',
+          color: 'bg-accent-soft text-accent border-accent',
           icon: '✓',
           animation: 'approved'
         }
@@ -28,21 +28,21 @@ export function PostStatus({ status, className = '' }: PostStatusProps) {
       case 'disapproved':
         return {
           label: 'Rejected',
-          color: 'bg-red-100 text-red-800 border-red-200',
+          color: 'bg-destructive/10 text-destructive border-destructive/20',
           icon: '✗',
           animation: 'rejected'
         }
       case 'draft':
         return {
           label: 'Draft',
-          color: 'bg-gray-100 text-gray-800 border-gray-200',
+          color: 'bg-bg-elev-1 text-muted-text border-border',
           icon: '📝',
           animation: 'draft'
         }
       default:
         return {
           label: status,
-          color: 'bg-gray-100 text-gray-800 border-gray-200',
+          color: 'bg-bg-elev-1 text-muted-text border-border',
           icon: '❓',
           animation: 'default'
         }
@@ -56,7 +56,7 @@ export function PostStatus({ status, className = '' }: PostStatusProps) {
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className={`inline-flex items-center px-3 py-2 rounded-full text-xs font-semibold border shadow-sm ${config.color} ${className}`}
+      className={`inline-flex items-center px-3 py-2 rounded-full text-xs font-semibold border shadow-soft ${config.color} ${className}`}
     >
       <span className="mr-1.5">{config.icon}</span>
       {config.label}

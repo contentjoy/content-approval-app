@@ -61,27 +61,51 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
     const root = document.documentElement
     
     if (data.primaryColor) {
+      // Set the primary color CSS variable
+      root.style.setProperty('--primary-color', data.primaryColor)
+      
       // Convert hex to RGB for CSS custom properties
       const hex = data.primaryColor.replace('#', '')
       const r = parseInt(hex.substr(0, 2), 16)
       const g = parseInt(hex.substr(2, 2), 16)
       const b = parseInt(hex.substr(4, 2), 16)
       
+      // Set legacy brand colors for compatibility
       root.style.setProperty('--brand-primary', data.primaryColor)
       root.style.setProperty('--brand-primary-rgb', `${r}, ${g}, ${b}`)
       root.style.setProperty('--brand-primary-light', lightenColor(data.primaryColor, 0.1))
       root.style.setProperty('--brand-primary-dark', darkenColor(data.primaryColor, 0.1))
+      
+      // Provide fallback color mixing for browsers that don't support color-mix
+      try {
+        // Lightweight darken/lighten fallback
+        const toRGB = (h: string) => {
+          const m = h.replace('#','')
+          const bigint = parseInt(m.length === 3 ? m.split('').map(c=>c+c).join('') : m, 16)
+          return { r: (bigint>>16)&255, g: (bigint>>8)&255, b: bigint&255 }
+        }
+        const clamp = (v:number)=>Math.min(255,Math.max(0,v))
+        const mix = (rgb:{r:number,g:number,b:number}, pct:number, base:'black'|'white') => {
+          const t = base==='black'?0:255
+          return `rgb(${clamp(rgb.r+(t-rgb.r)*pct)}, ${clamp(rgb.g+(t-rgb.g)*pct)}, ${clamp(rgb.b+(t-rgb.b)*pct)})`
+        }
+        const rgb = toRGB(data.primaryColor)
+        root.style.setProperty('--accent-strong', mix(rgb, 0.2, 'black')) // ~20% darker
+        root.style.setProperty('--accent-soft', mix(rgb, 0.4, 'white'))   // ~40% lighter
+      } catch {}
     } else {
       // Default colors if no branding
-      root.style.setProperty('--brand-primary', '#3b82f6')
-      root.style.setProperty('--brand-primary-rgb', '59, 130, 246')
-      root.style.setProperty('--brand-primary-light', '#60a5fa')
-      root.style.setProperty('--brand-primary-dark', '#2563eb')
+      const defaultColor = '#20B8CD'
+      root.style.setProperty('--primary-color', defaultColor)
+      root.style.setProperty('--brand-primary', defaultColor)
+      root.style.setProperty('--brand-primary-rgb', '32, 184, 205')
+      root.style.setProperty('--brand-primary-light', lightenColor(defaultColor, 0.1))
+      root.style.setProperty('--brand-primary-dark', darkenColor(defaultColor, 0.1))
     }
   }, [lightenColor, darkenColor])
 
   const fetchBranding = useCallback(async (slug: string) => {
-    setBrandingData(prev => ({ ...prev, isLoading: true, error: null }))
+    setBrandingData((prev: BrandingData) => ({ ...prev, isLoading: true, error: null }))
 
     try {
       // Get gym by slug
@@ -121,7 +145,7 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
 
     } catch (error) {
       console.error('Error fetching branding:', error)
-      setBrandingData(prev => ({
+      setBrandingData((prev: BrandingData) => ({
         ...prev,
         isLoading: false,
         error: error instanceof Error ? error.message : 'Failed to load branding'

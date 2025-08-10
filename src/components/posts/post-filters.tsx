@@ -65,16 +65,16 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
             whileTap={{ scale: 0.95 }}
             className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
               isActive
-                ? 'bg-[var(--brand-primary)] text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+                ? 'bg-accent text-background shadow-medium'
+                : 'bg-bg-elev-1 text-text hover:bg-bg hover:shadow-soft border border-border'
             }`}
           >
             <span>{filter.icon}</span>
             <span>{filter.label}</span>
             <span className={`px-2 py-0.5 rounded-full text-xs ${
               isActive 
-                ? 'bg-white bg-opacity-20' 
-                : 'bg-gray-200'
+                ? 'bg-background/20' 
+                : 'bg-bg-elev-1'
             }`}>
               {count}
             </span>

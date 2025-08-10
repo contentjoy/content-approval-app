@@ -133,16 +133,16 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Approved Posts Summary */}
-        <div className="bg-[var(--brand-primary)] bg-opacity-10 rounded-lg p-4">
+        <div className="bg-accent/10 rounded-lg p-4 border border-accent/20">
           <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-[var(--brand-primary)] bg-opacity-20 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 text-[var(--brand-primary)]" />
+            <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
+              <CheckCircle className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <h3 className="font-medium text-[var(--brand-primary)]">
+              <h3 className="font-medium text-accent">
                 {approvedPosts.length} Posts Ready to Schedule
               </h3>
-              <p className="text-sm text-[var(--brand-primary)] opacity-80">
+              <p className="text-sm text-accent opacity-80">
                 All posts have been approved and are ready for scheduling
               </p>
             </div>
@@ -151,83 +151,83 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
 
         {/* Scheduling Options */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
+          <label className="block text-sm font-medium text-foreground mb-3">
             Scheduling Frequency:
           </label>
           <div className="space-y-3">
-            <label className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <label className="flex items-center space-x-3 p-4 border border-border rounded-lg hover:bg-muted cursor-pointer">
               <input
                 type="radio"
                 value="daily"
                 {...register('frequency')}
-                className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                className="text-accent focus:ring-accent"
               />
               <div className="flex-1">
-                <div className="font-medium text-gray-900">One post per day</div>
-                <div className="text-sm text-gray-500">
+                <div className="font-medium text-foreground">One post per day</div>
+                <div className="text-sm text-muted-foreground">
                   Duration: {approvedPosts.length} days
                 </div>
               </div>
             </label>
-            <label className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <label className="flex items-center space-x-3 p-4 border border-border rounded-lg hover:bg-muted cursor-pointer">
               <input
                 type="radio"
                 value="every-other-day"
                 {...register('frequency')}
-                className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                className="text-accent focus:ring-accent"
               />
               <div className="flex-1">
-                <div className="font-medium text-gray-900">Every other day</div>
-                <div className="text-sm text-gray-500">
+                <div className="font-medium text-foreground">Every other day</div>
+                <div className="text-sm text-muted-foreground">
                   Duration: {approvedPosts.length * 2} days
                 </div>
               </div>
             </label>
           </div>
-          {errors.frequency && (
-            <p className="mt-1 text-sm text-red-600">{errors.frequency.message}</p>
-          )}
+            {errors.frequency && (
+              <p className="mt-1 text-sm text-destructive">{errors.frequency.message}</p>
+            )}
         </div>
 
         {/* Date and Time Selection */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-2">
-              Start Date <span className="text-red-500">*</span>
+            <label htmlFor="startDate" className="block text-sm font-medium text-foreground mb-2">
+              Start Date <span className="text-destructive">*</span>
             </label>
             <input
               type="date"
               id="startDate"
               {...register('startDate')}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
+              className="w-full px-3 py-2 bg-muted border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
             />
             {errors.startDate && (
-              <p className="mt-1 text-sm text-red-600">{errors.startDate.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.startDate.message}</p>
             )}
           </div>
           
           <div>
-            <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-2">
-              Post Time <span className="text-red-500">*</span>
+            <label htmlFor="startTime" className="block text-sm font-medium text-foreground mb-2">
+              Post Time <span className="text-destructive">*</span>
             </label>
             <input
               type="time"
               id="startTime"
               {...register('startTime')}
-              className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
+              className="w-full px-3 py-2 bg-muted border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
             />
             {errors.startTime && (
-              <p className="mt-1 text-sm text-red-600">{errors.startTime.message}</p>
+              <p className="mt-1 text-sm text-destructive">{errors.startTime.message}</p>
             )}
           </div>
         </div>
 
         {/* Timeline Preview */}
         {watchedStartDate && (
-          <div className="bg-blue-50 rounded-lg p-4">
-            <h4 className="font-medium text-blue-900 mb-2">Scheduling Timeline</h4>
-            <div className="space-y-2 text-sm text-blue-700">
+          <div className="bg-bg-elev-1 rounded-lg p-4 border border-border">
+            <h4 className="font-medium text-text mb-2">Scheduling Timeline</h4>
+            <div className="space-y-2 text-sm text-muted-text">
               <p><strong>Start Date:</strong> {new Date(watchedStartDate).toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 

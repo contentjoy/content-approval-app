@@ -35,7 +35,7 @@ export function PostCard({
     if (isCarousel) {
       return {
         label: 'Carousel',
-        color: 'bg-purple-100 text-purple-800',
+        color: 'bg-accent-soft text-accent border-accent',
         icon: <Grid3X3 className="w-3 h-3" />
       }
     }
@@ -44,14 +44,14 @@ export function PostCard({
       case 'video':
         return {
           label: 'Video',
-          color: 'bg-blue-100 text-blue-800',
+          color: 'bg-accent-soft text-accent border-accent',
           icon: <Video className="w-3 h-3" />
         }
       case 'photo':
       default:
         return {
           label: 'Photo',
-          color: 'bg-green-100 text-green-800',
+          color: 'bg-accent-soft text-accent border-accent',
           icon: <ImageIcon className="w-3 h-3" />
         }
     }
@@ -67,7 +67,7 @@ export function PostCard({
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
         whileHover={{ y: -4, scale: 1.02 }}
-        className={`bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-gray-200 transition-all duration-300 group ${className}`}
+        className={`card card-hover group ${className}`}
       >
         {/* Media Section with proper aspect ratios */}
         <div className="relative group overflow-hidden rounded-t-2xl">
@@ -92,8 +92,8 @@ export function PostCard({
                   <div className={`
                     w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200
                     ${isSelected 
-                      ? 'bg-[var(--brand-primary)] border-[var(--brand-primary)]' 
-                      : 'bg-white/80 border-white/60 backdrop-blur-sm hover:border-[var(--brand-primary)]'
+                      ? 'bg-accent border-accent' 
+                      : 'bg-background/80 border-border/60 backdrop-blur-sm hover:border-accent'
                     }
                   `}>
                     {isSelected && (
@@ -109,7 +109,7 @@ export function PostCard({
           
           {/* Asset Type Badge - Shows on hover - Top Left */}
           <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-black bg-opacity-50 text-white shadow-sm backdrop-blur-sm">
+            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${badge.color} shadow-medium backdrop-blur-sm`}>
               <span className="mr-1.5">{badge.icon}</span>
               {badge.label}
             </span>
@@ -118,7 +118,7 @@ export function PostCard({
           {/* Carousel Indicator - Shows on hover - Bottom Left */}
           {post['Carousel Group'] && post['Carousel Order'] && (
             <div className="absolute bottom-8 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-black bg-opacity-60 text-white backdrop-blur-sm">
+              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-background/80 text-foreground backdrop-blur-sm shadow-medium">
                 {post['Carousel Order']} of {post['Carousel Group']}
               </span>
             </div>
@@ -130,13 +130,13 @@ export function PostCard({
           {/* Post Caption */}
           {post['Post Caption'] && (
             <div className="mb-4">
-              <p className={`text-gray-700 text-sm leading-relaxed font-medium ${isExpanded ? '' : 'line-clamp-3'}`}>
+              <p className={`text-foreground text-sm leading-relaxed font-medium ${isExpanded ? '' : 'line-clamp-3'}`}>
                 {post['Post Caption']}
               </p>
               {post['Post Caption'].length > 150 && (
                 <button 
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-[var(--brand-primary)] text-xs font-semibold mt-2 hover:underline transition-colors"
+                  className="text-accent text-xs font-semibold mt-2 hover:underline transition-colors"
                 >
                   {isExpanded ? 'Show less' : 'Read more'}
                 </button>

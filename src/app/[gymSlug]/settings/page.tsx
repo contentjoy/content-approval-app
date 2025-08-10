@@ -376,7 +376,7 @@ function IntegrationSettings() {
               </div>
             </div>
             <BrandedButton
-              variant={integration.connected ? 'outline' : 'primary'}
+              variant={integration.connected ? 'outline' : 'default'}
               size="sm"
             >
               {integration.connected ? 'Disconnect' : 'Connect'}

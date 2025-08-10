@@ -34,27 +34,27 @@ export function ProgressBar({ current, total, goal, className = '' }: ProgressBa
   }, [isGoalReached, hasReachedGoal])
 
   const getProgressColor = () => {
-    if (progress >= 100) return 'bg-green-500'
-    if (progress >= 75) return 'bg-yellow-500'
-    if (progress >= 50) return 'bg-orange-500'
-    return 'bg-red-500'
+    if (progress >= 80) return 'bg-accent'
+    if (progress >= 60) return 'bg-accent-soft'
+    if (progress >= 40) return 'bg-accent-strong'
+    return 'bg-muted'
   }
 
   const getProgressBgColor = () => {
-    if (progress >= 100) return 'bg-green-100'
-    if (progress >= 75) return 'bg-yellow-100'
-    if (progress >= 50) return 'bg-orange-100'
-    return 'bg-gray-100'
+    if (progress >= 100) return 'bg-accent-soft'
+    if (progress >= 75) return 'bg-accent-soft'
+    if (progress >= 50) return 'bg-accent-soft'
+    return 'bg-bg-elev-1'
   }
 
   return (
     <div className={`w-full ${className}`}>
       {/* Progress Header */}
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-lg font-semibold text-text">
           Progress: {current}/{goal} Approved
         </h3>
-        <span className="text-sm font-medium text-gray-500">
+        <span className="text-sm font-medium text-muted-text">
           {total} total posts
         </span>
       </div>
@@ -76,7 +76,7 @@ export function ProgressBar({ current, total, goal, className = '' }: ProgressBa
         
         {/* Progress Percentage */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-xs font-medium text-gray-700 bg-white px-2 py-1 rounded-full shadow-sm">
+          <span className="text-xs font-medium text-card-foreground bg-card px-2 py-1 rounded-full shadow-soft">
             {Math.round(progress)}%
           </span>
         </div>
@@ -89,16 +89,16 @@ export function ProgressBar({ current, total, goal, className = '' }: ProgressBa
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg"
+            className="mt-3 p-3 bg-accent-soft border border-accent rounded-lg"
           >
             <div className="flex items-center space-x-2">
-              <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center">
+                <svg className="w-3 h-3 text-background" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span className="text-sm font-medium text-green-800">
-                �� Goal achieved! You&apos;ve approved {current} posts!
+              <span className="text-sm font-medium text-text">
+                🎯 Goal achieved! You&apos;ve approved {current} posts!
               </span>
             </div>
           </motion.div>
@@ -124,7 +124,7 @@ export function ProgressBar({ current, total, goal, className = '' }: ProgressBa
 
 // Simple confetti component (we'll enhance this later)
 function ConfettiCelebration() {
-  const [particles, setParticles] = useState<Array<{
+    const [particles, setParticles] = useState<Array<{
     id: number
     x: number
     y: number
@@ -133,8 +133,8 @@ function ConfettiCelebration() {
     speed: number
   }>>([])
 
-  useEffect(() => {
-    const colors = ['#fbbf24', '#34d399', '#60a5fa', '#f87171', '#a78bfa', '#fb7185']
+    useEffect(() => {
+    const colors = ['var(--accent)', 'var(--accent-soft)', 'var(--accent-strong)', 'var(--destructive)']
     const newParticles = Array.from({ length: 150 }, (_, i) => ({
       id: i,
       x: Math.random() * window.innerWidth,
