@@ -74,7 +74,7 @@ export function Sidebar() {
       transition={{ duration: 0.25, ease: 'easeInOut' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="group sticky top-0 h-screen border-r border-border bg-[var(--sidebar)] z-30 flex flex-col"
+      className="group sticky top-0 h-screen border-r border-border bg-[var(--sidebar)] z-50 pointer-events-auto flex flex-col"
       aria-label="Sidebar navigation"
     >
       <div className="flex-1 py-4">
@@ -88,6 +88,7 @@ export function Sidebar() {
                 className={`w-full flex items-center gap-3 px-3 py-2 transition-colors
                   ${active ? 'text-accent' : 'text-foreground'} hover:text-accent`}
                 prefetch={false}
+                onClick={(e) => { e.preventDefault(); router.push(href) }}
               >
                 <Icon className={`shrink-0 h-6 w-6 ${active ? 'text-accent' : 'text-foreground'} group-hover:scale-105 transition-transform`} />
                 <span className={`text-sm whitespace-nowrap overflow-hidden ${isExpanded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}>{label}</span>
