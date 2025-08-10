@@ -152,11 +152,6 @@ export function PostCard({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={gymProfileImageUrl} alt="profile" className="h-full w-full object-cover" />
               </div>
-            ) : logo ? (
-              <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={logo} alt="logo" className="h-full w-full object-cover" />
-              </div>
             ) : (
               <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold" style={{ backgroundColor: gymPrimaryColor || 'var(--accent)', color: '#fff' }}>
                 {(post['Gym Name'] || gymName || 'G').charAt(0).toUpperCase()}
