@@ -478,7 +478,7 @@ export default function GymPage() {
                   isBulkMode={isBulkMode}
                   isSelected={post.id ? selectedPosts.has(post.id) : false}
                   onSelectionChange={handleSelectionChange}
-                  className={index === selectedIndex ? 'ring-2 ring-accent ring-offset-2' : ''}
+                   className={''}
                 />
               )
             })}

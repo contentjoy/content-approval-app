@@ -86,7 +86,7 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
           onClick={() => setOpen(!open)}
           className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm bg-bg-elev-1 border border-border"
         >
-          <span>Filter: {filters.find(f => f.key === activeFilter)?.label}</span>
+          <span>Posts: {filters.find(f => f.key === activeFilter)?.label}</span>
         </button>
         {open && (
           <div className="absolute z-20 mt-2 w-56 bg-bg rounded-xl border border-border shadow-medium">
