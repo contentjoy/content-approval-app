@@ -241,8 +241,8 @@ export default function GymPage() {
     if (posts.length === 1) {
       openModal('approve', posts[0])
     } else {
-      // Open approve modal on the first post to select options; rest are status-only updates
-      openModal('approve', posts[0], undefined, undefined)
+      // Open approve modal on the first post to select options; pass bulkPosts for batch update
+      openModal('approve', posts[0], [], [], posts)
     }
   }
 
@@ -250,9 +250,7 @@ export default function GymPage() {
     if (posts.length === 1) {
       openModal('disapprove', posts[0])
     } else {
-      // For bulk disapproval, we'll need a special bulk disapproval modal
-      console.log('Bulk disapproving posts:', posts.length)
-      // TODO: Implement bulk disapproval logic
+      openModal('disapprove', posts[0], [], [], posts)
     }
   }
 

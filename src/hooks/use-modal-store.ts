@@ -9,7 +9,8 @@ interface ModalState {
   post: SocialMediaPost | null
   carouselPosts: SocialMediaPost[]
   approvedPosts: SocialMediaPost[]
-  openModal: (type: ModalType, post?: SocialMediaPost | null, carouselPosts?: SocialMediaPost[], approvedPosts?: SocialMediaPost[]) => void
+  bulkPosts: SocialMediaPost[]
+  openModal: (type: ModalType, post?: SocialMediaPost | null, carouselPosts?: SocialMediaPost[], approvedPosts?: SocialMediaPost[], bulkPosts?: SocialMediaPost[]) => void
   setApprovedPosts: (posts: SocialMediaPost[]) => void
   closeModal: () => void
 }
@@ -20,13 +21,15 @@ export const useModalStore = create<ModalState>((set) => ({
   post: null,
   carouselPosts: [],
   approvedPosts: [],
-  openModal: (type, post = null, carouselPosts = [], approvedPosts = []) => {
+  bulkPosts: [],
+  openModal: (type, post = null, carouselPosts = [], approvedPosts = [], bulkPosts = []) => {
     set({
       isOpen: true,
       modalType: type,
       post,
       carouselPosts,
-      approvedPosts
+      approvedPosts,
+      bulkPosts
     })
   },
   setApprovedPosts: (posts) => {
@@ -38,8 +41,8 @@ export const useModalStore = create<ModalState>((set) => ({
       modalType: null,
       post: null,
       carouselPosts: [],
-      // Keep approvedPosts so Schedule can be reopened without resyncing
-      // approvedPosts preserved
+      approvedPosts: [],
+      bulkPosts: []
     })
   }
 }))

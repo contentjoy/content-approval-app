@@ -52,7 +52,8 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess 
     setIsLoading(true)
     
     try {
-      const contentTypeOverride = data.approvalType === 'post' ? 'Story' : undefined
+      // Only set Content Type to Story if user selected Story; otherwise leave unchanged
+      const contentTypeOverride = data.approvalType === 'story' ? 'Story' : undefined
 
       if (isCarousel && data.carouselAction === 'all') {
         // Approve all carousel posts in group, keep content type unchanged unless approving as Story
