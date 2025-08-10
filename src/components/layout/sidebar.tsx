@@ -20,7 +20,6 @@ export function Sidebar() {
   const router = useRouter()
   const params = useParams()
   const gymSlug = params.gymSlug as string
-  const pathname = usePathname()
   const { gymName, logo, primaryColor } = useBranding()
   const { user, logout } = useAuth()
 
@@ -124,7 +123,7 @@ export function Sidebar() {
 
             <div className="flex gap-2 mt-4">
               <button onClick={() => { setShowProfile(false); setShowSettings(true) }} className="flex-1 px-3 py-2 rounded-md border border-border text-text hover:bg-bg-elev-1">Settings</button>
-              <button onClick={() => { void logout(); }} className="flex-1 px-3 py-2 rounded-md bg-destructive text-background hover:opacity-90">Sign Out</button>
+              <button onClick={async () => { await logout(); router.push('/agency') }} className="flex-1 px-3 py-2 rounded-md bg-destructive text-background hover:opacity-90">Sign Out</button>
             </div>
           </div>
         )}
