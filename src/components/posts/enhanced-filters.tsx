@@ -76,7 +76,7 @@ export function EnhancedFilters({
       <div className="flex items-center space-x-3">
         {/* Search Input */}
         <div className="flex-1 relative">
-          <div className="absolute inset-y-0 left-0 w-9 flex items-center justify-center pointer-events-none">
+          <div className="absolute inset-y-0 left-0 w-12 flex items-center justify-center pointer-events-none">
             <Search className="h-4 w-4 text-muted-text" />
           </div>
           <input
@@ -84,7 +84,7 @@ export function EnhancedFilters({
             placeholder="Search captions, content, or hashtags..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="block w-full pl-10 pr-4 py-2.5 border border-border rounded-full focus:ring-2 focus:ring-accent focus:border-transparent text-sm placeholder:text-muted-text bg-bg h-11"
+            className="block w-full pl-12 pr-4 py-2.5 border border-border rounded-full focus:ring-2 focus:ring-accent focus:border-transparent text-sm placeholder:text-muted-text bg-bg h-11"
           />
           {searchQuery && (
             <button

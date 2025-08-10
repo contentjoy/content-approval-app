@@ -19,7 +19,7 @@ export function Header() {
   const { openModal, approvedPosts } = useModalStore()
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-bg/100 backdrop-blur supports-[backdrop-filter]:bg-bg/90">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-bg">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Left side: Logo + Gym Name */}
         <div className="flex items-center space-x-3">

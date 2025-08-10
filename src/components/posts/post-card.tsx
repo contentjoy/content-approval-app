@@ -119,7 +119,7 @@ export function PostCard({
           {/* Carousel Indicator - Shows on hover - Bottom Left */}
           {post['Carousel Group'] && post['Carousel Order'] && (
             <div className="absolute bottom-8 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-background/80 text-foreground backdrop-blur-sm shadow-medium">
+              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-background/95 text-foreground shadow-medium">
                 {post['Carousel Order']} of {post['Carousel Group']}
               </span>
             </div>
