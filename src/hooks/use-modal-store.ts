@@ -38,7 +38,8 @@ export const useModalStore = create<ModalState>((set) => ({
       modalType: null,
       post: null,
       carouselPosts: [],
-      approvedPosts: []
+      // Keep approvedPosts so Schedule can be reopened without resyncing
+      // approvedPosts preserved
     })
   }
 }))
