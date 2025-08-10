@@ -108,6 +108,7 @@ export function CarouselDisplay({ post, className = '', carouselPosts = [], prio
                 controls
                 playsInline
                 preload="metadata"
+                poster={(currentPost['Asset URL'] || '') + '#t=0.1'}
                 onLoadedData={handleImageLoad}
                 onError={handleVideoError}
               >

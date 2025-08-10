@@ -71,6 +71,7 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
             controls
             playsInline
             preload="metadata"
+            poster={post['Asset URL'] + '#t=0.1'}
             onLoadedData={() => setIsLoading(false)}
             onError={handleVideoError}
           >

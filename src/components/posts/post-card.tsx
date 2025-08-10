@@ -84,6 +84,7 @@ export function PostCard({
   const handleDisapprove = () => openModal('disapprove', post, carouselPosts)
   const handleComments = () => openModal('comments', post, carouselPosts)
   const handleEditCaption = () => { openModal('edit-caption', post, carouselPosts); setIsMenuOpen(false) }
+  const handleRegenerate = () => { openModal('regenerate', post, carouselPosts); setIsMenuOpen(false) }
 
   const handleShare = () => {
     if (navigator.share && post['Asset URL']) {
@@ -96,14 +97,30 @@ export function PostCard({
     setIsMenuOpen(false)
   }
 
-  const handleDownload = () => {
-    if (!post['Asset URL']) return
-    const link = document.createElement('a')
-    link.href = post['Asset URL']
-    link.download = `post-${post.id}`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  const handleDownload = async () => {
+    const assetUrl = post['Asset URL']
+    if (!assetUrl) return
+    try {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+      if (isMobile && (navigator as any).share) {
+        await (navigator as any).share({ url: assetUrl, title: post['Post Caption'] || 'Post' })
+        setIsMenuOpen(false)
+        return
+      }
+      const response = await fetch(assetUrl, { mode: 'cors' })
+      const blob = await response.blob()
+      const objectUrl = URL.createObjectURL(blob)
+      const filenameFromUrl = assetUrl.split('/').pop() || `post-${post.id}`
+      const a = document.createElement('a')
+      a.href = objectUrl
+      a.download = filenameFromUrl
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(objectUrl)
+    } catch {
+      window.open(assetUrl, '_blank', 'noopener,noreferrer')
+    }
     setIsMenuOpen(false)
   }
 
@@ -170,6 +187,10 @@ export function PostCard({
                   <button onClick={handleEditCaption} className="w-full flex items-center px-4 py-3 text-sm text-text hover:bg-bg-elev-1">
                     <svg className="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                     Edit Caption
+                  </button>
+                  <button onClick={handleRegenerate} className="w-full flex items-center px-4 py-3 text-sm text-text hover:bg-bg-elev-1">
+                    <svg className="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                    Regenerate
                   </button>
                 </motion.div>
               )}
