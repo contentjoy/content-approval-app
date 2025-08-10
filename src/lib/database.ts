@@ -360,18 +360,19 @@ export async function updateCarouselGroupApproval(
     ;(updateData as any)['Reason'] = options.feedback
   }
 
-  const { error, count } = await supabase
+  const { error, data } = await supabase
     .from('social_media_posts')
     .update(updateData)
     .eq('Carousel Group', carouselGroup)
-    .select('*', { count: 'exact' })
+    .select('*')
 
   if (error) {
     console.error('Error updating carousel group approval:', error)
     return { success: false, error: error.message, updatedCount: 0 }
   }
 
-  return { success: true, updatedCount: count || 0 }
+  const updatedCount = Array.isArray(data) ? data.length : 0
+  return { success: true, updatedCount }
 }
 
 /**
