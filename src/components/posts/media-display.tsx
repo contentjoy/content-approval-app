@@ -41,7 +41,7 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
     setHasError(true)
   }
 
-  // If it's a carousel, use the CarouselDisplay component
+  // If it's a carousel, use the CarouselDisplay component (4:5)
   if (post['Carousel Group']) {
     return <CarouselDisplay post={post} carouselPosts={carouselPosts} className={className} priority={priority} />
   }
@@ -49,7 +49,7 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
   // Handle video with 9:16 aspect ratio
   if (isVideo && post['Asset URL']) {
     return (
-      <div className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: '1/1' }}>
+      <div className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: '9/16' }}>
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
@@ -84,7 +84,7 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
   // Handle image with 4:5 aspect ratio
   if (post['Asset URL']) {
     return (
-      <div className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: '1/1' }}>
+      <div className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: '4/5' }}>
         <AnimatePresence>
           {isLoading && (
             <motion.div

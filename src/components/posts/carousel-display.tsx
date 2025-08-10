@@ -66,8 +66,9 @@ export function CarouselDisplay({ post, className = '', carouselPosts = [], prio
     setHasError(true)
   }
 
+  // Carousels use 4:5
   return (
-    <div className={`relative w-full bg-bg-elev-1 overflow-hidden ${className}`} style={{ aspectRatio: '1/1' }}>
+    <div className={`relative w-full bg-bg-elev-1 overflow-hidden ${className}`} style={{ aspectRatio: '4/5' }}>
       {/* Loading State */}
       <AnimatePresence>
         {isLoading && (

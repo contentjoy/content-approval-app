@@ -135,8 +135,8 @@ export default function GymPage() {
   // Calculate progress
   // Precomputed counts for header/metrics; kept as variables to enable future usage
   const approvedPosts = useMemo(
-    () => displayPosts.filter(post => post['Approval Status']?.toLowerCase() === 'approved'),
-    [displayPosts]
+    () => posts.filter(post => post['Approval Status']?.toLowerCase() === 'approved'),
+    [posts]
   )
   const pendingPosts = useMemo(
     () => displayPosts.filter(post => post['Approval Status']?.toLowerCase() === 'pending'),

@@ -243,9 +243,14 @@ export function PostCard({
               <MessageCircle className="w-6 h-6" />
             </button>
           </div>
-          <button onClick={handleDownload} className="text-gray-500 hover:text-accent transition-colors" aria-label="Download">
+          <a
+            href={post['Asset URL'] || '#'}
+            download
+            className="text-gray-500 hover:text-accent transition-colors"
+            aria-label="Download"
+          >
             <Download className="w-6 h-6" />
-          </button>
+          </a>
         </div>
 
         {/* Caption + Timestamp */}
