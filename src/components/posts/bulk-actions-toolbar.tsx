@@ -43,21 +43,22 @@ export function BulkActionsToolbar({
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
         className={`
-          fixed bottom-4 left-1/2 -translate-x-1/2 z-50
+          fixed left-1/2 -translate-x-1/2 z-50
           bg-bg border border-border rounded-2xl shadow-large
-          px-3 sm:px-6 py-3 sm:py-4 flex items-center space-x-3 sm:space-x-4
-          backdrop-blur-sm bg-bg/95 max-w-[95vw]
+          px-3 sm:px-6 py-3 sm:py-4 flex items-center space-x-3 sm:space-x-4 whitespace-nowrap
+          backdrop-blur-sm bg-bg/95 max-w-[95vw] overflow-hidden
           ${className}
         `}
+        style={{ bottom: 'calc(16px + env(safe-area-inset-bottom))' }}
       >
         {/* Selection Info */}
         <div className="flex items-center space-x-3">
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-text hover:text-text border border-border rounded-lg hover:border-accent transition-colors"
+              className="flex items-center space-x-2 px-3 py-2 text-xs sm:text-sm font-medium text-text hover:text-text border border-border rounded-lg hover:border-accent transition-colors whitespace-nowrap"
             >
-              <span>{selectedCount} selected</span>
+              <span>({selectedCount}) Selected</span>
               <ChevronDown className="w-4 h-4" />
             </button>
             
@@ -116,7 +117,7 @@ export function BulkActionsToolbar({
             className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-accent text-background rounded-lg hover:bg-accent/90 transition-colors font-medium text-xs sm:text-sm"
           >
             <Check className="w-4 h-4" />
-            <span>Approve ({selectedCount})</span>
+            <span>({selectedCount}) Approve</span>
           </motion.button>
 
           {/* Disapprove Button */}
