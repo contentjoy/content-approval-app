@@ -70,6 +70,24 @@ export default function GymPage() {
     loadPosts()
   }, [gymSlug])
 
+  // Listen for optimistic updates from modals and update local state without reload
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as any
+      if (!detail) return
+
+      if (detail.type === 'approved' || detail.type === 'disapproved') {
+        setPosts(prev => prev.map(p => (p.id === detail.id ? { ...p, 'Approval Status': detail.type === 'approved' ? 'Approved' : 'Disapproved', ...(detail.feedback ? { Reason: detail.feedback } : {}) } : p)))
+      }
+
+      if (detail.type === 'approved-group' || detail.type === 'disapproved-group') {
+        setPosts(prev => prev.map(p => (p['Carousel Group'] === detail.group ? { ...p, 'Approval Status': detail.type === 'approved-group' ? 'Approved' : 'Disapproved', ...(detail.feedback ? { Reason: detail.feedback } : {}) } : p)))
+      }
+    }
+    window.addEventListener('post-updated', handler as EventListener)
+    return () => window.removeEventListener('post-updated', handler as EventListener)
+  }, [])
+
   // Group posts by carousel group and create display posts
   const { carouselGroups, displayPosts } = useMemo(() => {
     const groups: Record<string, SocialMediaPost[]> = {}

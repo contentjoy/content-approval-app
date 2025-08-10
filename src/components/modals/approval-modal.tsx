@@ -64,6 +64,7 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess 
           title: 'Carousel approved',
           message: `Approved all ${carouselPosts.length} slides${contentTypeOverride ? ' as Story' : ''}`
         })
+        onSuccess?.({ type: 'approved-group', group: post['Carousel Group'] })
       } else {
         // Approve single post or current carousel slide
         await updatePostApproval(post.id as string, 'Approved', {
@@ -74,9 +75,8 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess 
           title: 'Post approved',
           message: `Approved${contentTypeOverride ? ' as Story' : ''}`
         })
+        onSuccess?.({ type: 'approved', id: post.id })
       }
-      
-      onSuccess?.()
       onClose()
     } catch (error) {
       console.error('Error approving post:', error)

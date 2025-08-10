@@ -13,9 +13,11 @@ export function ModalContainer() {
     return null
   }
 
-  const handleSuccess = () => {
-    // Refresh the page or update the posts list
-    window.location.reload()
+  const handleSuccess = (detail?: any) => {
+    // Broadcast an app-wide update so views can optimistically update
+    try {
+      window.dispatchEvent(new CustomEvent('post-updated', { detail }))
+    } catch (_) {}
   }
 
   switch (modalType) {

@@ -61,6 +61,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
           title: 'Carousel disapproved',
           message: `Disapproved all ${carouselPosts.length} slides with feedback`
         })
+        onSuccess?.({ type: 'disapproved-group', group: post['Carousel Group'], feedback: data.feedback })
       } else {
         await updatePostApproval(post.id as string, 'Disapproved', {
           feedback: data.feedback
@@ -70,9 +71,8 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
           title: 'Post disapproved',
           message: 'Post has been disapproved with feedback'
         })
+        onSuccess?.({ type: 'disapproved', id: post.id, feedback: data.feedback })
       }
-      
-      onSuccess?.()
       onClose()
     } catch (error) {
       console.error('Error disapproving post:', error)
