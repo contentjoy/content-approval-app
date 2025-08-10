@@ -12,10 +12,10 @@ interface LogoProps {
 }
 
 const sizeClasses = {
-  sm: 'h-6 w-auto',
-  md: 'h-8 w-auto',
-  lg: 'h-12 w-auto',
-  xl: 'h-16 w-auto'
+  sm: 'h-6 w-6',
+  md: 'h-8 w-8',
+  lg: 'h-10 w-10',
+  xl: 'h-12 w-12'
 }
 
 // textSizes removed as it's unused in current implementation
@@ -28,54 +28,27 @@ export function Logo({
 }: LogoProps) {
   const { logo, agencyName, gymName, isLoading } = useBranding()
 
-  // Debug logging
-  console.log('🖼️ Logo component debug:', { 
-    logo, 
-    agencyName, 
-    gymName, 
-    isLoading, 
-    showFallback, 
-    fallbackText 
-  })
-
   if (isLoading) {
-    console.log('⏳ Logo loading...')
     return (
-      <div className={`${sizeClasses[size]} ${className} animate-pulse bg-bg-elev-1 rounded`} />
+      <div className={`${sizeClasses[size]} ${className} animate-pulse bg-bg-elev-1 rounded-lg`} />
     )
   }
-
-  // Force render the logo with known URL for now while debugging branding context
-  const knownLogoUrl = 'https://pub-8ca27ad93a114ad7b4d6e6ff4549cf90.r2.dev/Gym%20Launch%20Logo%20Gold%20Black.png'
-  
-  // Always show the logo (debugging) - remove this once branding context works
-  if (!isLoading) {
-    const logoSrc = logo || knownLogoUrl
-    console.log('🖼️ Rendering logo with URL:', logoSrc)
-    console.log('🎨 Logo container classes:', `${sizeClasses[size]} ${className} relative`)
-    
-    return (
-      <div 
-        className={`${sizeClasses[size]} ${className} relative`}
-        style={{ width: '140px', height: '56px' }}
-      >
+  const logoSrc = logo || ''
+  return (
+    <div className={`${sizeClasses[size]} ${className} relative rounded-lg bg-[color:var(--bg-elev-1)] overflow-hidden`}>
+      {logoSrc ? (
         <Image
           src={logoSrc}
           alt={agencyName || gymName || 'Agency Logo'}
           fill
-          className="object-contain"
-          sizes="140px"
-          onLoad={() => console.log('✅ Logo loaded successfully:', logoSrc)}
-          onError={(e) => {
-            console.error('❌ Logo failed to load:', e)
-            console.error('❌ Failed logo URL:', logoSrc)
-          }}
+          className="object-contain p-1.5"
+          sizes="64px"
         />
-      </div>
-    )
-  }
-
-  // Loading state fallback (shouldn't reach here with current logic)
-  console.log('🚫 Logo component fallback')
-  return null
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-muted-text">
+          {agencyName?.[0] || 'A'}
+        </div>
+      )}
+    </div>
+  )
 }

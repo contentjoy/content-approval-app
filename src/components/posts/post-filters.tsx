@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useState } from 'react'
 import { FileText, Image as ImageIcon, Video, Grid3X3, CheckCircle, XCircle } from 'lucide-react'
 import type { SocialMediaPost } from '@/types'
 
@@ -14,6 +15,7 @@ interface PostFiltersProps {
 }
 
 export function PostFilters({ activeFilter, onFilterChange, posts, className = '' }: PostFiltersProps) {
+  const [open, setOpen] = useState(false)
   const getFilterCount = (filter: FilterType) => {
     switch (filter) {
       case 'photos':
@@ -53,34 +55,60 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
 
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
-      {filters.map((filter) => {
-        const count = getFilterCount(filter.key)
-        const isActive = activeFilter === filter.key
-        
-        return (
-          <motion.button
-            key={filter.key}
-            onClick={() => onFilterChange(filter.key)}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={`flex items-center space-x-2 px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 ${
-              isActive
-                ? 'bg-accent text-background shadow-medium'
-                : 'bg-bg-elev-1 text-text hover:bg-bg hover:shadow-soft border border-border'
-            }`}
-          >
-            <span>{filter.icon}</span>
-            <span>{filter.label}</span>
-            <span className={`px-2 py-0.5 rounded-full text-xs ${
-              isActive 
-                ? 'bg-background/20' 
-                : 'bg-bg-elev-1'
-            }`}>
-              {count}
-            </span>
-          </motion.button>
-        )
-      })}
+      {/* Desktop pills */}
+      <div className="hidden sm:flex flex-wrap gap-2">
+        {filters.map((filter) => {
+          const count = getFilterCount(filter.key)
+          const isActive = activeFilter === filter.key
+          return (
+            <motion.button
+              key={filter.key}
+              onClick={() => onFilterChange(filter.key)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 ${
+                isActive ? 'bg-accent text-background shadow-medium' : 'bg-bg-elev-1 text-text hover:bg-bg hover:shadow-soft border border-border'
+              }`}
+            >
+              <span>{filter.icon}</span>
+              <span>{filter.label}</span>
+              <span className={`px-2 py-0.5 rounded-full text-xs ${isActive ? 'bg-background/20' : 'bg-bg-elev-1'}`}>
+                {count}
+              </span>
+            </motion.button>
+          )
+        })}
+      </div>
+
+      {/* Mobile dropdown */}
+      <div className="sm:hidden relative">
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm bg-bg-elev-1 border border-border"
+        >
+          <span>Filter: {filters.find(f => f.key === activeFilter)?.label}</span>
+        </button>
+        {open && (
+          <div className="absolute z-20 mt-2 w-56 bg-bg rounded-xl border border-border shadow-medium">
+            {filters.map((filter) => {
+              const count = getFilterCount(filter.key)
+              return (
+                <button
+                  key={filter.key}
+                  onClick={() => { onFilterChange(filter.key); setOpen(false) }}
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm text-text hover:bg-bg-elev-1"
+                >
+                  <span className="flex items-center space-x-2">
+                    <span>{filter.icon}</span>
+                    <span>{filter.label}</span>
+                  </span>
+                  <span className="text-xs text-muted-text">{count}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
