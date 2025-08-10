@@ -43,10 +43,10 @@ export function BulkActionsToolbar({
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
         className={`
-          fixed left-1/2 -translate-x-1/2 z-50
+          fixed z-50 left-0 right-0 mx-auto w-fit
           bg-bg border border-border rounded-2xl shadow-large
           px-3 sm:px-6 py-3 sm:py-4 flex items-center space-x-3 sm:space-x-4 whitespace-nowrap
-          backdrop-blur-sm bg-bg/95 max-w-[95vw] overflow-hidden
+          backdrop-blur-sm bg-bg/95 max-w-[90vw] overflow-hidden
           ${className}
         `}
         style={{ bottom: 'calc(16px + env(safe-area-inset-bottom))' }}
