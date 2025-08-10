@@ -122,6 +122,11 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
       icon: PencilIcon,
       onClick: handleEditCaption,
     },
+    {
+      label: 'Regenerate',
+      icon: PencilIcon,
+      onClick: () => openModal('edit-caption', post, carouselPosts),
+    },
   ]
 
   return (
@@ -176,7 +181,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -10 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="absolute right-0 top-full mt-2 w-48 bg-bg rounded-xl shadow-large border border-border py-2 z-[9999] overflow-visible"
+              className="absolute right-0 top-full mt-2 w-48 bg-bg rounded-xl shadow-large border border-border py-2 z-[99999] overflow-visible"
               style={{ 
                 boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)' 
               }}

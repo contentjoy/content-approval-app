@@ -48,6 +48,8 @@ export interface SocialMediaPost {
   "Asset Type": string | null
   "Content Type": string | null
   "Gym Name": string
+  "Template ID"?: string | null
+  "Reason"?: string | null
   "Scheduled"?: string | null // scheduled_date timestamp
   created_at?: string
   updated_at?: string

@@ -457,6 +457,54 @@ export async function getAllPosts(filters?: {
   return data || []
 }
 
+// Comments table helpers (to be created in Supabase)
+export interface PostComment {
+  id: string
+  post_id: string
+  gym_id: string
+  author_first_name: string
+  author_last_name: string
+  comment: string
+  created_at?: string
+}
+
+export async function getCommentsForPost(postId: string): Promise<PostComment[]> {
+  const { data, error } = await supabase
+    .from('post_comments')
+    .select('*')
+    .eq('post_id', postId)
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching comments:', error)
+    return []
+  }
+  return data || []
+}
+
+export async function addCommentToPost(input: Omit<PostComment, 'id' | 'created_at'>): Promise<{ success: boolean; error?: string; comment?: PostComment }> {
+  const { data, error } = await supabase
+    .from('post_comments')
+    .insert(input)
+    .select('*')
+    .single()
+
+  if (error) {
+    console.error('Error adding comment:', error)
+    return { success: false, error: error.message }
+  }
+  return { success: true, comment: data as PostComment }
+}
+
+export async function sendRegenerateRequest(payload: { feedback: string; gymName: string; postId: string; templateId?: string | null }) {
+  const webhook = 'https://contentjoy.app.n8n.cloud/webhook/f75b31eb-cf28-4ab5-8994-8d6ab6de12fc'
+  await fetch(webhook, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+}
+
 /**
  * Get gym by email
  */
