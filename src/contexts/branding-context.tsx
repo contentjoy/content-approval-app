@@ -8,6 +8,8 @@ interface BrandingData {
   primaryColor: string | null
   agencyName: string | null
   gymName: string | null
+  gymProfileImageUrl: string | null
+  gymPrimaryColor: string | null
   isLoading: boolean
   error: string | null
 }
@@ -31,6 +33,8 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
     primaryColor: null,
     agencyName: null,
     gymName: null,
+    gymProfileImageUrl: null,
+    gymPrimaryColor: null,
     isLoading: false,
     error: null
   })
@@ -127,6 +131,8 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
         primaryColor: agency['Primary Color'],
         agencyName: agency['Partner name'],
         gymName: gym['Gym Name'],
+        gymProfileImageUrl: (gym as any)['Profile Image URL'] || null,
+        gymPrimaryColor: (gym as any)['Primary color'] || null,
         isLoading: false,
         error: null
       }

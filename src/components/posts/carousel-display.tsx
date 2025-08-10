@@ -55,8 +55,19 @@ export function CarouselDisplay({ post, className = '', carouselPosts = [], prio
     setHasError(true)
   }
 
+  const isVideoSlide = (p: SocialMediaPost) => {
+    const t = (p['Asset Type'] || '').toLowerCase()
+    const url = (p['Asset URL'] || '').toLowerCase()
+    return t === 'video' || /\.(mp4|mov|m4v|webm|ogg)(\?|#|$)/.test(url)
+  }
+
+  const handleVideoError = () => {
+    setIsLoading(false)
+    setHasError(true)
+  }
+
   return (
-    <div className={`relative w-full bg-bg-elev-1 overflow-hidden ${className}`} style={{ aspectRatio: '4/5' }}>
+    <div className={`relative w-full bg-bg-elev-1 overflow-hidden ${className}`} style={{ aspectRatio: '1/1' }}>
       {/* Loading State */}
       <AnimatePresence>
         {isLoading && (
@@ -90,17 +101,30 @@ export function CarouselDisplay({ post, className = '', carouselPosts = [], prio
               </div>
             </div>
           ) : currentPost['Asset URL'] ? (
-            <Image
-              src={currentPost['Asset URL']}
-              alt={currentPost['Post Caption'] || `Carousel slide ${currentSlide + 1}`}
-              fill
-              className="object-cover"
-              priority={priority}
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              quality={85}
-            />
+            isVideoSlide(currentPost) ? (
+              <video
+                className="w-full h-full object-cover"
+                controls
+                playsInline
+                preload="metadata"
+                onLoadedData={handleImageLoad}
+                onError={handleVideoError}
+              >
+                <source src={currentPost['Asset URL']!} />
+              </video>
+            ) : (
+              <Image
+                src={currentPost['Asset URL']}
+                alt={currentPost['Post Caption'] || `Carousel slide ${currentSlide + 1}`}
+                fill
+                className="object-cover"
+                priority={priority}
+                onLoad={handleImageLoad}
+                onError={handleImageError}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                quality={85}
+              />
+            )
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
               <div className="text-center">

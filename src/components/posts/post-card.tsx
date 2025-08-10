@@ -34,7 +34,7 @@ export function PostCard({
   const [isExpanded, setIsExpanded] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
-  const { logo, gymName } = useBranding()
+  const { logo, gymName, gymProfileImageUrl, gymPrimaryColor } = useBranding()
   const { openModal } = useModalStore()
   const { showToast } = useToast()
 
@@ -129,13 +129,18 @@ export function PostCard({
         {/* Top Section */}
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-2">
-            {logo ? (
+            {gymProfileImageUrl ? (
+              <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={gymProfileImageUrl} alt="profile" className="h-full w-full object-cover" />
+              </div>
+            ) : logo ? (
               <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={logo} alt="logo" className="h-full w-full object-cover" />
               </div>
             ) : (
-              <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-700">
+              <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold" style={{ backgroundColor: gymPrimaryColor || 'var(--accent)', color: '#fff' }}>
                 {(post['Gym Name'] || gymName || 'G').charAt(0).toUpperCase()}
               </div>
             )}
@@ -173,12 +178,12 @@ export function PostCard({
         </div>
 
         {/* Media Section */}
-        <div className="relative group overflow-hidden px-4">
+        <div className="relative group overflow-hidden">
           <MediaDisplay post={post} carouselPosts={carouselPosts} priority={priority} />
 
           {/* Bulk Selection Checkbox - Top Right */}
           {isBulkMode && onSelectionChange && (
-            <div className="absolute top-2 right-6 z-20">
+            <div className="absolute top-2 right-2 z-20">
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -208,7 +213,7 @@ export function PostCard({
           )}
 
           {/* Asset Type Badge - hover */}
-          <div className="absolute top-2 left-6 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-bg-elev-1 text-text border border-border`}>
               <span className="mr-1.5">{badge.icon}</span>
               {post['Carousel Group'] ? 'Carousel' : (post['Asset Type'] || 'Post')}
@@ -217,7 +222,7 @@ export function PostCard({
 
           {/* Carousel Indicator */}
           {post['Carousel Group'] && post['Carousel Order'] && (
-            <div className="absolute bottom-2 left-6 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute bottom-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-background text-foreground border border-border">
                 {post['Carousel Order']} of {post['Carousel Group']}
               </span>

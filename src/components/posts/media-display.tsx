@@ -19,13 +19,12 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
   const [isVideo, setIsVideo] = useState(false)
 
   useEffect(() => {
-    // Check if it's a video based on asset type or URL
     const assetType = post['Asset Type']?.toLowerCase()
-    const assetUrl = post['Asset URL']
-    
-    if (assetType === 'video' || assetUrl?.includes('.mp4') || assetUrl?.includes('.mov') || assetUrl?.includes('.avi')) {
-      setIsVideo(true)
-    }
+    const assetUrl = (post['Asset URL'] || '').toLowerCase().trim()
+    const looksLikeVideo = /\.(mp4|mov|m4v|webm|ogg)(\?|#|$)/.test(assetUrl)
+    setIsVideo(assetType === 'video' || looksLikeVideo)
+    setHasError(false)
+    setIsLoading(true)
   }, [post])
 
   const handleImageLoad = () => {
@@ -50,7 +49,7 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
   // Handle video with 9:16 aspect ratio
   if (isVideo && post['Asset URL']) {
     return (
-      <div className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: '9/16' }}>
+      <div className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: '1/1' }}>
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
@@ -70,14 +69,12 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
           <video
             className="w-full h-full object-cover"
             controls
-            onLoadStart={() => setIsLoading(true)}
+            playsInline
+            preload="metadata"
             onLoadedData={() => setIsLoading(false)}
             onError={handleVideoError}
-            preload="metadata"
           >
-            <source src={post['Asset URL']} type="video/mp4" />
-            <source src={post['Asset URL']} type="video/webm" />
-            Your browser does not support the video tag.
+            <source src={post['Asset URL']} />
           </video>
         )}
       </div>
@@ -87,7 +84,7 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
   // Handle image with 4:5 aspect ratio
   if (post['Asset URL']) {
     return (
-      <div className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: '4/5' }}>
+      <div className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: '1/1' }}>
         <AnimatePresence>
           {isLoading && (
             <motion.div
