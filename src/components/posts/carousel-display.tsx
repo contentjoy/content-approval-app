@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
+import { VideoPlayer } from '@/components/ui/video-player'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 import type { SocialMediaPost } from '@/types'
 
@@ -103,17 +104,13 @@ export function CarouselDisplay({ post, className = '', carouselPosts = [], prio
             </div>
           ) : currentPost['Asset URL'] ? (
             isVideoSlide(currentPost) ? (
-              <video
-                className="w-full h-full object-cover"
-                controls
-                playsInline
-                preload="metadata"
+              <VideoPlayer
+                src={currentPost['Asset URL']!}
                 poster={(currentPost['Asset URL'] || '') + '#t=0.1'}
-                onLoadedData={handleImageLoad}
+                aspect="4/5"
+                onLoaded={handleImageLoad}
                 onError={handleVideoError}
-              >
-                <source src={currentPost['Asset URL']!} />
-              </video>
+              />
             ) : (
               <Image
                 src={currentPost['Asset URL']}
