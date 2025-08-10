@@ -152,11 +152,21 @@ hr, .divider { border-color: var(--border); }
 }
 .card.elevated { box-shadow: var(--shadow-1); }
 
-.input, .search, textarea {
+.input, .search {
   height: 44px; border-radius: var(--radius-pill);
   border: 1px solid var(--border);
   background: var(--bg);
   padding: 0 var(--space-4);
+}
+
+/* Textareas: larger by default, vertical resize, comfortable radius */
+textarea {
+  min-height: 8rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  padding: var(--space-3) var(--space-4);
+  resize: vertical;
 }
 .input:focus, input:focus, textarea:focus { outline: none; box-shadow: var(--focus); }
 

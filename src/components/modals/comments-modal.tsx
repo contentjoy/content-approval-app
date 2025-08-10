@@ -60,16 +60,19 @@ export function CommentsModal({ isOpen, onClose, post, onSuccess }: CommentsModa
             ))
           )}
         </div>
-        <div className="flex items-center space-x-2">
-          <input
+        <div className="space-y-2">
+          <textarea
+            rows={4}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Add a comment..."
-            className="flex-1 h-11 rounded-full border border-border px-4 bg-bg focus:outline-none focus:ring-2 focus:ring-accent"
+            className="w-full border border-border rounded-md px-3 py-2 bg-bg focus:outline-none focus:ring-2 focus:ring-accent resize-y min-h-[8rem] max-h-[50vh]"
           />
-          <BrandedButton onClick={handleAdd} disabled={isLoading || !input.trim()}>
-            {isLoading ? 'Adding...' : 'Add'}
-          </BrandedButton>
+          <div className="flex justify-end">
+            <BrandedButton onClick={handleAdd} disabled={isLoading || !input.trim()}>
+              {isLoading ? 'Adding...' : 'Add Comment'}
+            </BrandedButton>
+          </div>
         </div>
       </div>
     </Modal>

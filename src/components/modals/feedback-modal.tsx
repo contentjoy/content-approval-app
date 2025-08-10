@@ -39,11 +39,11 @@ export function FeedbackModal({ isOpen, onClose, post, carouselPosts = [], onSuc
     <Modal isOpen={isOpen} onClose={onClose} title="Feedback" size="md">
       <div className="space-y-4">
         <textarea
-          rows={6}
+          rows={8}
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
           placeholder="Add or edit feedback (Reason) for this post or carousel group"
-          className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-bg text-text placeholder:text-muted-text"
+          className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-bg text-text placeholder:text-muted-text resize min-h-[8rem] max-h-[50vh]"
         />
         <div className="flex justify-end space-x-3">
           <BrandedButton variant="outline" onClick={onClose}>Cancel</BrandedButton>

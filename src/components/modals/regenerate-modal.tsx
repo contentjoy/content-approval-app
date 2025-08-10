@@ -40,11 +40,11 @@ export function RegenerateModal({ isOpen, onClose, post, onSuccess }: Regenerate
           Describe how you want the new version to look (text direction, vibe, layout, etc.).
         </p>
         <textarea
-          rows={6}
+          rows={8}
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
           placeholder="e.g., Use bold white headline over the first frame, add subtle drop shadow, keep text under 12 words."
-          className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-bg text-text placeholder:text-muted-text"
+          className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-bg text-text placeholder:text-muted-text resize min-h-[8rem] max-h-[50vh]"
         />
         <div className="flex justify-end space-x-3">
           <BrandedButton variant="outline" onClick={onClose}>Cancel</BrandedButton>

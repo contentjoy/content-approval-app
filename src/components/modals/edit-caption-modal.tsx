@@ -108,9 +108,9 @@ export function EditCaptionModal({ isOpen, onClose, post, onSuccess }: EditCapti
           </label>
           <textarea
             id="caption"
-            rows={Math.min(18, Math.max(10, Math.ceil((watchedCaption?.length || 0) / 100)))}
+            rows={Math.min(18, Math.max(10, Math.ceil((watchedCaption?.length || 0) / 90)))}
             {...register('caption')}
-            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize bg-bg text-text placeholder:text-muted-text max-h-[50vh]"
+            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-bg text-text placeholder:text-muted-text resize min-h-[10rem] max-h-[60vh]"
             placeholder="Write your post caption here..."
           />
           {errors.caption && (
