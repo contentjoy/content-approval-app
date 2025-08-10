@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, usePathname, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Calendar, Home, Search, ArrowRightCircle, ArrowLeftCircle, Sun, Moon } from 'lucide-react'
 import { useBranding } from '@/contexts/branding-context'
@@ -81,16 +82,16 @@ export function Sidebar() {
           {navItems.map(({ key, label, href, Icon }) => {
             const active = pathname === href
             return (
-              <button
+              <Link
                 key={key}
-                onClick={() => router.push(href)}
+                href={href}
                 className={`w-full flex items-center gap-3 px-3 py-2 transition-colors
-                  ${active ? 'text-accent' : 'text-foreground'}
-                  hover:text-accent`}
+                  ${active ? 'text-accent' : 'text-foreground'} hover:text-accent`}
+                prefetch={false}
               >
                 <Icon className={`shrink-0 h-6 w-6 ${active ? 'text-accent' : 'text-foreground'} group-hover:scale-105 transition-transform`} />
                 <span className={`text-sm whitespace-nowrap overflow-hidden ${isExpanded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}>{label}</span>
-              </button>
+              </Link>
             )
           })}
         </nav>
