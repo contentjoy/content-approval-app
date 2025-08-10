@@ -200,7 +200,7 @@ export function PostCard({
 
           {/* Bulk Selection Checkbox - Top Right */}
           {isBulkMode && onSelectionChange && (
-            <div className="absolute top-2 right-2 z-20">
+            <div className="absolute top-2 right-2 z-30">
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -216,7 +216,7 @@ export function PostCard({
                   />
                   <div className={`
                     w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200
-                    ${isSelected ? 'bg-accent border-accent' : 'bg-background/80 border-border/60 backdrop-blur-sm hover:border-accent'}
+                    ${isSelected ? 'bg-accent border-accent' : 'bg-black/40 border-white/80 text-white'}
                   `}>
                     {isSelected && (
                       <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -230,7 +230,7 @@ export function PostCard({
           )}
 
           {/* Asset Type Badge - hover */}
-          <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute top-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-bg-elev-1 text-text border border-border`}>
               <span className="mr-1.5">{badge.icon}</span>
               {post['Carousel Group'] ? 'Carousel' : (post['Asset Type'] || 'Post')}
@@ -239,7 +239,7 @@ export function PostCard({
 
           {/* Carousel Indicator */}
           {post['Carousel Group'] && post['Carousel Order'] && (
-            <div className="absolute bottom-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute bottom-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-background text-foreground border border-border">
                 {post['Carousel Order']} of {post['Carousel Group']}
               </span>

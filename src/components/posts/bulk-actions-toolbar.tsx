@@ -43,10 +43,10 @@ export function BulkActionsToolbar({
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
         className={`
-          fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50
+          fixed bottom-4 left-1/2 -translate-x-1/2 z-50
           bg-bg border border-border rounded-2xl shadow-large
-          px-6 py-4 flex items-center space-x-4
-          backdrop-blur-sm bg-bg/95
+          px-3 sm:px-6 py-3 sm:py-4 flex items-center space-x-3 sm:space-x-4
+          backdrop-blur-sm bg-bg/95 max-w-[95vw]
           ${className}
         `}
       >
@@ -113,7 +113,7 @@ export function BulkActionsToolbar({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onApprove(selectedPosts)}
-            className="flex items-center space-x-2 px-4 py-2 bg-accent text-background rounded-lg hover:bg-accent/90 transition-colors font-medium"
+            className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-accent text-background rounded-lg hover:bg-accent/90 transition-colors font-medium text-xs sm:text-sm"
           >
             <Check className="w-4 h-4" />
             <span>Approve ({selectedCount})</span>
@@ -124,7 +124,7 @@ export function BulkActionsToolbar({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => onDisapprove(selectedPosts)}
-            className="flex items-center space-x-2 px-4 py-2 bg-bg-elev-1 text-text rounded-lg hover:bg-bg transition-colors font-medium border border-border"
+            className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-bg-elev-1 text-text rounded-lg hover:bg-bg transition-colors font-medium border border-border text-xs sm:text-sm"
           >
             <X className="w-4 h-4" />
             <span>Disapprove</span>

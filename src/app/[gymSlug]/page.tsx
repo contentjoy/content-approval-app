@@ -241,10 +241,8 @@ export default function GymPage() {
     if (posts.length === 1) {
       openModal('approve', posts[0])
     } else {
-      // For bulk approval, we'll need a special bulk approval modal
-      // For now, approve them directly
-      console.log('Bulk approving posts:', posts.length)
-      // TODO: Implement bulk approval logic
+      // Open approve modal on the first post to select options; rest are status-only updates
+      openModal('approve', posts[0], undefined, undefined)
     }
   }
 
