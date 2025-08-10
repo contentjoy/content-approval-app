@@ -24,6 +24,9 @@
   --radius: 12px;
   --radius-pill: 9999px;
 
+  /* Component-specific tokens */
+  --post-card-bg: #f4f3ed;
+
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
   --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
 
@@ -110,6 +113,9 @@ html[data-theme="dark"] {
   --card-border: var(--border);
   --pill-bg: var(--bg-elev-1);
   --pill-border: var(--border);
+
+  /* Component-specific tokens */
+  --post-card-bg: #1e2120;
   
   /* Brand colors for dark mode */
   --brand-primary: var(--accent);

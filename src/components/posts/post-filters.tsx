@@ -43,12 +43,12 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
   }
 
   const filters: { key: FilterType; label: string; icon: React.ReactNode }[] = [
-    { key: 'all', label: 'All', icon: <FileText className="w-4 h-4" /> },
-    { key: 'photos', label: 'Photos', icon: <ImageIcon className="w-4 h-4" /> },
-    { key: 'videos', label: 'Videos', icon: <Video className="w-4 h-4" /> },
-    { key: 'carousels', label: 'Carousels', icon: <Grid3X3 className="w-4 h-4" /> },
-    { key: 'approved', label: 'Approved', icon: <CheckCircle className="w-4 h-4" /> },
-    { key: 'disapproved', label: 'Disapproved', icon: <XCircle className="w-4 h-4" /> },
+    { key: 'all', label: 'All', icon: <FileText className="w-3.5 h-3.5" /> },
+    { key: 'photos', label: 'Photos', icon: <ImageIcon className="w-3.5 h-3.5" /> },
+    { key: 'videos', label: 'Videos', icon: <Video className="w-3.5 h-3.5" /> },
+    { key: 'carousels', label: 'Carousels', icon: <Grid3X3 className="w-3.5 h-3.5" /> },
+    { key: 'approved', label: 'Approved', icon: <CheckCircle className="w-3.5 h-3.5" /> },
+    { key: 'disapproved', label: 'Disapproved', icon: <XCircle className="w-3.5 h-3.5" /> },
   ]
 
   return (
@@ -63,7 +63,7 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
             onClick={() => onFilterChange(filter.key)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+            className={`flex items-center space-x-2 px-3.5 py-2 rounded-full text-xs font-medium transition-all duration-200 ${
               isActive
                 ? 'bg-accent text-background shadow-medium'
                 : 'bg-bg-elev-1 text-text hover:bg-bg hover:shadow-soft border border-border'

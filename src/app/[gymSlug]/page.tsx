@@ -353,7 +353,7 @@ export default function GymPage() {
             {/* Compact Header - Just the title */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-text">
-          Content Approval Dashboard
+          Content
         </h1>
       </div>
 
@@ -383,7 +383,7 @@ export default function GymPage() {
           <div className="flex items-center space-x-3">
             {filteredPosts.length > 0 && (
               <>
-                <span className="text-sm text-muted-text">
+                <span className="text-xs text-muted-text">
                   {filteredPosts.length} posts
                 </span>
                 <motion.button
@@ -398,8 +398,8 @@ export default function GymPage() {
                     }
                   `}
                 >
-                  <CheckSquare className="w-4 h-4" />
-                  <span>{isBulkMode ? 'Exit Bulk' : 'Bulk Select'}</span>
+                  <CheckSquare className="w-3.5 h-3.5" />
+                  <span className="text-xs">{isBulkMode ? 'Exit Bulk' : 'Bulk Select'}</span>
                   {selectedPosts.size > 0 && (
                     <span className="bg-white/20 text-xs px-2 py-0.5 rounded-full">
                       {selectedPosts.size}

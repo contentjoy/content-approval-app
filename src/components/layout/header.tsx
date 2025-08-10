@@ -17,7 +17,7 @@ export function Header() {
   const { total, approved } = usePostStats(gymSlug)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-bg/95 backdrop-blur supports-[backdrop-filter]:bg-bg/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-bg/98 backdrop-blur supports-[backdrop-filter]:bg-bg/80">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         {/* Left side: Logo + Gym Name */}
         <div className="flex items-center space-x-3">

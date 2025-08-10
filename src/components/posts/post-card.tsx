@@ -67,7 +67,8 @@ export function PostCard({
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
         whileHover={{ y: -4, scale: 1.02 }}
-        className={`card card-hover group ${className}`}
+        className={`group ${className}`}
+        style={{ backgroundColor: 'var(--post-card-bg)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}
       >
         {/* Media Section with proper aspect ratios */}
         <div className="relative group overflow-hidden rounded-t-2xl">

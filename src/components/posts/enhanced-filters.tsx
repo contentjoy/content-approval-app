@@ -77,14 +77,14 @@ export function EnhancedFilters({
         {/* Search Input */}
         <div className="flex-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-muted-text" />
+            <Search className="h-4 w-4 text-muted-text" />
           </div>
           <input
             type="text"
             placeholder="Search captions, content, or hashtags..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="block w-full pl-10 pr-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-accent focus:border-transparent text-sm placeholder-muted-text bg-bg"
+            className="block w-full pl-9 pr-4 py-2.5 border border-border rounded-full focus:ring-2 focus:ring-accent focus:border-transparent text-sm placeholder:text-muted-text bg-bg h-11"
           />
           {searchQuery && (
             <button
@@ -102,7 +102,7 @@ export function EnhancedFilters({
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowAdvanced(!showAdvanced)}
           className={`
-            flex items-center space-x-2 px-4 py-3 rounded-xl border font-medium transition-all duration-200
+            flex items-center space-x-2 px-4 py-2.5 rounded-full border font-medium transition-all duration-200 h-11 text-sm
             ${showAdvanced || hasActiveFilters
               ? 'bg-accent text-white border-accent'
               : 'bg-bg text-text border-border hover:border-accent'
@@ -110,7 +110,7 @@ export function EnhancedFilters({
           `}
         >
           <SlidersHorizontal className="w-4 h-4" />
-          <span>Filters</span>
+          <span className="text-sm">Filters</span>
           {hasActiveFilters && (
             <span className="bg-white/20 text-xs px-2 py-0.5 rounded-full">
               {[searchQuery, dateRange, selectedTags.length > 0, activeFilter !== 'all'].filter(Boolean).length}
