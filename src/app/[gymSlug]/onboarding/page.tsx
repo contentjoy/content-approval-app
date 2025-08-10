@@ -174,7 +174,7 @@ export default function OnboardingPage() {
           'Clients Desired Result': formData.results,
           'Google Map URL': formData.googleMapUrl,
           'Instagram URL': formData.instagramUrl,
-          'Social Platforms': formData.socialPlatforms.join(', '),
+          'Social Platforms': formData.socialPlatforms,
           'Primary offer': formData.cta,
           'Client Info': formData.testimonial,
           'Profile Image URL': formData.profileImageUrl,
@@ -571,14 +571,16 @@ function ProfileImageUploader({ currentUrl, onUploaded }: { currentUrl: string; 
       const { error: uploadError } = await supabase.storage.from('profile-images').upload(filePath, file, {
         cacheControl: '3600',
         upsert: true,
+        contentType: file.type,
       })
       if (uploadError) throw uploadError
 
       const { data: publicUrlData } = supabase.storage.from('profile-images').getPublicUrl(filePath)
       const url = publicUrlData.publicUrl
       onUploaded(url)
-    } catch (e) {
-      alert('Failed to upload image. Please try again.')
+    } catch (e: any) {
+      console.error('Supabase upload failed:', e)
+      alert(`Failed to upload image: ${e?.message || 'Please try again.'}`)
     } finally {
       setUploading(false)
       setDragOver(false)
