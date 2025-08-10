@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, DragEvent } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
@@ -42,6 +42,9 @@ interface FormData {
   socialPlatforms: string[]
   cta: string
   testimonial: string
+  
+  // Media
+  profileImageUrl: string
 }
 
 const steps = [
@@ -96,6 +99,8 @@ export default function OnboardingPage() {
     socialPlatforms: [],
     cta: '',
     testimonial: ''
+    ,
+    profileImageUrl: ''
   })
 
   // Load existing data if available
@@ -120,7 +125,8 @@ export default function OnboardingPage() {
             lastName: gym['Last name'] || '',
             email: gym['Email'] || '',
             businessName: gym['Gym Name'] || '',
-            brandColor: gym['Primary color'] || '#000000'
+            brandColor: gym['Primary color'] || '#000000',
+            profileImageUrl: gym['Profile Image URL'] || ''
           }))
         }
       }
@@ -171,6 +177,7 @@ export default function OnboardingPage() {
           'Social Platforms': formData.socialPlatforms.join(', '),
           'Primary offer': formData.cta,
           'Client Info': formData.testimonial,
+          'Profile Image URL': formData.profileImageUrl,
           'Status': 'active'
         })
         .eq('id', gymId)
@@ -300,6 +307,15 @@ export default function OnboardingPage() {
       case 2:
         return (
           <div className="space-y-6">
+            {/* Profile Image Upload */}
+            <div>
+              <label className="block text-sm font-medium text-text mb-2">Profile Image</label>
+              <ProfileImageUploader
+                currentUrl={formData.profileImageUrl}
+                onUploaded={(url) => updateFormData('profileImageUrl', url)}
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-text mb-2">Brand Color</label>
               <div className="flex items-center space-x-4">
@@ -458,32 +474,17 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto">
-        {/* Progress Steps */}
+        {/* Progress bar (mobile-friendly) */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            {steps.map((step, index) => (
-              <div key={step.id} className="flex items-center">
-                <div className={`
-                  w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors
-                  ${currentStep >= step.id ? 'bg-primary text-white' : 'bg-card-bg text-text-secondary border border-card-border'}
-                `}>
-                  {currentStep > step.id ? <CheckCircle className="w-5 h-5" /> : step.id}
-                </div>
-                {index < steps.length - 1 && (
-                  <div className={`
-                    h-0.5 w-16 mx-2 transition-colors
-                    ${currentStep > step.id ? 'bg-primary' : 'bg-card-border'}
-                  `} />
-                )}
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-text-secondary">Step {currentStep} of {steps.length}</span>
+            <span className="text-sm text-text-secondary">{Math.round((currentStep/steps.length)*100)}%</span>
           </div>
-          <div className="flex justify-between mt-2">
-            {steps.map((step) => (
-              <div key={step.id} className="text-xs text-text-secondary text-center w-10">
-                {step.title}
-              </div>
-            ))}
+          <div className="w-full h-2 rounded-full bg-card-border overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all duration-500"
+              style={{ width: `${(currentStep/steps.length)*100}%` }}
+            />
           </div>
         </div>
 
@@ -548,6 +549,75 @@ export default function OnboardingPage() {
             </button>
           )}
         </div>
+      </div>
+    </div>
+  )
+}
+
+// Simple uploader that saves a file to Supabase Storage and returns a public URL
+function ProfileImageUploader({ currentUrl, onUploaded }: { currentUrl: string; onUploaded: (url: string) => void }) {
+  const [dragOver, setDragOver] = useState(false)
+  const [uploading, setUploading] = useState(false)
+
+  const handleFiles = async (file: File) => {
+    if (!file) return
+    setUploading(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `profile_${Date.now()}.${fileExt}`
+      const filePath = `profile-images/${fileName}`
+
+      const { error: uploadError } = await supabase.storage.from('public').upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true,
+      })
+      if (uploadError) throw uploadError
+
+      const { data: publicUrlData } = supabase.storage.from('public').getPublicUrl(filePath)
+      const url = publicUrlData.publicUrl
+      onUploaded(url)
+    } catch (e) {
+      alert('Failed to upload image. Please try again.')
+    } finally {
+      setUploading(false)
+      setDragOver(false)
+    }
+  }
+
+  const onDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    const file = e.dataTransfer.files?.[0]
+    if (file) void handleFiles(file)
+  }
+
+  return (
+    <div>
+      {currentUrl && (
+        <div className="mb-3 flex items-center space-x-3">
+          <img src={currentUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover border border-card-border" />
+          <span className="text-sm text-text-secondary">Current profile image</span>
+        </div>
+      )}
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={onDrop}
+        className={`border-2 ${dragOver ? 'border-primary' : 'border-dashed border-card-border'} rounded-lg p-4 text-center bg-card-bg`}
+      >
+        <p className="text-sm text-text mb-2">Drag and drop an image here, or</p>
+        <label className="inline-block">
+          <span className="px-3 py-2 rounded-lg bg-primary text-white cursor-pointer">Choose file</span>
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) void handleFiles(file)
+            }}
+          />
+        </label>
+        {uploading && <p className="text-xs text-text-secondary mt-2">Uploading…</p>}
       </div>
     </div>
   )
