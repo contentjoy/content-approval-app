@@ -565,15 +565,16 @@ function ProfileImageUploader({ currentUrl, onUploaded }: { currentUrl: string; 
     try {
       const fileExt = file.name.split('.').pop()
       const fileName = `profile_${Date.now()}.${fileExt}`
-      const filePath = `profile-images/${fileName}`
+      const filePath = `${fileName}`
 
-      const { error: uploadError } = await supabase.storage.from('public').upload(filePath, file, {
+      // Use a dedicated bucket named "profile-images"
+      const { error: uploadError } = await supabase.storage.from('profile-images').upload(filePath, file, {
         cacheControl: '3600',
         upsert: true,
       })
       if (uploadError) throw uploadError
 
-      const { data: publicUrlData } = supabase.storage.from('public').getPublicUrl(filePath)
+      const { data: publicUrlData } = supabase.storage.from('profile-images').getPublicUrl(filePath)
       const url = publicUrlData.publicUrl
       onUploaded(url)
     } catch (e) {
