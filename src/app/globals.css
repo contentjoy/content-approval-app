@@ -6,7 +6,8 @@
 
 :root {
   /* Primary brand color injected at runtime */
-  --primary-color: #20B8CD; /* placeholder, overridden at runtime */
+  /* Fallback brand color when no DB color provided */
+  --primary-color: #D1D5DB; /* light grey; overridden at runtime */
 
   /* Accent tokens derived from primary */
   --accent: var(--primary-color);
@@ -78,6 +79,8 @@
 
 /* Dark theme overrides (activated by data-theme="dark" on <html>) */
 html[data-theme="dark"] {
+  /* Dark theme fallback brand color */
+  --primary-color: #6B7280; /* dark grey */
   --bg: #0B1111;
   --bg-elev-1: #0F1616;
   --text: #E8F0F0;

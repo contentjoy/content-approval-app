@@ -98,11 +98,16 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
         root.style.setProperty('--accent-soft', mix(rgb, 0.4, 'white'))   // ~40% lighter
       } catch {}
     } else {
-      // Default colors if no branding
-      const defaultColor = '#20B8CD'
+      // Default colors if no branding: light/dark grey depending on theme
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+      const defaultColor = isDark ? '#6B7280' : '#D1D5DB'
+      const rgb = defaultColor.replace('#','')
+      const r = parseInt(rgb.substr(0,2),16)
+      const g = parseInt(rgb.substr(2,2),16)
+      const b = parseInt(rgb.substr(4,2),16)
       root.style.setProperty('--primary-color', defaultColor)
       root.style.setProperty('--brand-primary', defaultColor)
-      root.style.setProperty('--brand-primary-rgb', '32, 184, 205')
+      root.style.setProperty('--brand-primary-rgb', `${r}, ${g}, ${b}`)
       root.style.setProperty('--brand-primary-light', lightenColor(defaultColor, 0.1))
       root.style.setProperty('--brand-primary-dark', darkenColor(defaultColor, 0.1))
     }
