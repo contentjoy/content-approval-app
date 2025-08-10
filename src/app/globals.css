@@ -152,7 +152,7 @@ hr, .divider { border-color: var(--border); }
 }
 .card.elevated { box-shadow: var(--shadow-1); }
 
-.input, input[type="text"], textarea, .search {
+.input, .search, textarea {
   height: 44px; border-radius: var(--radius-pill);
   border: 1px solid var(--border);
   background: var(--bg);
