@@ -11,9 +11,10 @@ interface PostActionsProps {
   post: SocialMediaPost
   carouselPosts?: SocialMediaPost[]
   isLoading?: boolean
+  mode?: 'full' | 'menu-only'
 }
 
-export function PostActions({ post, carouselPosts = [], isLoading = false }: PostActionsProps) {
+export function PostActions({ post, carouselPosts = [], isLoading = false, mode = 'full' }: PostActionsProps) {
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const { showToast } = useToast()
@@ -140,7 +141,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
   return (
     <div className="flex items-center space-x-3">
       {/* Approval Actions */}
-      {status === 'pending' && (
+      {mode === 'full' && status === 'pending' && (
         <>
           <button
             onClick={handleApprove}
@@ -161,7 +162,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
       )}
 
       {/* Status-specific actions */}
-      {status === 'approved' && (
+      {mode === 'full' && status === 'approved' && (
         <div className="flex items-center space-x-2">
           <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-accent/10 text-accent">Approved</span>
           <button onClick={handleReject} className="text-accent text-sm underline">Disapprove</button>
@@ -169,7 +170,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
         </div>
       )}
 
-      {status === 'rejected' || status === 'disapproved' ? (
+      {mode === 'full' && (status === 'rejected' || status === 'disapproved') ? (
         <div className="flex items-center space-x-2">
           <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-destructive/10 text-destructive">Disapproved</span>
           <button onClick={handleApprove} className="text-accent text-sm underline">Approve</button>

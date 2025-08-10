@@ -148,11 +148,7 @@ export function PostCard({
           {/* Status and Actions */}
           <div className="flex items-center justify-between">
             <PostStatus status={post['Approval Status']} />
-            
-            <PostActions
-              post={post}
-              carouselPosts={carouselPosts}
-            />
+            <PostActions post={post} carouselPosts={carouselPosts} />
           </div>
         </div>
       </motion.div>
