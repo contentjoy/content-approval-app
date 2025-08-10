@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { VideoPlayer } from '@/components/ui/video-player'
@@ -67,9 +67,38 @@ export function CarouselDisplay({ post, className = '', carouselPosts = [], prio
     setHasError(true)
   }
 
+  // Touch swipe support
+  const touchStartX = useRef<number | null>(null)
+  const touchStartY = useRef<number | null>(null)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0]
+    touchStartX.current = t.clientX
+    touchStartY.current = t.clientY
+  }
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current == null || touchStartY.current == null) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - touchStartX.current
+    const dy = t.clientY - touchStartY.current
+    const absDx = Math.abs(dx)
+    const absDy = Math.abs(dy)
+    const threshold = 40
+    if (absDx > absDy && absDx > threshold) {
+      if (dx < 0) nextSlide()
+      else prevSlide()
+    }
+    touchStartX.current = null
+    touchStartY.current = null
+  }
+
   // Carousels use 4:5
   return (
-    <div className={`relative w-full bg-bg-elev-1 overflow-hidden ${className}`} style={{ aspectRatio: '4/5' }}>
+    <div
+      className={`relative w-full bg-bg-elev-1 overflow-hidden ${className}`}
+      style={{ aspectRatio: '4/5' }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Loading State */}
       <AnimatePresence>
         {isLoading && (
