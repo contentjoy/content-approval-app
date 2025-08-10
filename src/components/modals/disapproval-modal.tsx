@@ -124,9 +124,9 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
           </label>
           <textarea
             id="feedback"
-            rows={4}
+            rows={8}
             {...register('feedback')}
-            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none bg-bg text-text placeholder:text-muted-text"
+            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize bg-bg text-text placeholder:text-muted-text max-h-[50vh]"
             placeholder="Please provide specific feedback on why this content is being disapproved..."
           />
           {errors.feedback && (
