@@ -26,12 +26,10 @@ export function useDownload() {
       const finalName = inferFileName(url, fileName || 'media')
 
       // If Web Share API supports files (mobile), prefer that UX
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error - canShare is not in all TS lib versions
-      if (navigator.canShare && navigator.canShare({ files: [new File([blob], finalName, { type: blob.type })] })) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-expect-error
-        await navigator.share({ files: [new File([blob], finalName, { type: blob.type })], title: finalName })
+      const navAny = navigator as unknown as { canShare?: (data: any) => boolean; share?: (data: any) => Promise<void> }
+      const shareFile = new File([blob], finalName, { type: blob.type })
+      if (navAny.canShare && navAny.canShare({ files: [shareFile] }) && navAny.share) {
+        await navAny.share({ files: [shareFile], title: finalName })
         setIsDownloading(false)
         return
       }
