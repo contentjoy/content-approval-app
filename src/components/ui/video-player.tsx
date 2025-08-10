@@ -63,9 +63,8 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
       {!isPlaying && !isLoading && (
         <button
           onClick={handlePlay}
-          className="absolute inset-0 flex items-center justify-center h-12 w-12 m-auto z-10 rounded-full bg-black/50 text-white hover:bg-black/60"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-12 w-12 z-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/60"
           aria-label="Play video"
-          style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6">
             <path d="M8 5v14l11-7z" />
