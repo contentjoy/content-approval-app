@@ -33,6 +33,24 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
   useEffect(() => {
     setIsPlaying(false)
     setIsLoading(true)
+    const v = videoRef.current
+    if (!v) return
+    const onLoadedMetadata = () => {
+      // Try to seek to a small offset to force poster-like first frame
+      try {
+        v.currentTime = 0.1
+      } catch {}
+    }
+    const onSeeked = () => {
+      setIsLoading(false)
+      onLoaded?.()
+    }
+    v.addEventListener('loadedmetadata', onLoadedMetadata)
+    v.addEventListener('seeked', onSeeked)
+    return () => {
+      v.removeEventListener('loadedmetadata', onLoadedMetadata)
+      v.removeEventListener('seeked', onSeeked)
+    }
   }, [src])
 
   return (
@@ -45,7 +63,7 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
       {!isPlaying && !isLoading && (
         <button
           onClick={handlePlay}
-          className="absolute inset-0 m-auto h-12 w-12 z-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/60"
+          className="absolute inset-0 flex items-center justify-center h-12 w-12 m-auto z-10 rounded-full bg-black/50 text-white hover:bg-black/60"
           aria-label="Play video"
           style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
         >
