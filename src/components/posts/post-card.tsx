@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, X as XIcon, MessageCircle, MoreVertical, Download, Grid3X3, Image as ImageIcon, Video } from 'lucide-react'
 import { MediaDisplay } from './index'
@@ -10,6 +9,7 @@ import { useBranding } from '@/contexts/branding-context'
 import { useModalStore } from '@/hooks/use-modal-store'
 import { useToast } from '@/components/ui/toast'
 import { updatePostApproval } from '@/lib/database'
+import { useDownload } from '@/hooks/use-download'
 
 interface PostCardProps {
   post: SocialMediaPost
@@ -37,6 +37,7 @@ export function PostCard({
   const { logo, gymName, gymProfileImageUrl, gymPrimaryColor } = useBranding()
   const { openModal } = useModalStore()
   const { showToast } = useToast()
+  const { downloadMedia, isDownloading } = useDownload()
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -264,14 +265,19 @@ export function PostCard({
               <MessageCircle className="w-6 h-6" />
             </button>
           </div>
-          <a
-            href={post['Asset URL'] || '#'}
-            download
-            className="text-gray-500 hover:text-accent transition-colors"
+          <button
+            onClick={async () => {
+              const assetUrl = post['Asset URL']
+              if (!assetUrl) return
+              const fileName = `${(post['Post Caption'] || 'post').slice(0, 24).replace(/\s+/g, '-')}.${(post['Asset Type'] || '').toLowerCase() === 'video' ? 'mp4' : 'jpg'}`
+              await downloadMedia(assetUrl, fileName)
+            }}
+            className={`text-gray-500 hover:text-accent transition-colors ${isDownloading ? 'opacity-50' : ''}`}
             aria-label="Download"
+            disabled={isDownloading}
           >
             <Download className="w-6 h-6" />
-          </a>
+          </button>
         </div>
 
         {/* Caption + Timestamp */}
