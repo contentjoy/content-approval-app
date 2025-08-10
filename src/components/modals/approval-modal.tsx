@@ -23,7 +23,7 @@ interface ApprovalModalProps {
   onClose: () => void
   post: SocialMediaPost
   carouselPosts: SocialMediaPost[]
-  onSuccess?: () => void
+  onSuccess?: (detail?: any) => void
 }
 
 export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess }: ApprovalModalProps) {

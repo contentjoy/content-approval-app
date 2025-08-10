@@ -23,7 +23,7 @@ interface DisapprovalModalProps {
   onClose: () => void
   post: SocialMediaPost
   carouselPosts: SocialMediaPost[]
-  onSuccess?: () => void
+  onSuccess?: (detail?: any) => void
 }
 
 export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess }: DisapprovalModalProps) {
