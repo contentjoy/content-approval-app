@@ -548,3 +548,32 @@ export async function getGymByEmail(email: string): Promise<Gym | null> {
 
   return data
 }
+
+/**
+ * Discovery helpers
+ */
+export interface DiscoveryItem {
+  id: string
+  name: string
+  link: string
+  created_at: string
+}
+
+export async function getDiscoveryForCurrentMonth(): Promise<DiscoveryItem[]> {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), now.getMonth(), 1)
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+
+  const { data, error } = await supabase
+    .from('discovery')
+    .select('id, name, link, created_at')
+    .gte('created_at', start.toISOString())
+    .lt('created_at', end.toISOString())
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching discovery items:', error)
+    return []
+  }
+  return (data as DiscoveryItem[]) || []
+}
