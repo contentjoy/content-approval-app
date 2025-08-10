@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Calendar, Home, Search, ArrowRightCircle, ArrowLeftCircle } from 'lucide-react'
+import { Calendar, Home, Search, ArrowRightCircle, ArrowLeftCircle, Sun, Moon } from 'lucide-react'
 import { useBranding } from '@/contexts/branding-context'
 import { useAuth } from '@/contexts/auth-context'
 import SettingsModal from '@/components/modals/settings-modal'
@@ -27,6 +27,11 @@ export function Sidebar() {
   const [hovered, setHovered] = useState<boolean>(false)
   const [showProfile, setShowProfile] = useState<boolean>(false)
   const [showSettings, setShowSettings] = useState<boolean>(false)
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light'
+    const t = localStorage.getItem('theme')
+    return (t === 'dark' || t === 'light') ? t : 'light'
+  })
 
   // Restore persisted state
   useEffect(() => {
@@ -50,6 +55,15 @@ export function Sidebar() {
     const next = !lockedExpanded
     setLockedExpanded(next)
     try { localStorage.setItem('sidebar_locked_expanded', String(next)) } catch {}
+  }
+
+  const toggleTheme = () => {
+    const next = theme === 'light' ? 'dark' : 'light'
+    setTheme(next)
+    try {
+      localStorage.setItem('theme', next)
+      document.documentElement.setAttribute('data-theme', next)
+    } catch {}
   }
 
   return (
@@ -117,13 +131,19 @@ export function Sidebar() {
             </div>
 
             <div className="space-y-1 text-sm">
-              <div className="flex justify-between"><span className="text-muted-text">Email</span><span className="text-text">{user ? '—' : '—'}</span></div>
+              <div className="flex justify-between"><span className="text-muted-text">Email</span><span className="text-text">—</span></div>
               <div className="flex justify-between"><span className="text-muted-text">Primary</span><span className="inline-flex items-center gap-2 text-text"><span className="h-3 w-3 rounded-full" style={{ backgroundColor: primaryColor || 'var(--primary-color)' }} />{primaryColor || '—'}</span></div>
             </div>
 
-            <div className="flex gap-2 mt-4">
-              <button onClick={() => { setShowProfile(false); setShowSettings(true) }} className="flex-1 px-3 py-2 rounded-md border border-border text-text hover:bg-bg-elev-1">Settings</button>
-              <button onClick={async () => { await logout(); router.push('/agency') }} className="flex-1 px-3 py-2 rounded-md bg-destructive text-background hover:opacity-90">Sign Out</button>
+            <div className="flex items-center justify-between mt-4">
+              <button onClick={toggleTheme} className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-border text-text hover:bg-bg-elev-1">
+                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                <span className="text-sm">{theme === 'dark' ? 'Light' : 'Dark'} mode</span>
+              </button>
+              <div className="flex gap-2">
+                <button onClick={() => { setShowProfile(false); setShowSettings(true) }} className="px-3 py-2 rounded-md border border-border text-text hover:bg-bg-elev-1">Settings</button>
+                <button onClick={async () => { await logout(); router.push('/agency') }} className="px-3 py-2 rounded-md bg-destructive text-background hover:opacity-90">Sign Out</button>
+              </div>
             </div>
           </div>
         )}
