@@ -142,7 +142,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
             disabled={isLoading}
             className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold border-2 border-accent text-accent bg-transparent hover:bg-accent hover:text-background shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Reject
+            Disapprove
           </button>
         </>
       )}
@@ -156,7 +156,7 @@ export function PostActions({ post, carouselPosts = [], isLoading = false }: Pos
 
       {status === 'rejected' || status === 'disapproved' ? (
         <span className="inline-flex items-center px-3 py-2 rounded-full text-sm font-semibold bg-destructive/10 text-destructive">
-          Rejected
+          Disapproved
         </span>
       ) : null}
 

@@ -312,18 +312,22 @@ export async function getPostsForGym(gymId: string, status?: string): Promise<So
  * Update post approval status
  */
 export async function updatePostApproval(
-  postId: string, 
-  status: string, 
-  feedback?: string
+  postId: string,
+  status: 'Approved' | 'Disapproved' | 'Pending',
+  options?: { feedback?: string; contentType?: string }
 ): Promise<{ success: boolean; error?: string }> {
   const updateData: Partial<SocialMediaPost> = {
     'Approval Status': status
   }
 
-  // TODO: Add feedback field to database if needed
-  if (feedback) {
-    console.log('Feedback provided:', feedback)
-    // You can add feedback to a separate table or extend the social_media_posts table
+  if (options?.contentType) {
+    // Update content type when provided
+    ;(updateData as any)['Content Type'] = options.contentType
+  }
+
+  if (options?.feedback) {
+    // Persist feedback to Reason if the column exists
+    ;(updateData as any)['Reason'] = options.feedback
   }
 
   const { error } = await supabase
@@ -337,6 +341,37 @@ export async function updatePostApproval(
   }
 
   return { success: true }
+}
+
+export async function updateCarouselGroupApproval(
+  carouselGroup: string,
+  status: 'Approved' | 'Disapproved' | 'Pending',
+  options?: { feedback?: string; contentType?: string }
+): Promise<{ success: boolean; error?: string; updatedCount: number }> {
+  const updateData: Partial<SocialMediaPost> = {
+    'Approval Status': status
+  }
+
+  if (options?.contentType) {
+    ;(updateData as any)['Content Type'] = options.contentType
+  }
+
+  if (options?.feedback) {
+    ;(updateData as any)['Reason'] = options.feedback
+  }
+
+  const { error, count } = await supabase
+    .from('social_media_posts')
+    .update(updateData)
+    .eq('Carousel Group', carouselGroup)
+    .select('*', { count: 'exact' })
+
+  if (error) {
+    console.error('Error updating carousel group approval:', error)
+    return { success: false, error: error.message, updatedCount: 0 }
+  }
+
+  return { success: true, updatedCount: count || 0 }
 }
 
 /**

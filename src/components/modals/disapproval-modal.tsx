@@ -8,7 +8,7 @@ import { XCircle } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 import { BrandedButton } from '@/components/ui/branded-button'
 import { useToast } from '@/components/ui/toast'
-import { updatePostApproval } from '@/lib/database'
+import { updatePostApproval, updateCarouselGroupApproval } from '@/lib/database'
 import type { SocialMediaPost } from '@/types'
 
 const disapprovalSchema = z.object({
@@ -53,27 +53,22 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
     
     try {
       if (isCarousel && data.carouselAction === 'all') {
-        // Disapprove all carousel posts
-        const carouselGroup = post['Carousel Group']
-        const postsToDisapprove = carouselPosts.filter(p => p['Carousel Group'] === carouselGroup)
-        
-        for (const carouselPost of postsToDisapprove) {
-          await updatePostApproval(carouselPost.id, 'rejected', data.feedback)
-        }
-        
+        await updateCarouselGroupApproval(post['Carousel Group'] as string, 'Disapproved', {
+          feedback: data.feedback
+        })
         showToast({
           type: 'warning',
           title: 'Carousel disapproved',
-          message: `Disapproved all ${postsToDisapprove.length} slides with feedback`
+          message: `Disapproved all ${carouselPosts.length} slides with feedback`
         })
       } else {
-        // Disapprove single post or current carousel slide
-        await updatePostApproval(post.id, 'rejected', data.feedback)
-        
+        await updatePostApproval(post.id as string, 'Disapproved', {
+          feedback: data.feedback
+        })
         showToast({
           type: 'warning',
           title: 'Post disapproved',
-          message: 'Post has been rejected with feedback'
+          message: 'Post has been disapproved with feedback'
         })
       }
       

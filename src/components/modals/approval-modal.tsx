@@ -8,7 +8,7 @@ import { CheckCircle } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 import { BrandedButton } from '@/components/ui/branded-button'
 import { useToast } from '@/components/ui/toast'
-import { updatePostApproval } from '@/lib/database'
+import { updatePostApproval, updateCarouselGroupApproval } from '@/lib/database'
 import type { SocialMediaPost } from '@/types'
 
 const approvalSchema = z.object({
@@ -52,28 +52,27 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess 
     setIsLoading(true)
     
     try {
+      const contentTypeOverride = data.approvalType === 'post' ? 'Story' : undefined
+
       if (isCarousel && data.carouselAction === 'all') {
-        // Approve all carousel posts
-        const carouselGroup = post['Carousel Group']
-        const postsToApprove = carouselPosts.filter(p => p['Carousel Group'] === carouselGroup)
-        
-        for (const carouselPost of postsToApprove) {
-          await updatePostApproval(carouselPost.id, 'approved')
-        }
-        
+        // Approve all carousel posts in group, keep content type unchanged unless approving as Story
+        await updateCarouselGroupApproval(post['Carousel Group'] as string, 'Approved', {
+          contentType: contentTypeOverride
+        })
         showToast({
           type: 'success',
           title: 'Carousel approved',
-          message: `Approved all ${postsToApprove.length} slides as ${data.approvalType}`
+          message: `Approved all ${carouselPosts.length} slides${contentTypeOverride ? ' as Story' : ''}`
         })
       } else {
         // Approve single post or current carousel slide
-        await updatePostApproval(post.id, 'approved')
-        
+        await updatePostApproval(post.id as string, 'Approved', {
+          contentType: contentTypeOverride
+        })
         showToast({
           type: 'success',
           title: 'Post approved',
-          message: `Approved as ${data.approvalType}`
+          message: `Approved${contentTypeOverride ? ' as Story' : ''}`
         })
       }
       
