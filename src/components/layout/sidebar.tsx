@@ -4,6 +4,9 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Calendar, Home, Search, ArrowRightCircle, ArrowLeftCircle } from 'lucide-react'
+import { useBranding } from '@/contexts/branding-context'
+import { useAuth } from '@/contexts/auth-context'
+import SettingsModal from '@/components/modals/settings-modal'
 
 interface NavItem {
   key: string
@@ -17,9 +20,14 @@ export function Sidebar() {
   const router = useRouter()
   const params = useParams()
   const gymSlug = params.gymSlug as string
+  const pathname = usePathname()
+  const { gymName, logo, primaryColor } = useBranding()
+  const { user, logout } = useAuth()
 
   const [lockedExpanded, setLockedExpanded] = useState<boolean>(false)
   const [hovered, setHovered] = useState<boolean>(false)
+  const [showProfile, setShowProfile] = useState<boolean>(false)
+  const [showSettings, setShowSettings] = useState<boolean>(false)
 
   // Restore persisted state
   useEffect(() => {
@@ -75,7 +83,52 @@ export function Sidebar() {
         </nav>
       </div>
 
-      <div className="p-3 mt-auto">
+      <div className="mt-auto p-3 space-y-3 relative">
+        {/* Profile button */}
+        <button
+          onClick={() => setShowProfile((s) => !s)}
+          className="w-full flex items-center gap-3 px-3 py-2 text-foreground hover:text-accent transition-colors"
+          aria-label="Open profile"
+        >
+          {logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logo} alt="Gym logo" className="h-8 w-8 rounded-full object-cover border border-border" />
+          ) : (
+            <div className="h-8 w-8 rounded-full bg-gray-300" />
+          )}
+          <span className={`text-sm whitespace-nowrap overflow-hidden ${isExpanded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}>
+            {gymName || 'Profile'}
+          </span>
+        </button>
+
+        {/* Profile popout */}
+        {showProfile && (
+          <div className="absolute right-3 bottom-16 w-64 bg-card-bg border border-card-border rounded-lg shadow-soft p-4">
+            <div className="flex items-center gap-3 mb-3">
+              {logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logo} alt="Gym logo" className="h-10 w-10 rounded-full object-cover border border-border" />
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-gray-300" />
+              )}
+              <div>
+                <div className="text-sm font-bold text-text">{gymName || 'Gym'}</div>
+                <div className="text-xs text-muted-text">{user?.gymName || ''}</div>
+              </div>
+            </div>
+
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between"><span className="text-muted-text">Email</span><span className="text-text">{user ? '—' : '—'}</span></div>
+              <div className="flex justify-between"><span className="text-muted-text">Primary</span><span className="inline-flex items-center gap-2 text-text"><span className="h-3 w-3 rounded-full" style={{ backgroundColor: primaryColor || 'var(--primary-color)' }} />{primaryColor || '—'}</span></div>
+            </div>
+
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => { setShowProfile(false); setShowSettings(true) }} className="flex-1 px-3 py-2 rounded-md border border-border text-text hover:bg-bg-elev-1">Settings</button>
+              <button onClick={() => { void logout(); }} className="flex-1 px-3 py-2 rounded-md bg-destructive text-background hover:opacity-90">Sign Out</button>
+            </div>
+          </div>
+        )}
+
         <button
           onClick={handleToggleLock}
           className="w-full flex items-center gap-3 px-3 py-2 text-foreground hover:text-accent transition-colors"
@@ -91,6 +144,13 @@ export function Sidebar() {
           </span>
         </button>
       </div>
+
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        gymId={user?.gymId || ''}
+        initial={{ email: undefined, primaryColor: primaryColor || undefined }}
+      />
     </motion.aside>
   )
 }
