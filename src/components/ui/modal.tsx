@@ -70,7 +70,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
             aria-labelledby="modal-title"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-border">
+            <div className="flex items-center justify-between p-5 sm:p-6 border-b border-border">
               <h2 id="modal-title" className="text-lg font-semibold text-text">
                 {title}
               </h2>
@@ -84,7 +84,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
             </div>
 
             {/* Content - scrollable on mobile */}
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-4rem)]">
+            <div className="p-5 sm:p-6 overflow-y-auto max-h-[calc(90vh-4rem)]">
               {children}
             </div>
           </motion.div>

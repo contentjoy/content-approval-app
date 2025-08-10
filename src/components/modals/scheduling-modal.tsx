@@ -139,10 +139,10 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
               <CheckCircle className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <h3 className="font-medium text-accent">
+              <h3 className="font-medium text-accent text-sm">
                 {approvedPosts.length} Posts Ready to Schedule
               </h3>
-              <p className="text-sm text-accent opacity-80">
+              <p className="text-xs text-accent opacity-80">
                 All posts have been approved and are ready for scheduling
               </p>
             </div>
