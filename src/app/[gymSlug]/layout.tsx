@@ -6,6 +6,7 @@ import { BrandingProvider, useBranding } from '@/contexts/branding-context'
 // import { getGymBySlug } from '@/lib/database' // Temporarily unused
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
+import { Sidebar } from '@/components/layout/sidebar'
 
 interface GymLayoutProps {
   children: React.ReactNode
@@ -113,9 +114,12 @@ function GymLayoutContent({ children }: GymLayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1">
-        {children}
-      </main>
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1">
+          {children}
+        </main>
+      </div>
       <Footer />
     </div>
   )
