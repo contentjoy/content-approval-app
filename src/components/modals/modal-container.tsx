@@ -10,7 +10,7 @@ import { RegenerateModal } from './regenerate-modal'
 import { FeedbackModal } from './feedback-modal'
 
 export function ModalContainer() {
-  const { isOpen, modalType, post, carouselPosts, approvedPosts, closeModal } = useModalStore()
+  const { isOpen, modalType, post, carouselPosts, approvedPosts, bulkPosts, closeModal } = useModalStore() as any
 
   if (!isOpen) {
     return null
@@ -33,6 +33,7 @@ export function ModalContainer() {
           post={post}
           carouselPosts={carouselPosts}
           onSuccess={handleSuccess}
+          bulkPosts={bulkPosts}
         />
       )
     case 'disapprove':
@@ -44,6 +45,7 @@ export function ModalContainer() {
           post={post}
           carouselPosts={carouselPosts}
           onSuccess={handleSuccess}
+          bulkPosts={bulkPosts}
         />
       )
     case 'edit-caption':

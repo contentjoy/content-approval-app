@@ -24,9 +24,10 @@ interface DisapprovalModalProps {
   post: SocialMediaPost
   carouselPosts: SocialMediaPost[]
   onSuccess?: (detail?: any) => void
+  bulkPosts?: SocialMediaPost[]
 }
 
-export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess }: DisapprovalModalProps) {
+export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess, bulkPosts = [] }: DisapprovalModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { showToast } = useToast()
   
@@ -52,7 +53,17 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
     setIsLoading(true)
     
     try {
-      if (isCarousel && data.carouselAction === 'all') {
+      if (bulkPosts.length > 1) {
+        const uniqueGroups = Array.from(new Set(bulkPosts.filter(p => p['Carousel Group']).map(p => p['Carousel Group'] as string)))
+        for (const group of uniqueGroups) {
+          await updateCarouselGroupApproval(group, 'Disapproved', { feedback: data.feedback })
+        }
+        const singles = bulkPosts.filter(p => !p['Carousel Group'])
+        for (const single of singles) {
+          await updatePostApproval(single.id as string, 'Disapproved', { feedback: data.feedback })
+        }
+        onSuccess?.({ type: 'disapproved-bulk', feedback: data.feedback })
+      } else if (isCarousel && data.carouselAction === 'all') {
         await updateCarouselGroupApproval(post['Carousel Group'] as string, 'Disapproved', {
           feedback: data.feedback
         })

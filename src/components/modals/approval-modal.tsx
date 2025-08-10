@@ -24,9 +24,10 @@ interface ApprovalModalProps {
   post: SocialMediaPost
   carouselPosts: SocialMediaPost[]
   onSuccess?: (detail?: any) => void
+  bulkPosts?: SocialMediaPost[]
 }
 
-export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess }: ApprovalModalProps) {
+export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess, bulkPosts = [] }: ApprovalModalProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { showToast } = useToast()
   
@@ -55,7 +56,25 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess 
       // Only set Content Type to Story if user selected Story; otherwise leave unchanged
       const contentTypeOverride = data.approvalType === 'story' ? 'Story' : undefined
 
-      if (isCarousel && data.carouselAction === 'all') {
+      if (bulkPosts.length > 1) {
+        // Bulk approval across mixed selection (carousels + singles)
+        const allIds: string[] = []
+        for (const p of bulkPosts) {
+          if (p['Carousel Group']) {
+            // In bulk, approve entire group for any carousel item
+            // We rely on updateCarouselGroupApproval for each unique group
+          }
+        }
+        const uniqueGroups = Array.from(new Set(bulkPosts.filter(p => p['Carousel Group']).map(p => p['Carousel Group'] as string)))
+        for (const group of uniqueGroups) {
+          await updateCarouselGroupApproval(group, 'Approved', { contentType: contentTypeOverride })
+        }
+        const singles = bulkPosts.filter(p => !p['Carousel Group'])
+        for (const single of singles) {
+          await updatePostApproval(single.id as string, 'Approved', { contentType: contentTypeOverride })
+        }
+        onSuccess?.({ type: 'approved-bulk' })
+      } else if (isCarousel && data.carouselAction === 'all') {
         // Approve all carousel posts in group, keep content type unchanged unless approving as Story
         await updateCarouselGroupApproval(post['Carousel Group'] as string, 'Approved', {
           contentType: contentTypeOverride
