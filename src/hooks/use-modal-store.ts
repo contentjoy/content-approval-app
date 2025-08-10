@@ -10,6 +10,7 @@ interface ModalState {
   carouselPosts: SocialMediaPost[]
   approvedPosts: SocialMediaPost[]
   openModal: (type: ModalType, post?: SocialMediaPost | null, carouselPosts?: SocialMediaPost[], approvedPosts?: SocialMediaPost[]) => void
+  setApprovedPosts: (posts: SocialMediaPost[]) => void
   closeModal: () => void
 }
 
@@ -27,6 +28,9 @@ export const useModalStore = create<ModalState>((set) => ({
       carouselPosts,
       approvedPosts
     })
+  },
+  setApprovedPosts: (posts) => {
+    set({ approvedPosts: posts })
   },
   closeModal: () => {
     set({

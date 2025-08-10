@@ -32,7 +32,7 @@ export default function GymPage() {
   const [isBulkMode, setIsBulkMode] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
   
-  const { openModal } = useModalStore()
+  const { openModal, setApprovedPosts } = useModalStore()
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -124,6 +124,10 @@ export default function GymPage() {
     () => displayPosts.filter(post => post['Approval Status']?.toLowerCase() === 'pending'),
     [displayPosts]
   )
+  useEffect(() => {
+    // Keep modal store in sync so header Schedule button can access approved items
+    setApprovedPosts(approvedPosts)
+  }, [approvedPosts, setApprovedPosts])
   void approvedPosts.length
   void pendingPosts.length
 
