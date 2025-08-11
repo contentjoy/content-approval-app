@@ -33,28 +33,28 @@ export function PopoutMenu({ isOpen, onClose, placement = 'desktop', onAccountSe
   const content = (
     <div className="flex flex-col gap-1 text-sm text-foreground">
       <div className="text-[var(--muted-text)] mb-2">{user?.gymName || 'User'}</div>
-      <Link href="/" className="no-underline flex items-center p-2 rounded-sm hover:bg-[var(--border)]/20 transition">
+      <Link href="/" className="no-underline hover:no-underline flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition">
         <Home className="h-4 w-4 text-[var(--muted-text)] mr-2" />
         Dashboard
       </Link>
-      <button onClick={() => { onClose(); onAccountSettings?.() }} className="flex items-center p-2 rounded-sm hover:bg-[var(--border)]/20 transition">
+      <button onClick={() => { onClose(); onAccountSettings?.() }} className="flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition">
         <Settings className="h-4 w-4 text-[var(--muted-text)] mr-2" />
         Account Settings
       </button>
-      <button className="flex items-center p-2 rounded-sm hover:bg-[var(--border)]/20 transition">
+      <button className="flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition">
         <Users className="h-4 w-4 text-[var(--muted-text)] mr-2" />
         Create Team
       </button>
       <div className="border-t border-[var(--border)] my-2" />
-      <button onClick={toggleTheme} className="flex items-center p-2 rounded-sm hover:bg-[var(--border)]/20 transition">
+      <button onClick={toggleTheme} className="flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition">
         {theme === 'dark' ? <Sun className="h-4 w-4 text-[var(--muted-text)] mr-2" /> : <Moon className="h-4 w-4 text-[var(--muted-text)] mr-2" />}
         Theme
       </button>
-      <button id="schedule-content" className="flex items-center p-2 rounded-sm hover:bg-[var(--border)]/20 transition" onClick={() => { onClose(); openModal('schedule', null, [], approvedPosts || []) }}>
+      <button id="schedule-content" className="flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition" onClick={() => { onClose(); openModal('schedule', null, [], approvedPosts || []) }}>
         <CalendarIcon className="h-4 w-4 text-[var(--muted-text)] mr-2" />
         Schedule Content
       </button>
-      <button onClick={logout} className="flex items-center p-2 rounded-sm hover:bg-[var(--border)]/20 transition">
+      <button onClick={logout} className="flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition">
         <LogOut className="h-4 w-4 mr-2" />
         Log Out
       </button>

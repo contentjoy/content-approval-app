@@ -480,7 +480,7 @@ export default function OnboardingPage() {
             <span className="text-sm text-text-secondary">Step {currentStep} of {steps.length}</span>
             <span className="text-sm text-text-secondary">{Math.round((currentStep/steps.length)*100)}%</span>
           </div>
-          <div className="w-full h-2 rounded-full bg-card-border overflow-hidden">
+          <div className="w-full h-2 rounded-md bg-[var(--surface)] border border-border overflow-hidden">
             <div
               className="h-full bg-primary transition-all duration-500"
               style={{ width: `${(currentStep/steps.length)*100}%` }}
@@ -494,7 +494,7 @@ export default function OnboardingPage() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
-          className="bg-card-bg border border-card-border rounded-lg p-8 mb-8"
+          className="bg-card-bg border border-card-border rounded-md p-8 mb-8"
         >
           <div className="flex items-center mb-6">
             <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mr-4">

@@ -200,7 +200,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
               id="startDate"
               {...register('startDate')}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-3 py-2 bg-muted border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+              className="w-full px-3 py-2 bg-[var(--surface)] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
             />
             {errors.startDate && (
               <p className="mt-1 text-sm text-destructive">{errors.startDate.message}</p>
@@ -215,7 +215,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
               type="time"
               id="startTime"
               {...register('startTime')}
-              className="w-full px-3 py-2 bg-muted border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+              className="w-full px-3 py-2 bg-[var(--surface)] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
             />
             {errors.startTime && (
               <p className="mt-1 text-sm text-destructive">{errors.startTime.message}</p>
@@ -243,14 +243,14 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
 
         {/* Actions */}
         <div className="flex items-center justify-end space-x-3 pt-4 border-t">
-          <BrandedButton
+          <button
             type="button"
-            variant="outline"
             onClick={onClose}
             disabled={isLoading}
+            className="h-10 px-4 rounded-md border border-border text-foreground bg-transparent transition-colors hover:bg-foreground hover:text-background disabled:opacity-50"
           >
             Cancel
-          </BrandedButton>
+          </button>
           <BrandedButton
             type="submit"
             disabled={isLoading}
