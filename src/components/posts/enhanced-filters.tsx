@@ -84,7 +84,7 @@ export function EnhancedFilters({
             placeholder="Search captions, content, or hashtags..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="block w-full pl-16 pr-4 py-2.5 border border-border rounded-full focus:ring-2 focus:ring-accent focus:border-transparent text-sm placeholder:text-muted-text bg-bg h-11 leading-[44px]"
+            className="block w-full pl-16 pr-4 py-2.5 border border-border rounded-md focus:ring-2 focus:ring-accent focus:border-transparent text-sm placeholder:text-muted-text bg-[var(--navbar)] h-11 leading-[44px]"
           />
           {searchQuery && (
             <button
@@ -102,10 +102,10 @@ export function EnhancedFilters({
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowAdvanced(!showAdvanced)}
           className={`
-            flex items-center space-x-2 px-4 py-2.5 rounded-full border font-medium transition-all duration-200 h-11 text-sm
+            flex items-center space-x-2 px-4 py-2.5 rounded-md border font-medium transition-all duration-200 h-11 text-sm
             ${showAdvanced || hasActiveFilters
               ? 'bg-accent text-white border-accent'
-              : 'bg-bg text-text border-border hover:border-accent'
+              : 'bg-[var(--navbar)] text-text border-border hover:border-accent'
             }
           `}
         >
@@ -127,7 +127,7 @@ export function EnhancedFilters({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleReset}
-            className="flex items-center space-x-2 px-3 py-3 text-muted-text hover:text-text hover:bg-bg-elev-1 rounded-xl transition-colors"
+            className="flex items-center space-x-2 px-3 py-3 text-muted-text hover:text-text hover:bg-bg-elev-1 rounded-md transition-colors"
             title="Reset all filters"
           >
             <RotateCcw className="w-4 h-4" />
