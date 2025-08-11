@@ -554,8 +554,9 @@ export async function getGymByEmail(email: string): Promise<Gym | null> {
  */
 export interface DiscoveryItem {
   id: string
-  name: string
+  title: string
   link: string
+  platform: 'instagram' | 'tiktok'
   created_at: string
 }
 
@@ -566,7 +567,7 @@ export async function getDiscoveryForCurrentMonth(): Promise<DiscoveryItem[]> {
 
   const { data, error } = await supabase
     .from('discovery')
-    .select('id, name, link, created_at')
+    .select('id, title, link, platform, created_at')
     .gte('created_at', start.toISOString())
     .lt('created_at', end.toISOString())
     .order('created_at', { ascending: false })
@@ -575,5 +576,12 @@ export async function getDiscoveryForCurrentMonth(): Promise<DiscoveryItem[]> {
     console.error('Error fetching discovery items:', error)
     return []
   }
-  return (data as DiscoveryItem[]) || []
+  // Normalize records to typesafe shape
+  return (data || []).map((row: any) => ({
+    id: row.id,
+    title: row.title ?? row.name ?? '',
+    link: row.link,
+    platform: (row.platform === 'instagram' || row.platform === 'tiktok') ? row.platform : 'instagram',
+    created_at: row.created_at,
+  })) as DiscoveryItem[]
 }
