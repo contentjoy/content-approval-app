@@ -142,7 +142,7 @@ export function PostCard({
         transition={{ duration: 0.3, ease: 'easeOut' }}
         whileHover={{ y: -2, scale: 1.02 }}
         className={`group ${className}`}
-        style={{ backgroundColor: 'var(--card-bg)', borderRadius: 'var(--radius)', border: '1px solid var(--card-border)' }}
+        style={{ backgroundColor: 'var(--card-bg)', borderRadius: 'var(--radius)', border: '1px solid color-mix(in srgb, var(--card-border) 70%, transparent)' }}
       >
         {/* Top Section */}
         <div className="flex items-center justify-between p-4">
