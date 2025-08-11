@@ -151,6 +151,12 @@ export default function SocialConnectPage() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ gymId, platform: platformId, profileKey })
             })
+            // Then ask Ayrshare which platforms are currently linked, to fill any pre-existing ones
+            await fetch('/api/ayrshare/sync-profiles', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ gymId, profileKey })
+            })
           } catch {}
           // Then refresh UI state
           setTimeout(() => checkConnectionStatus(platformId), 800)
