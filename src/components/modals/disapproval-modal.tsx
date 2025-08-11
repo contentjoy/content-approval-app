@@ -12,7 +12,7 @@ import { updatePostApproval, updateCarouselGroupApproval } from '@/lib/database'
 import type { SocialMediaPost } from '@/types'
 
 const disapprovalSchema = z.object({
-  feedback: z.string().min(10, 'Feedback must be at least 10 characters'),
+  feedback: z.string().optional(),
   carouselAction: z.enum(['current', 'all']).optional(),
 })
 
@@ -144,7 +144,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
             <p className="mt-1 text-sm text-destructive">{errors.feedback.message}</p>
           )}
           <p className="mt-1 text-sm text-muted-foreground">
-            {watchedFeedback.length}/10 characters minimum
+            {watchedFeedback.length} characters
           </p>
         </div>
 
@@ -209,7 +209,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
           </button>
           <BrandedButton
             type="submit"
-            disabled={isLoading || watchedFeedback.length < 10}
+            disabled={isLoading}
             className="bg-destructive hover:bg-destructive/90 text-background"
           >
             {isLoading ? (
