@@ -63,7 +63,7 @@
   --ring-offset: var(--bg);
 
   /* Legacy colors for compatibility */
-  --navbar: var(--accents-1);
+  --navbar: var(--bg);
   --sidebar: var(--accents-1);
   --text-secondary: var(--muted-text);
   --card-bg: var(--accents-1);
