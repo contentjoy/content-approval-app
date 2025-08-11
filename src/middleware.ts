@@ -26,12 +26,12 @@ export async function middleware(request: NextRequest) {
     const gymSlug = pathSegments[0]
     const subPath = pathSegments[1] || ''
     
-    // Valid gym subpaths
-    const validGymPaths = ['', 'onboarding', 'settings', 'connect']
+    // Valid gym subpaths (allow main content + feature sections)
+    const validGymPaths = ['', 'onboarding', 'settings', 'connect', 'discovery', 'calendar']
     
     if (validGymPaths.includes(subPath) || subPath.startsWith('onboarding')) {
-      // Check session for main dashboard access
-      if (subPath === '' || subPath === 'settings') {
+      // Check session for protected sections
+      if (['', 'settings', 'discovery', 'calendar'].includes(subPath)) {
         const sessionToken = request.cookies.get('session_token')?.value || 
                            request.headers.get('authorization')?.replace('Bearer ', '')
 
