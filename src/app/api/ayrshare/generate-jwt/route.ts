@@ -35,10 +35,9 @@ export async function POST(request: NextRequest) {
         domain,
         privateKey,
         profileKey,
-        allowedSocial: ['instagram', 'tiktok'],
+        // omit allowedSocial to allow all networks; can be re-added once confirmed
         logout: true,
         verify: true,
-        // Per product requirement: let Ayrshare handle redirect back to app
         redirect: `/[gym-slug]`,
       }),
       cache: 'no-store',
@@ -47,7 +46,12 @@ export async function POST(request: NextRequest) {
     if (!res.ok) {
       const text = await res.text()
       console.error('Ayrshare generateJWT error:', res.status, text)
-      return NextResponse.json({ error: 'Failed to generate JWT' }, { status: 500 })
+      return NextResponse.json({
+        error: 'Failed to generate JWT',
+        upstreamStatus: res.status,
+        upstreamText: text,
+        meta: { domainPresent: !!domain, profileKeyPresent: !!profileKey }
+      }, { status: 500 })
     }
 
     const data = await res.json()
