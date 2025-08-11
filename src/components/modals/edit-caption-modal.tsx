@@ -83,7 +83,7 @@ export function EditCaptionModal({ isOpen, onClose, post, onSuccess }: EditCapti
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Post Preview */}
-        <div className="bg-muted rounded-lg p-4">
+        <div className="bg-[var(--surface)] rounded-lg p-4 border border-border">
           <div className="flex items-center space-x-3 mb-3">
             <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
               <span className="text-accent font-semibold">

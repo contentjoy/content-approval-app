@@ -22,7 +22,7 @@ const BrandedButton = React.forwardRef<HTMLButtonElement, BrandedButtonProps>(
       }
       
       if (primaryColor && variant === 'outline') {
-        return `border border-[var(--brand-primary)] bg-[var(--accents-1)] text-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-white`
+        return `border border-border text-text bg-transparent hover:bg-hover`
       }
       
       if (primaryColor && variant === 'ghost') {
@@ -36,7 +36,7 @@ const BrandedButton = React.forwardRef<HTMLButtonElement, BrandedButtonProps>(
         case 'secondary':
           return 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
         case 'outline':
-           return 'border border-border bg-[var(--accents-1)] text-foreground hover:bg-accent hover:text-accent-foreground'
+           return 'border border-border text-text bg-transparent hover:bg-hover'
         case 'ghost':
           return 'hover:bg-accent hover:text-accent-foreground'
         case 'destructive':

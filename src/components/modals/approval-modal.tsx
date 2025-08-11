@@ -119,7 +119,7 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Post Preview */}
-        <div className="bg-bg-elev-1 rounded-2xl p-4">
+        <div className="bg-[var(--surface)] rounded-2xl p-4 border border-border">
           <div className="flex items-center space-x-3 mb-3">
             <div className="w-10 h-10 bg-accent rounded-2xl flex items-center justify-center">
               <CheckCircle className="w-5 h-5 text-white" />
@@ -216,7 +216,7 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
         )}
 
         {/* Summary */}
-        <div className="bg-bg-elev-1 rounded-2xl p-4">
+        <div className="bg-[var(--surface)] rounded-2xl p-4 border border-border">
           <h4 className="font-medium text-text mb-2">Summary</h4>
           <p className="text-sm text-muted-text">
             {isCarousel && watchedCarouselAction === 'all' 

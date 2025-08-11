@@ -89,6 +89,8 @@ html[data-theme="dark"] {
   --surface: #0a0a0a;
   --text: #ffffff;
   --muted-text: #6e6e6e;
+  --accents-1: #111111;
+  --accents-2: #1a1a1a;
   --border: #2d2d2d;
   --border-strong: #2d2d2d;
   /* App-wide hover background color */
@@ -335,6 +337,11 @@ p { font-size: var(--fs-base); line-height: 1.7; }
   
   .button-base {
     @apply inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 focus-ring disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  /* Unified neutral/secondary button (Cancel across app) */
+  .btn-cancel {
+    @apply h-10 px-4 rounded-md border border-border text-text bg-transparent transition-colors hover:bg-hover disabled:opacity-50;
   }
   
   .input-base {
