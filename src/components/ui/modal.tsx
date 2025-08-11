@@ -64,7 +64,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`w-full ${sizeClasses[size]} max-h-[90vh] bg-bg border border-border rounded-3xl shadow-large overflow-hidden`}
+            className={`w-full ${sizeClasses[size]} max-h-[90vh] bg-[var(--accents-1)] border border-border rounded-md overflow-hidden`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
@@ -76,7 +76,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
               </h2>
               <button
                 onClick={onClose}
-                className="p-2 text-muted-text hover:text-text hover:bg-bg-elev-1 rounded-full transition-colors"
+                className="p-2 text-muted-text hover:text-text hover:bg-bg-elev-1 rounded-md transition-colors"
                 aria-label="Close modal"
               >
                 <XMarkIcon className="w-5 h-5" />

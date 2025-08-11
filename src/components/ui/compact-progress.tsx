@@ -27,9 +27,9 @@ export function CompactProgress({ approved, total, goal, className = '' }: Compa
     <div className={`flex items-center space-x-3 ${className}`}>
       {/* Progress Bar */}
       <div className="flex items-center space-x-2">
-        <div className="w-16 h-2 bg-bg-elev-1 rounded-full overflow-hidden">
+        <div className="w-16 h-2 bg-[var(--accents-1)] rounded-md overflow-hidden">
           <div 
-            className={`h-full ${getProgressColor()} rounded-full transition-all duration-300`}
+            className={`h-full ${getProgressColor()} rounded-md transition-all duration-300`}
             style={{
               width: `${progress}%`,
               backgroundColor: primaryColor && progress > 0 ? `var(--accent)` : undefined

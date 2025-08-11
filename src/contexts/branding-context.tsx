@@ -67,6 +67,7 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
     if (data.primaryColor) {
       // Set the primary color CSS variable
       root.style.setProperty('--primary-color', data.primaryColor)
+      root.style.setProperty('--primary', data.primaryColor)
       
       // Convert hex to RGB for CSS custom properties
       const hex = data.primaryColor.replace('#', '')
@@ -107,6 +108,7 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
       const b = parseInt(rgb.substr(4,2),16)
       root.style.setProperty('--primary-color', defaultColor)
       root.style.setProperty('--brand-primary', defaultColor)
+      root.style.setProperty('--primary', defaultColor)
       root.style.setProperty('--brand-primary-rgb', `${r}, ${g}, ${b}`)
       root.style.setProperty('--brand-primary-light', lightenColor(defaultColor, 0.1))
       root.style.setProperty('--brand-primary-dark', darkenColor(defaultColor, 0.1))

@@ -61,7 +61,7 @@ export function ProgressBar({ current, total, goal, className = '' }: ProgressBa
 
       {/* Progress Bar */}
       <div className="relative">
-        <div className={`w-full h-3 rounded-full ${getProgressBgColor()} overflow-hidden`}>
+        <div className={`w-full h-3 rounded-md ${getProgressBgColor()} overflow-hidden`}>
           <motion.div
             className={`h-full ${getProgressColor()} rounded-full transition-all duration-500 ease-out`}
             style={{

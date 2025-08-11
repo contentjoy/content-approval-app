@@ -14,15 +14,15 @@ const BrandedButton = React.forwardRef<HTMLButtonElement, BrandedButtonProps>(
   ({ className, variant = 'default', size = 'md', children, ...props }, ref) => {
     const { primaryColor, isLoading } = useBranding()
 
-    const baseStyles = 'inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 focus-ring disabled:opacity-50 disabled:pointer-events-none'
+    const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-all duration-200 focus-ring disabled:opacity-50 disabled:pointer-events-none'
     
     const getVariantStyles = () => {
       if (primaryColor && variant === 'default') {
-        return `bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-dark)] shadow-soft hover:shadow-medium focus:ring-[var(--brand-primary)]`
+        return `bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-dark)] focus:ring-[var(--brand-primary)]`
       }
       
       if (primaryColor && variant === 'outline') {
-        return `border border-[var(--brand-primary)] bg-transparent text-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-white shadow-soft hover:shadow-medium`
+        return `border border-[var(--brand-primary)] bg-[var(--accents-1)] text-[var(--brand-primary)] hover:bg-[var(--brand-primary)] hover:text-white`
       }
       
       if (primaryColor && variant === 'ghost') {
@@ -32,15 +32,15 @@ const BrandedButton = React.forwardRef<HTMLButtonElement, BrandedButtonProps>(
       // Default styles if no branding
       switch (variant) {
         case 'default':
-          return 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-soft hover:shadow-medium'
+           return 'bg-primary text-primary-foreground hover:bg-primary/90'
         case 'secondary':
           return 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
         case 'outline':
-          return 'border border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground'
+           return 'border border-border bg-[var(--accents-1)] text-foreground hover:bg-accent hover:text-accent-foreground'
         case 'ghost':
           return 'hover:bg-accent hover:text-accent-foreground'
         case 'destructive':
-          return 'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-soft hover:shadow-medium'
+           return 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
         case 'link':
           return 'text-primary underline-offset-4 hover:underline'
         default:
