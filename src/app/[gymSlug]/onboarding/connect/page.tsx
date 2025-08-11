@@ -87,14 +87,20 @@ export default function SocialConnectPage() {
     setError('')
 
     try {
+      // Load profileKey
+      const { data: gym } = await supabase
+        .from('gyms')
+        .select('profile_key')
+        .eq('id', gymId)
+        .single()
+      const profileKey = gym?.profile_key
+      if (!profileKey) throw new Error('Missing profile key. Please complete onboarding first.')
+
       // Generate JWT for Ayrshare authentication
       const response = await fetch('/api/ayrshare/generate-jwt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          platform: platformId,
-          gymId: gymId
-        })
+        body: JSON.stringify({ profileKey })
       })
 
       console.log('📡 JWT generation response status:', response.status)
@@ -108,7 +114,7 @@ export default function SocialConnectPage() {
       const responseData = await response.json()
       console.log('📋 JWT response data:', responseData)
       
-      const { authUrl, jwt, demo } = responseData
+      const { url, jwt, demo } = responseData
 
       if (demo) {
         console.log('🎭 Demo mode - showing Ayrshare connection flow')
@@ -117,11 +123,11 @@ export default function SocialConnectPage() {
       }
 
       // Store JWT for callback handling
-      localStorage.setItem(`ayrshare_jwt_${platformId}`, jwt)
+      if (jwt) localStorage.setItem(`ayrshare_jwt_${platformId}`, jwt)
       
       // Open Ayrshare auth in new window
       const authWindow = window.open(
-        authUrl,
+        url,
         'ayrshare_auth',
         'width=600,height=700,scrollbars=yes,resizable=yes'
       )

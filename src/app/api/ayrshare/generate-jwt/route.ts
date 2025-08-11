@@ -7,10 +7,7 @@ interface GenerateJwtBody {
 export async function POST(request: NextRequest) {
   try {
     const { profileKey }: GenerateJwtBody = await request.json()
-
-    if (!profileKey) {
-      return NextResponse.json({ error: 'profileKey is required' }, { status: 400 })
-    }
+    if (!profileKey) return NextResponse.json({ error: 'profileKey is required' }, { status: 400 })
 
     if (!process.env.AYRSHARE_API_KEY || !process.env.AYRSHARE_PRIVATE_KEY || !process.env.AYRSHARE_DOMAIN) {
       return NextResponse.json({ error: 'AYRSHARE credentials not configured' }, { status: 500 })
@@ -29,6 +26,7 @@ export async function POST(request: NextRequest) {
         allowedSocial: ['instagram', 'tiktok'],
         logout: true,
         verify: true,
+        // Per product requirement: let Ayrshare handle redirect back to app
         redirect: `/[gym-slug]`,
       }),
       cache: 'no-store',

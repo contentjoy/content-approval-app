@@ -583,7 +583,7 @@ export default function OnboardingPage() {
                   const r = await fetch('/api/ayrshare/generate-jwt', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ profileKey })
+                    body: JSON.stringify({ profileKey, gymId, platform: 'instagram' })
                   })
                   if (!r.ok) throw new Error(await r.text())
                   const { url } = await r.json()
