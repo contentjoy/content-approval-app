@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useParams, notFound } from 'next/navigation'
 import { BrandingProvider, useBranding } from '@/contexts/branding-context'
 // import { getGymBySlug } from '@/lib/database' // Temporarily unused
@@ -16,12 +16,14 @@ interface GymLayoutProps {
 function GymLayoutContent({ children }: GymLayoutProps) {
   const { gymSlug } = useParams()
   const { error, setGymSlug } = useBranding() // isLoading temporarily unused
+  const didSetRef = useRef(false)
   const [isValidGym, setIsValidGym] = useState<boolean | null>(true) // Temporarily start as true to skip loading
 
   // Ensure the gym slug is set in the branding context
   useEffect(() => {
-    if (typeof gymSlug === 'string') {
-      console.log('🏋️ Setting gym slug in branding context:', gymSlug)
+    if (!didSetRef.current && typeof gymSlug === 'string') {
+      didSetRef.current = true
+      console.log('🏋️ Setting gym slug in branding context (once):', gymSlug)
       setGymSlug(gymSlug)
     }
   }, [gymSlug, setGymSlug])

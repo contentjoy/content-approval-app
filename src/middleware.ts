@@ -30,8 +30,8 @@ export async function middleware(request: NextRequest) {
     const validGymPaths = ['', 'onboarding', 'settings', 'connect', 'discovery', 'calendar']
     
     if (validGymPaths.includes(subPath) || subPath.startsWith('onboarding')) {
-      // Check session for protected sections
-      if (['', 'settings', 'discovery', 'calendar'].includes(subPath)) {
+      // Check session only for protected sections (main dashboard and settings)
+      if (['', 'settings'].includes(subPath)) {
         const sessionToken = request.cookies.get('session_token')?.value || 
                            request.headers.get('authorization')?.replace('Bearer ', '')
 

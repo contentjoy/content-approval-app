@@ -22,7 +22,7 @@ export function HorizontalNav() {
   const tabRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
   const [underline, setUnderline] = useState<{ left: number; width: number }>({ left: 0, width: 0 })
 
-  useEffect(() => {
+  const recalc = () => {
     const active = tabs.find(t => pathname === t.href)
     const key = active?.href || tabs[0].href
     const el = tabRefs.current[key]
@@ -32,7 +32,14 @@ export function HorizontalNav() {
       const rect = el.getBoundingClientRect()
       setUnderline({ left: rect.left - containerRect.left, width: rect.width })
     }
-  }, [pathname, tabs])
+  }
+
+  useEffect(() => {
+    recalc()
+    window.addEventListener('resize', recalc)
+    return () => window.removeEventListener('resize', recalc)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, tabs.length])
 
   return (
     <div className="relative h-10 border-b border-[var(--accents-2)] flex items-center px-4 overflow-x-auto snap-x gap-2">
