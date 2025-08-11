@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -27,6 +27,7 @@ export function Sidebar() {
   const [lockedExpanded, setLockedExpanded] = useState<boolean>(false)
   const [hovered, setHovered] = useState<boolean>(false)
   const [showProfile, setShowProfile] = useState<boolean>(false)
+  const profileRef = useRef<HTMLDivElement | null>(null)
   const [showSettings, setShowSettings] = useState<boolean>(false)
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window === 'undefined') return 'light'
@@ -51,6 +52,19 @@ export function Sidebar() {
     window.addEventListener('sidebar-toggle', onToggle as EventListener)
     return () => window.removeEventListener('sidebar-toggle', onToggle as EventListener)
   }, [])
+
+  // Close profile on outside click; keep expanded while open
+  useEffect(() => {
+    if (!showProfile) return
+    const onDocClick = (e: MouseEvent) => {
+      if (!profileRef.current) return
+      if (!profileRef.current.contains(e.target as Node)) {
+        setShowProfile(false)
+      }
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
+  }, [showProfile])
 
   const [mobileOpen, setMobileOpen] = useState(false)
   const isExpanded = lockedExpanded || hovered
@@ -83,22 +97,22 @@ export function Sidebar() {
       animate={{ width: isExpanded ? 240 : 60 }}
       transition={{ duration: 0.25, ease: 'easeInOut' }}
       onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="group sticky top-0 h-screen border-r border-border bg-[var(--sidebar)] z-50 pointer-events-auto flex flex-col hidden md:flex"
+      onMouseLeave={() => { if (!showProfile) setHovered(false) }}
+      className="group sticky top-10 h-[calc(100vh-2.5rem)] border-r border-[var(--E0E0E0,#E0E0E0)] bg-[var(--sidebar,#FFFFFF)] z-50 pointer-events-auto flex flex-col hidden md:flex"
       aria-label="Sidebar navigation"
     >
       {/* Top: Gym logo + name */}
-      <div className="pt-4 px-3 flex items-center gap-3">
+      <div className="pt-2 px-3 flex items-center gap-3">
         {gymProfileImageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={gymProfileImageUrl} alt="Gym logo" className="h-6 w-6 rounded-full object-cover border border-border" />
+          <img src={gymProfileImageUrl} alt="Gym logo" className="h-6 w-6 rounded-full object-cover border border-[var(--E0E0E0,#E0E0E0)]" />
         ) : (
           <div className="h-6 w-6 rounded-full bg-gray-300" />
         )}
-        <span className={`text-sm font-semibold text-foreground ${isExpanded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200 whitespace-nowrap overflow-hidden`}>{gymName || 'Gym'}</span>
+        <span className={`text-sm font-semibold text-[var(--1A1A1A,#1A1A1A)] ${isExpanded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200 whitespace-nowrap overflow-hidden`}>{gymName || 'Gym'}</span>
       </div>
 
-      <div className="flex-1 py-4">
+      <div className="flex-1 py-3">
         <nav className="space-y-1">
           {navItems.map(({ key, label, href, Icon }) => {
             const active = pathname === href
@@ -106,13 +120,13 @@ export function Sidebar() {
               <Link
                 key={key}
                 href={href}
-                className={`relative w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors
-                  ${active ? 'text-accent' : 'text-foreground'} hover:text-accent`}
-                prefetch
+                className={`no-underline relative w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${active ? 'text-[var(--primary,#000)] bg-[color:var(--primary,#000)]/10' : 'text-[var(--1A1A1A,#1A1A1A)] hover:bg-[color:var(--primary,#000)]/10'}`}
+                prefetch={true}
+                onClick={() => { if (key === 'discovery') console.log('Navigating to Discovery:', href) }}
               >
                 {/* Active indicator */}
-                <span className={`${active ? 'opacity-100' : 'opacity-0'} transition-opacity absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 bg-accent rounded-r`} />
-                <Icon className={`shrink-0 h-6 w-6 ${active ? 'text-accent' : 'text-foreground'} group-hover:scale-110 transition-transform`} />
+                <span className={`${active ? 'opacity-100' : 'opacity-0'} transition-opacity absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 bg-[var(--primary,#000)] rounded-r`} />
+                <Icon className={`shrink-0 h-6 w-6 ${active ? 'text-[var(--primary,#000)]' : 'text-[var(--1A1A1A,#1A1A1A)]'} group-hover:scale-110 transition-transform`} />
                 <span className={`text-sm whitespace-nowrap overflow-hidden ${isExpanded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}>{label}</span>
               </Link>
             )
@@ -120,16 +134,16 @@ export function Sidebar() {
         </nav>
       </div>
 
-      <div className="mt-auto p-3 space-y-3 relative">
+      <div className={`mt-auto p-3 space-y-3 relative ${!isExpanded ? 'flex flex-col items-center justify-center' : ''}`}>
         {/* Profile button */}
         <button
           onClick={() => setShowProfile((s) => !s)}
-          className="w-full flex items-center gap-3 px-3 py-2 text-foreground hover:text-accent transition-colors"
+          className={`w-full flex ${!isExpanded ? 'justify-center' : 'justify-start'} items-center gap-3 px-3 py-2 text-[var(--1A1A1A,#1A1A1A)] hover:bg-[color:var(--primary,#000)]/10 rounded-lg transition-colors`}
           aria-label="Open profile"
         >
           {gymProfileImageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={gymProfileImageUrl} alt="Gym logo" className="h-8 w-8 rounded-full object-cover border border-border" />
+            <img src={gymProfileImageUrl} alt="Gym logo" className="h-8 w-8 rounded-full object-cover border border-[var(--E0E0E0,#E0E0E0)]" />
           ) : (
             <div className="h-8 w-8 rounded-full bg-gray-300" />
           )}
@@ -141,33 +155,33 @@ export function Sidebar() {
         {/* Profile popout */}
         {showProfile && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute right-3 bottom-16 md:w-64 w-[90vw] max-w-[20rem] bg-card-bg border border-card-border rounded-lg p-4 md:fixed md:right-4 md:bottom-6"
-            style={{ left: isExpanded ? undefined : 8 }}
+            ref={profileRef}
+            initial={{ x: -100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            className={`hidden md:block fixed ${lockedExpanded || hovered ? 'left-[240px]' : 'left-0'} top-1/2 -translate-y-1/2 z-[60] w-64 bg-[var(--F9F9F9,#F9F9F9)] border border-[var(--E0E0E0,#E0E0E0)] rounded-lg p-4`}
           >
             <div className="flex items-center gap-3 mb-3">
               {gymProfileImageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={gymProfileImageUrl} alt="Gym logo" className="h-10 w-10 rounded-full object-cover border border-border" />
+                <img src={gymProfileImageUrl} alt="Gym logo" className="h-10 w-10 rounded-full object-cover border border-[var(--E0E0E0,#E0E0E0)]" />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-gray-300" />
               )}
               <div>
-                <div className="text-sm font-bold text-text">{gymName || 'Gym'}</div>
-                <div className="text-xs text-muted-text">{user?.gymName || ''}</div>
+                <div className="text-sm font-bold text-[var(--1A1A1A,#1A1A1A)]">{gymName || 'Gym'}</div>
+                <div className="text-xs text-[color:var(--1A1A1A,#1A1A1A)]/60">{user?.gymName || ''}</div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <button onClick={toggleTheme} className="w-full inline-flex items-center gap-2 px-3 py-2 rounded-md border border-border text-text hover:bg-bg-elev-1">
+              <button onClick={toggleTheme} className="w-full inline-flex items-center gap-2 px-3 py-2 rounded-md border border-[var(--E0E0E0,#E0E0E0)] text-[var(--1A1A1A,#1A1A1A)] hover:bg-[color:var(--primary,#000)]/10">
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 <span className="text-sm">{theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}</span>
               </button>
-              <button onClick={() => { setShowProfile(false); setShowSettings(true) }} className="w-full inline-flex items-center justify-between px-3 py-2 rounded-md border border-border text-text hover:bg-bg-elev-1">
+              <button onClick={() => { setShowProfile(false); setShowSettings(true) }} className="w-full inline-flex items-center justify-between px-3 py-2 rounded-md border border-[var(--E0E0E0,#E0E0E0)] text-[var(--1A1A1A,#1A1A1A)] hover:bg-[color:var(--primary,#000)]/10">
                 <span className="text-sm">Settings</span>
               </button>
-              <button onClick={async () => { await logout(); router.push('/agency') }} className="w-full inline-flex items-center gap-2 px-3 py-2 rounded-md text-red-500 hover:bg-bg-elev-1">
+              <button onClick={async () => { await logout(); router.push('/agency') }} className="w-full inline-flex items-center gap-2 px-3 py-2 rounded-md text-red-500 hover:bg-[color:var(--primary,#000)]/10">
                 <LogOut className="h-4 w-4" />
                 <span className="text-sm">Sign Out</span>
               </button>
@@ -177,7 +191,7 @@ export function Sidebar() {
 
         <button
           onClick={handleToggleLock}
-          className="w-full flex items-center gap-3 px-3 py-2 text-foreground hover:text-accent transition-colors"
+          className={`w-full flex ${!isExpanded ? 'justify-center' : 'justify-start'} items-center gap-3 px-3 py-2 text-[var(--1A1A1A,#1A1A1A)] hover:bg-[color:var(--primary,#000)]/10 rounded-lg transition-colors`}
           aria-label={lockedExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
         >
           {lockedExpanded ? (
@@ -207,33 +221,106 @@ export function Sidebar() {
     >
       {/* Backdrop */}
       <motion.div
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
         animate={{ opacity: mobileOpen ? 1 : 0 }}
         transition={{ duration: 0.2 }}
         onClick={() => setMobileOpen(false)}
       />
       {/* Panel */}
       <motion.aside
-        className="absolute left-0 top-0 h-full w-full max-w-[320px] bg-[var(--background)]/95 backdrop-blur-sm border-r border-border p-3 flex flex-col"
+        className="absolute left-0 top-0 h-screen w-64 max-w-[100vw] bg-[var(--sidebar,#FFFFFF)] border-r border-[var(--E0E0E0,#E0E0E0)] p-3 flex flex-col overflow-hidden"
         initial={{ x: '-100%' }}
         animate={{ x: mobileOpen ? 0 : '-100%' }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
       >
-        <nav className="space-y-1 mt-2">
+        {/* Top: logo and gym name */}
+        <div className="pt-2 px-1 flex items-center gap-3">
+          {gymProfileImageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={gymProfileImageUrl} alt="Gym logo" className="h-6 w-6 rounded-full object-cover border border-[var(--E0E0E0,#E0E0E0)]" />
+          ) : (
+            <div className="h-6 w-6 rounded-full bg-gray-300" />
+          )}
+          <span className="text-sm font-semibold text-[var(--1A1A1A,#1A1A1A)]">{gymName || 'Gym'}</span>
+        </div>
+
+        {/* Nav */}
+        <nav className="space-y-1 mt-3">
           {navItems.map(({ key, label, href, Icon }) => (
             <Link
               key={key}
               href={href}
-              className={`w-full flex items-center gap-3 px-3 py-3 rounded-md transition-colors ${pathname === href ? 'text-accent' : 'text-foreground hover:text-accent'}`}
-              prefetch={false}
-              onClick={(e) => { e.preventDefault(); setMobileOpen(false); router.push(href) }}
+              className={`no-underline w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${pathname === href ? 'text-[var(--primary,#000)] bg-[color:var(--primary,#000)]/10' : 'text-[var(--1A1A1A,#1A1A1A)] hover:bg-[color:var(--primary,#000)]/10'}`}
+              prefetch={true}
+              onClick={() => setMobileOpen(false)}
             >
-              <Icon className="h-6 w-6 group-hover:scale-110 transition-transform" />
+              <Icon className="h-6 w-6" />
               <span className="text-sm">{label}</span>
             </Link>
           ))}
         </nav>
+
+        {/* Bottom actions */}
+        <div className="mt-auto space-y-2 pb-2">
+          <button
+            onClick={() => setShowProfile(true)}
+            className="w-full flex items-center gap-3 px-3 py-2 text-[var(--1A1A1A,#1A1A1A)] hover:bg-[color:var(--primary,#000)]/10 rounded-lg"
+          >
+            {gymProfileImageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={gymProfileImageUrl} alt="Gym logo" className="h-8 w-8 rounded-full object-cover border border-[var(--E0E0E0,#E0E0E0)]" />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-gray-300" />
+            )}
+            <span className="text-sm">{gymName || 'Profile'}</span>
+          </button>
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="w-full flex items-center gap-3 px-3 py-2 text-[var(--1A1A1A,#1A1A1A)] hover:bg-[color:var(--primary,#000)]/10 rounded-lg"
+          >
+            {lockedExpanded ? <ArrowLeftCircle className="h-6 w-6" /> : <ArrowRightCircle className="h-6 w-6" />}
+            <span className="text-sm">Close</span>
+          </button>
+        </div>
       </motion.aside>
+
+      {/* Mobile profile popout */}
+      {showProfile && (
+        <motion.div
+          initial={{ x: 20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className="md:hidden fixed left-0 right-0 bottom-0 z-[60] w-full bg-[var(--F9F9F9,#F9F9F9)] border-t border-[var(--E0E0E0,#E0E0E0)] rounded-t-lg p-4"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            {gymProfileImageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={gymProfileImageUrl} alt="Gym logo" className="h-10 w-10 rounded-full object-cover border border-[var(--E0E0E0,#E0E0E0)]" />
+            ) : (
+              <div className="h-10 w-10 rounded-full bg-gray-300" />
+            )}
+            <div>
+              <div className="text-sm font-bold text-[var(--1A1A1A,#1A1A1A)]">{gymName || 'Gym'}</div>
+              <div className="text-xs text-[color:var(--1A1A1A,#1A1A1A)]/60">{user?.gymName || ''}</div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <button onClick={toggleTheme} className="w-full inline-flex items-center gap-2 px-3 py-2 rounded-md border border-[var(--E0E0E0,#E0E0E0)] text-[var(--1A1A1A,#1A1A1A)] hover:bg-[color:var(--primary,#000)]/10">
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              <span className="text-sm">{theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}</span>
+            </button>
+            <button onClick={() => { setShowProfile(false); setShowSettings(true) }} className="w-full inline-flex items-center justify-between px-3 py-2 rounded-md border border-[var(--E0E0E0,#E0E0E0)] text-[var(--1A1A1A,#1A1A1A)] hover:bg-[color:var(--primary,#000)]/10">
+              <span className="text-sm">Settings</span>
+            </button>
+            <button onClick={async () => { await logout(); router.push('/agency') }} className="w-full inline-flex items-center gap-2 px-3 py-2 rounded-md text-red-500 hover:bg-[color:var(--primary,#000)]/10">
+              <LogOut className="h-4 w-4" />
+              <span className="text-sm">Sign Out</span>
+            </button>
+            <button onClick={() => setShowProfile(false)} className="w-full inline-flex items-center justify-center px-3 py-2 rounded-md border border-[var(--E0E0E0,#E0E0E0)] text-[var(--1A1A1A,#1A1A1A)]">
+              Close
+            </button>
+          </div>
+        </motion.div>
+      )}
     </motion.div>
     </>
   )

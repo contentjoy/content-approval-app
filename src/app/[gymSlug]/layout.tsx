@@ -112,9 +112,9 @@ function GymLayoutContent({ children }: GymLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#FFFFFF]">
       <Header />
-      <div className="flex">
+      <div className="flex pt-10">
         <Sidebar />
         <main className="flex-1">
           {children}

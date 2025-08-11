@@ -19,12 +19,12 @@ export function Header() {
   const { openModal, approvedPosts } = useModalStore()
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-bg">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+    <header className="fixed top-0 z-[60] w-full h-10 border-b border-border bg-[var(--navbar,#F5F5F5)] opacity-100">
+      <div className="container mx-auto h-full px-4 flex items-center justify-between">
         {/* Left side: Mobile hamburger + Logo + Gym Name */}
         <div className="flex items-center space-x-3">
           <button
-            className="md:hidden p-2 rounded-md border border-border text-text hover:bg-bg-elev-1"
+            className="md:hidden p-2 rounded-md border border-border text-text hover:bg-[var(--primary,#000)]/10"
             aria-label="Open navigation"
             onClick={() => {
               const event = new CustomEvent('sidebar-toggle', { detail: { open: true } })
