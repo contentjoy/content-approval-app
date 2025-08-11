@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     // Get current gym data
     const { data: gym, error: gymError } = await supabase
       .from('gyms')
-      .select('social_accounts, ayrshare_profiles')
+      .select('social_accounts, ayrshare_profiles, profile_key')
       .eq('id', gymId)
       .single()
 
@@ -66,7 +66,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Prefer the profileKey from our DB or token response if provided by Ayrshare
-    const profileKey = tokenData?.profileKey || (gym?.ayrshare_profiles?.[platform]?.profile_key) || (gym?.profile_key)
+    const gymProfiles: any = (gym as any)?.ayrshare_profiles || {}
+    const pkFromGym: string | undefined = (gym as any)?.profile_key
+    const profileKey = tokenData?.profileKey || gymProfiles?.[platform]?.profile_key || pkFromGym
 
     // Update social accounts and ayrshare profiles in database
     const socialAccounts = gym?.social_accounts || {}
