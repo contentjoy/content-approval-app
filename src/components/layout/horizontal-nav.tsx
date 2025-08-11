@@ -42,7 +42,7 @@ export function HorizontalNav() {
   }, [pathname, tabs.length])
 
   return (
-    <div className="relative h-10 border-b border-[var(--accents-2)] bg-[var(--navbar)] flex items-center px-4 overflow-x-auto snap-x gap-2">
+    <div className="relative h-10 border-b border-[var(--border)] bg-[var(--navbar)] flex items-center px-4 overflow-x-auto snap-x gap-2">
       <div ref={containerRef} className="relative flex items-center gap-2">
         <LayoutGroup id="horizontal-tabs">
           {tabs.map((t) => {

@@ -57,26 +57,22 @@ export function Header() {
             className="hidden md:flex"
           />
           
-          {/* Upload Content Button */}
-          <BrandedButton 
-            variant="outline" 
-            size="sm"
-            className="flex items-center space-x-2"
+          {/* Upload Content Button - ghost with stroke */}
+          <button
+            className="flex items-center space-x-2 h-8 px-3 rounded-md border border-foreground text-foreground bg-transparent transition-colors hover:bg-foreground hover:text-background"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Upload</span>
-          </BrandedButton>
+          </button>
           
           {/* Schedule Posts Button */}
-          <BrandedButton 
-            variant="outline" 
-            size="sm"
-            className="flex items-center space-x-2"
+          <button
+            className="flex items-center space-x-2 h-8 px-3 rounded-md border border-foreground text-foreground bg-transparent transition-colors hover:bg-foreground hover:text-background"
             onClick={() => openModal('schedule', null, [], approvedPosts || [])}
           >
             <Calendar className="w-4 h-4" />
             <span className="hidden sm:inline">Schedule ({approved})</span>
-          </BrandedButton>
+          </button>
 
           {/* Mobile hamburger (far right) */}
           <button
