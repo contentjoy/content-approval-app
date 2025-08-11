@@ -34,14 +34,14 @@ export function Header() {
   }), [])
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-bg">
-      <div className="mx-auto w-full px-3 sm:px-4 md:px-5 lg:px-6 2xl:px-8 py-3 flex items-center justify-between">
+    <header className="sticky top-0 z-50 w-full bg-foreground">
+      <div className="mx-auto w-full px-3 sm:px-4 md:px-5 lg:px-6 2xl:px-8 py-3 flex items-center justify-between text-background">
         {/* Left: Logo + Gym Name */}
         <div className="flex items-center space-x-3">
           <Logo size="md" fallbackText="" showFallback={false} />
           <div className="flex items-center space-x-2">
             <div className="w-px h-4 bg-border"></div>
-            <span className="text-sm font-medium text-muted-text">
+            <span className="text-sm font-medium text-background/80">
               {isLoading ? 'Loading...' : gymName || 'Gym Name'}
             </span>
           </div>

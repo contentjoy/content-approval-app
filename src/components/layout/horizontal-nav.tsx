@@ -42,7 +42,7 @@ export function HorizontalNav() {
   }, [pathname, tabs.length])
 
   return (
-    <div className="relative h-10 border-b border-[var(--accents-2)] flex items-center px-4 overflow-x-auto snap-x gap-2">
+    <div className="relative h-10 border-b border-[var(--accents-2)] bg-foreground flex items-center px-4 overflow-x-auto snap-x gap-2">
       <div ref={containerRef} className="relative flex items-center gap-2">
         <LayoutGroup id="horizontal-tabs">
           {tabs.map((t) => {
@@ -53,7 +53,7 @@ export function HorizontalNav() {
                 href={t.href}
                 prefetch={true}
                 ref={(el) => { tabRefs.current[t.href] = el }}
-                className={`no-underline snap-start px-3 py-1.5 rounded-md text-sm font-medium transition-colors cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 ${isActive ? 'text-foreground bg-black/5 dark:bg-white/5' : 'text-[var(--geist-secondary)] hover:text-[var(--primary)]'}`}
+                className={`no-underline snap-start px-3 py-1.5 rounded-md text-sm font-medium transition-colors cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 ${isActive ? 'text-background' : 'text-background/70 hover:text-background'}`}
               >
                 {t.label}
               </Link>
@@ -61,7 +61,7 @@ export function HorizontalNav() {
           })}
           <motion.div
             layout
-            className="absolute bottom-0 h-0.5 bg-[var(--primary)] rounded-full"
+            className="absolute bottom-[-1px] h-[2px] bg-[var(--primary)] rounded-full"
             animate={{ left: underline.left, width: underline.width }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
           />
