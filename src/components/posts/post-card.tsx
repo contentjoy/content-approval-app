@@ -279,9 +279,14 @@ export function PostCard({
         <div className="px-4 py-4">
           {post['Post Caption'] && (
             <div className="mb-2">
-              <p className={`text-text text-sm leading-relaxed ${isExpanded ? '' : 'line-clamp-3'}`}>
-                {post['Post Caption']}
-              </p>
+              <p
+                className={`text-text text-sm leading-relaxed ${isExpanded ? '' : 'line-clamp-3'}`}
+                dangerouslySetInnerHTML={{
+                  __html: (post['Post Caption'] || '')
+                    .replace(/(#[\w\p{L}\p{Mn}\p{Pd}\d_]+)/gu, '<span class="text-muted-text">$1</span>')
+                    .replace(/\n/g, '<br/>')
+                }}
+              />
               {post['Post Caption'].length > 150 && (
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}

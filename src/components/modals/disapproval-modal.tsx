@@ -46,7 +46,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
     },
   })
 
-  const watchedFeedback = watch('feedback')
+  const watchedFeedback = watch('feedback') || ''
   const watchedCarouselAction = watch('carouselAction')
 
   const onSubmit = async (data: DisapprovalFormData) => {

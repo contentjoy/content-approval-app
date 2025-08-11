@@ -69,7 +69,7 @@ export function Header() {
             onClick={() => openModal('schedule', null, [], approvedPosts || [])}
           >
             <Calendar className="w-4 h-4" />
-            <span className="hidden sm:inline content">Schedule ({approved})</span>
+            <span className="hidden sm:inline content">Schedule <span className="text-muted-text">({approved})</span></span>
           </button>
 
           {/* Mobile hamburger (far right) */}
