@@ -562,8 +562,9 @@ export interface DiscoveryItem {
 
 export async function getDiscoveryForCurrentMonth(): Promise<DiscoveryItem[]> {
   const now = new Date()
-  const start = new Date(now.getFullYear(), now.getMonth(), 1)
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+  // Compute month window in UTC to avoid timezone edge cases
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0))
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0))
 
   const { data, error } = await supabase
     .from('discovery')
