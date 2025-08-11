@@ -1,11 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
-  darkMode: ['class', '[data-theme="dark"]'], // allow both class or attribute
+  darkMode: ['class', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
-        // New Perplexity-style design system colors
+        // Geist-style design system colors
         bg: 'var(--bg)',
         'bg-elev-1': 'var(--bg-elev-1)',
         text: 'var(--text)',
@@ -67,11 +67,11 @@ module.exports = {
         '128': '32rem',
       },
       borderRadius: {
-        'lg': 'var(--radius)',
-        'full': 'var(--radius-pill)',
-        'xl': '0.75rem',
+        md: 'var(--radius)',
+        lg: 'calc(var(--radius) + 2px)',
+        xl: '0.75rem',
         '2xl': '1rem',
-        '3xl': '1.5rem',
+        full: 'var(--radius-pill)'
       },
       boxShadow: {
         'md': 'var(--shadow-1)',

@@ -67,7 +67,7 @@ export function Header() {
             variant="outline" 
             size="sm"
             className="flex items-center space-x-2"
-            onClick={() => approvedPosts.length > 0 && openModal('schedule', null, [], approvedPosts)}
+            onClick={() => openModal('schedule', null, [], approvedPosts || [])}
           >
             <Calendar className="w-4 h-4" />
             <span className="hidden sm:inline">Schedule ({approved})</span>
