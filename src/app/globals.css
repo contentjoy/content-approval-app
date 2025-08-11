@@ -21,13 +21,13 @@
   --accent-strong: color-mix(in srgb, var(--accent) 80%, black);
   --accent-soft: color-mix(in srgb, var(--accent) 60%, white);
 
-  /* Light theme mapping */
-  --bg: var(--geist-background);
-  --bg-elev-1: var(--accents-1);
-  --text: var(--geist-foreground);
-  --muted-text: var(--geist-secondary);
-  --border: var(--accents-2);
-  --border-strong: var(--accents-2);
+  /* Light theme (updated per spec) */
+  --bg: #fafafa;
+  --bg-elev-1: #ffffff;
+  --text: #171717;
+  --muted-text: #898989;
+  --border: #ebebeb;
+  --border-strong: #ebebeb;
 
   /* Geometry + radii */
   --radius: 6px; /* rounded-md */
@@ -63,7 +63,7 @@
   --ring-offset: var(--bg);
 
   /* Legacy colors for compatibility */
-  --navbar: var(--bg);
+  --navbar: #ffffff;
   --sidebar: var(--accents-1);
   --text-secondary: var(--muted-text);
   --card-bg: var(--accents-1);
@@ -80,24 +80,13 @@
 
 /* Dark theme overrides (activated by data-theme="dark" on <html>) */
 html[data-theme="dark"] {
-  /* Geist dark tokens */
-  --geist-background: #000;
-  --geist-foreground: #fff;
-  --geist-secondary: #aaa;
-  --accents-1: #111;
-  --accents-2: #333;
-
-  /* Brand primary fallback remains accent */
-  --primary-color: #ffffff;
-  --primary: var(--primary-color);
-
-  /* Dark mapping */
-  --bg: var(--geist-background);
-  --bg-elev-1: var(--accents-1);
-  --text: var(--geist-foreground);
-  --muted-text: var(--geist-secondary);
-  --border: var(--accents-2);
-  --border-strong: var(--accents-2);
+  /* Dark theme (updated per spec) */
+  --bg: #000000;
+  --bg-elev-1: #0a0a0a;
+  --text: #ffffff;
+  --muted-text: #6e6e6e;
+  --border: #2d2d2d;
+  --border-strong: #2d2d2d;
 
   --background: var(--bg);
   --foreground: var(--text);
@@ -117,8 +106,8 @@ html[data-theme="dark"] {
   --ring: var(--accent);
   --ring-offset: var(--bg);
 
-  --navbar: var(--accents-1);
-  --sidebar: var(--accents-1);
+  --navbar: #0a0a0a;
+  --sidebar: #0a0a0a;
   --text-secondary: var(--muted-text);
   --card-bg: var(--accents-1);
   --card-border: var(--accents-2);
