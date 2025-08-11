@@ -5,22 +5,26 @@ import { Plus, Calendar, Menu, X } from 'lucide-react'
 import { BrandedButton } from '@/components/ui/branded-button'
 import { Logo } from '@/components/ui/logo'
 import { CompactProgress } from '@/components/ui/compact-progress'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
+// ThemeToggle removed; theme switch is in popout menu
 import { useBranding } from '@/contexts/branding-context'
 import { usePostStats } from '@/hooks/use-post-stats'
 import { useParams, usePathname } from 'next/navigation'
 import { useModalStore } from '@/hooks/use-modal-store'
 import { motion } from 'framer-motion'
 import { HorizontalNav } from './horizontal-nav'
+import { PopoutMenu } from './popout-menu'
+import { useAuth } from '@/contexts/auth-context'
 
 export function Header() {
-  const { gymName, isLoading } = useBranding()
+  const { gymName, isLoading, gymProfileImageUrl } = useBranding()
+  const { user } = useAuth()
   const params = useParams()
   const pathname = usePathname()
   const gymSlug = typeof params.gymSlug === 'string' ? params.gymSlug : null
   const { total, approved } = usePostStats(gymSlug)
   const { openModal, approvedPosts } = useModalStore()
   const [menuOpen, setMenuOpen] = React.useState(false)
+  const [profileOpen, setProfileOpen] = React.useState(false)
 
   const menuVariants = useMemo(() => ({
     open: { rotate: 180, transition: { duration: 0.3 } },
@@ -50,7 +54,7 @@ export function Header() {
           </div>
         </div>
         
-        {/* Right side: Progress + Actions + Theme Toggle */}
+        {/* Right side: Progress + Actions + Profile */}
         <div className="flex items-center space-x-4">
           {/* Compact Progress Meter */}
           <CompactProgress 
@@ -81,14 +85,29 @@ export function Header() {
             <span className="hidden sm:inline">Schedule ({approved})</span>
           </BrandedButton>
 
-          {/* Theme Toggle hidden on mobile (moved into profile popout) */}
-          <div className="hidden md:block">
-            <ThemeToggle variant="icon" size="sm" />
+          {/* Profile avatar (desktop) */}
+          <div className="hidden md:block relative">
+            <button
+              onClick={() => setProfileOpen(v => !v)}
+              aria-label="Open account menu"
+              className="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center bg-[color:var(--primary)]/20"
+            >
+              {gymProfileImageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={gymProfileImageUrl} alt="profile" className="h-full w-full object-cover" />
+              ) : (
+                <span className="text-lg font-bold text-[var(--primary)] leading-none">
+                  {(user?.gymName || gymName || 'G').charAt(0).toUpperCase()}
+                </span>
+              )}
+            </button>
+            <div className="absolute right-0">
+              <PopoutMenu isOpen={profileOpen} onClose={() => setProfileOpen(false)} placement="desktop" />
+            </div>
           </div>
         </div>
       </div>
       {/* Horizontal tabs below header (kept here for global placement) */}
-      {/* On pages using [gymSlug]/layout, it will render once due to structure */}
       
     </header>
   )
