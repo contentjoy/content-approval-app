@@ -505,6 +505,19 @@ export async function sendRegenerateRequest(payload: { feedback: string; gymName
   })
 }
 
+export async function updateGymProfileKey(gymId: string, profileKey: string): Promise<{ success: boolean; error?: string }>{
+  const { error } = await supabase
+    .from('gyms')
+    .update({ profile_key: profileKey } as any)
+    .eq('id', gymId)
+
+  if (error) {
+    console.error('Error saving profile_key:', error)
+    return { success: false, error: error.message }
+  }
+  return { success: true }
+}
+
 export async function updatePostReason(postId: string, reason: string): Promise<{ success: boolean; error?: string }> {
   const { error } = await supabase
     .from('social_media_posts')

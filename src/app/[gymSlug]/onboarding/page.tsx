@@ -15,6 +15,8 @@ import {
   Loader
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { updateGymProfileKey } from '@/lib/database'
+import toast from 'react-hot-toast'
 
 interface FormData {
   // Business Details
@@ -77,6 +79,8 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [gymId, setGymId] = useState<string | null>(null)
+  const [profileKey, setProfileKey] = useState<string | null>(null)
+  const [creatingProfile, setCreatingProfile] = useState(false)
   
   const router = useRouter()
   const params = useParams()
@@ -182,9 +186,7 @@ export default function OnboardingPage() {
         })
         .eq('id', gymId)
 
-      if (updateError) {
-        throw updateError
-      }
+      if (updateError) throw updateError
 
       // Send data to onboarding webhook
       const webhookData = {
@@ -201,12 +203,33 @@ export default function OnboardingPage() {
         })
       }
 
-      // Redirect to social connection
+      // Create Ayrshare profile for this gym
+      try {
+        setCreatingProfile(true)
+        const r = await fetch('/api/ayrshare/create-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ gymName: formData.instagramUrl ? new URL(formData.instagramUrl).pathname.replace(/\//g, '') || gymSlug : gymSlug })
+        })
+        if (!r.ok) throw new Error(await r.text())
+        const { profileKey } = await r.json()
+        setProfileKey(profileKey)
+        const save = await updateGymProfileKey(gymId, profileKey)
+        if (!save.success) throw new Error(save.error || 'Failed to save profileKey')
+        toast.success('Profile created. You can now connect social accounts.')
+      } catch (err: any) {
+        console.error('Ayrshare profile create failed:', err)
+        toast.error('Failed to create social profile')
+      } finally {
+        setCreatingProfile(false)
+      }
+      
+      // Show connect step
       router.push(`/${gymSlug}/onboarding/connect`)
       
     } catch (error) {
       console.error('Onboarding submission failed:', error)
-      alert('Failed to save onboarding data. Please try again.')
+      toast.error('Failed to save onboarding data. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -549,6 +572,35 @@ export default function OnboardingPage() {
             </button>
           )}
         </div>
+
+        {/* Connect Social Account CTA (after submit or if profile exists) */}
+        {(profileKey || creatingProfile) && (
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={async () => {
+                try {
+                  if (!profileKey) return
+                  const r = await fetch('/api/ayrshare/generate-jwt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profileKey })
+                  })
+                  if (!r.ok) throw new Error(await r.text())
+                  const { url } = await r.json()
+                  if (!url) throw new Error('No URL returned')
+                  window.open(url, '_blank')
+                } catch (err: any) {
+                  console.error('Generate JWT failed:', err)
+                  toast.error('Failed to start social connection')
+                }
+              }}
+              className="px-6 py-3 rounded-lg bg-[var(--brand-primary)] text-white hover:opacity-90 disabled:opacity-50"
+              disabled={creatingProfile}
+            >
+              {creatingProfile ? 'Preparing…' : 'Connect Social Account'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
