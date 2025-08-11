@@ -12,7 +12,14 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.AYRSHARE_API_KEY
     const domain = process.env.AYRSHARE_DOMAIN
     const privateKeyRaw = process.env.AYRSHARE_PRIVATE_KEY
-    const privateKey = (privateKeyRaw || '').replace(/\\n/g, '\n')
+    let privateKey = (privateKeyRaw || '').replace(/\\n/g, '\n')
+
+    // If user pasted base64 content only (no PEM headers), wrap it
+    if (privateKey && !/BEGIN (RSA )?PRIVATE KEY/.test(privateKey)) {
+      const body = privateKey.replace(/\s+/g, '')
+      const chunked = body.match(/.{1,64}/g)?.join('\n') || body
+      privateKey = `-----BEGIN RSA PRIVATE KEY-----\n${chunked}\n-----END RSA PRIVATE KEY-----`
+    }
 
     if (!apiKey || !domain || !privateKeyRaw) {
       return NextResponse.json({
