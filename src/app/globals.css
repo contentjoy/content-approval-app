@@ -24,6 +24,7 @@
   /* Light theme (updated per spec) */
   --bg: #fafafa;
   --bg-elev-1: #ffffff;
+  --surface: #ffffff;
   --text: #171717;
   --muted-text: #898989;
   --border: #ebebeb;
@@ -46,19 +47,19 @@
   /* Legacy compatibility - map to new system */
   --background: var(--bg);
   --foreground: var(--text);
-  --card: var(--accents-1);
+  --card: var(--surface);
   --card-foreground: var(--text);
-  --popover: var(--bg);
+  --popover: var(--surface);
   --popover-foreground: var(--text);
   --primary-foreground: var(--bg);
-  --secondary: var(--accents-1);
+  --secondary: var(--surface);
   --secondary-foreground: var(--text);
   --muted: var(--accents-1);
   --muted-foreground: var(--muted-text);
   --accent-foreground: var(--bg);
   --destructive: #ef4444;
   --destructive-foreground: var(--bg);
-  --input: var(--accents-1);
+  --input: var(--surface);
   --ring: var(--accent);
   --ring-offset: var(--bg);
 
@@ -66,7 +67,7 @@
   --navbar: #ffffff;
   --sidebar: var(--accents-1);
   --text-secondary: var(--muted-text);
-  --card-bg: var(--accents-1);
+  --card-bg: var(--surface);
   --card-border: var(--accents-2);
   --pill-bg: var(--accents-1);
   --pill-border: var(--accents-2);
@@ -83,6 +84,7 @@ html[data-theme="dark"] {
   /* Dark theme (updated per spec) */
   --bg: #000000;
   --bg-elev-1: #0a0a0a;
+  --surface: #0a0a0a;
   --text: #ffffff;
   --muted-text: #6e6e6e;
   --border: #2d2d2d;
@@ -90,26 +92,26 @@ html[data-theme="dark"] {
 
   --background: var(--bg);
   --foreground: var(--text);
-  --card: var(--accents-1);
+  --card: var(--surface);
   --card-foreground: var(--text);
-  --popover: var(--bg);
+  --popover: var(--surface);
   --popover-foreground: var(--text);
   --primary-foreground: var(--bg);
-  --secondary: var(--accents-1);
+  --secondary: var(--surface);
   --secondary-foreground: var(--text);
   --muted: var(--accents-1);
   --muted-foreground: var(--muted-text);
   --accent-foreground: var(--bg);
   --destructive: #dc2626;
   --destructive-foreground: var(--bg);
-  --input: var(--accents-1);
+  --input: var(--surface);
   --ring: var(--accent);
   --ring-offset: var(--bg);
 
   --navbar: #0a0a0a;
   --sidebar: #0a0a0a;
   --text-secondary: var(--muted-text);
-  --card-bg: var(--accents-1);
+  --card-bg: var(--surface);
   --card-border: var(--accents-2);
   --pill-bg: var(--accents-1);
   --pill-border: var(--accents-2);
