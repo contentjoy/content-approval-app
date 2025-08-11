@@ -3,6 +3,10 @@ module.exports = {
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   darkMode: ['class', '[data-theme="dark"]'],
   theme: {
+    borderColor: ({ theme }) => ({
+      DEFAULT: 'var(--border)',
+      ...theme('colors'),
+    }),
     extend: {
       colors: {
         // Geist-style design system colors

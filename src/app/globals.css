@@ -68,7 +68,7 @@
   --sidebar: var(--accents-1);
   --text-secondary: var(--muted-text);
   --card-bg: var(--surface);
-  --card-border: var(--accents-2);
+  --card-border: var(--border);
   --pill-bg: var(--accents-1);
   --pill-border: var(--accents-2);
 
@@ -112,7 +112,7 @@ html[data-theme="dark"] {
   --sidebar: #0a0a0a;
   --text-secondary: var(--muted-text);
   --card-bg: var(--surface);
-  --card-border: var(--accents-2);
+  --card-border: var(--border);
   --pill-bg: var(--accents-1);
   --pill-border: var(--accents-2);
 
@@ -334,7 +334,7 @@ p { font-size: var(--fs-base); line-height: 1.7; }
   }
   
   .input-base {
-    @apply flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply flex h-10 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
   }
   
   .badge {
