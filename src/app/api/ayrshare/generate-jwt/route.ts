@@ -9,19 +9,31 @@ export async function POST(request: NextRequest) {
     const { profileKey }: GenerateJwtBody = await request.json()
     if (!profileKey) return NextResponse.json({ error: 'profileKey is required' }, { status: 400 })
 
-    if (!process.env.AYRSHARE_API_KEY || !process.env.AYRSHARE_PRIVATE_KEY || !process.env.AYRSHARE_DOMAIN) {
-      return NextResponse.json({ error: 'AYRSHARE credentials not configured' }, { status: 500 })
+    const apiKey = process.env.AYRSHARE_API_KEY
+    const domain = process.env.AYRSHARE_DOMAIN
+    const privateKeyRaw = process.env.AYRSHARE_PRIVATE_KEY
+    const privateKey = (privateKeyRaw || '').replace(/\\n/g, '\n')
+
+    if (!apiKey || !domain || !privateKeyRaw) {
+      return NextResponse.json({
+        error: 'AYRSHARE credentials not configured',
+        details: {
+          apiKey: !!apiKey,
+          domain: !!domain,
+          privateKey: !!privateKeyRaw
+        }
+      }, { status: 500 })
     }
 
     const res = await fetch('https://api.ayrshare.com/api/profiles/generateJWT', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${process.env.AYRSHARE_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        domain: process.env.AYRSHARE_DOMAIN,
-        privateKey: process.env.AYRSHARE_PRIVATE_KEY,
+        domain,
+        privateKey,
         profileKey,
         allowedSocial: ['instagram', 'tiktok'],
         logout: true,
