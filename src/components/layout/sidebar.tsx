@@ -95,12 +95,14 @@ export function Sidebar() {
               <Link
                 key={key}
                 href={href}
-                className={`w-full flex items-center gap-3 px-3 py-2 transition-colors
+                className={`relative w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors
                   ${active ? 'text-accent' : 'text-foreground'} hover:text-accent`}
                 prefetch={false}
                 onClick={(e) => { e.preventDefault(); router.push(href) }}
               >
-                <Icon className={`shrink-0 h-6 w-6 ${active ? 'text-accent' : 'text-foreground'} group-hover:scale-105 transition-transform`} />
+                {/* Active indicator */}
+                <span className={`${active ? 'opacity-100' : 'opacity-0'} transition-opacity absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 bg-accent rounded-r`} />
+                <Icon className={`shrink-0 h-6 w-6 ${active ? 'text-accent' : 'text-foreground'} group-hover:scale-110 transition-transform`} />
                 <span className={`text-sm whitespace-nowrap overflow-hidden ${isExpanded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}>{label}</span>
               </Link>
             )
@@ -128,7 +130,7 @@ export function Sidebar() {
 
         {/* Profile popout */}
         {showProfile && (
-          <div className="absolute right-3 bottom-16 w-64 bg-card-bg border border-card-border rounded-lg shadow-soft p-4">
+          <div className="absolute right-3 bottom-16 w-64 bg-card-bg border border-card-border rounded-lg p-4">
             <div className="flex items-center gap-3 mb-3">
               {logo ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -209,11 +211,11 @@ export function Sidebar() {
             <Link
               key={key}
               href={href}
-              className={`w-full flex items-center gap-3 px-3 py-3 rounded-md transition-colors ${pathname === href ? 'bg-bg-elev-1 text-accent' : 'text-foreground hover:text-accent'}`}
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-md transition-colors ${pathname === href ? 'text-accent' : 'text-foreground hover:text-accent'}`}
               prefetch={false}
               onClick={(e) => { e.preventDefault(); setMobileOpen(false); router.push(href) }}
             >
-              <Icon className="h-6 w-6" />
+              <Icon className="h-6 w-6 group-hover:scale-110 transition-transform" />
               <span className="text-sm">{label}</span>
             </Link>
           ))}
