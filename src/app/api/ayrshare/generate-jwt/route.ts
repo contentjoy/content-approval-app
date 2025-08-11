@@ -12,14 +12,22 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.AYRSHARE_API_KEY
     const domain = process.env.AYRSHARE_DOMAIN
     const privateKeyRaw = process.env.AYRSHARE_PRIVATE_KEY
-    let privateKey = (privateKeyRaw || '').replace(/\\n/g, '\n')
+    let privateKey = (privateKeyRaw || '').replace(/\\n/g, '\n').trim()
+    // Strip accidental wrapping quotes
+    if ((privateKey.startsWith('"') && privateKey.endsWith('"')) || (privateKey.startsWith('\'') && privateKey.endsWith('\''))) {
+      privateKey = privateKey.slice(1, -1)
+    }
 
-    // If user pasted base64 content only (no PEM headers), wrap it
+    // If user pasted base64 content only (no PEM headers) OR the BEGIN/END lines are on one line, wrap/format it
     if (privateKey && !/BEGIN (RSA )?PRIVATE KEY/.test(privateKey)) {
       const body = privateKey.replace(/\s+/g, '')
       const chunked = body.match(/.{1,64}/g)?.join('\n') || body
       privateKey = `-----BEGIN RSA PRIVATE KEY-----\n${chunked}\n-----END RSA PRIVATE KEY-----`
     }
+    // Ensure header/footer are on their own lines
+    privateKey = privateKey
+      .replace(/-----BEGIN [^-]+-----\s*/g, (m) => m.endsWith('\n') ? m : m + '\n')
+      .replace(/\s*-----END [^-]+-----/g, (m) => (m.startsWith('\n') ? '' : '\n') + m)
 
     if (!apiKey || !domain || !privateKeyRaw) {
       return NextResponse.json({
