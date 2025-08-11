@@ -40,12 +40,9 @@ export async function GET(request: NextRequest) {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.AYRSHARE_API_KEY}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: JSON.stringify({
-        code,
-        profileKey: `${gymId}-${platform}`,
-      })
+      body: new URLSearchParams({ code, profileKey: `${gymId}-${platform}` }).toString()
     })
 
     if (!tokenResponse.ok) {

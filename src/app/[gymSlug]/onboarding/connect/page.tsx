@@ -141,11 +141,19 @@ export default function SocialConnectPage() {
       }
 
       // Poll for window closure (successful auth)
-      const checkWindow = setInterval(() => {
+      const checkWindow = setInterval(async () => {
         if (authWindow?.closed) {
           clearInterval(checkWindow)
-          // Check if connection was successful
-          setTimeout(() => checkConnectionStatus(platformId), 1000)
+          try {
+            // Best-effort persist mapping even if redirect callback didn't run
+            await fetch('/api/ayrshare/mark-connected', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ gymId, platform: platformId, profileKey })
+            })
+          } catch {}
+          // Then refresh UI state
+          setTimeout(() => checkConnectionStatus(platformId), 800)
         }
       }, 1000)
 
