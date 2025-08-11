@@ -77,6 +77,7 @@ export function Sidebar() {
   }
 
   return (
+    <>
     <motion.aside
       initial={false}
       animate={{ width: isExpanded ? 240 : 60 }}
@@ -219,6 +220,7 @@ export function Sidebar() {
         </nav>
       </motion.aside>
     </motion.div>
+    </>
   )
 }
 
