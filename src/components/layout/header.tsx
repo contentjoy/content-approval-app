@@ -57,20 +57,18 @@ export function Header() {
             className="hidden md:flex"
           />
           
-          {/* Upload Content Button - ghost with stroke */}
-          <button
-            className="flex items-center space-x-2 h-8 px-3 rounded-md border border-border text-foreground bg-transparent transition-colors hover:bg-foreground hover:text-background"
-          >
-            <Plus className="w-4 h-4" />
+          {/* Upload Content Button - compact topnav */}
+          <button className="btn-topnav">
+            <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Upload</span>
           </button>
           
           {/* Schedule Posts Button */}
           <button
-            className="flex items-center space-x-2 h-8 px-3 rounded-md border border-border text-foreground bg-transparent transition-colors hover:bg-foreground hover:text-background"
+            className="btn-topnav"
             onClick={() => openModal('schedule', null, [], approvedPosts || [])}
           >
-            <Calendar className="w-4 h-4" />
+            <Calendar className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Schedule ({approved})</span>
           </button>
 
@@ -90,7 +88,7 @@ export function Header() {
             <button
               onClick={() => setProfileOpen(v => !v)}
               aria-label="Open account menu"
-              className="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center"
+              className="h-[28px] w-[28px] rounded-full overflow-hidden flex items-center justify-center"
               style={{ backgroundColor: 'var(--primary)' as any }}
             >
               {gymProfileImageUrl ? (
@@ -103,14 +101,28 @@ export function Header() {
               )}
             </button>
             <div className="absolute right-0">
-              <PopoutMenu isOpen={profileOpen} onClose={() => setProfileOpen(false)} placement="desktop" onAccountSettings={() => setSettingsOpen(true)} />
+              <PopoutMenu
+                isOpen={profileOpen}
+                onClose={() => setProfileOpen(false)}
+                placement="desktop"
+                onAccountSettings={() => setSettingsOpen(true)}
+                approvedProgress={approved}
+                goal={30}
+              />
             </div>
           </div>
         </div>
       </div>
       {/* Mobile popout */}
       <div className="md:hidden relative">
-        <PopoutMenu isOpen={profileOpen} onClose={() => setProfileOpen(false)} placement="mobile" onAccountSettings={() => setSettingsOpen(true)} />
+        <PopoutMenu
+          isOpen={profileOpen}
+          onClose={() => setProfileOpen(false)}
+          placement="mobile"
+          onAccountSettings={() => setSettingsOpen(true)}
+          approvedProgress={approved}
+          goal={30}
+        />
       </div>
       <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} gymId={user?.gymId || ''} initial={{ email: undefined, primaryColor: undefined }} />
       {/* Horizontal tabs below header (kept here for global placement) */}

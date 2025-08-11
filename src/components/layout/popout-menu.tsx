@@ -13,9 +13,11 @@ interface PopoutMenuProps {
   onClose: () => void
   placement?: 'desktop' | 'mobile'
   onAccountSettings?: () => void
+  approvedProgress?: number
+  goal?: number
 }
 
-export function PopoutMenu({ isOpen, onClose, placement = 'desktop', onAccountSettings }: PopoutMenuProps) {
+export function PopoutMenu({ isOpen, onClose, placement = 'desktop', onAccountSettings, approvedProgress = 0, goal = 30 }: PopoutMenuProps) {
   const { theme, toggleTheme } = useTheme()
   const { user, logout } = useAuth()
   const { openModal, approvedPosts } = useModalStore() as any
@@ -30,8 +32,20 @@ export function PopoutMenu({ isOpen, onClose, placement = 'desktop', onAccountSe
     return () => document.removeEventListener('mousedown', handleClick)
   }, [isOpen, onClose])
 
+  const progressPct = Math.min(goal > 0 ? (approvedProgress / goal) * 100 : 0, 100)
+
   const content = (
     <div className="flex flex-col gap-1 text-sm text-foreground">
+      {placement === 'mobile' && (
+        <div className="mb-3">
+          <div className="flex items-center space-x-2">
+            <div className="flex-1 h-2 bg-[var(--surface)] rounded-md overflow-hidden border border-border">
+              <div className="h-full bg-accent rounded-md" style={{ width: `${progressPct}%` }} />
+            </div>
+            <span className="text-xs text-muted-text min-w-[2.5rem]">{approvedProgress}/{goal}</span>
+          </div>
+        </div>
+      )}
       <div className="text-[var(--muted-text)] mb-2">{user?.gymName || 'User'}</div>
       <Link href="/" className="no-underline hover:no-underline flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition">
         <Home className="h-4 w-4 text-[var(--muted-text)] mr-2" />
@@ -84,7 +98,7 @@ export function PopoutMenu({ isOpen, onClose, placement = 'desktop', onAccountSe
             className={
               placement === 'desktop'
                 ? 'absolute top-12 right-0 w-64 bg-[var(--surface)] border border-[var(--border)] rounded-md p-4 z-[60]'
-                : 'fixed top-[3rem] right-0 w-full max-w-[360px] h-[calc(100vh-3rem)] bg-[var(--surface)] border border-[var(--border)] rounded-t-none p-4 z-[60] overflow-y-auto'
+                : 'fixed top-[3rem] inset-x-0 w-full h-[calc(100vh-3rem)] bg-[var(--surface)] border-t border-[var(--border)] rounded-t-none p-4 z-[60] overflow-y-auto'
             }
           >
             {content}
