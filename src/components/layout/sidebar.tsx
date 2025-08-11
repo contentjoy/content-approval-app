@@ -21,7 +21,7 @@ export function Sidebar() {
   const router = useRouter()
   const params = useParams()
   const gymSlug = params.gymSlug as string
-  const { gymName, gymProfileImageUrl, logo, primaryColor } = useBranding()
+  const { gymName, gymProfileImageUrl, logo, primaryColor, gymPrimaryColor } = useBranding()
   const { user, logout } = useAuth()
 
   const [lockedExpanded, setLockedExpanded] = useState<boolean>(false)
@@ -87,15 +87,21 @@ export function Sidebar() {
       className="group sticky top-0 h-screen border-r border-border bg-[var(--sidebar)] z-50 pointer-events-auto flex flex-col hidden md:flex"
       aria-label="Sidebar navigation"
     >
-      {/* Top: Gym logo + name */}
+      {/* Top: Gym avatar (colored initial). Hide name on desktop */}
       <div className="pt-4 px-3 flex items-center gap-3">
         {gymProfileImageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={gymProfileImageUrl} alt="Gym logo" className="h-6 w-6 rounded-full object-cover border border-border" />
+          <img src={gymProfileImageUrl} alt="Gym avatar" className="h-6 w-6 rounded-full object-cover border border-border" />
         ) : (
-          <div className="h-6 w-6 rounded-full bg-gray-300" />
+          <div
+            className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-semibold text-white"
+            style={{ backgroundColor: gymPrimaryColor || primaryColor || '#000000' }}
+          >
+            {(gymName || 'G').charAt(0).toUpperCase()}
+          </div>
         )}
-        <span className={`text-sm font-semibold text-foreground ${isExpanded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200 whitespace-nowrap overflow-hidden`}>{gymName || 'Gym'}</span>
+        {/* Show name on mobile only */}
+        <span className="block md:hidden text-sm font-semibold text-foreground">{gymName || 'Gym'}</span>
       </div>
 
       <div className="flex-1 py-4">
