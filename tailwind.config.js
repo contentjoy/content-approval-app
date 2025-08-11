@@ -16,6 +16,7 @@ module.exports = {
         'muted-text': 'var(--muted-text)',
         border: 'var(--border)',
         'border-strong': 'var(--border-strong)',
+        hover: 'var(--hover)',
         accent: 'var(--accent)',
         'accent-strong': 'var(--accent-strong)',
         'accent-soft': 'var(--accent-soft)',

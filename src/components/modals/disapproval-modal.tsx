@@ -106,7 +106,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Post Preview */}
-        <div className="bg-muted rounded-lg p-4">
+        <div className="bg-[var(--surface)] rounded-lg p-4 border border-border">
           <div className="flex items-center space-x-3 mb-3">
             <div className="w-10 h-10 bg-destructive/10 rounded-lg flex items-center justify-center">
               <XCircle className="w-5 h-5 text-destructive" />
@@ -199,14 +199,14 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
 
         {/* Actions */}
         <div className="flex items-center justify-end space-x-3 pt-4 border-t">
-          <BrandedButton
+          <button
             type="button"
-            variant="outline"
             onClick={onClose}
             disabled={isLoading}
+            className="h-10 px-4 rounded-md border border-border text-text bg-transparent transition-colors hover:bg-hover disabled:opacity-50"
           >
             Cancel
-          </BrandedButton>
+          </button>
           <BrandedButton
             type="submit"
             disabled={isLoading || watchedFeedback.length < 10}

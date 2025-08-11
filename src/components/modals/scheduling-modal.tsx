@@ -155,7 +155,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
             Scheduling Frequency:
           </label>
           <div className="space-y-3">
-            <label className="flex items-center space-x-3 p-4 border border-border rounded-lg hover:bg-muted cursor-pointer">
+            <label className="flex items-center space-x-3 p-4 border border-border rounded-lg hover:bg-hover cursor-pointer transition-colors">
               <input
                 type="radio"
                 value="daily"
@@ -169,7 +169,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
                 </div>
               </div>
             </label>
-            <label className="flex items-center space-x-3 p-4 border border-border rounded-lg hover:bg-muted cursor-pointer">
+            <label className="flex items-center space-x-3 p-4 border border-border rounded-lg hover:bg-hover cursor-pointer transition-colors">
               <input
                 type="radio"
                 value="every-other-day"
@@ -247,7 +247,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="h-10 px-4 rounded-md border border-border text-foreground bg-transparent transition-colors hover:bg-foreground hover:text-background disabled:opacity-50"
+            className="h-10 px-4 rounded-md border border-border text-text bg-transparent transition-colors hover:bg-hover disabled:opacity-50"
           >
             Cancel
           </button>

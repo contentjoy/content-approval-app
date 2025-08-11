@@ -29,6 +29,8 @@
   --muted-text: #898989;
   --border: #ebebeb;
   --border-strong: #ebebeb;
+  /* App-wide hover background color */
+  --hover: #f2f2f2;
 
   /* Geometry + radii */
   --radius: 6px; /* rounded-md */
@@ -89,6 +91,8 @@ html[data-theme="dark"] {
   --muted-text: #6e6e6e;
   --border: #2d2d2d;
   --border-strong: #2d2d2d;
+  /* App-wide hover background color */
+  --hover: #181818;
 
   --background: var(--bg);
   --foreground: var(--text);
