@@ -63,13 +63,17 @@ export default function SocialConnectPage() {
         .single()
 
       if (gym?.social_accounts || gym?.ayrshare_profiles) {
-        setPlatforms(prev => prev.map(platform => ({
-          ...platform,
-          connected: !!(
-            gym.social_accounts?.[platform.id as keyof typeof gym.social_accounts] ||
-            gym.ayrshare_profiles?.[platform.id as keyof typeof gym.ayrshare_profiles]
+        setPlatforms(prev => prev.map(platform => {
+          const profile: any = gym.ayrshare_profiles?.[platform.id as keyof typeof gym.ayrshare_profiles]
+          const connected = Boolean(
+            gym.social_accounts?.[platform.id as keyof typeof gym.social_accounts] || profile?.profile_key
           )
-        })))
+          return {
+            ...platform,
+            connected,
+            profile: profile || undefined
+          }
+        }))
       }
     } catch (error) {
       console.error('Failed to load connected accounts:', error)
@@ -100,7 +104,7 @@ export default function SocialConnectPage() {
       const response = await fetch('/api/ayrshare/generate-jwt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profileKey })
+        body: JSON.stringify({ profileKey, gymId, platform: platformId })
       })
 
       console.log('📡 JWT generation response status:', response.status)

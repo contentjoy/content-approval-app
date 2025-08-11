@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 
 interface GenerateJwtBody {
   profileKey?: string
+  gymId?: string
+  platform?: 'instagram' | 'tiktok' | 'facebook' | 'twitter' | 'linkedin' | 'youtube'
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const { profileKey }: GenerateJwtBody = await request.json()
+    const { profileKey, gymId, platform }: GenerateJwtBody = await request.json()
     if (!profileKey) return NextResponse.json({ error: 'profileKey is required' }, { status: 400 })
 
     const apiKey = process.env.AYRSHARE_API_KEY
@@ -46,6 +48,12 @@ export async function POST(request: NextRequest) {
     form.set('profileKey', profileKey)
     form.set('verify', 'true')
     form.set('logout', 'true')
+    // Redirect back to our callback so we can persist state and notify the opener
+    const proto = request.headers.get('x-forwarded-proto') || 'https'
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || ''
+    const baseUrl = `${proto}://${host}`
+    const state = gymId && platform ? `${gymId}-${platform}` : ''
+    form.set('redirect', `${baseUrl}/api/ayrshare/callback${state ? `?state=${encodeURIComponent(state)}` : ''}`)
     // If you want to restrict networks, uncomment:
     // form.set('allowedSocial[0]', 'instagram')
     // form.set('allowedSocial[1]', 'tiktok')
