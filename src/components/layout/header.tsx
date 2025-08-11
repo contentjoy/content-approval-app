@@ -34,17 +34,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-bg">
       <div className="mx-auto w-full px-3 sm:px-4 md:px-5 lg:px-6 2xl:px-8 py-3 flex items-center justify-between">
-        {/* Left side: Mobile hamburger + Logo + Gym Name */}
+        {/* Left: Logo + Gym Name */}
         <div className="flex items-center space-x-3">
-          <button
-            className="md:hidden p-2 rounded-md border border-border text-text hover:bg-bg-elev-1"
-            aria-label="Open navigation"
-            onClick={() => setMenuOpen(v => !v)}
-          >
-            <motion.div animate={menuOpen ? 'open' : 'closed'} variants={menuVariants}>
-              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </motion.div>
-          </button>
           <Logo size="md" fallbackText="" showFallback={false} />
           <div className="flex items-center space-x-2">
             <div className="w-px h-4 bg-border"></div>
@@ -85,18 +76,30 @@ export function Header() {
             <span className="hidden sm:inline">Schedule ({approved})</span>
           </BrandedButton>
 
+          {/* Mobile hamburger (far right) */}
+          <button
+            className="md:hidden p-2 rounded-md border border-border text-text hover:bg-bg-elev-1"
+            aria-label="Open menu"
+            onClick={() => setProfileOpen(v => !v)}
+          >
+            <motion.div animate={profileOpen ? 'open' : 'closed'} variants={menuVariants}>
+              {profileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </motion.div>
+          </button>
+
           {/* Profile avatar (desktop) */}
           <div className="hidden md:block relative">
             <button
               onClick={() => setProfileOpen(v => !v)}
               aria-label="Open account menu"
-              className="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center bg-[color:var(--primary)]/20"
+              className="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center"
+              style={{ backgroundColor: 'var(--primary)' as any }}
             >
               {gymProfileImageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={gymProfileImageUrl} alt="profile" className="h-full w-full object-cover" />
               ) : (
-                <span className="text-lg font-bold text-[var(--primary)] leading-none">
+                <span className="text-lg font-bold text-white leading-none">
                   {(user?.gymName || gymName || 'G').charAt(0).toUpperCase()}
                 </span>
               )}
@@ -106,6 +109,10 @@ export function Header() {
             </div>
           </div>
         </div>
+      </div>
+      {/* Mobile popout */}
+      <div className="md:hidden relative">
+        <PopoutMenu isOpen={profileOpen} onClose={() => setProfileOpen(false)} placement="mobile" />
       </div>
       {/* Horizontal tabs below header (kept here for global placement) */}
       

@@ -3,9 +3,10 @@
 import React, { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Home, Settings, Users, Command, Moon, Sun, LogOut } from 'lucide-react'
+import { Home, Settings, Users, Command, Moon, Sun, LogOut, Calendar as CalendarIcon } from 'lucide-react'
 import { useTheme } from '@/contexts/theme-context'
 import { useAuth } from '@/contexts/auth-context'
+import { useModalStore } from '@/hooks/use-modal-store'
 
 interface PopoutMenuProps {
   isOpen: boolean
@@ -16,6 +17,7 @@ interface PopoutMenuProps {
 export function PopoutMenu({ isOpen, onClose, placement = 'desktop' }: PopoutMenuProps) {
   const { theme, toggleTheme } = useTheme()
   const { user, logout } = useAuth()
+  const { openModal, approvedPosts } = useModalStore() as any
   const panelRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export function PopoutMenu({ isOpen, onClose, placement = 'desktop' }: PopoutMen
         <Home className="h-4 w-4 text-[var(--geist-secondary)] mr-2" />
         Dashboard
       </Link>
-      <button onClick={onClose} className="flex items-center p-2 rounded-sm hover:bg-[var(--accents-2)] transition">
+      <button onClick={() => { onClose() }} className="flex items-center p-2 rounded-sm hover:bg-[var(--accents-2)] transition">
         <Settings className="h-4 w-4 text-[var(--geist-secondary)] mr-2" />
         Account Settings
       </button>
@@ -47,11 +49,11 @@ export function PopoutMenu({ isOpen, onClose, placement = 'desktop' }: PopoutMen
         {theme === 'dark' ? <Sun className="h-4 w-4 text-[var(--geist-secondary)] mr-2" /> : <Moon className="h-4 w-4 text-[var(--geist-secondary)] mr-2" />}
         Theme
       </button>
-      <Link href="/" className="no-underline flex items-center p-2 rounded-sm hover:bg-[var(--accents-2)] transition">
-        <Home className="h-4 w-4 text-[var(--geist-secondary)] mr-2" />
-        Home Page
-      </Link>
-      <button onClick={logout} className="flex items-center p-2 rounded-sm hover:bg-[var(--accents-2)] transition text-[var(--primary)] hover:text-red-600">
+      <button id="schedule-content" className="flex items-center p-2 rounded-sm hover:bg-[var(--accents-2)] transition" onClick={() => { onClose(); openModal('schedule', null, [], approvedPosts || []) }}>
+        <CalendarIcon className="h-4 w-4 text-[var(--geist-secondary)] mr-2" />
+        Schedule Content
+      </button>
+      <button onClick={logout} className="flex items-center p-2 rounded-sm hover:bg-[var(--accents-2)] transition">
         <LogOut className="h-4 w-4 mr-2" />
         Log Out
       </button>
