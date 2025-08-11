@@ -57,24 +57,24 @@ export function Header() {
             className="hidden md:flex"
           />
           
-          {/* Upload Content Button - compact topnav */}
-          <button className="btn-topnav">
-            <Plus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Upload</span>
+          {/* Upload Content Button - inline standard */}
+          <button className="btn-inline">
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline content">Upload</span>
           </button>
           
           {/* Schedule Posts Button */}
           <button
-            className="btn-topnav"
+            className="btn-inline"
             onClick={() => openModal('schedule', null, [], approvedPosts || [])}
           >
-            <Calendar className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Schedule ({approved})</span>
+            <Calendar className="w-4 h-4" />
+            <span className="hidden sm:inline content">Schedule ({approved})</span>
           </button>
 
           {/* Mobile hamburger (far right) */}
           <button
-            className="md:hidden p-2 rounded-md border border-border text-text hover:bg-bg-elev-1"
+            className="md:hidden h-10 w-10 p-2 rounded-md border border-border text-text hover:bg-hover"
             aria-label="Open menu"
             onClick={() => setProfileOpen(v => !v)}
           >

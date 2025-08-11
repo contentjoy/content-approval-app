@@ -344,10 +344,16 @@ p { font-size: var(--fs-base); line-height: 1.7; }
     @apply h-10 px-4 rounded-md border border-border text-text bg-transparent transition-colors hover:bg-hover disabled:opacity-50;
   }
 
-  /* Top navigation small buttons (Upload / Schedule) */
-  .btn-topnav {
-    @apply inline-flex items-center gap-1.5 rounded-md border border-border text-foreground bg-transparent transition-colors hover:bg-hover h-[28px] px-3.5 text-xs;
+  /* Inline button standard (used across app for compact actions) */
+  .btn-inline {
+    @apply inline-flex items-center gap-1.5 rounded-md text-[14px] font-medium leading-[1.2] bg-transparent text-foreground select-none;
+    @apply h-8 px-3.5; /* 32px height, ~14px horizontal per side */
+    @apply transition-colors;
+    border: none;
+    box-shadow: 0 0 0 1px var(--border);
   }
+  .btn-inline:hover { background: var(--hover); }
+  .btn-inline .content { padding: 0 6px; }
   
   .input-base {
     @apply flex h-10 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
