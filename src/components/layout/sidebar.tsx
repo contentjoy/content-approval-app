@@ -87,8 +87,8 @@ export function Sidebar() {
       className="group sticky top-0 h-screen border-r border-border bg-[var(--sidebar)] z-50 pointer-events-auto flex flex-col hidden md:flex"
       aria-label="Sidebar navigation"
     >
-      {/* Top: Gym avatar (colored initial). Hide name on desktop */}
-      <div className="pt-4 px-3 flex items-center gap-3">
+      {/* Top: Gym avatar + name (mobile only) */}
+      <div className="pt-4 px-3 flex items-center gap-3 md:hidden">
         {gymProfileImageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={gymProfileImageUrl} alt="Gym avatar" className="h-6 w-6 rounded-full object-cover border border-border" />
@@ -100,8 +100,8 @@ export function Sidebar() {
             {(gymName || 'G').charAt(0).toUpperCase()}
           </div>
         )}
-        {/* Show name on mobile only */}
-        <span className="block md:hidden text-sm font-semibold text-foreground">{gymName || 'Gym'}</span>
+        {/* Name (mobile only) */}
+        <span className="text-sm font-semibold text-foreground">{gymName || 'Gym'}</span>
       </div>
 
       <div className="flex-1 py-4">
@@ -137,7 +137,12 @@ export function Sidebar() {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={gymProfileImageUrl} alt="Gym logo" className="h-8 w-8 rounded-full object-cover border border-border" />
           ) : (
-            <div className="h-8 w-8 rounded-full bg-gray-300" />
+            <div
+              className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold text-white"
+              style={{ backgroundColor: gymPrimaryColor || primaryColor || '#000000' }}
+            >
+              {(gymName || 'G').charAt(0).toUpperCase()}
+            </div>
           )}
           <span className={`text-sm whitespace-nowrap overflow-hidden ${isExpanded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}>
             {gymName || 'Profile'}
@@ -220,7 +225,7 @@ export function Sidebar() {
       />
       {/* Panel */}
       <motion.aside
-        className="absolute left-0 top-0 h-full w-full max-w-[320px] bg-[var(--background)]/95 backdrop-blur-sm border-r border-border p-3 flex flex-col"
+        className="absolute left-0 top-0 h-full w-full max-w-[320px] bg-[var(--sidebar)] border-r border-border p-3 flex flex-col"
         initial={{ x: '-100%' }}
         animate={{ x: mobileOpen ? 0 : '-100%' }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
