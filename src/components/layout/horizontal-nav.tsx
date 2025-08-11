@@ -53,7 +53,7 @@ export function HorizontalNav() {
                 href={t.href}
                 prefetch={true}
                 ref={(el) => { tabRefs.current[t.href] = el }}
-                className={`snap-start px-2 py-1 rounded-md text-sm font-medium transition-colors cursor-pointer hover:bg-[var(--accents-1)] ${isActive ? 'text-foreground' : 'text-[var(--geist-secondary)] hover:text-[var(--primary)]'}`}
+                className={`no-underline snap-start px-3 py-1.5 rounded-md text-sm font-medium transition-colors cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 ${isActive ? 'text-foreground bg-black/5 dark:bg-white/5' : 'text-[var(--geist-secondary)] hover:text-[var(--primary)]'}`}
               >
                 {t.label}
               </Link>
