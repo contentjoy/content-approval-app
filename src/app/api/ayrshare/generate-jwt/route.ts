@@ -40,21 +40,23 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
+    const form = new URLSearchParams()
+    form.set('domain', domain)
+    form.set('privateKey', privateKey)
+    form.set('profileKey', profileKey)
+    form.set('verify', 'true')
+    form.set('logout', 'true')
+    // If you want to restrict networks, uncomment:
+    // form.set('allowedSocial[0]', 'instagram')
+    // form.set('allowedSocial[1]', 'tiktok')
+
     const res = await fetch('https://api.ayrshare.com/api/profiles/generateJWT', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: JSON.stringify({
-        domain,
-        privateKey,
-        profileKey,
-        // omit allowedSocial to allow all networks; can be re-added once confirmed
-        logout: true,
-        verify: true,
-        redirect: `/[gym-slug]`,
-      }),
+      body: form.toString(),
       cache: 'no-store',
     })
 
