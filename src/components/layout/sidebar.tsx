@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Calendar, Home, Search, ArrowRightCircle, ArrowLeftCircle, Sun, Moon } from 'lucide-react'
+import { Calendar, Home, Search, ArrowRightCircle, ArrowLeftCircle, Sun, Moon, LogOut } from 'lucide-react'
 import { useBranding } from '@/contexts/branding-context'
 import { useAuth } from '@/contexts/auth-context'
 import SettingsModal from '@/components/modals/settings-modal'
@@ -21,7 +21,7 @@ export function Sidebar() {
   const router = useRouter()
   const params = useParams()
   const gymSlug = params.gymSlug as string
-  const { gymName, logo, primaryColor } = useBranding()
+  const { gymName, gymProfileImageUrl, logo, primaryColor } = useBranding()
   const { user, logout } = useAuth()
 
   const [lockedExpanded, setLockedExpanded] = useState<boolean>(false)
@@ -87,6 +87,17 @@ export function Sidebar() {
       className="group sticky top-0 h-screen border-r border-border bg-[var(--sidebar)] z-50 pointer-events-auto flex flex-col hidden md:flex"
       aria-label="Sidebar navigation"
     >
+      {/* Top: Gym logo + name */}
+      <div className="pt-4 px-3 flex items-center gap-3">
+        {gymProfileImageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={gymProfileImageUrl} alt="Gym logo" className="h-6 w-6 rounded-full object-cover border border-border" />
+        ) : (
+          <div className="h-6 w-6 rounded-full bg-gray-300" />
+        )}
+        <span className={`text-sm font-semibold text-foreground ${isExpanded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200 whitespace-nowrap overflow-hidden`}>{gymName || 'Gym'}</span>
+      </div>
+
       <div className="flex-1 py-4">
         <nav className="space-y-1">
           {navItems.map(({ key, label, href, Icon }) => {
@@ -97,8 +108,7 @@ export function Sidebar() {
                 href={href}
                 className={`relative w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors
                   ${active ? 'text-accent' : 'text-foreground'} hover:text-accent`}
-                prefetch={false}
-                onClick={(e) => { e.preventDefault(); router.push(href) }}
+                prefetch
               >
                 {/* Active indicator */}
                 <span className={`${active ? 'opacity-100' : 'opacity-0'} transition-opacity absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 bg-accent rounded-r`} />
@@ -117,9 +127,9 @@ export function Sidebar() {
           className="w-full flex items-center gap-3 px-3 py-2 text-foreground hover:text-accent transition-colors"
           aria-label="Open profile"
         >
-          {logo ? (
+          {gymProfileImageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logo} alt="Gym logo" className="h-8 w-8 rounded-full object-cover border border-border" />
+            <img src={gymProfileImageUrl} alt="Gym logo" className="h-8 w-8 rounded-full object-cover border border-border" />
           ) : (
             <div className="h-8 w-8 rounded-full bg-gray-300" />
           )}
@@ -130,11 +140,16 @@ export function Sidebar() {
 
         {/* Profile popout */}
         {showProfile && (
-          <div className="absolute right-3 bottom-16 w-64 bg-card-bg border border-card-border rounded-lg p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute right-3 bottom-16 md:w-64 w-[90vw] max-w-[20rem] bg-card-bg border border-card-border rounded-lg p-4 md:fixed md:right-4 md:bottom-6"
+            style={{ left: isExpanded ? undefined : 8 }}
+          >
             <div className="flex items-center gap-3 mb-3">
-              {logo ? (
+              {gymProfileImageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={logo} alt="Gym logo" className="h-10 w-10 rounded-full object-cover border border-border" />
+                <img src={gymProfileImageUrl} alt="Gym logo" className="h-10 w-10 rounded-full object-cover border border-border" />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-gray-300" />
               )}
@@ -144,22 +159,20 @@ export function Sidebar() {
               </div>
             </div>
 
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between"><span className="text-muted-text">Email</span><span className="text-text">—</span></div>
-              <div className="flex justify-between"><span className="text-muted-text">Primary</span><span className="inline-flex items-center gap-2 text-text"><span className="h-3 w-3 rounded-full" style={{ backgroundColor: primaryColor || 'var(--primary-color)' }} />{primaryColor || '—'}</span></div>
-            </div>
-
-            <div className="flex items-center justify-between mt-4">
-              <button onClick={toggleTheme} className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-border text-text hover:bg-bg-elev-1">
+            <div className="space-y-2">
+              <button onClick={toggleTheme} className="w-full inline-flex items-center gap-2 px-3 py-2 rounded-md border border-border text-text hover:bg-bg-elev-1">
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                <span className="text-sm">{theme === 'dark' ? 'Light' : 'Dark'} mode</span>
+                <span className="text-sm">{theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}</span>
               </button>
-              <div className="flex gap-2">
-                <button onClick={() => { setShowProfile(false); setShowSettings(true) }} className="px-3 py-2 rounded-md border border-border text-text hover:bg-bg-elev-1">Settings</button>
-                <button onClick={async () => { await logout(); router.push('/agency') }} className="px-3 py-2 rounded-md bg-destructive text-background hover:opacity-90">Sign Out</button>
-              </div>
+              <button onClick={() => { setShowProfile(false); setShowSettings(true) }} className="w-full inline-flex items-center justify-between px-3 py-2 rounded-md border border-border text-text hover:bg-bg-elev-1">
+                <span className="text-sm">Settings</span>
+              </button>
+              <button onClick={async () => { await logout(); router.push('/agency') }} className="w-full inline-flex items-center gap-2 px-3 py-2 rounded-md text-red-500 hover:bg-bg-elev-1">
+                <LogOut className="h-4 w-4" />
+                <span className="text-sm">Sign Out</span>
+              </button>
             </div>
-          </div>
+          </motion.div>
         )}
 
         <button
@@ -201,7 +214,7 @@ export function Sidebar() {
       />
       {/* Panel */}
       <motion.aside
-        className="absolute left-0 top-0 h-full w-[80vw] max-w-[320px] bg-[var(--sidebar)] border-r border-border p-3 flex flex-col"
+        className="absolute left-0 top-0 h-full w-full max-w-[320px] bg-[var(--background)]/95 backdrop-blur-sm border-r border-border p-3 flex flex-col"
         initial={{ x: '-100%' }}
         animate={{ x: mobileOpen ? 0 : '-100%' }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
