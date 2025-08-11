@@ -42,8 +42,17 @@ export function Sidebar() {
         setLockedExpanded(persisted === 'true')
       }
     } catch {}
+    const onToggle = (e: Event) => {
+      const d = (e as CustomEvent).detail as { open?: boolean }
+      if (typeof d?.open !== 'undefined') {
+        setMobileOpen(!!d.open)
+      }
+    }
+    window.addEventListener('sidebar-toggle', onToggle as EventListener)
+    return () => window.removeEventListener('sidebar-toggle', onToggle as EventListener)
   }, [])
 
+  const [mobileOpen, setMobileOpen] = useState(false)
   const isExpanded = lockedExpanded || hovered
 
   const navItems: NavItem[] = useMemo(() => [
@@ -74,7 +83,7 @@ export function Sidebar() {
       transition={{ duration: 0.25, ease: 'easeInOut' }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="group sticky top-0 h-screen border-r border-border bg-[var(--sidebar)] z-50 pointer-events-auto flex flex-col"
+      className="group sticky top-0 h-screen border-r border-border bg-[var(--sidebar)] z-50 pointer-events-auto flex flex-col hidden md:flex"
       aria-label="Sidebar navigation"
     >
       <div className="flex-1 py-4">
@@ -173,6 +182,43 @@ export function Sidebar() {
         initial={{ email: undefined, primaryColor: primaryColor || undefined }}
       />
     </motion.aside>
+
+    {/* Mobile overlay drawer */}
+    <motion.div
+      className="fixed inset-0 z-50 md:hidden"
+      initial={false}
+      animate={{ pointerEvents: mobileOpen ? 'auto' : 'none' }}
+    >
+      {/* Backdrop */}
+      <motion.div
+        className="absolute inset-0 bg-black/40"
+        animate={{ opacity: mobileOpen ? 1 : 0 }}
+        transition={{ duration: 0.2 }}
+        onClick={() => setMobileOpen(false)}
+      />
+      {/* Panel */}
+      <motion.aside
+        className="absolute left-0 top-0 h-full w-[80vw] max-w-[320px] bg-[var(--sidebar)] border-r border-border p-3 flex flex-col"
+        initial={{ x: '-100%' }}
+        animate={{ x: mobileOpen ? 0 : '-100%' }}
+        transition={{ duration: 0.25, ease: 'easeInOut' }}
+      >
+        <nav className="space-y-1 mt-2">
+          {navItems.map(({ key, label, href, Icon }) => (
+            <Link
+              key={key}
+              href={href}
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-md transition-colors ${pathname === href ? 'bg-bg-elev-1 text-accent' : 'text-foreground hover:text-accent'}`}
+              prefetch={false}
+              onClick={(e) => { e.preventDefault(); setMobileOpen(false); router.push(href) }}
+            >
+              <Icon className="h-6 w-6" />
+              <span className="text-sm">{label}</span>
+            </Link>
+          ))}
+        </nav>
+      </motion.aside>
+    </motion.div>
   )
 }
 

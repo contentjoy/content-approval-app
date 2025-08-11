@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Plus, Calendar } from 'lucide-react'
+import { Plus, Calendar, Menu } from 'lucide-react'
 import { BrandedButton } from '@/components/ui/branded-button'
 import { Logo } from '@/components/ui/logo'
 import { CompactProgress } from '@/components/ui/compact-progress'
@@ -21,8 +21,18 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-bg">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Left side: Logo + Gym Name */}
+        {/* Left side: Mobile hamburger + Logo + Gym Name */}
         <div className="flex items-center space-x-3">
+          <button
+            className="md:hidden p-2 rounded-md border border-border text-text hover:bg-bg-elev-1"
+            aria-label="Open navigation"
+            onClick={() => {
+              const event = new CustomEvent('sidebar-toggle', { detail: { open: true } })
+              window.dispatchEvent(event)
+            }}
+          >
+            <Menu className="h-5 w-5" />
+          </button>
           <Logo size="md" fallbackText="" showFallback={false} />
           <div className="flex items-center space-x-2">
             <div className="w-px h-4 bg-border"></div>
@@ -63,8 +73,10 @@ export function Header() {
             <span className="hidden sm:inline">Schedule ({approved})</span>
           </BrandedButton>
 
-          {/* Theme Toggle */}
-          <ThemeToggle variant="icon" size="sm" />
+          {/* Theme Toggle hidden on mobile (moved into profile popout) */}
+          <div className="hidden md:block">
+            <ThemeToggle variant="icon" size="sm" />
+          </div>
         </div>
       </div>
     </header>
