@@ -14,6 +14,7 @@ import { motion } from 'framer-motion'
 import { HorizontalNav } from './horizontal-nav'
 import { PopoutMenu } from './popout-menu'
 import { useAuth } from '@/contexts/auth-context'
+import SettingsModal from '@/components/modals/settings-modal'
 
 export function Header() {
   const { gymName, isLoading, gymProfileImageUrl } = useBranding()
@@ -25,6 +26,7 @@ export function Header() {
   const { openModal, approvedPosts } = useModalStore()
   const [menuOpen, setMenuOpen] = React.useState(false)
   const [profileOpen, setProfileOpen] = React.useState(false)
+  const [settingsOpen, setSettingsOpen] = React.useState(false)
 
   const menuVariants = useMemo(() => ({
     open: { rotate: 180, transition: { duration: 0.3 } },
@@ -105,15 +107,16 @@ export function Header() {
               )}
             </button>
             <div className="absolute right-0">
-              <PopoutMenu isOpen={profileOpen} onClose={() => setProfileOpen(false)} placement="desktop" />
+              <PopoutMenu isOpen={profileOpen} onClose={() => setProfileOpen(false)} placement="desktop" onAccountSettings={() => setSettingsOpen(true)} />
             </div>
           </div>
         </div>
       </div>
       {/* Mobile popout */}
       <div className="md:hidden relative">
-        <PopoutMenu isOpen={profileOpen} onClose={() => setProfileOpen(false)} placement="mobile" />
+        <PopoutMenu isOpen={profileOpen} onClose={() => setProfileOpen(false)} placement="mobile" onAccountSettings={() => setSettingsOpen(true)} />
       </div>
+      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} gymId={user?.gymId || ''} initial={{ email: undefined, primaryColor: undefined }} />
       {/* Horizontal tabs below header (kept here for global placement) */}
       
     </header>

@@ -12,9 +12,10 @@ interface PopoutMenuProps {
   isOpen: boolean
   onClose: () => void
   placement?: 'desktop' | 'mobile'
+  onAccountSettings?: () => void
 }
 
-export function PopoutMenu({ isOpen, onClose, placement = 'desktop' }: PopoutMenuProps) {
+export function PopoutMenu({ isOpen, onClose, placement = 'desktop', onAccountSettings }: PopoutMenuProps) {
   const { theme, toggleTheme } = useTheme()
   const { user, logout } = useAuth()
   const { openModal, approvedPosts } = useModalStore() as any
@@ -36,7 +37,7 @@ export function PopoutMenu({ isOpen, onClose, placement = 'desktop' }: PopoutMen
         <Home className="h-4 w-4 text-[var(--geist-secondary)] mr-2" />
         Dashboard
       </Link>
-      <button onClick={() => { onClose() }} className="flex items-center p-2 rounded-sm hover:bg-[var(--accents-2)] transition">
+      <button onClick={() => { onClose(); onAccountSettings?.() }} className="flex items-center p-2 rounded-sm hover:bg-[var(--accents-2)] transition">
         <Settings className="h-4 w-4 text-[var(--geist-secondary)] mr-2" />
         Account Settings
       </button>
