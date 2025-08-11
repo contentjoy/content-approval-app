@@ -65,24 +65,8 @@ export async function GET(request: NextRequest) {
       throw gymError
     }
 
-    // Create Ayrshare profile and get profile key
-    const profileResponse = await fetch('https://app.ayrshare.com/api/profiles/create-profile', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.AYRSHARE_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        title: `${gymId}-${platform}`,
-        profileKey: `${gymId}-${platform}-${Date.now()}`
-      })
-    })
-
-    if (!profileResponse.ok) {
-      throw new Error('Failed to create Ayrshare profile')
-    }
-
-    const profileData = await profileResponse.json()
+    // Prefer the profileKey from our DB or token response if provided by Ayrshare
+    const profileKey = tokenData?.profileKey || (gym?.ayrshare_profiles?.[platform]?.profile_key) || (gym?.profile_key)
 
     // Update social accounts and ayrshare profiles in database
     const socialAccounts = gym?.social_accounts || {}
@@ -96,7 +80,7 @@ export async function GET(request: NextRequest) {
     }
 
     ayrshareProfiles[platform as keyof typeof ayrshareProfiles] = {
-      profile_key: profileData.profileKey,
+      profile_key: profileKey || `${gymId}-${platform}`,
       platform_id: tokenData.platform_id || tokenData.user_id,
       platform_username: tokenData.username || tokenData.name
     }
@@ -113,7 +97,7 @@ export async function GET(request: NextRequest) {
       throw updateError
     }
 
-    // Return success page that closes the popup
+    // Return success page that closes the popup and redirects opener
     return new NextResponse(`
       <html>
         <body>
@@ -125,6 +109,7 @@ export async function GET(request: NextRequest) {
                 platform: '${platform}',
                 gymId: '${gymId}'
               }, '*');
+              try { window.opener.location = '/${gymId}'; } catch (e) {}
             }
             window.close();
           </script>

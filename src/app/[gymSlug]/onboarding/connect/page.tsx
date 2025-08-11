@@ -145,6 +145,24 @@ export default function SocialConnectPage() {
         }
       }, 1000)
 
+      // Listen for success from callback
+      const listener = async (event: MessageEvent) => {
+        try {
+          const msg = event.data
+          if (msg?.type === 'AYRSHARE_AUTH_SUCCESS' && msg.gymId === gymId) {
+            // Persist minimal profile mapping
+            await fetch('/api/ayrshare/mark-connected', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ gymId, platform: platformId, profileKey }),
+            })
+            await checkConnectionStatus(platformId)
+          }
+        } catch {}
+      }
+      window.addEventListener('message', listener)
+      setTimeout(() => window.removeEventListener('message', listener), 120000)
+
     } catch (error: unknown) {
       console.error(`Failed to connect ${platformId}:`, error)
       setError((error as Error).message || `Failed to connect ${platformId}`)
