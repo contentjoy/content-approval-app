@@ -16,7 +16,6 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { AyrshareProfile } from '@/types'
-import { Modal } from '@/components/ui/modal'
 
 interface SocialPlatform {
   id: string
@@ -39,7 +38,6 @@ export default function SocialConnectPage() {
   const [error, setError] = useState('')
   const [gymId, setGymId] = useState<string | null>(null)
   const [isConnecting, setIsConnecting] = useState<string | null>(null)
-  const [confirmPlatform, setConfirmPlatform] = useState<string | null>(null)
   
   const router = useRouter()
   const params = useParams()
@@ -131,12 +129,13 @@ export default function SocialConnectPage() {
       // Store JWT for callback handling
       if (jwt) localStorage.setItem(`ayrshare_jwt_${platformId}`, jwt)
       
-      // Open Ayrshare auth in new window
-      const authWindow = window.open(
-        url,
-        'ayrshare_auth',
-        'width=600,height=700,scrollbars=yes,resizable=yes'
-      )
+      // Open Ayrshare auth in a contained popup (in-app modal window)
+      const width = Math.min(720, Math.floor(window.innerWidth * 0.9))
+      const height = Math.min(780, Math.floor(window.innerHeight * 0.9))
+      const left = Math.floor((window.screen.width - width) / 2)
+      const top = Math.floor((window.screen.height - height) / 2)
+      const features = `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=no,toolbar=no,menubar=no,location=no`
+      const authWindow = window.open(url, 'ayrshare_auth', features)
 
       if (!authWindow) {
         throw new Error('Popup blocked! Please allow popups for this site.')
@@ -177,6 +176,8 @@ export default function SocialConnectPage() {
               body: JSON.stringify({ gymId, platform: platformId, profileKey }),
             })
             await checkConnectionStatus(platformId)
+            // Close popup proactively once success is received
+            try { authWindow?.close() } catch {}
           }
         } catch {}
       }
