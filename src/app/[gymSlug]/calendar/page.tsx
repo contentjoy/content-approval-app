@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useParams } from 'next/navigation'
 import { getScheduledPosts, type ScheduledPostSummary } from '@/lib/database'
-import { MediaDisplay } from '@/components/posts'
+import FullCalendar from '@fullcalendar/react'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import interactionPlugin from '@fullcalendar/interaction'
 
 function startOfWeek(date: Date) {
   const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
@@ -60,104 +62,47 @@ export default function CalendarPage() {
     return () => { mounted = false }
   }, [gymSlug, weekStart, weekEnd])
 
-  // scroll snapping container ref for desktop scaling
-  const containerRef = useRef<HTMLDivElement>(null)
+  // Build FullCalendar events from posts
+  const events = useMemo(() => {
+    return posts
+      .filter(p => !!p.Scheduled)
+      .map(p => ({
+        id: p.id,
+        title: (p['Post Caption'] || '').slice(0, 48) || 'Scheduled Post',
+        start: p.Scheduled as string,
+        allDay: false,
+        extendedProps: { post: p },
+      }))
+  }, [posts])
 
   return (
     <div className="max-w-5xl mx-auto p-4 bg-[var(--background)] text-[var(--text)]">
       <h1 className="text-2xl font-semibold mb-2">Calendar</h1>
-      <p className="text-sm text-[var(--muted-text)] mb-4">Scheduled posts this week</p>
+      <p className="text-sm text-[var(--muted-text)] mb-4">Scheduled posts</p>
 
-      {/* Timeline track */}
-      <div className="relative w-full h-2 rounded-full bg-[var(--accents-2)] mb-4">
-        {[0,1,2,3,4,5,6].map(i => (
-          <div key={i} className="absolute -top-5" style={{ left: `${(i/6)*100}%` }}>
-            <span className="text-xs text-[var(--text)]">{formatDay(addDays(weekStart, i))}</span>
-          </div>
-        ))}
-      </div>
+      {loading && <div className="text-[var(--muted-text)]">Loading…</div>}
+      {error && <div className="text-destructive mb-2">{error}</div>}
 
-      {/* Desktop horizontal cards */}
-      <div className="hidden md:block">
-        <div
-          ref={containerRef}
-          className="flex items-start gap-6 overflow-x-auto snap-x snap-mandatory p-4 scroll-smooth"
-        >
-          {loading && <div className="text-[var(--muted-text)]">Loading…</div>}
-          {error && <div className="text-destructive">{error}</div>}
-          {!loading && posts.length === 0 && (
-            <div className="text-[var(--muted-text)]">No scheduled posts this week.</div>
-          )}
-          {posts.map((p, idx) => {
-            const scheduled = p.Scheduled || undefined
-            return (
-              <motion.div
-                key={p.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="snap-center min-w-[320px] max-w-[360px]"
-              >
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="text-xs text-[var(--text)]">{formatDay(new Date(scheduled || ''))} · {formatTime(scheduled)}</span>
-                  {/* channel badge omitted if not available */}
-                </div>
-                <motion.div
-                  whileInView={{ scale: 1.05, y: -10 }}
-                  viewport={{ amount: 0.6 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
-                  className="rounded-md border border-[var(--border)] bg-[var(--card-bg)]"
-                >
-                  <div className="p-2">
-                    <div className="rounded-md overflow-hidden">
-                      <MediaDisplay post={p as any} carouselPosts={[]} priority={false} />
-                    </div>
-                    {p['Post Caption'] && (
-                      <p className="mt-2 text-sm text-[var(--text)] line-clamp-3">{p['Post Caption']}</p>
-                    )}
-                  </div>
-                </motion.div>
-              </motion.div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Mobile vertical stack */}
-      <div className="md:hidden flex flex-col gap-6 p-1">
-        {loading && <div className="text-[var(--muted-text)]">Loading…</div>}
-        {error && <div className="text-destructive">{error}</div>}
-        {!loading && posts.length === 0 && (
-          <div className="text-[var(--muted-text)]">No scheduled posts this week.</div>
-        )}
-        {posts.map((p, idx) => {
-          const scheduled = p.Scheduled || undefined
-          return (
-            <motion.div
-              key={p.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05 }}
-              className=""
-            >
-              <div className="mb-2 flex items-center gap-2">
-                <span className="text-xs text-[var(--text)]">{formatDay(new Date(scheduled || ''))} · {formatTime(scheduled)}</span>
-                {/* channel badge omitted if not available */}
-              </div>
-              <motion.div whileTap={{ scale: 0.98 }} className="rounded-md border border-[var(--border)] bg-[var(--card-bg)]">
-                <div className="p-2">
-                  <div className="rounded-md overflow-hidden">
-                    <MediaDisplay post={p as any} carouselPosts={[]} priority={false} />
-                  </div>
-                  {p['Post Caption'] && (
-                    <p className="mt-2 text-sm text-[var(--text)] line-clamp-3">{p['Post Caption']}</p>
-                  )}
-                </div>
-              </motion.div>
-            </motion.div>
-          )
-        })}
-      </div>
+      <FullCalendar
+        plugins={[dayGridPlugin, interactionPlugin]}
+        initialView="dayGridMonth"
+        height="auto"
+        headerToolbar={{ left: 'title', center: '', right: 'prev,next today' }}
+        events={events}
+        eventContent={(arg) => {
+          const p = (arg.event.extendedProps as any)?.post as ScheduledPostSummary | undefined
+          if (!p) return { html: '' }
+          const caption = (p['Post Caption'] || '').replace(/</g, '&lt;').slice(0, 80)
+          const media = p['Asset URL'] || ''
+          const isVideo = (p['Asset Type'] || '').toLowerCase() === 'video'
+          const mediaHtml = isVideo
+            ? `<video muted playsinline style="width:100%;border-radius:8px" src="${media}"></video>`
+            : `<img style="width:100%;border-radius:8px" src="${media}" />`
+          return { html: `<div style="font-size:12px;line-height:1.3">${media ? mediaHtml : ''}<div style="margin-top:6px;color:var(--muted-text)">${caption}</div></div>` }
+        }}
+        dayMaxEventRows={3}
+        dayMaxEvents={true}
+      />
     </div>
   )
 }

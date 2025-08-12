@@ -10,6 +10,9 @@
     "generate-passcodes": "node scripts/generate-passcodes.js"
   },
   "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.19",
+    "@fullcalendar/interaction": "^6.1.19",
+    "@fullcalendar/react": "^6.1.19",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^3.3.4",
     "@supabase/supabase-js": "^2.39.3",
