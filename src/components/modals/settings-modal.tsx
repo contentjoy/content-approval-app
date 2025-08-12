@@ -49,6 +49,8 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
 
   const [profileKey, setProfileKey] = useState<string | null>(null)
   const [ayrshareProfiles, setAyrshareProfiles] = useState<AyrshareProfiles>({})
+  const [resolvedGymId, setResolvedGymId] = useState<string | null>(null)
+  const [resolvedGymName, setResolvedGymName] = useState<string | null>(null)
   const connectedPlatforms = useMemo(() => Object.keys(ayrshareProfiles || {}), [ayrshareProfiles])
 
   useEffect(() => {
@@ -64,11 +66,17 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
         // but URL encoding can cause 400s; use filter() with unquoted key
         query = query.filter('Gym Name', 'ilike', name)
       }
-      const { data, error } = await query.single()
+      const { data, error } = await query.order('id', { ascending: false }).limit(1).maybeSingle()
       if (error) {
         toast.error(`Failed to load settings: ${error.message}`)
         return
       }
+      if (!data) {
+        toast.error('Gym not found')
+        return
+      }
+      setResolvedGymId((data as any).id || null)
+      setResolvedGymName((data as any)['Gym Name'] || null)
       setProfileKey(data?.profile_key || null)
       setAyrshareProfiles((data as any)?.ayrshare_profiles || {})
       reset({
@@ -89,7 +97,7 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
         localHashtags: data?.['Local Hashtags'] || '',
       })
     })()
-  }, [isOpen, gymId, reset])
+  }, [isOpen, gymId, gymSlug, reset])
 
   const onSubmit = async (values: SettingsModalData) => {
     const update: Record<string, any> = {
@@ -110,10 +118,11 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
       'Local Hashtags': values.localHashtags ?? null,
     }
 
+    const targetId = resolvedGymId || gymId
     const { error } = await supabase
       .from('gyms')
       .update(update)
-      .eq('id', gymId)
+      .eq('id', targetId!)
 
     if (error) {
       toast.error(`Failed to update settings: ${error.message}`)
@@ -126,14 +135,23 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
 
   async function openAyrshareManage(platform?: string) {
     try {
-      if (!profileKey) {
-        toast.error('Profile key missing. Complete onboarding first.')
-        return
+      let pk = profileKey
+      if (!pk) {
+        if (!resolvedGymName) throw new Error('Missing gym name to create profile')
+        const createRes = await fetch('/api/ayrshare/create-profile', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ gymName: resolvedGymName })
+        })
+        const createData = await createRes.json()
+        if (!createRes.ok) throw new Error(createData.error || 'Failed to create Ayrshare profile')
+        pk = createData.profileKey
+        setProfileKey(pk)
+        const id = resolvedGymId || gymId
+        if (id) await supabase.from('gyms').update({ profile_key: pk } as any).eq('id', id)
       }
       const res = await fetch('/api/ayrshare/generate-jwt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profileKey, gymId, platform }),
+        body: JSON.stringify({ profileKey: pk, gymId: resolvedGymId || gymId, platform }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to generate URL')
