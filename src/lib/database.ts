@@ -615,7 +615,7 @@ export async function getScheduledPosts(gymSlug: string, startDate: Date, endDat
   // We already store gym_id on rows, but the instruction says "gymSlug". We'll first try matching by gym_id.
   let query = supabase
     .from('social_media_posts')
-    .select('id, "Gym Name", "Asset URL", "Asset Type", "Post Caption", Scheduled, channel, gym_id')
+    .select('id, "Gym Name", "Asset URL", "Asset Type", "Post Caption", Scheduled, gym_id')
     .gte('Scheduled', startDate.toISOString())
     .lt('Scheduled', endDate.toISOString())
     .order('Scheduled', { ascending: true })

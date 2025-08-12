@@ -92,11 +92,7 @@ export default function CalendarPage() {
               >
                 <div className="mb-2 flex items-center gap-2">
                   <span className="text-xs text-[var(--text)]">{formatDay(new Date(scheduled || ''))} · {formatTime(scheduled)}</span>
-                  {p.channel && (
-                    <span className="text-xs bg-[var(--primary)]/10 text-[var(--primary)] px-2 py-0.5 rounded">
-                      {p.channel}
-                    </span>
-                  )}
+                  {/* channel badge omitted if not available */}
                 </div>
                 <motion.div
                   whileInView={{ scale: 1.05, y: -10 }}
@@ -137,11 +133,7 @@ export default function CalendarPage() {
             >
               <div className="mb-2 flex items-center gap-2">
                 <span className="text-xs text-[var(--text)]">{formatDay(new Date(scheduled || ''))} · {formatTime(scheduled)}</span>
-                {p.channel && (
-                  <span className="text-xs bg-[var(--primary)]/10 text-[var(--primary)] px-2 py-0.5 rounded">
-                    {p.channel}
-                  </span>
-                )}
+                {/* channel badge omitted if not available */}
               </div>
               <motion.div whileTap={{ scale: 0.98 }} className="rounded-md border border-[var(--border)] bg-[var(--card-bg)]">
                 <div className="p-2">
