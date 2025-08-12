@@ -54,13 +54,15 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
   useEffect(() => {
     if (!isOpen) return
     ;(async () => {
-      const columns = 'id, profile_key, ayrshare_profiles, "Gym Name", "Brand Choice", "Primary color", "City Address", "Social handle", "Email", "First name", "Last name", "Brand Profile", "Writing Style", "Client Info", "Primary offer", "Target Demographic", "Clients Desired Result", "Offerings", "Local Hashtags"'
-      let query = supabase.from('gyms').select(columns)
+      // Use wildcard to avoid URL encoding issues with quoted column names
+      let query = supabase.from('gyms').select('*')
       if (gymId) {
         query = query.eq('id', gymId)
       } else if (gymSlug) {
         const name = gymSlug.replace(/-/g, ' ')
-        query = query.ilike('"Gym Name"', name)
+        // Supabase JS client accepts quoted identifier if passed as a string
+        // but URL encoding can cause 400s; use filter() with unquoted key
+        query = query.filter('Gym Name', 'ilike', name)
       }
       const { data, error } = await query.single()
       if (error) {
