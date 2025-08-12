@@ -1,10 +1,11 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Grid3X3, List, CalendarDays, Palette, Calendar as CalendarDate } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Grid3X3, List, CalendarDays, Palette, Calendar as CalendarDate, ChevronDown } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { useCalendar } from "./calendar-context";
 import type { TCalendarView } from "./types";
+import { useState } from "react";
 
 const VIEW_ICONS = {
 	day: CalendarIcon,
@@ -14,8 +15,17 @@ const VIEW_ICONS = {
 	agenda: List,
 };
 
+const VIEW_LABELS = {
+	day: "Day",
+	week: "Week", 
+	month: "Month",
+	year: "Year",
+	agenda: "Agenda",
+};
+
 export function CalendarHeader() {
 	const { selectedDate, setSelectedDate, view, setView, agendaModeGroupBy, setAgendaModeGroupBy } = useCalendar();
+	const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
 	const goToPrevious = () => {
 		const newDate = new Date(selectedDate);
@@ -80,6 +90,16 @@ export function CalendarHeader() {
 		}
 	};
 
+	const handleViewChange = (newView: TCalendarView) => {
+		setView(newView);
+		setIsDropdownOpen(false);
+	};
+
+	const renderViewIcon = (viewType: TCalendarView) => {
+		const Icon = VIEW_ICONS[viewType];
+		return Icon ? <Icon className="h-4 w-4" /> : null;
+	};
+
 	return (
 		<div className="border-b">
 			{/* Top row: Navigation and Today button */}
@@ -111,8 +131,8 @@ export function CalendarHeader() {
 					</Button>
 				</div>
 
-				{/* View switching buttons - compact on mobile */}
-				<div className="flex items-center gap-1">
+				{/* View selection - Dropdown on mobile, buttons on desktop */}
+				<div className="hidden sm:flex items-center gap-1">
 					{(Object.keys(VIEW_ICONS) as TCalendarView[]).map((viewType) => {
 						const Icon = VIEW_ICONS[viewType];
 						return (
@@ -129,6 +149,46 @@ export function CalendarHeader() {
 							</Button>
 						);
 					})}
+				</div>
+
+				{/* Mobile dropdown */}
+				<div className="sm:hidden relative">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+						className="h-8 px-3 text-sm flex items-center gap-2"
+					>
+						{renderViewIcon(view)}
+						<span>{VIEW_LABELS[view]}</span>
+						<ChevronDown className={`h-3 w-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+					</Button>
+
+					{/* Dropdown menu */}
+					{isDropdownOpen && (
+						<div className="absolute right-0 top-full mt-1 w-32 bg-background border border-border rounded-md shadow-lg z-50">
+							{(Object.keys(VIEW_ICONS) as TCalendarView[]).map((viewType) => {
+								const isActive = view === viewType;
+								
+								return (
+									<button
+										key={viewType}
+										onClick={() => handleViewChange(viewType)}
+										className={`
+											w-full px-3 py-2 text-left text-sm flex items-center gap-2 transition-colors
+											${isActive 
+												? 'bg-foreground text-background' 
+												: 'hover:bg-muted text-foreground'
+											}
+										`}
+									>
+										{renderViewIcon(viewType)}
+										{VIEW_LABELS[viewType]}
+									</button>
+								);
+							})}
+						</div>
+					)}
 				</div>
 			</div>
 
