@@ -638,3 +638,16 @@ export async function getScheduledPosts(gymSlug: string, startDate: Date, endDat
   }
   return (data || []) as ScheduledPostSummary[]
 }
+
+export async function updatePostScheduled(postId: string, iso: string): Promise<{ success: boolean; error?: string }>{
+  const { error } = await supabase
+    .from('social_media_posts')
+    .update({ 'Scheduled': iso } as any)
+    .eq('id', postId)
+
+  if (error) {
+    console.error('Error updating scheduled timestamp:', error)
+    return { success: false, error: error.message }
+  }
+  return { success: true }
+}

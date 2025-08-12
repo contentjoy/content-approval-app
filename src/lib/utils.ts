@@ -12,3 +12,27 @@ export async function getEmbedHtml(url: string, platform: 'instagram' | 'tiktok'
   const data = await res.json()
   return data?.html || null
 }
+
+// Calendar color helpers using CSS variables only (no hex literals)
+export type ContentType = 'Reels' | 'Photo' | 'Carousel' | 'Story' | 'Other' | string
+export type AssetType = 'Video' | 'Photo' | string
+
+export function getContentTypeFillVar(contentType?: ContentType): string {
+  const key = (contentType || 'Other').toString().toLowerCase()
+  switch (true) {
+    case /reel|short|video/.test(key):
+      return 'var(--accent)'
+    case /photo|image|pic/.test(key):
+      return 'var(--surface)'
+    case /carousel|album|multi/.test(key):
+      return 'var(--accents-2)'
+    default:
+      return 'var(--card-bg)'
+  }
+}
+
+export function getAssetTypeStripeVar(assetType?: AssetType): string {
+  const key = (assetType || '').toString().toLowerCase()
+  if (/video|mp4|mov/.test(key)) return 'var(--accent)'
+  return 'var(--border)'
+}

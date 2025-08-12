@@ -1,12 +1,14 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useParams } from 'next/navigation'
-import { getScheduledPosts, type ScheduledPostSummary } from '@/lib/database'
-import FullCalendar from '@fullcalendar/react'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import interactionPlugin from '@fullcalendar/interaction'
+import { getScheduledPosts, type ScheduledPostSummary, updatePostScheduled } from '@/lib/database'
+import dynamic from 'next/dynamic'
+import '@toast-ui/calendar/dist/toastui-calendar.min.css'
+import { getAssetTypeStripeVar, getContentTypeFillVar } from '@/lib/utils'
+
+const ToastCalendar: any = dynamic(() => import('@toast-ui/calendar'), { ssr: false })
 
 function startOfWeek(date: Date) {
   const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
@@ -62,18 +64,37 @@ export default function CalendarPage() {
     return () => { mounted = false }
   }, [gymSlug, weekStart, weekEnd])
 
-  // Build FullCalendar events from posts
-  const events = useMemo(() => {
-    return posts
-      .filter(p => !!p.Scheduled)
-      .map(p => ({
-        id: p.id,
-        title: (p['Post Caption'] || '').slice(0, 48) || 'Scheduled Post',
-        start: p.Scheduled as string,
-        allDay: false,
-        extendedProps: { post: p },
-      }))
-  }, [posts])
+  const calRef = useRef<any>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const events = useMemo(() => posts.filter(p => !!p.Scheduled).map((p) => {
+    const title = (p as any)['Post Title'] || (p as any)['Content Type'] || 'Post'
+    const order = (p as any)['Carousel Order']
+    const group = (p as any)['Carousel Group']
+    const withOrder = group ? `${title} #${order ?? ''}`.trim() : title
+    const contentType = (p as any)['Content Type']
+    const assetType = (p as any)['Asset Type'] || (p as any)['Asset type']
+    return {
+      id: p.id,
+      calendarId: contentType ?? 'Other',
+      title: withOrder,
+      start: p.Scheduled as string,
+      end: new Date(new Date(p.Scheduled as string).getTime() + 30 * 60000).toISOString(),
+      isAllDay: false,
+      backgroundColor: getContentTypeFillVar(contentType),
+      borderColor: 'var(--border)',
+      raw: {
+        assetUrl: (p as any)['Asset URL'],
+        gymName: (p as any)['Gym Name'],
+        contentType,
+        caption: (p as any)['Post Caption'],
+        carouselGroup: group,
+        carouselOrder: order,
+        assetType,
+        stripe: getAssetTypeStripeVar(assetType),
+      },
+    }
+  }), [posts])
 
   return (
     <div className="max-w-5xl mx-auto p-4 bg-[var(--background)] text-[var(--text)]">
@@ -83,26 +104,42 @@ export default function CalendarPage() {
       {loading && <div className="text-[var(--muted-text)]">Loading…</div>}
       {error && <div className="text-destructive mb-2">{error}</div>}
 
-      <FullCalendar
-        plugins={[dayGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        height="auto"
-        headerToolbar={{ left: 'title', center: '', right: 'prev,next today' }}
-        events={events}
-        eventContent={(arg) => {
-          const p = (arg.event.extendedProps as any)?.post as ScheduledPostSummary | undefined
-          if (!p) return { html: '' }
-          const caption = (p['Post Caption'] || '').replace(/</g, '&lt;').slice(0, 80)
-          const media = p['Asset URL'] || ''
-          const isVideo = (p['Asset Type'] || '').toLowerCase() === 'video'
-          const mediaHtml = isVideo
-            ? `<video muted playsinline style="width:100%;border-radius:8px" src="${media}"></video>`
-            : `<img style="width:100%;border-radius:8px" src="${media}" />`
-          return { html: `<div style="font-size:12px;line-height:1.3">${media ? mediaHtml : ''}<div style="margin-top:6px;color:var(--muted-text)">${caption}</div></div>` }
-        }}
-        dayMaxEventRows={3}
-        dayMaxEvents={true}
-      />
+      <div ref={containerRef} className="min-h-[70vh] overflow-hidden rounded-md border border-[var(--border)] bg-[var(--card-bg)]">
+        <ToastCalendar
+          ref={calRef}
+          height={800}
+          view="month"
+          month={{ isAlways6Weeks: true }}
+          usageStatistics={false}
+          events={events}
+          theme={{
+            common: { backgroundColor: 'var(--background)' },
+            month: {
+              dayName: { color: 'var(--muted-text)' },
+              moreView: { border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)' },
+            },
+          }}
+          onAfterRenderEvent={(ev: any) => {
+            const el = ev?.el as HTMLElement | undefined
+            const stripe = ev?.event?.raw?.stripe
+            if (el && stripe) {
+              el.style.borderLeft = `3px solid ${stripe}`
+            }
+          }}
+          onBeforeUpdateEvent={async (ev: any) => {
+            const event = ev.event
+            const newIso = new Date(event.start).toISOString()
+            const id = event.id as string
+            const prev = posts
+            setPosts(curr => curr.map(p => p.id === id ? { ...p, Scheduled: newIso } : p))
+            const res = await updatePostScheduled(id, newIso)
+            if (!res.success) {
+              // revert
+              setPosts(prev)
+            }
+          }}
+        />
+      </div>
     </div>
   )
 }
