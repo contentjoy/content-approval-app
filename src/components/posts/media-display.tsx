@@ -32,14 +32,35 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
     setIsLoading(false)
   }
 
-  const handleImageError = () => {
+  const handleImageError = async () => {
     setIsLoading(false)
     setHasError(true)
+    if (post?.id) {
+      try {
+        await fetch('/api/posts/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ postId: post.id })
+        })
+        // Optionally dispatch an event so parent lists can refresh
+        window.dispatchEvent(new CustomEvent('post-deleted', { detail: { id: post.id } }))
+      } catch {}
+    }
   }
 
-  const handleVideoError = () => {
+  const handleVideoError = async () => {
     setIsLoading(false)
     setHasError(true)
+    if (post?.id) {
+      try {
+        await fetch('/api/posts/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ postId: post.id })
+        })
+        window.dispatchEvent(new CustomEvent('post-deleted', { detail: { id: post.id } }))
+      } catch {}
+    }
   }
 
   // If it's a carousel, use the CarouselDisplay component (4:5)
