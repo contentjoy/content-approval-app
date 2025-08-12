@@ -1,214 +1,133 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
 import { useParams } from 'next/navigation'
-import { getScheduledPosts, type ScheduledPostSummary, updatePostScheduled } from '@/lib/database'
+import { getScheduledPosts, type ScheduledPostSummary } from '@/lib/database'
 import '@toast-ui/calendar/dist/toastui-calendar.min.css'
 import { getAssetTypeStripeVar, getContentTypeFillVar } from '@/lib/utils'
-import dynamic from 'next/dynamic'
-const noop = () => null
 
-function startOfWeek(date: Date) {
-  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
-  const day = d.getUTCDay()
-  const diff = (day === 0 ? -6 : 1) // Monday as start
-  d.setUTCDate(d.getUTCDate() - (day - 1))
-  return d
+function startOfMonth(date: Date) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1, 0, 0, 0))
 }
-
-function addDays(date: Date, days: number) {
-  const d = new Date(date)
-  d.setUTCDate(d.getUTCDate() + days)
-  return d
-}
-
-function formatDay(date: Date) {
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-}
-
-function formatTime(iso?: string | null) {
-  if (!iso) return ''
-  const d = new Date(iso)
-  return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+function addMonths(date: Date, n: number) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + n, 1, 0, 0, 0))
 }
 
 export default function CalendarPage() {
   const params = useParams()
   const gymSlug = (params?.gymSlug as string) || ''
 
-  const today = new Date()
-  const weekStart = useMemo(() => startOfWeek(today), [today])
-  const weekEnd = useMemo(() => addDays(weekStart, 7), [weekStart])
-
+  const [currentDate, setCurrentDate] = useState(new Date())
   const [posts, setPosts] = useState<ScheduledPostSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // range for current month (UTC)
+  const range = useMemo(() => {
+    const start = startOfMonth(currentDate)
+    const end = addMonths(start, 1)
+    return { start, end }
+  }, [currentDate])
+
   useEffect(() => {
     let mounted = true
     async function load() {
+      setLoading(true)
+      setError(null)
       try {
-        setLoading(true)
-        setError(null)
-        const data = await getScheduledPosts(gymSlug, weekStart, weekEnd)
+        const data = await getScheduledPosts(gymSlug, range.start, range.end)
         if (mounted) setPosts(data)
       } catch (e: any) {
-        setError('Failed to load calendar')
+        if (mounted) setError('Failed to load scheduled posts')
       } finally {
-        setLoading(false)
+        if (mounted) setLoading(false)
       }
     }
     load()
     return () => { mounted = false }
-  }, [gymSlug, weekStart, weekEnd])
+  }, [gymSlug, range.start, range.end])
 
-  const calRef = useRef<any>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const calendarRef = useRef<any>(null)
 
-  const events = useMemo(() => posts.filter(p => !!p.Scheduled).map((p) => {
-    const title = (p as any)['Post Title'] || (p as any)['Content Type'] || 'Post'
-    const order = (p as any)['Carousel Order']
-    const group = (p as any)['Carousel Group']
-    const withOrder = group ? `${title} #${order ?? ''}`.trim() : title
-    const contentType = (p as any)['Content Type']
-    const assetType = (p as any)['Asset Type'] || (p as any)['Asset type']
-    return {
-      id: p.id,
-      calendarId: contentType ?? 'Other',
-      title: withOrder,
-      start: p.Scheduled as string,
-      end: new Date(new Date(p.Scheduled as string).getTime() + 30 * 60000).toISOString(),
-      isAllDay: false,
-      backgroundColor: getContentTypeFillVar(contentType),
-      borderColor: 'var(--border)',
-      raw: {
-        assetUrl: (p as any)['Asset URL'],
-        gymName: (p as any)['Gym Name'],
-        contentType,
-        caption: (p as any)['Post Caption'],
-        carouselGroup: group,
-        carouselOrder: order,
-        assetType,
-        stripe: getAssetTypeStripeVar(assetType),
-      },
-    }
-  }), [posts])
-
-  return (
-    <div className="max-w-5xl mx-auto p-4 bg-[var(--background)] text-[var(--text)]">
-      <h1 className="text-2xl font-semibold mb-2">Calendar</h1>
-      <p className="text-sm text-[var(--muted-text)] mb-4">Scheduled posts</p>
-
-      {loading && <div className="text-[var(--muted-text)]">Loading…</div>}
-      {error && <div className="text-destructive mb-2">{error}</div>}
-      <div ref={containerRef} className="min-h-[70vh] overflow-hidden rounded-md border border-[var(--border)] bg-[var(--card-bg)]" />
-
-      {/* Initialize Toast UI Calendar once */}
-      <Initializer
-        containerRef={containerRef}
-        calRef={calRef}
-        events={events}
-        onUpdateScheduled={async (id, iso) => {
-          const prev = posts
-          setPosts(curr => curr.map(p => (p.id === id ? { ...p, Scheduled: iso } : p)))
-          const res = await updatePostScheduled(id, iso)
-          if (!res.success) setPosts(prev)
-        }}
-      />
-    </div>
-  )
-}
-
-function Initializer({ containerRef, calRef, events, onUpdateScheduled }: {
-  containerRef: React.RefObject<HTMLDivElement>
-  calRef: React.MutableRefObject<any>
-  events: any[]
-  onUpdateScheduled: (id: string, iso: string) => Promise<void>
-}) {
+  // Create calendar once
   useEffect(() => {
-    let calendar: any = calRef.current
-    let ro: ResizeObserver | null = null
-    let rafId: number | null = null
-    let lastW = 0
-    let lastH = 0
-    let mounted = true
+    let created = false
     async function init() {
-      if (!containerRef.current || calendar) return
-      // @ts-expect-error third-party package doesn't export typings via "exports"; runtime default exists
-      const Calendar: any = (await import('@toast-ui/calendar')).default as any
-      calendar = new Calendar(containerRef.current, {
+      if (!containerRef.current || created) return
+      // @ts-expect-error package does not expose typings via exports; runtime default exists
+      const Calendar: any = (await import('@toast-ui/calendar')).default
+      const cal = new Calendar(containerRef.current, {
         defaultView: 'month',
         usageStatistics: false,
-        isReadOnly: false,
+        isReadOnly: true,
         month: { isAlways6Weeks: true },
         theme: {
           common: { backgroundColor: 'var(--background)' },
-          month: {
-            dayName: { color: 'var(--muted-text)' },
-            weekend: { backgroundColor: 'transparent' },
-            today: { color: 'var(--text)' },
-            moreView: { border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)' },
-          },
+          month: { dayName: { color: 'var(--muted-text)' }, moreView: { border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)' } },
         },
       })
-      calRef.current = calendar
-
-      calendar.on('afterRenderEvent', (ev: any) => {
-        const el = ev?.el as HTMLElement | undefined
-        const stripe = ev?.event?.raw?.stripe
-        if (el && stripe) el.style.borderLeft = `3px solid ${stripe}`
-      })
-
-      calendar.on('beforeUpdateEvent', async (ev: any) => {
-        const { event, changes } = ev
-        const newStart = changes?.start || event.start
-        const iso = new Date(newStart).toISOString()
-        await onUpdateScheduled(event.id as string, iso)
-      })
-
-      ro = new ResizeObserver((entries) => {
-        const entry = entries[0]
-        if (!entry) return
-        const { width, height } = entry.contentRect
-        if (Math.round(width) === Math.round(lastW) && Math.round(height) === Math.round(lastH)) return
-        lastW = width
-        lastH = height
-        if (rafId) cancelAnimationFrame(rafId)
-        rafId = requestAnimationFrame(() => {
-          calendar?.render()
-          rafId = null
-        })
-      })
-      ro.observe(containerRef.current!)
-
-      if (mounted) {
-        calendar.clear()
-        calendar.createEvents(events)
-      }
+      calendarRef.current = cal
+      created = true
+      // initial date
+      cal.setDate(currentDate)
     }
     init()
-    return () => {
-      mounted = false
-      ro?.disconnect()
-      if (rafId) cancelAnimationFrame(rafId)
-    }
   }, [])
 
-  // Update events when data changes without remount; debounce to avoid flashing
+  // Update calendar on date change
   useEffect(() => {
-    const calendar = calRef.current
-    if (!calendar) return
-    let raf: number | null = null
-    const apply = () => {
-      calendar.clear()
-      calendar.createEvents(events)
-      raf = null
-    }
-    raf = requestAnimationFrame(apply)
-    return () => { if (raf) cancelAnimationFrame(raf) }
-  }, [events])
-  return null
+    const cal = calendarRef.current
+    if (!cal) return
+    cal.setDate(currentDate)
+  }, [currentDate])
+
+  // Map posts to events and render (no re-mount)
+  useEffect(() => {
+    const cal = calendarRef.current
+    if (!cal) return
+    const events = posts.filter(p => !!p.Scheduled).map(p => {
+      const title = (p as any)['Post Title'] || (p as any)['Content Type'] || 'Post'
+      const order = (p as any)['Carousel Order']
+      const group = (p as any)['Carousel Group']
+      const withOrder = group ? `${title} #${order ?? ''}`.trim() : title
+      const contentType = (p as any)['Content Type']
+      const assetType = (p as any)['Asset Type'] || (p as any)['Asset type']
+      return {
+        id: p.id,
+        title: withOrder,
+        start: p.Scheduled as string,
+        end: new Date(new Date(p.Scheduled as string).getTime() + 30 * 60000).toISOString(),
+        isAllDay: false,
+        backgroundColor: getContentTypeFillVar(contentType),
+        borderColor: 'var(--border)',
+        raw: { stripe: getAssetTypeStripeVar(assetType) },
+      }
+    })
+    cal.clear()
+    cal.createEvents(events as any)
+  }, [posts])
+
+  return (
+    <div className="max-w-5xl mx-auto p-4">
+      <h1 className="text-2xl font-semibold mb-2">Calendar</h1>
+      <p className="text-sm text-[var(--muted-text)] mb-4">Scheduled posts</p>
+
+      <div className="mb-3 flex items-center gap-2">
+        <button className="btn-inline" onClick={() => setCurrentDate(new Date())}>Today</button>
+        <button className="btn-inline" onClick={() => setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1))}>Prev</button>
+        <button className="btn-inline" onClick={() => setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1))}>Next</button>
+        <span className="ml-2 text-sm text-[var(--muted-text)]">
+          {currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+        </span>
+      </div>
+
+      {loading && <div className="text-[var(--muted-text)]">Loading…</div>}
+      {error && <div className="text-destructive mb-2">{error}</div>}
+
+      <div ref={containerRef} className="rounded-md border border-[var(--border)] bg-[var(--card-bg)]" style={{ minHeight: 720 }} />
+    </div>
+  )
 }
 
 
