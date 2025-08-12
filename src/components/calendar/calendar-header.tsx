@@ -177,7 +177,7 @@ export function CalendarHeader() {
 										className={`
 											w-full px-3 py-2 text-left text-sm flex items-center gap-2 transition-colors
 											${isActive 
-												? 'bg-foreground text-background' 
+												? 'bg-text text-bg' 
 												: 'hover:bg-muted text-foreground'
 											}
 										`}
