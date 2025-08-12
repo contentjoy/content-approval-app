@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useMemo } from "react";
-import { format, startOfMonth, endOfMonth, eachMonthOfInterval, parseISO, isSameMonth } from "date-fns";
+import { format, eachMonthOfInterval, parseISO, isSameMonth } from "date-fns";
 import { useCalendar } from "../../calendar-context";
 import type { IEvent } from "../../interfaces";
 
@@ -11,6 +11,19 @@ interface IProps {
 	singleDayEvents: IEvent[];
 	multiDayEvents: IEvent[];
 }
+
+// Theme-based color mapping for events
+const getEventColorClasses = (color: string) => {
+	const colorMap: Record<string, string> = {
+		teal: "bg-teal-500 dark:bg-teal-600",
+		blue: "bg-blue-500 dark:bg-blue-600",
+		green: "bg-green-500 dark:bg-green-600",
+		amber: "bg-amber-500 dark:bg-amber-600",
+		red: "bg-red-500 dark:bg-red-600",
+		purple: "bg-purple-500 dark:bg-purple-600",
+	};
+	return colorMap[color] || colorMap.blue;
+};
 
 export function CalendarYearView({ singleDayEvents, multiDayEvents }: IProps) {
 	const { selectedDate, setSelectedDate } = useCalendar();
@@ -131,11 +144,13 @@ export function CalendarYearView({ singleDayEvents, multiDayEvents }: IProps) {
 											className={`
 												text-center p-1 rounded text-xs
 												${!isCurrentMonthDay ? 'text-muted-foreground/30' : ''}
-												${hasEvents ? 'bg-accent text-accent-foreground font-medium' : ''}
 												${dayDate.getDate() === 1 ? 'font-semibold' : ''}
 											`}
 										>
 											{dayDate.getDate()}
+											{hasEvents && (
+												<div className={`w-1 h-1 mx-auto mt-1 rounded-full ${getEventColorClasses('blue')}`} />
+											)}
 										</div>
 									);
 								})}
@@ -147,7 +162,7 @@ export function CalendarYearView({ singleDayEvents, multiDayEvents }: IProps) {
 									{monthEvents.slice(0, 2).map((event) => (
 										<div
 											key={event.id}
-											className="text-xs p-1 rounded bg-muted truncate"
+											className={`text-xs p-1 rounded truncate ${getEventColorClasses(event.color)}`}
 											title={event.title}
 										>
 											{event.title}

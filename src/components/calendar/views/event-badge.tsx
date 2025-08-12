@@ -12,12 +12,13 @@ const eventBadgeVariants = cva(
 	{
 		variants: {
 			color: {
-				blue: "bg-blue-100 text-blue-800 border border-blue-200 hover:bg-blue-200",
-				green: "bg-green-100 text-green-800 border border-green-200 hover:bg-green-200",
-				red: "bg-red-100 text-red-800 border border-red-200 hover:bg-red-200",
-				yellow: "bg-yellow-100 text-yellow-800 border border-yellow-200 hover:bg-yellow-200",
-				purple: "bg-purple-100 text-purple-800 border border-purple-200 hover:bg-purple-200",
-				orange: "bg-orange-100 text-orange-800 border border-orange-200 hover:bg-orange-200",
+				// Light mode: Material 300, Dark mode: Material 700
+				teal: "bg-teal-100 text-teal-800 border border-teal-200 hover:bg-teal-200 dark:bg-teal-700 dark:text-white dark:border-teal-600 dark:hover:bg-teal-600",
+				blue: "bg-blue-100 text-blue-800 border border-blue-200 hover:bg-blue-200 dark:bg-blue-700 dark:text-white dark:border-blue-600 dark:hover:bg-blue-600",
+				green: "bg-green-100 text-green-800 border border-green-200 hover:bg-green-200 dark:bg-green-700 dark:text-white dark:border-green-600 dark:hover:bg-green-600",
+				amber: "bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 dark:bg-amber-700 dark:text-white dark:border-amber-600 dark:hover:bg-amber-600",
+				red: "bg-red-100 text-red-800 border border-red-200 hover:bg-red-200 dark:bg-red-700 dark:text-white dark:border-red-600 dark:hover:bg-red-600",
+				purple: "bg-purple-100 text-purple-800 border border-purple-200 hover:bg-purple-200 dark:bg-purple-700 dark:text-white dark:border-purple-600 dark:hover:bg-purple-600",
 			},
 		},
 		defaultVariants: {
@@ -37,8 +38,8 @@ export function EventBadge({ event, cellDate, index }: IProps) {
 	const eventEnd = parseISO(event.endDate);
 	const isMultiDay = eventStart.toDateString() !== eventEnd.toDateString();
 	
-	// Format time for display
-	const timeDisplay = format(eventStart, "HH:mm");
+	// Format time for display - use 12-hour format for better readability
+	const timeDisplay = format(eventStart, "h:mm a");
 	
 	// Truncate title if too long - shorter on mobile
 	const displayTitle = event.title.length > (window.innerWidth < 640 ? 15 : 20)

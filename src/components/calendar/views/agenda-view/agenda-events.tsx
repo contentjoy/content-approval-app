@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useMemo } from "react";
-import { format, parseISO, startOfDay, endOfDay, isSameDay, isToday, isTomorrow, isYesterday } from "date-fns";
+import { format, parseISO, isToday, isTomorrow, isYesterday } from "date-fns";
 import { useCalendar } from "../../calendar-context";
 import type { IEvent } from "../../interfaces";
 import { EventDetailsDialog } from "../../dialogs/event-details-dialog";
@@ -13,8 +13,34 @@ interface IProps {
 	multiDayEvents: IEvent[];
 }
 
+// Theme-based color mapping for events
+const getEventColorClasses = (color: string) => {
+	const colorMap: Record<string, string> = {
+		teal: "bg-teal-100 text-teal-800 border border-teal-200 hover:bg-teal-200 dark:bg-teal-700 dark:text-white dark:border-teal-600 dark:hover:bg-teal-600",
+		blue: "bg-blue-100 text-blue-800 border border-blue-200 hover:bg-blue-200 dark:bg-blue-700 dark:text-white dark:border-blue-600 dark:hover:bg-blue-600",
+		green: "bg-green-100 text-green-800 border border-green-200 hover:bg-green-200 dark:bg-green-700 dark:text-white dark:border-green-600 dark:hover:bg-green-600",
+		amber: "bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 dark:bg-amber-700 dark:text-white dark:border-amber-600 dark:hover:bg-amber-600",
+		red: "bg-red-100 text-red-800 border border-red-200 hover:bg-red-200 dark:bg-red-700 dark:text-white dark:border-red-600 dark:hover:bg-red-600",
+		purple: "bg-purple-100 text-purple-800 border border-purple-200 hover:bg-purple-200 dark:bg-purple-700 dark:text-white dark:border-purple-600 dark:hover:bg-purple-600",
+	};
+	return colorMap[color] || colorMap.blue;
+};
+
+// Color indicator mapping
+const getColorIndicatorClasses = (color: string) => {
+	const colorMap: Record<string, string> = {
+		teal: "bg-teal-500 border-teal-600",
+		blue: "bg-blue-500 border-blue-600",
+		green: "bg-green-500 border-green-600",
+		amber: "bg-amber-500 border-amber-600",
+		red: "bg-red-500 border-red-600",
+		purple: "bg-purple-500 border-purple-600",
+	};
+	return colorMap[color] || colorMap.blue;
+};
+
 export function AgendaEvents({ singleDayEvents, multiDayEvents }: IProps) {
-	const { selectedDate, agendaModeGroupBy } = useCalendar();
+	const { agendaModeGroupBy } = useCalendar();
 
 	// Get all events and sort by date
 	const allEvents = useMemo(() => {
@@ -63,14 +89,14 @@ export function AgendaEvents({ singleDayEvents, multiDayEvents }: IProps) {
 
 	const getColorLabel = (color: string) => {
 		const colorLabels: Record<string, string> = {
-			blue: "Blue Events",
-			green: "Green Events", 
-			red: "Red Events",
-			yellow: "Yellow Events",
-			purple: "Purple Events",
-			orange: "Orange Events"
+			teal: "Story Posts",
+			blue: "Photo Posts", 
+			green: "General Posts",
+			amber: "Reel Posts",
+			red: "Video Posts",
+			purple: "Carousel Posts"
 		};
-		return colorLabels[color] || `${color.charAt(0).toUpperCase() + color.slice(1)} Events`;
+		return colorLabels[color] || `${color.charAt(0).toUpperCase() + color.slice(1)} Posts`;
 	};
 
 	return (
@@ -157,7 +183,7 @@ export function AgendaEvents({ singleDayEvents, multiDayEvents }: IProps) {
 																{format(eventDate, 'MMM d, yyyy')}
 															</span>
 															<span>
-																{format(eventDate, 'HH:mm')}
+																{format(eventDate, 'h:mm a')}
 															</span>
 															{event.assetType && (
 																<span className="capitalize">
@@ -169,10 +195,7 @@ export function AgendaEvents({ singleDayEvents, multiDayEvents }: IProps) {
 													
 													{/* Color indicator */}
 													<div 
-														className={`
-															w-4 h-4 rounded-full ml-3 flex-shrink-0
-															bg-${event.color}-100 border border-${event.color}-200
-														`}
+														className={`w-4 h-4 rounded-full ml-3 flex-shrink-0 border ${getColorIndicatorClasses(event.color)}`}
 													/>
 												</div>
 											</motion.div>

@@ -2,7 +2,17 @@ import type { ScheduledPostSummary } from "@/lib/database";
 import type { IEvent, IUser } from "./interfaces";
 import type { TEventColor } from "./types";
 
-// Map content types to colors
+// Map asset types to colors - prioritize asset type over content type
+const assetTypeToColor: Record<string, TEventColor> = {
+	"carousel": "purple",
+	"video": "red",
+	"photo": "blue",
+	"story": "teal",
+	"reel": "amber",
+	"default": "blue",
+};
+
+// Fallback content type colors (only used if asset type not found)
 const contentTypeToColor: Record<string, TEventColor> = {
 	"instagram": "blue",
 	"facebook": "purple",
@@ -11,27 +21,19 @@ const contentTypeToColor: Record<string, TEventColor> = {
 	"linkedin": "blue",
 	"youtube": "red",
 	"post": "green",
-	"story": "purple",
-	"reel": "orange",
-	"default": "blue",
-};
-
-// Map asset types to colors
-const assetTypeToColor: Record<string, TEventColor> = {
-	"video": "red",
-	"photo": "blue",
-	"carousel": "purple",
+	"story": "teal",
+	"reel": "amber",
 	"default": "blue",
 };
 
 export function convertPostToEvent(post: ScheduledPostSummary, gymName: string): IEvent {
-	// Determine color based on content type or asset type
+	// Determine color based on asset type first, then content type as fallback
 	let color: TEventColor = "blue";
 	
-	if (post["Content Type"]) {
-		color = contentTypeToColor[post["Content Type"].toLowerCase()] || contentTypeToColor.default;
-	} else if (post["Asset Type"]) {
+	if (post["Asset Type"]) {
 		color = assetTypeToColor[post["Asset Type"].toLowerCase()] || assetTypeToColor.default;
+	} else if (post["Content Type"]) {
+		color = contentTypeToColor[post["Content Type"].toLowerCase()] || contentTypeToColor.default;
 	}
 
 	// Create event title
@@ -48,8 +50,24 @@ export function convertPostToEvent(post: ScheduledPostSummary, gymName: string):
 		title = `${title} #${carouselOrder}`;
 	}
 
-	// Create start and end dates
-	const scheduledDate = post.Scheduled ? new Date(post.Scheduled) : new Date();
+	// Create start and end dates - preserve local time
+	let scheduledDate: Date;
+	if (post.Scheduled) {
+		// Parse the ISO string and preserve local time
+		const parsed = new Date(post.Scheduled);
+		// Create a new date with the local components to avoid timezone shifts
+		scheduledDate = new Date(
+			parsed.getFullYear(),
+			parsed.getMonth(),
+			parsed.getDate(),
+			parsed.getHours(),
+			parsed.getMinutes(),
+			parsed.getSeconds()
+		);
+	} else {
+		scheduledDate = new Date();
+	}
+	
 	const endDate = new Date(scheduledDate.getTime() + 30 * 60 * 1000); // 30 minutes duration
 
 	// Create user object (placeholder for now)
