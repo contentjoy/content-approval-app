@@ -599,3 +599,34 @@ export async function getDiscoveryForCurrentMonth(): Promise<DiscoveryItem[]> {
     created_at: row.created_at,
   })) as DiscoveryItem[]
 }
+
+export interface ScheduledPostSummary {
+  id: string
+  "Gym Name"?: string
+  "Asset URL"?: string
+  "Asset Type"?: string
+  "Post Caption"?: string
+  Scheduled?: string | null
+  channel?: string | null
+}
+
+export async function getScheduledPosts(gymSlug: string, startDate: Date, endDate: Date): Promise<ScheduledPostSummary[]> {
+  // Convert slug like "my-gym" to gym name format if needed, else assume slug is gym id string
+  // We already store gym_id on rows, but the instruction says "gymSlug". We'll first try matching by gym_id.
+  let query = supabase
+    .from('social_media_posts')
+    .select('id, "Gym Name", "Asset URL", "Asset Type", "Post Caption", Scheduled, channel, gym_id')
+    .gte('Scheduled', startDate.toISOString())
+    .lt('Scheduled', endDate.toISOString())
+    .order('Scheduled', { ascending: true })
+
+  // Try filter by gym_id using provided slug (many of our routes use the actual id in localStorage)
+  query = query.eq('gym_id', gymSlug)
+
+  const { data, error } = await query
+  if (error) {
+    console.error('Error fetching scheduled posts:', error)
+    return []
+  }
+  return (data || []) as ScheduledPostSummary[]
+}
