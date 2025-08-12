@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { AyrshareProfile } from '@/types'
+// No modal needed; we use a centered popup and a lightweight overlay while connecting
 
 interface SocialPlatform {
   id: string
@@ -297,8 +298,8 @@ export default function SocialConnectPage() {
                 transition={{ delay: 0.1 * platforms.indexOf(platform) }}
                 className={`
                   border rounded-lg p-4 transition-all duration-200
-                  ${platform.connected 
-                    ? 'border-green-300 bg-green-50' 
+                  ${platform.connected
+                    ? 'border-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 dark:border-emerald-700'
                     : 'border-card-border bg-background hover:border-primary'
                   }
                 `}
@@ -329,7 +330,7 @@ export default function SocialConnectPage() {
                     </div>
                   ) : (
                     <button
-                      onClick={() => setConfirmPlatform(platform.id)}
+                      onClick={() => connectPlatform(platform.id)}
                       disabled={isConnecting === platform.id}
                       className="flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
                     >
@@ -390,43 +391,11 @@ export default function SocialConnectPage() {
       {isConnecting && (
         <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-[var(--surface)] border border-border rounded-lg p-6 max-w-sm text-center shadow-medium">
-            <p className="text-text mb-2 font-semibold">Please click "Close" in the connect window</p>
+            <p className="text-text mb-2 font-semibold">Please click &quot;Close&quot; in the connect window</p>
             <p className="text-sm text-muted-text">After closing, we’ll update your connected accounts here automatically.</p>
           </div>
         </div>
       )}
-
-      {/* Confirm modal */}
-      <Modal
-        isOpen={!!confirmPlatform}
-        onClose={() => setConfirmPlatform(null)}
-        title="Open social connection"
-        size="sm"
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-text">
-            A window will open to link your social accounts. When finished, click the "Close" button in that window and return here.
-          </p>
-          <div className="flex justify-end gap-3">
-            <button
-              onClick={() => setConfirmPlatform(null)}
-              className="btn-cancel"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={async () => {
-                const p = confirmPlatform
-                setConfirmPlatform(null)
-                if (p) await connectPlatform(p)
-              }}
-              className="px-4 py-2 rounded-md bg-[var(--brand-primary)] text-white hover:opacity-90"
-            >
-              Continue
-            </button>
-          </div>
-        </div>
-      </Modal>
     </div>
   )
 }
