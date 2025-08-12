@@ -33,6 +33,29 @@ interface IProps {
 	index: number;
 }
 
+// Safe text truncation that preserves emojis
+function safeTruncate(text: string, maxLength: number): string {
+	if (text.length <= maxLength) return text;
+	
+	// Try to find a good breaking point (space, punctuation, or emoji boundary)
+	let breakPoint = maxLength;
+	
+	// Look for a space to break at
+	for (let i = maxLength; i > 0; i--) {
+		if (text[i] === ' ' || text[i] === '\n' || text[i] === '\t') {
+			breakPoint = i;
+			break;
+		}
+	}
+	
+	// If no good break point found, just truncate at maxLength
+	if (breakPoint === maxLength) {
+		breakPoint = maxLength;
+	}
+	
+	return text.substring(0, breakPoint) + '...';
+}
+
 export function EventBadge({ event, cellDate, index }: IProps) {
 	const eventStart = parseISO(event.startDate);
 	const eventEnd = parseISO(event.endDate);
@@ -41,10 +64,9 @@ export function EventBadge({ event, cellDate, index }: IProps) {
 	// Format time for display - use 12-hour format for better readability
 	const timeDisplay = format(eventStart, "h:mm a");
 	
-	// Truncate title if too long - shorter on mobile
-	const displayTitle = event.title.length > (window.innerWidth < 640 ? 15 : 20)
-		? `${event.title.substring(0, window.innerWidth < 640 ? 15 : 20)}...` 
-		: event.title;
+	// Safe truncate title that preserves emojis
+	const maxLength = window.innerWidth < 640 ? 15 : 20;
+	const displayTitle = safeTruncate(event.title, maxLength);
 
 	return (
 		<EventDetailsDialog event={event}>

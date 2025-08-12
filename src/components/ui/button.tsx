@@ -12,7 +12,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-all duration-200 focus-ring disabled:opacity-50 disabled:pointer-events-none'
     
     const variants = {
-      default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+      // Light mode: dark button with white text, Dark mode: white button with black text
+      default: 'bg-foreground text-background hover:bg-foreground/90 dark:bg-background dark:text-foreground dark:hover:bg-background/90',
       destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
       outline: 'border border-border bg-[var(--accents-1)] text-foreground hover:bg-accent hover:text-accent-foreground',
       secondary: 'bg-[var(--accents-1)] text-secondary-foreground hover:bg-secondary/80',
