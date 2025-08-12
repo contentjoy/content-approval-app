@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { motion, useMotionValue, useScroll } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useParams } from 'next/navigation'
 import { getScheduledPosts, type ScheduledPostSummary } from '@/lib/database'
 import { MediaDisplay } from '@/components/posts'
@@ -55,8 +55,6 @@ export default function CalendarPage() {
 
   // scroll snapping container ref for desktop scaling
   const containerRef = useRef<HTMLDivElement>(null)
-  const x = useMotionValue(0)
-  useScroll({ container: containerRef, axis: 'x', onChange: latest => x.set(latest) })
 
   return (
     <div className="max-w-5xl mx-auto p-4 bg-[var(--background)] text-[var(--text)]">
