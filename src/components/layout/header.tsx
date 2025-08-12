@@ -88,14 +88,13 @@ export function Header() {
             <button
               onClick={() => setProfileOpen(v => !v)}
               aria-label="Open account menu"
-              className="h-[28px] w-[28px] rounded-full overflow-hidden flex items-center justify-center"
-              style={{ backgroundColor: 'var(--primary)' as any }}
+              className="h-[28px] w-[28px] rounded-full overflow-hidden flex items-center justify-center bg-[var(--background)] text-[var(--text)] border border-[var(--border)]"
             >
               {gymProfileImageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={gymProfileImageUrl} alt="profile" className="h-full w-full object-cover" />
               ) : (
-                <span className="text-lg font-bold text-white leading-none">
+                <span className="text-lg font-bold leading-none">
                   {(user?.gymName || gymName || 'G').charAt(0).toUpperCase()}
                 </span>
               )}
