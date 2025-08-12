@@ -132,7 +132,8 @@ function Initializer({ containerRef, calRef, events, onUpdateScheduled }: {
     let mounted = true
     async function init() {
       if (!containerRef.current || calendar) return
-      const { default: Calendar } = await import('@toast-ui/calendar')
+      // @ts-ignore - package does not expose proper typings via exports; safe at runtime
+      const Calendar: any = (await import('@toast-ui/calendar')).default as any
       calendar = new Calendar(containerRef.current, {
         defaultView: 'month',
         usageStatistics: false,
