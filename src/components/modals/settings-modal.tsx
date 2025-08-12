@@ -55,7 +55,7 @@ export function SettingsModal({ isOpen, onClose, gymId, initial, onSaved }: Sett
     ;(async () => {
       const { data, error } = await supabase
         .from('gyms')
-        .select('profile_key, ayrshare_profiles, "Brand Choice", "Primary Color", "City Address", "Social handle", "Email", "First name", "Last name", "Brand Profile", "Writing Style", "Client Info", "Primary offer", "Target Demographic", "Clients Desired Result", "Offerings", "Local Hashtags"')
+        .select('profile_key, ayrshare_profiles, "Brand Choice", "Primary color", "City Address", "Social handle", "Email", "First name", "Last name", "Brand Profile", "Writing Style", "Client Info", "Primary offer", "Target Demographic", "Clients Desired Result", "Offerings", "Local Hashtags"')
         .eq('id', gymId)
         .single()
       if (error) {
@@ -65,8 +65,8 @@ export function SettingsModal({ isOpen, onClose, gymId, initial, onSaved }: Sett
       setProfileKey(data?.profile_key || null)
       setAyrshareProfiles((data as any)?.ayrshare_profiles || {})
       reset({
-        email: data?.Email || '',
-        primaryColor: data?.['Primary Color'] || '',
+        email: (data as any)?.['Email'] || '',
+        primaryColor: (data as any)?.['Primary color'] || '',
         brandChoice: data?.['Brand Choice'] || '',
         cityAddress: data?.['City Address'] || '',
         socialHandle: data?.['Social handle'] || '',
@@ -87,7 +87,7 @@ export function SettingsModal({ isOpen, onClose, gymId, initial, onSaved }: Sett
   const onSubmit = async (values: SettingsModalData) => {
     const update: Record<string, any> = {
       'Email': values.email ?? null,
-      'Primary Color': values.primaryColor ?? null,
+      'Primary color': values.primaryColor ?? null,
       'Brand Choice': values.brandChoice ?? null,
       'City Address': values.cityAddress ?? null,
       'Social handle': values.socialHandle ?? null,
