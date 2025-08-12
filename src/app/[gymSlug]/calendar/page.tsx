@@ -4,11 +4,10 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useParams } from 'next/navigation'
 import { getScheduledPosts, type ScheduledPostSummary, updatePostScheduled } from '@/lib/database'
-import dynamic from 'next/dynamic'
 import '@toast-ui/calendar/dist/toastui-calendar.min.css'
 import { getAssetTypeStripeVar, getContentTypeFillVar } from '@/lib/utils'
-
-const ToastCalendar: any = dynamic(() => import('@toast-ui/calendar'), { ssr: false })
+import dynamic from 'next/dynamic'
+const noop = () => null
 
 function startOfWeek(date: Date) {
   const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
@@ -103,45 +102,88 @@ export default function CalendarPage() {
 
       {loading && <div className="text-[var(--muted-text)]">Loading…</div>}
       {error && <div className="text-destructive mb-2">{error}</div>}
+      <div ref={containerRef} className="min-h-[70vh] overflow-hidden rounded-md border border-[var(--border)] bg-[var(--card-bg)]" />
 
-      <div ref={containerRef} className="min-h-[70vh] overflow-hidden rounded-md border border-[var(--border)] bg-[var(--card-bg)]">
-        <ToastCalendar
-          ref={calRef}
-          height={800}
-          view="month"
-          month={{ isAlways6Weeks: true }}
-          usageStatistics={false}
-          events={events}
-          theme={{
-            common: { backgroundColor: 'var(--background)' },
-            month: {
-              dayName: { color: 'var(--muted-text)' },
-              moreView: { border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)' },
-            },
-          }}
-          onAfterRenderEvent={(ev: any) => {
-            const el = ev?.el as HTMLElement | undefined
-            const stripe = ev?.event?.raw?.stripe
-            if (el && stripe) {
-              el.style.borderLeft = `3px solid ${stripe}`
-            }
-          }}
-          onBeforeUpdateEvent={async (ev: any) => {
-            const event = ev.event
-            const newIso = new Date(event.start).toISOString()
-            const id = event.id as string
-            const prev = posts
-            setPosts(curr => curr.map(p => p.id === id ? { ...p, Scheduled: newIso } : p))
-            const res = await updatePostScheduled(id, newIso)
-            if (!res.success) {
-              // revert
-              setPosts(prev)
-            }
-          }}
-        />
-      </div>
+      {/* Initialize Toast UI Calendar once */}
+      <Initializer
+        containerRef={containerRef}
+        calRef={calRef}
+        events={events}
+        onUpdateScheduled={async (id, iso) => {
+          const prev = posts
+          setPosts(curr => curr.map(p => (p.id === id ? { ...p, Scheduled: iso } : p)))
+          const res = await updatePostScheduled(id, iso)
+          if (!res.success) setPosts(prev)
+        }}
+      />
     </div>
   )
+}
+
+function Initializer({ containerRef, calRef, events, onUpdateScheduled }: {
+  containerRef: React.RefObject<HTMLDivElement>
+  calRef: React.MutableRefObject<any>
+  events: any[]
+  onUpdateScheduled: (id: string, iso: string) => Promise<void>
+}) {
+  useEffect(() => {
+    let calendar: any = calRef.current
+    let ro: ResizeObserver | null = null
+    let mounted = true
+    async function init() {
+      if (!containerRef.current || calendar) return
+      const { default: Calendar } = await import('@toast-ui/calendar')
+      calendar = new Calendar(containerRef.current, {
+        defaultView: 'month',
+        usageStatistics: false,
+        isReadOnly: false,
+        month: { isAlways6Weeks: true },
+        theme: {
+          common: { backgroundColor: 'var(--background)' },
+          month: {
+            dayName: { color: 'var(--muted-text)' },
+            moreView: { border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)' },
+          },
+        },
+      })
+      calRef.current = calendar
+
+      calendar.on('afterRenderEvent', (ev: any) => {
+        const el = ev?.el as HTMLElement | undefined
+        const stripe = ev?.event?.raw?.stripe
+        if (el && stripe) el.style.borderLeft = `3px solid ${stripe}`
+      })
+
+      calendar.on('beforeUpdateEvent', async (ev: any) => {
+        const { event, changes } = ev
+        const newStart = changes?.start || event.start
+        const iso = new Date(newStart).toISOString()
+        await onUpdateScheduled(event.id as string, iso)
+      })
+
+      ro = new ResizeObserver(() => calendar?.render())
+      ro.observe(containerRef.current!)
+
+      if (mounted) {
+        calendar.clear()
+        calendar.createEvents(events)
+      }
+    }
+    init()
+    return () => {
+      mounted = false
+      ro?.disconnect()
+    }
+  }, [])
+
+  // Update events when data changes without remount
+  useEffect(() => {
+    const calendar = calRef.current
+    if (!calendar) return
+    calendar.clear()
+    calendar.createEvents(events)
+  }, [events])
+  return null
 }
 
 
