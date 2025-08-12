@@ -89,7 +89,7 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
         email: (resolved as any)?.['Email'] || '',
         primaryColor: (resolved as any)?.['Primary color'] || '',
         brandChoice: (resolved as any)?.['Brand Choice'] || '',
-        cityAddress: (resolved as any)?.['City Address'] || '',
+        cityAddress: (resolved as any)?.['Address'] || (resolved as any)?.['City Address'] || '',
         socialHandle: (resolved as any)?.['Social handle'] || '',
         firstName: (resolved as any)?.['First name'] || '',
         lastName: (resolved as any)?.['Last name'] || '',
@@ -110,7 +110,7 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
       'Email': values.email ?? null,
       'Primary color': values.primaryColor ?? null,
       'Brand Choice': values.brandChoice ?? null,
-      'City Address': values.cityAddress ?? null,
+      'Address': values.cityAddress ?? null,
       'Social handle': values.socialHandle ?? null,
       'First name': values.firstName ?? null,
       'Last name': values.lastName ?? null,
@@ -214,7 +214,7 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
             <input type="text" {...register('brandChoice')} className="input-base" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-text mb-2">City Address</label>
+            <label className="block text-sm font-medium text-text mb-2">Address</label>
             <input type="text" {...register('cityAddress')} className="input-base" />
           </div>
           <div>
