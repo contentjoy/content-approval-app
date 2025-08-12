@@ -161,6 +161,18 @@ export default function OnboardingPage() {
     setIsSubmitting(true)
 
     try {
+      // First, fetch the gym data to get email and gym name
+      const { data: gymData, error: gymError } = await supabase
+        .from('gyms')
+        .select('"Gym Name", "Email"')
+        .eq('id', gymId)
+        .single()
+
+      if (gymError) {
+        console.error('Failed to fetch gym data:', gymError)
+        throw new Error('Failed to fetch gym data')
+      }
+
       // Update gym record with onboarding data
       const { error: updateError } = await supabase
         .from('gyms')
@@ -188,19 +200,82 @@ export default function OnboardingPage() {
 
       if (updateError) throw updateError
 
-      // Send data to onboarding webhook
+      // Send data to onboarding webhook with gym name and email
       const webhookData = {
-        id: gymId,
-        ...formData
+        // Gym identification
+        gym_id: gymId,
+        gym_name: gymData['Gym Name'],
+        gym_email: gymData['Email'],
+        
+        // Onboarding form data
+        business_details: {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone,
+          website: formData.website,
+          city: formData.city,
+          address: formData.address
+        },
+        
+        brand_identity: {
+          brand_color: formData.brandColor,
+          brand_style: formData.brandStyle
+        },
+        
+        audience_services: {
+          target_audience: formData.audience,
+          services: formData.services,
+          desired_results: formData.results
+        },
+        
+        links_socials: {
+          google_map_url: formData.googleMapUrl,
+          instagram_url: formData.instagramUrl
+        },
+        
+        marketing_content: {
+          social_platforms: formData.socialPlatforms,
+          primary_cta: formData.cta,
+          testimonial: formData.testimonial
+        },
+        
+        media: {
+          profile_image_url: formData.profileImageUrl
+        },
+        
+        // Metadata
+        submitted_at: new Date().toISOString(),
+        gym_slug: gymSlug
       }
 
-      const webhookUrl = process.env.ONBOARDING_WEBHOOK_URL || process.env.NEXT_PUBLIC_ONBOARDING_WEBHOOK_URL
-      if (webhookUrl) {
-        await fetch(webhookUrl, {
+      // Send to test webhook
+      const webhookUrl = process.env.ONBOARDING_TEST_WEBHOOK || 
+                        process.env.ONBOARDING_WEBHOOK_URL || 
+                        'https://contentjoy.app.n8n.cloud/webhook-test/156ef9a5-0ae7-4e65-acc1-a27aa533d90a'
+      
+      try {
+        console.log('🚀 Sending onboarding data to webhook:', webhookData)
+        console.log('🌐 Webhook URL:', webhookUrl)
+        
+        const webhookResponse = await fetch(webhookUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'User-Agent': 'ContentJoy-Onboarding/1.0'
+          },
           body: JSON.stringify(webhookData)
         })
+
+        if (!webhookResponse.ok) {
+          console.warn('⚠️ Webhook request failed:', webhookResponse.status, webhookResponse.statusText)
+          console.warn('📝 Response text:', await webhookResponse.text())
+        } else {
+          console.log('✅ Webhook data sent successfully')
+          console.log('📊 Response status:', webhookResponse.status)
+        }
+      } catch (webhookError) {
+        console.error('❌ Webhook error:', webhookError)
+        // Don't fail the onboarding if webhook fails
       }
 
       // Create Ayrshare profile for this gym
