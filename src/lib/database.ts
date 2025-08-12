@@ -611,19 +611,27 @@ export interface ScheduledPostSummary {
 }
 
 export async function getScheduledPosts(gymSlug: string, startDate: Date, endDate: Date): Promise<ScheduledPostSummary[]> {
-  // Convert slug like "my-gym" to gym name format if needed, else assume slug is gym id string
-  // We already store gym_id on rows, but the instruction says "gymSlug". We'll first try matching by gym_id.
-  let query = supabase
+  // Base query by date range only; we will add the gym filter branch below
+  let base = supabase
     .from('social_media_posts')
     .select('id, "Gym Name", "Asset URL", "Asset Type", "Post Caption", Scheduled, gym_id')
     .gte('Scheduled', startDate.toISOString())
     .lt('Scheduled', endDate.toISOString())
     .order('Scheduled', { ascending: true })
 
-  // Try filter by gym_id using provided slug (many of our routes use the actual id in localStorage)
-  query = query.eq('gym_id', gymSlug)
+  // Detect whether slug is a UUID (gym_id) or a gym name slug (e.g., kokoro-demo)
+  const isUuid = /^[0-9a-fA-F-]{8}-[0-9a-fA-F-]{4}-[0-9a-fA-F-]{4}-[0-9a-fA-F-]{4}-[0-9a-fA-F-]{12}$/.test(gymSlug)
 
-  const { data, error } = await query
+  let query
+  if (isUuid) {
+    query = base.eq('gym_id', gymSlug)
+  } else {
+    const gymName = gymSlug.replace(/-/g, ' ')
+    // Case-insensitive exact match using ILIKE pattern without wildcards
+    query = base.ilike('"Gym Name"', gymName)
+  }
+
+  const { data, error } = await query!
   if (error) {
     console.error('Error fetching scheduled posts:', error)
     return []

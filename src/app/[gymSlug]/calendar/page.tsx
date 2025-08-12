@@ -40,14 +40,21 @@ export default function CalendarPage() {
 
   const [posts, setPosts] = useState<ScheduledPostSummary[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let mounted = true
     async function load() {
-      setLoading(true)
-      const data = await getScheduledPosts(gymSlug, weekStart, weekEnd)
-      if (mounted) setPosts(data)
-      setLoading(false)
+      try {
+        setLoading(true)
+        setError(null)
+        const data = await getScheduledPosts(gymSlug, weekStart, weekEnd)
+        if (mounted) setPosts(data)
+      } catch (e: any) {
+        setError('Failed to load calendar')
+      } finally {
+        setLoading(false)
+      }
     }
     load()
     return () => { mounted = false }
@@ -77,6 +84,7 @@ export default function CalendarPage() {
           className="flex items-start gap-6 overflow-x-auto snap-x snap-mandatory p-4 scroll-smooth"
         >
           {loading && <div className="text-[var(--muted-text)]">Loading…</div>}
+          {error && <div className="text-destructive">{error}</div>}
           {!loading && posts.length === 0 && (
             <div className="text-[var(--muted-text)]">No scheduled posts this week.</div>
           )}
@@ -118,6 +126,7 @@ export default function CalendarPage() {
       {/* Mobile vertical stack */}
       <div className="md:hidden flex flex-col gap-6 p-1">
         {loading && <div className="text-[var(--muted-text)]">Loading…</div>}
+        {error && <div className="text-destructive">{error}</div>}
         {!loading && posts.length === 0 && (
           <div className="text-[var(--muted-text)]">No scheduled posts this week.</div>
         )}
