@@ -5,6 +5,10 @@ import { motion } from "framer-motion";
 import React from "react";
 import { useCalendar } from "./calendar-context";
 import { CalendarMonthView } from "./views/calendar-month-view";
+import { CalendarWeekView } from "./views/week-view/calendar-week-view";
+import { CalendarDayView } from "./views/day-view/calendar-day-view";
+import { CalendarYearView } from "./views/year-view/calendar-year-view";
+import { AgendaEvents } from "./views/agenda-view/agenda-events";
 
 export function CalendarBody() {
 	const { view, events } = useCalendar();
@@ -36,11 +40,29 @@ export function CalendarBody() {
 						multiDayEvents={multiDayEvents}
 					/>
 				)}
-				{/* TODO: Add other views (week, day, year, agenda) */}
-				{view !== "month" && (
-					<div className="p-8 text-center text-muted-foreground">
-						{view.charAt(0).toUpperCase() + view.slice(1)} view coming soon...
-					</div>
+				{view === "week" && (
+					<CalendarWeekView
+						singleDayEvents={singleDayEvents}
+						multiDayEvents={multiDayEvents}
+					/>
+				)}
+				{view === "day" && (
+					<CalendarDayView
+						singleDayEvents={singleDayEvents}
+						multiDayEvents={multiDayEvents}
+					/>
+				)}
+				{view === "year" && (
+					<CalendarYearView
+						singleDayEvents={singleDayEvents}
+						multiDayEvents={multiDayEvents}
+					/>
+				)}
+				{view === "agenda" && (
+					<AgendaEvents
+						singleDayEvents={singleDayEvents}
+						multiDayEvents={multiDayEvents}
+					/>
 				)}
 			</motion.div>
 		</div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { isToday, startOfDay, isSameMonth, parseISO, isSameDay } from "date-fns";
+import { isToday, startOfDay, parseISO } from "date-fns";
 import { motion } from "framer-motion";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -35,7 +35,7 @@ export function DayCell({ cell, events }: IProps) {
 	return (
 		<motion.div
 			className={cn(
-				"min-h-[120px] p-2 border-r border-b border-border relative",
+				"min-h-[100px] sm:min-h-[120px] p-1 sm:p-2 border-r border-b border-border relative",
 				!currentMonth && "bg-muted/30",
 				isToday(date) && "bg-accent/10"
 			)}
@@ -45,7 +45,7 @@ export function DayCell({ cell, events }: IProps) {
 		>
 			{/* Day number */}
 			<div className={cn(
-				"text-sm font-medium mb-1",
+				"text-xs sm:text-sm font-medium mb-1",
 				!currentMonth && "text-muted-foreground",
 				isToday(date) && "text-accent-foreground font-bold"
 			)}>
@@ -53,7 +53,7 @@ export function DayCell({ cell, events }: IProps) {
 			</div>
 
 			{/* Events */}
-			<div className="space-y-1">
+			<div className="space-y-0.5 sm:space-y-1">
 				{cellEvents.slice(0, MAX_VISIBLE_EVENTS).map((event, index) => (
 					<EventBadge
 						key={`${event.id}-${index}`}

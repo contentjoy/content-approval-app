@@ -8,7 +8,7 @@ import type { IEvent } from "../interfaces";
 import { EventDetailsDialog } from "../dialogs/event-details-dialog";
 
 const eventBadgeVariants = cva(
-	"flex items-center gap-1 truncate rounded px-1.5 py-0.5 text-xs font-medium cursor-pointer transition-colors",
+	"flex items-center gap-1 truncate rounded px-1 sm:px-1.5 py-0.5 text-xs font-medium cursor-pointer transition-colors",
 	{
 		variants: {
 			color: {
@@ -40,9 +40,9 @@ export function EventBadge({ event, cellDate, index }: IProps) {
 	// Format time for display
 	const timeDisplay = format(eventStart, "HH:mm");
 	
-	// Truncate title if too long
-	const displayTitle = event.title.length > 20 
-		? `${event.title.substring(0, 20)}...` 
+	// Truncate title if too long - shorter on mobile
+	const displayTitle = event.title.length > (window.innerWidth < 640 ? 15 : 20)
+		? `${event.title.substring(0, window.innerWidth < 640 ? 15 : 20)}...` 
 		: event.title;
 
 	return (
@@ -54,15 +54,15 @@ export function EventBadge({ event, cellDate, index }: IProps) {
 				transition={{ delay: index * 0.1, duration: 0.2 }}
 				title={`${event.title} - ${timeDisplay}`}
 			>
-				{/* Time indicator */}
-				<span className="text-xs opacity-75">{timeDisplay}</span>
+				{/* Time indicator - hidden on very small screens */}
+				<span className="text-xs opacity-75 hidden sm:inline">{timeDisplay}</span>
 				
 				{/* Event title */}
-				<span className="truncate">{displayTitle}</span>
+				<span className="truncate text-xs">{displayTitle}</span>
 				
 				{/* Multi-day indicator */}
 				{isMultiDay && (
-					<span className="text-xs opacity-75">→</span>
+					<span className="text-xs opacity-75 hidden sm:inline">→</span>
 				)}
 			</motion.div>
 		</EventDetailsDialog>
