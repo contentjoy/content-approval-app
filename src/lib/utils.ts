@@ -6,23 +6,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export async function getEmbedHtml(url: string, platform: 'instagram' | 'tiktok'): Promise<string | null> {
-  let oEmbedUrl = ''
-  let params = ''
-
-  if (platform === 'instagram') {
-    // Normalize Instagram URLs by stripping tracking params
-    const clean = url.split('?')[0]
-    oEmbedUrl = 'https://graph.facebook.com/v20.0/instagram_oembed'
-    params = `?url=${encodeURIComponent(clean)}&omitscript=true`
-  } else if (platform === 'tiktok') {
-    oEmbedUrl = 'https://www.tiktok.com/oembed'
-    params = `?url=${encodeURIComponent(url)}`
-  } else {
-    return null
-  }
-
-  const response = await fetch(oEmbedUrl + params)
-  if (!response.ok) throw new Error('oEmbed fetch failed')
-  const data = await response.json()
-  return data.html as string
+  const cleanUrl = platform === 'instagram' ? url.split('?')[0] : url
+  const res = await fetch(`/api/oembed?platform=${platform}&url=${encodeURIComponent(cleanUrl)}`)
+  if (!res.ok) return null
+  const data = await res.json()
+  return data?.html || null
 }
