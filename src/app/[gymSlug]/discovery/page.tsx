@@ -20,6 +20,22 @@ export default function DiscoveryPage() {
       )
       setItems(embeds)
       setLoading(false)
+      // Give the browser a tick to paint, then process instagram embeds if their script is present
+      setTimeout(() => {
+        try {
+          // Dynamically inject instagram embed script once
+          if (!(window as any).instgrm && !document.getElementById('instagram-embed-js')) {
+            const s = document.createElement('script')
+            s.id = 'instagram-embed-js'
+            s.async = true
+            s.src = 'https://www.instagram.com/embed.js'
+            document.body.appendChild(s)
+            s.onload = () => { try { (window as any).instgrm?.Embeds?.process() } catch {} }
+          } else {
+            ;(window as any).instgrm?.Embeds?.process()
+          }
+        } catch {}
+      }, 50)
     }
     load()
   }, [])
@@ -43,9 +59,12 @@ export default function DiscoveryPage() {
               transition={{ delay: index * 0.06 }}
               className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-4"
            >
-              <h3 className="text-sm font-medium mb-2 text-text">{item.title}</h3>
+              {/* Title hidden for now per request */}
               {item.embedHtml ? (
-                <div className="w-full h-64" dangerouslySetInnerHTML={{ __html: item.embedHtml }} />
+                <div
+                  className="w-full overflow-hidden rounded-md [&_iframe]:w-full [&_iframe]:aspect-video [&_.instagram-media]:w-full [&_.instagram-media]:!min-w-0"
+                  dangerouslySetInnerHTML={{ __html: item.embedHtml }}
+                />
               ) : (
                 <a
                   href={item.link}
