@@ -66,40 +66,41 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
         // Use quoted identifier for columns with spaces in filters
         query = query.ilike('"Gym Name"', name)
       }
-      let { data, error } = await query.order('id', { ascending: false }).limit(1).maybeSingle()
-      if (error || !data) {
+      const { data, error } = await query.order('id', { ascending: false }).limit(1).maybeSingle()
+      let resolved = data as any
+      if (error || !resolved) {
         // Fallback via helper that already resolves by slug
         if (gymSlug) {
           const gym = await getGymBySlug(gymSlug)
           if (gym) {
-            data = gym as any
+            resolved = gym as any
           }
         }
       }
-      if (!data) {
+      if (!resolved) {
         toast.error('Gym not found')
         return
       }
-      setResolvedGymId((data as any).id || null)
-      setResolvedGymName((data as any)['Gym Name'] || null)
-      setProfileKey(data?.profile_key || null)
-      setAyrshareProfiles((data as any)?.ayrshare_profiles || {})
+      setResolvedGymId((resolved as any).id || null)
+      setResolvedGymName((resolved as any)['Gym Name'] || null)
+      setProfileKey((resolved as any)?.profile_key || null)
+      setAyrshareProfiles((resolved as any)?.ayrshare_profiles || {})
       reset({
-        email: (data as any)?.['Email'] || '',
-        primaryColor: (data as any)?.['Primary color'] || '',
-        brandChoice: data?.['Brand Choice'] || '',
-        cityAddress: data?.['City Address'] || '',
-        socialHandle: data?.['Social handle'] || '',
-        firstName: data?.['First name'] || '',
-        lastName: data?.['Last name'] || '',
-        brandProfile: data?.['Brand Profile'] || '',
-        writingStyle: data?.['Writing Style'] || '',
-        clientInfo: data?.['Client Info'] || '',
-        primaryOffer: data?.['Primary offer'] || '',
-        targetDemographic: data?.['Target Demographic'] || '',
-        clientsDesiredResult: data?.['Clients Desired Result'] || '',
-        offerings: data?.['Offerings'] || '',
-        localHashtags: data?.['Local Hashtags'] || '',
+        email: (resolved as any)?.['Email'] || '',
+        primaryColor: (resolved as any)?.['Primary color'] || '',
+        brandChoice: (resolved as any)?.['Brand Choice'] || '',
+        cityAddress: (resolved as any)?.['City Address'] || '',
+        socialHandle: (resolved as any)?.['Social handle'] || '',
+        firstName: (resolved as any)?.['First name'] || '',
+        lastName: (resolved as any)?.['Last name'] || '',
+        brandProfile: (resolved as any)?.['Brand Profile'] || '',
+        writingStyle: (resolved as any)?.['Writing Style'] || '',
+        clientInfo: (resolved as any)?.['Client Info'] || '',
+        primaryOffer: (resolved as any)?.['Primary offer'] || '',
+        targetDemographic: (resolved as any)?.['Target Demographic'] || '',
+        clientsDesiredResult: (resolved as any)?.['Clients Desired Result'] || '',
+        offerings: (resolved as any)?.['Offerings'] || '',
+        localHashtags: (resolved as any)?.['Local Hashtags'] || '',
       })
     })()
   }, [isOpen, gymId, gymSlug, reset])
