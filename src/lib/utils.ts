@@ -10,8 +10,10 @@ export async function getEmbedHtml(url: string, platform: 'instagram' | 'tiktok'
   let params = ''
 
   if (platform === 'instagram') {
+    // Normalize Instagram URLs by stripping tracking params
+    const clean = url.split('?')[0]
     oEmbedUrl = 'https://graph.facebook.com/v20.0/instagram_oembed'
-    params = `?url=${encodeURIComponent(url)}&omitscript=true`
+    params = `?url=${encodeURIComponent(clean)}&omitscript=true`
   } else if (platform === 'tiktok') {
     oEmbedUrl = 'https://www.tiktok.com/oembed'
     params = `?url=${encodeURIComponent(url)}`
