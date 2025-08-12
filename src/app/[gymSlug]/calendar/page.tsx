@@ -129,6 +129,9 @@ function Initializer({ containerRef, calRef, events, onUpdateScheduled }: {
   useEffect(() => {
     let calendar: any = calRef.current
     let ro: ResizeObserver | null = null
+    let rafId: number | null = null
+    let lastW = 0
+    let lastH = 0
     let mounted = true
     async function init() {
       if (!containerRef.current || calendar) return
@@ -143,6 +146,8 @@ function Initializer({ containerRef, calRef, events, onUpdateScheduled }: {
           common: { backgroundColor: 'var(--background)' },
           month: {
             dayName: { color: 'var(--muted-text)' },
+            weekend: { backgroundColor: 'transparent' },
+            today: { color: 'var(--text)' },
             moreView: { border: '1px solid var(--border)', backgroundColor: 'var(--card-bg)' },
           },
         },
@@ -162,7 +167,19 @@ function Initializer({ containerRef, calRef, events, onUpdateScheduled }: {
         await onUpdateScheduled(event.id as string, iso)
       })
 
-      ro = new ResizeObserver(() => calendar?.render())
+      ro = new ResizeObserver((entries) => {
+        const entry = entries[0]
+        if (!entry) return
+        const { width, height } = entry.contentRect
+        if (Math.round(width) === Math.round(lastW) && Math.round(height) === Math.round(lastH)) return
+        lastW = width
+        lastH = height
+        if (rafId) cancelAnimationFrame(rafId)
+        rafId = requestAnimationFrame(() => {
+          calendar?.render()
+          rafId = null
+        })
+      })
       ro.observe(containerRef.current!)
 
       if (mounted) {
@@ -174,15 +191,22 @@ function Initializer({ containerRef, calRef, events, onUpdateScheduled }: {
     return () => {
       mounted = false
       ro?.disconnect()
+      if (rafId) cancelAnimationFrame(rafId)
     }
   }, [])
 
-  // Update events when data changes without remount
+  // Update events when data changes without remount; debounce to avoid flashing
   useEffect(() => {
     const calendar = calRef.current
     if (!calendar) return
-    calendar.clear()
-    calendar.createEvents(events)
+    let raf: number | null = null
+    const apply = () => {
+      calendar.clear()
+      calendar.createEvents(events)
+      raf = null
+    }
+    raf = requestAnimationFrame(apply)
+    return () => { if (raf) cancelAnimationFrame(raf) }
   }, [events])
   return null
 }
