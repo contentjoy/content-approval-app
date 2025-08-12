@@ -58,12 +58,16 @@ const steps = [
 ]
 
 const brandStyles = [
-  'Modern & Minimalist',
-  'Bold & Energetic',
-  'Professional & Corporate',
-  'Friendly & Approachable',
-  'Luxury & Premium',
-  'Creative & Artistic'
+  'F45',
+  'Peloton',
+  'Nike',
+  'Orangetheory',
+  'CrossFit HQ',
+  'Barry\'s',
+  'SoulCycle',
+  'Equinox',
+  'Gymshark',
+  'Rumble Boxing'
 ]
 
 const socialPlatforms = [
@@ -434,13 +438,13 @@ export default function OnboardingPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text mb-2">Brand Style</label>
+              <label className="block text-sm font-medium text-text mb-2">Which brand sounds most like you?</label>
               <select
                 value={formData.brandStyle}
                 onChange={(e) => updateFormData('brandStyle', e.target.value)}
                 className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
               >
-                <option value="">Select your brand style</option>
+                <option value="">Select an option</option>
                 {brandStyles.map(style => (
                   <option key={style} value={style}>{style}</option>
                 ))}
