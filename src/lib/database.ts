@@ -612,7 +612,7 @@ export interface ScheduledPostSummary {
 
 export async function getScheduledPosts(gymSlug: string, startDate: Date, endDate: Date): Promise<ScheduledPostSummary[]> {
   // Base query by date range only; we will add the gym filter branch below
-  let base = supabase
+  const base = supabase
     .from('social_media_posts')
     .select('id, "Gym Name", "Asset URL", "Asset Type", "Post Caption", Scheduled, gym_id')
     .gte('Scheduled', startDate.toISOString())
