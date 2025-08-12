@@ -132,7 +132,7 @@ function Initializer({ containerRef, calRef, events, onUpdateScheduled }: {
     let mounted = true
     async function init() {
       if (!containerRef.current || calendar) return
-      // @ts-ignore - package does not expose proper typings via exports; safe at runtime
+      // @ts-expect-error third-party package doesn't export typings via "exports"; runtime default exists
       const Calendar: any = (await import('@toast-ui/calendar')).default as any
       calendar = new Calendar(containerRef.current, {
         defaultView: 'month',
