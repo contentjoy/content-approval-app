@@ -271,8 +271,15 @@ export default function OnboardingPage() {
         })
 
         if (!webhookResponse.ok) {
+          const responseText = await webhookResponse.text()
           console.warn('⚠️ Webhook request failed:', webhookResponse.status, webhookResponse.statusText)
-          console.warn('📝 Response text:', await webhookResponse.text())
+          console.warn('📝 Response text:', responseText)
+          
+          // If it's a 404, the webhook might not be configured for POST
+          if (webhookResponse.status === 404) {
+            console.warn('🔍 Webhook returned 404 - endpoint might not be configured for POST requests')
+            console.warn('💡 Try checking your n8n webhook configuration')
+          }
         } else {
           console.log('✅ Webhook data sent successfully')
           console.log('📊 Response status:', webhookResponse.status)
@@ -285,20 +292,47 @@ export default function OnboardingPage() {
       // Create Ayrshare profile for this gym
       try {
         setCreatingProfile(true)
+        console.log('🔑 Attempting to create Ayrshare profile for gym:', gymSlug)
+        
         const r = await fetch('/api/ayrshare/create-profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ gymName: formData.instagramUrl ? new URL(formData.instagramUrl).pathname.replace(/\//g, '') || gymSlug : gymSlug })
         })
-        if (!r.ok) throw new Error(await r.text())
+        
+        if (!r.ok) {
+          const errorText = await r.text()
+          console.error('❌ Ayrshare profile creation failed:', r.status, errorText)
+          throw new Error(`Failed to create profile: ${r.status} - ${errorText}`)
+        }
+        
         const { profileKey } = await r.json()
+        console.log('✅ Ayrshare profile created successfully:', profileKey)
+        
         setProfileKey(profileKey)
         const save = await updateGymProfileKey(gymId, profileKey)
         if (!save.success) throw new Error(save.error || 'Failed to save profileKey')
+        
         toast.success('Profile created. You can now connect social accounts.')
       } catch (err: any) {
-        console.error('Ayrshare profile create failed:', err)
-        toast.error('Failed to create social profile')
+        console.error('❌ Ayrshare profile create failed:', err)
+        console.error('🔍 Error details:', {
+          message: err.message,
+          status: err.status,
+          details: err.details
+        })
+        
+        // Show more specific error message
+        if (err.message?.includes('AYRSHARE_API_KEY is not configured')) {
+          toast.error('Ayrshare API not configured. Please contact support.')
+        } else if (err.message?.includes('Failed to create profile')) {
+          toast.error('Failed to create social profile. Please try again later.')
+        } else {
+          toast.error('Failed to create social profile: ' + (err.message || 'Unknown error'))
+        }
+        
+        // Continue with onboarding even if profile creation fails
+        console.log('⚠️ Continuing onboarding without Ayrshare profile')
       } finally {
         setCreatingProfile(false)
       }
