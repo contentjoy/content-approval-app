@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Modal } from '@/components/ui/modal'
 import { BrandedButton } from '@/components/ui/branded-button'
 import { supabase } from '@/lib/supabase'
+import { getGymBySlug } from '@/lib/database'
 import toast from 'react-hot-toast'
 
 const schema = z.object({
@@ -62,14 +63,18 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
         query = query.eq('id', gymId)
       } else if (gymSlug) {
         const name = gymSlug.replace(/-/g, ' ')
-        // Supabase JS client accepts quoted identifier if passed as a string
-        // but URL encoding can cause 400s; use filter() with unquoted key
-        query = query.filter('Gym Name', 'ilike', name)
+        // Use quoted identifier for columns with spaces in filters
+        query = query.ilike('"Gym Name"', name)
       }
-      const { data, error } = await query.order('id', { ascending: false }).limit(1).maybeSingle()
-      if (error) {
-        toast.error(`Failed to load settings: ${error.message}`)
-        return
+      let { data, error } = await query.order('id', { ascending: false }).limit(1).maybeSingle()
+      if (error || !data) {
+        // Fallback via helper that already resolves by slug
+        if (gymSlug) {
+          const gym = await getGymBySlug(gymSlug)
+          if (gym) {
+            data = gym as any
+          }
+        }
       }
       if (!data) {
         toast.error('Gym not found')
