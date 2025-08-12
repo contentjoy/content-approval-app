@@ -124,7 +124,13 @@ export function Header() {
           goal={30}
         />
       </div>
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} gymId={user?.gymId || ''} initial={{ email: undefined, primaryColor: undefined }} />
+      <SettingsModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        gymId={user?.gymId || undefined}
+        gymSlug={gymSlug || undefined}
+        initial={{}}
+      />
       {/* Horizontal tabs below header (kept here for global placement) */}
       
     </header>

@@ -32,7 +32,8 @@ export type SettingsModalData = z.infer<typeof schema>
 interface SettingsModalProps {
   isOpen: boolean
   onClose: () => void
-  gymId: string
+  gymId?: string
+  gymSlug?: string
   // Optional initial values; will be overridden by DB fetch when modal opens
   initial?: Partial<SettingsModalData>
   onSaved?: (data: SettingsModalData) => void
@@ -40,7 +41,7 @@ interface SettingsModalProps {
 
 type AyrshareProfiles = Record<string, { profile_key?: string; connected_at?: string }>
 
-export function SettingsModal({ isOpen, onClose, gymId, initial, onSaved }: SettingsModalProps) {
+export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSaved }: SettingsModalProps) {
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<SettingsModalData>({
     resolver: zodResolver(schema),
     defaultValues: initial || {}
@@ -53,11 +54,15 @@ export function SettingsModal({ isOpen, onClose, gymId, initial, onSaved }: Sett
   useEffect(() => {
     if (!isOpen) return
     ;(async () => {
-      const { data, error } = await supabase
-        .from('gyms')
-        .select('profile_key, ayrshare_profiles, "Brand Choice", "Primary color", "City Address", "Social handle", "Email", "First name", "Last name", "Brand Profile", "Writing Style", "Client Info", "Primary offer", "Target Demographic", "Clients Desired Result", "Offerings", "Local Hashtags"')
-        .eq('id', gymId)
-        .single()
+      const columns = 'id, profile_key, ayrshare_profiles, "Gym Name", "Brand Choice", "Primary color", "City Address", "Social handle", "Email", "First name", "Last name", "Brand Profile", "Writing Style", "Client Info", "Primary offer", "Target Demographic", "Clients Desired Result", "Offerings", "Local Hashtags"'
+      let query = supabase.from('gyms').select(columns)
+      if (gymId) {
+        query = query.eq('id', gymId)
+      } else if (gymSlug) {
+        const name = gymSlug.replace(/-/g, ' ')
+        query = query.ilike('"Gym Name"', name)
+      }
+      const { data, error } = await query.single()
       if (error) {
         toast.error(`Failed to load settings: ${error.message}`)
         return
