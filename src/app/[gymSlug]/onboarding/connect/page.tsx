@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { AyrshareProfile } from '@/types'
+import { Modal } from '@/components/ui/modal'
 
 interface SocialPlatform {
   id: string
@@ -38,6 +39,7 @@ export default function SocialConnectPage() {
   const [error, setError] = useState('')
   const [gymId, setGymId] = useState<string | null>(null)
   const [isConnecting, setIsConnecting] = useState<string | null>(null)
+  const [confirmPlatform, setConfirmPlatform] = useState<string | null>(null)
   
   const router = useRouter()
   const params = useParams()
@@ -326,7 +328,7 @@ export default function SocialConnectPage() {
                     </div>
                   ) : (
                     <button
-                      onClick={() => connectPlatform(platform.id)}
+                      onClick={() => setConfirmPlatform(platform.id)}
                       disabled={isConnecting === platform.id}
                       className="flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
                     >
@@ -382,6 +384,48 @@ export default function SocialConnectPage() {
           </div>
         </div>
       </motion.div>
+
+      {/* Overlay while connecting */}
+      {isConnecting && (
+        <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-[var(--surface)] border border-border rounded-lg p-6 max-w-sm text-center shadow-medium">
+            <p className="text-text mb-2 font-semibold">Please click "Close" in the connect window</p>
+            <p className="text-sm text-muted-text">After closing, we’ll update your connected accounts here automatically.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm modal */}
+      <Modal
+        isOpen={!!confirmPlatform}
+        onClose={() => setConfirmPlatform(null)}
+        title="Open social connection"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-text">
+            A window will open to link your social accounts. When finished, click the "Close" button in that window and return here.
+          </p>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setConfirmPlatform(null)}
+              className="btn-cancel"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={async () => {
+                const p = confirmPlatform
+                setConfirmPlatform(null)
+                if (p) await connectPlatform(p)
+              }}
+              className="px-4 py-2 rounded-md bg-[var(--brand-primary)] text-white hover:opacity-90"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
