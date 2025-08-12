@@ -68,6 +68,23 @@ export default function GymPage() {
     })()
   }, [gymSlug])
 
+  // Remove posts immediately when media deletion event fires
+  useEffect(() => {
+    const onDeleted = (e: Event) => {
+      const id = (e as CustomEvent).detail?.id as string | undefined
+      if (!id) return
+      setPosts(prev => prev.filter(p => p.id !== id))
+      setFilteredPosts(prev => prev.filter(p => p.id !== id))
+      // Also evict cache entry for this slug to avoid stale items reappearing
+      if (typeof gymSlug === 'string') {
+        const cached = contentCache[gymSlug]
+        if (cached) contentCache[gymSlug] = { posts: cached.posts.filter(p => p.id !== id), ts: cached.ts }
+      }
+    }
+    window.addEventListener('post-deleted', onDeleted as EventListener)
+    return () => window.removeEventListener('post-deleted', onDeleted as EventListener)
+  }, [gymSlug])
+
   // Listen for optimistic updates from modals and update local state without reload
   useEffect(() => {
     const handler = (e: Event) => {
