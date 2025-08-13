@@ -5,81 +5,98 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222.2 84% 4.9%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222.2 84% 4.9%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
-  --radius: 0.5rem;
-  
-  /* Geist-inspired CSS variables for Uppy Dashboard */
+  /* Vercel Geist base (light) */
   --geist-background: #fff;
   --geist-foreground: #000;
   --geist-secondary: #888;
   --accents-1: #fafafa;
   --accents-2: #eaeaea;
-  --primary: #000000;
-  
-  /* App-specific variables */
-  --bg: var(--background);
-  --bg-elev-1: var(--accents-1);
-  --text: var(--foreground);
-  --muted-text: var(--geist-secondary);
-  --border: var(--border);
-  --accent: var(--primary);
-  --hover: var(--accents-2);
-  --navbar: var(--background);
-}
 
-/* Dark theme */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --geist-background: #000;
-    --geist-foreground: #fff;
-    --geist-secondary: #aaa;
-    --accents-1: #111;
-    --accents-2: #333;
-    --primary: #ffffff;
-    
-    --bg: var(--background);
-    --bg-elev-1: var(--accents-1);
-    --text: var(--foreground);
-    --muted-text: var(--geist-secondary);
-    --border: var(--border);
-    --accent: var(--primary);
-    --hover: var(--accents-2);
-    --navbar: var(--background);
-  }
+  /* Primary brand color injected at runtime; fallback to --primary if present */
+  --primary-color: #000000;
+  --primary: var(--primary-color);
+
+  /* Accent tokens derived from primary (override-able by agency color) */
+  --accent: var(--primary, var(--primary-color, #000000));
+  --accent-strong: color-mix(in srgb, var(--accent) 80%, black);
+  --accent-soft: color-mix(in srgb, var(--accent) 60%, white);
+
+  /* Light theme (updated per spec) */
+  --bg: #fafafa;
+  --bg-elev-1: #ffffff;
+  --surface: #ffffff;
+  --text: #171717;
+  --muted-text: #898989;
+  --border: #ebebeb;
+  --border-strong: #ebebeb;
+  /* App-wide hover background color */
+  --hover: #f2f2f2;
+
+  /* Geometry + radii */
+  --radius: 6px; /* rounded-md */
+  --radius-pill: 9999px;
+
+  /* Spacing + fonts */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+  --font-regular: 400; --font-medium: 500; --font-semibold: 600;
+  --fs-xs: 0.75rem; --fs-sm: 0.875rem; --fs-base: 1rem; --fs-lg: 1.125rem;
+  --fs-xl: 1.25rem; --fs-2xl: 1.5rem; --fs-3xl: 1.875rem; --fs-4xl: 2.25rem; --fs-5xl: 3rem;
+
+  /* Focus ring */
+  --focus: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent), 0 0 0 1px var(--accent);
+
+  /* Legacy compatibility - map to new system */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary-foreground: var(--bg);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--text);
+  --muted: var(--accents-1);
+  --muted-foreground: var(--muted-text);
+  --accent-foreground: var(--bg);
+  --destructive: #ef4444;
+  --destructive-foreground: var(--bg);
+  --input: var(--surface);
+  --ring: var(--accent);
+  --ring-offset: var(--bg);
+
+  /* Legacy colors for compatibility */
+  --navbar: #ffffff;
+  --sidebar: var(--accents-1);
+  --text-secondary: var(--muted-text);
+  --card-bg: var(--surface);
+  --card-border: var(--border);
+  --pill-bg: var(--accents-1);
+  --pill-border: var(--accents-2);
+
+  /* Brand colors - can be overridden by JavaScript */
+  --brand-primary: var(--accent);
+  --brand-primary-rgb: 0, 0, 0;
+  --brand-primary-light: var(--accent-soft);
+  --brand-primary-dark: var(--accent-strong);
 }
 
 /* Dark theme overrides (activated by data-theme="dark" on <html>) */
-html[data-theme="dark"] {
-  /* Dark theme (updated per spec) */
-  --bg: #000000;
-  --bg-elev-1: #0a0a0a;
-  --surface: #0a0a0a;
-  --text: #ffffff;
-  --muted-text: #6e6e6e;
-  --accents-1: #111111;
-  --accents-2: #1a1a1a;
-  --border: #2d2d2d;
-  --border-strong: #2d2d2d;
-  /* App-wide hover background color */
-  --hover: #181818;
+[data-theme="dark"] {
+  --geist-background: #000;
+  --geist-foreground: #fff;
+  --geist-secondary: #aaa;
+  --accents-1: #111;
+  --accents-2: #333;
+
+  --bg: #0a0a0a;
+  --bg-elev-1: #111111;
+  --surface: #111111;
+  --text: #fafafa;
+  --muted-text: #a3a3a3;
+  --border: #262626;
+  --border-strong: #404040;
+  --hover: #1a1a1a;
 
   --background: var(--bg);
   --foreground: var(--text);
@@ -93,25 +110,19 @@ html[data-theme="dark"] {
   --muted: var(--accents-1);
   --muted-foreground: var(--muted-text);
   --accent-foreground: var(--bg);
-  --destructive: #dc2626;
-  --destructive-foreground: var(--bg);
   --input: var(--surface);
   --ring: var(--accent);
   --ring-offset: var(--bg);
 
-  --navbar: #0a0a0a;
-  --sidebar: #0a0a0a;
+  --navbar: var(--bg);
+  --sidebar: var(--accents-1);
   --text-secondary: var(--muted-text);
   --card-bg: var(--surface);
   --card-border: var(--border);
   --pill-bg: var(--accents-1);
   --pill-border: var(--accents-2);
 
-  --post-card-bg: var(--accents-1);
-  --brand-primary: var(--accent);
   --brand-primary-rgb: 255, 255, 255;
-  --brand-primary-light: var(--accent-soft);
-  --brand-primary-dark: var(--accent-strong);
 }
 
 * {
@@ -370,37 +381,37 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 
 /* Uppy Dashboard Styling Overrides */
 .uppy-Dashboard-inner {
-  background-color: var(--accents-1) !important;
-  border: 1px solid var(--accents-2) !important;
+  background-color: var(--bg) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 0.375rem !important;
   box-shadow: none !important;
 }
 
 .uppy-Dashboard-AddFiles {
   text-align: center !important;
-  color: var(--geist-secondary) !important;
+  color: var(--muted-text) !important;
   font-size: 1.125rem !important;
   font-weight: 500 !important;
   margin-bottom: 1rem !important;
 }
 
 .uppy-Dashboard-AddFiles--is-drag-over {
-  background-color: var(--accents-2) !important;
-  border-color: var(--primary) !important;
+  background-color: var(--hover) !important;
+  border-color: var(--accent) !important;
 }
 
 .uppy-Dashboard-AddFiles--is-drag-over .uppy-Dashboard-AddFiles-title {
-  color: var(--primary) !important;
+  color: var(--accent) !important;
 }
 
 .uppy-Dashboard-AddFiles-title {
-  color: var(--geist-secondary) !important;
+  color: var(--muted-text) !important;
   font-size: 1.125rem !important;
   font-weight: 500 !important;
 }
 
 .uppy-Dashboard-AddFiles-subtitle {
-  color: var(--geist-secondary) !important;
+  color: var(--muted-text) !important;
   font-size: 0.875rem !important;
 }
 
@@ -409,6 +420,7 @@ p { font-size: var(--fs-base); line-height: 1.7; }
   grid-template-columns: repeat(3, 1fr) !important;
   gap: 1rem !important;
   margin-top: 1rem !important;
+  justify-items: center !important;
 }
 
 @media (min-width: 768px) {
@@ -425,18 +437,20 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 }
 
 .uppy-Dashboard-AddFiles-item {
-  background-color: transparent !important;
-  border: 1px solid var(--accents-2) !important;
+  background-color: var(--bg-elev-1) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 0.375rem !important;
   padding: 1rem !important;
   text-align: center !important;
   transition: all 0.2s ease !important;
   cursor: pointer !important;
+  width: 100% !important;
+  max-width: 80px !important;
 }
 
 .uppy-Dashboard-AddFiles-item:hover {
-  background-color: var(--accents-2) !important;
-  border-color: var(--primary) !important;
+  background-color: var(--hover) !important;
+  border-color: var(--accent) !important;
 }
 
 .uppy-Dashboard-AddFiles-itemIcon {
@@ -447,13 +461,13 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 
 .uppy-Dashboard-AddFiles-itemLabel {
   font-size: 0.75rem !important;
-  color: var(--geist-secondary) !important;
+  color: var(--muted-text) !important;
   font-weight: 500 !important;
 }
 
 .uppy-Dashboard-Item {
-  background-color: var(--accents-1) !important;
-  border: 1px solid var(--accents-2) !important;
+  background-color: var(--bg-elev-1) !important;
+  border: 1px solid var(--border) !important;
   border-radius: 0.375rem !important;
   padding: 0.5rem !important;
   margin-bottom: 0.5rem !important;
@@ -461,12 +475,12 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 }
 
 .uppy-Dashboard-Item-preview {
-  background-color: var(--accents-1) !important;
+  background-color: var(--bg-elev-1) !important;
   border-radius: 0.375rem !important;
 }
 
 .uppy-Dashboard-Item-name {
-  color: var(--geist-foreground) !important;
+  color: var(--text) !important;
   font-size: 0.875rem !important;
   font-weight: 500 !important;
 }
@@ -481,21 +495,21 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 }
 
 .uppy-Dashboard-Item-progress {
-  background-color: var(--accents-2) !important;
+  background-color: var(--border) !important;
   border-radius: 9999px !important;
   height: 0.25rem !important;
   overflow: hidden !important;
 }
 
 .uppy-Dashboard-Item-progressBar {
-  background-color: var(--primary) !important;
+  background-color: var(--accent) !important;
   height: 100% !important;
   border-radius: 9999px !important;
   transition: width 0.3s ease !important;
 }
 
 .uppy-Dashboard-Item-status {
-  color: var(--geist-secondary) !important;
+  color: var(--muted-text) !important;
   font-size: 0.75rem !important;
 }
 
@@ -514,7 +528,7 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 }
 
 .uppy-Dashboard-Item-actionBtn {
-  background-color: var(--primary) !important;
+  background-color: var(--accent) !important;
   color: white !important;
   border: none !important;
   border-radius: 0.375rem !important;
@@ -526,7 +540,7 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 }
 
 .uppy-Dashboard-Item-actionBtn:hover {
-  background-color: color-mix(in srgb, var(--primary) 90%, transparent) !important;
+  background-color: color-mix(in srgb, var(--accent) 90%, transparent) !important;
 }
 
 .uppy-Dashboard-Item-actionBtn:disabled {
@@ -535,7 +549,7 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 }
 
 .uppy-Dashboard-AddMore {
-  background-color: var(--primary) !important;
+  background-color: var(--accent) !important;
   color: white !important;
   border: none !important;
   border-radius: 0.375rem !important;
@@ -548,12 +562,7 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 }
 
 .uppy-Dashboard-AddMore:hover {
-  background-color: color-mix(in srgb, var(--primary) 90%, transparent) !important;
-}
-
-.uppy-Dashboard-AddMore:disabled {
-  opacity: 0.5 !important;
-  cursor: not-allowed !important;
+  background-color: color-mix(in srgb, var(--accent) 90%, transparent) !important;
 }
 
 .uppy-Dashboard-AddMore--is-hidden {
@@ -562,5 +571,14 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 
 /* Hide Uppy branding */
 .uppy-Dashboard-poweredBy {
+  display: none !important;
+}
+
+/* Remove the "Drop your files here" text */
+.uppy-Dashboard-AddFiles-title {
+  display: none !important;
+}
+
+.uppy-Dashboard-AddFiles-subtitle {
   display: none !important;
 }
