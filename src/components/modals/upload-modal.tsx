@@ -77,14 +77,17 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       return user.gymId
     }
     
-    console.log(`🔍 Looking up gym by slug: ${gymSlug}`)
+    console.log(`🔍 Looking up gym by name: ${gymSlug}`)
     
     // Look up gym by slug to get the correct gym ID
     try {
+      console.log(`🔍 Looking up gym by name: ${gymSlug}`)
+      
+      // Use 'Gym Name' column instead of 'slug' since that column doesn't exist
       const { data: gym, error } = await supabase
         .from('gyms')
         .select('id, "Gym Name"')
-        .eq('slug', gymSlug)
+        .eq('"Gym Name"', gymSlug)
         .single()
       
       console.log('📊 Supabase query result:', { gym, error })
@@ -94,31 +97,31 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         // Fallback to user context
         if (!user?.gymId) {
           console.error('❌ Fallback failed - no user gym ID available')
-          throw new Error(`Gym not found for slug: ${gymSlug}`)
+          throw new Error(`Gym not found for name: ${gymSlug}`)
         }
         console.log('✅ Falling back to user gym ID:', user.gymId)
         return user.gymId
       }
       
       if (!gym) {
-        console.error('❌ No gym found with slug:', gymSlug)
+        console.error('❌ No gym found with name:', gymSlug)
         // Fallback to user context
         if (!user?.gymId) {
           console.error('❌ Fallback failed - no user gym ID available')
-          throw new Error(`Gym not found for slug: ${gymSlug}`)
+          throw new Error(`Gym not found for name: ${gymSlug}`)
         }
         console.log('✅ Falling back to user gym ID:', user.gymId)
         return user.gymId
       }
       
-      console.log(`✅ Found gym by slug: ${gymSlug} -> ${gym['Gym Name']} (ID: ${gym.id})`)
+      console.log(`✅ Found gym by name: ${gymSlug} -> ${gym['Gym Name']} (ID: ${gym.id})`)
       return gym.id
     } catch (error) {
-      console.error('❌ Error looking up gym by slug:', error)
+      console.error('❌ Error looking up gym by name:', error)
       // Fallback to user context
       if (!user?.gymId) {
         console.error('❌ Fallback failed - no user gym ID available')
-        throw new Error(`Failed to look up gym for slug: ${gymSlug}`)
+        throw new Error(`Failed to look up gym for name: ${gymSlug}`)
       }
       console.log('✅ Falling back to user gym ID:', user.gymId)
       return user.gymId
