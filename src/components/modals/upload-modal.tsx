@@ -12,6 +12,10 @@ import { initUpload, uploadFile, completeUpload } from '@/lib/contentUploadClien
 import type { SlotName } from '@/lib/slots'
 import toast from 'react-hot-toast'
 
+// Import required Uppy CSS files
+import '@uppy/core/dist/style.css'
+import '@uppy/dashboard/dist/style.css'
+
 interface UploadModalProps {
   isOpen: boolean
   onClose: () => void
