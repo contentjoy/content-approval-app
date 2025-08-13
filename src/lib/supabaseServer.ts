@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabasejs';
+import { createClient } from '@supabase/supabase-js';
 
 export function getAdminClient() {
   // Comprehensive environment variable debugging
