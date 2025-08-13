@@ -58,6 +58,17 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   const params = useParams()
   const gymSlug = typeof params.gymSlug === 'string' ? params.gymSlug : null
   
+  // Debug logging
+  useEffect(() => {
+    console.log('UploadModal debug:', { 
+      isOpen, 
+      gymName, 
+      user: user ? { gymId: user.gymId, gymName: user.gymName } : 'null',
+      gymSlug,
+      params 
+    })
+  }, [isOpen, gymName, user, gymSlug, params])
+  
   const [activeSlot, setActiveSlot] = useState<typeof SLOT_NAMES[number]>('Photos')
   const [isUploading, setIsUploading] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
@@ -102,6 +113,11 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         }
       })
       
+      // Enable better file previews
+      uppy.on('file-added', (file) => {
+        console.log(`File added to ${slotName}:`, file.name, file.type)
+      })
+      
       instances[slotName] = uppy
     })
     
@@ -118,6 +134,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   const handleUpload = useCallback(async () => {
     if (!gymSlug || !gymName || !user?.gymId) {
       console.error('Missing gym information or user not authenticated')
+      console.log('Debug info:', { gymSlug, gymName, user: user ? { gymId: user.gymId } : 'null' })
       toast.error('Please log in to upload files')
       return
     }
@@ -310,17 +327,18 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 uppy={getActiveUppy()}
                 plugins={[]}
                 width="100%"
-                height={400}
-                showProgressDetails={false}
+                height={450}
+                showProgressDetails={true}
                 proudlyDisplayPoweredByUppy={false}
                 theme="light"
                 showRemoveButtonAfterComplete={true}
                 showLinkToFileUploadResult={false}
-                note={`Accepted file types: ${getActiveConfig().allowedTypes.join(', ')}. Maximum size: 50MB. Use the "Upload All Files to Google Drive" button below.`}
+                note={`Accepted file types: ${getActiveConfig().allowedTypes.join(', ')}. Maximum size: 50MB.`}
                 doneButtonHandler={() => {
                   console.log('Upload complete for current slot')
                 }}
                 hideUploadButton={true}
+                showSelectedFiles={true}
               />
             </div>
 
