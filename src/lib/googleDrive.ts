@@ -82,18 +82,17 @@ export async function ensureFolder(
 export async function ensureGymUploadStructure(drive: drive_v3.Drive, p: {
   driveRootId: string;
   gymName: string;
-  uploadId: string;
-  dateStr: string;
+  uploadLabel: string;
+  slotNames: readonly string[];
 }) {
   try {
-    console.log(`🏗️ Creating upload structure for gym: ${p.gymName}, upload: ${p.uploadId}`);
+    console.log(`🏗️ Creating upload structure for gym: ${p.gymName}, upload: ${p.uploadLabel}`);
     
     const gymFolderId = await ensureFolder(drive, sanitizeName(p.gymName), p.driveRootId);
-    const uploadFolderName = `${p.dateStr}_${p.uploadId}`;
-    const uploadFolderId = await ensureFolder(drive, uploadFolderName, gymFolderId);
+    const uploadFolderId = await ensureFolder(drive, p.uploadLabel, gymFolderId);
     
     const slotFolders: Record<string, string> = {};
-    for (const slot of ['Slot-1', 'Slot-2', 'Slot-3', 'Slot-4']) {
+    for (const slot of p.slotNames) {
       slotFolders[slot] = await ensureFolder(drive, slot, uploadFolderId);
     }
     
@@ -202,6 +201,16 @@ export async function uploadToResumable(uploadUrl: string, body: ReadableStream 
 
 export function newUploadId() {
   return crypto.randomBytes(8).toString('hex');
+}
+
+export function timestampLabel() {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+}
+
+export function shortId() {
+  return Math.random().toString(36).slice(-8);
 }
 
 // Utility function to get file size from ReadableStream

@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDrive, ensureGymUploadStructure, newUploadId } from '@/lib/googleDrive';
+import { getDrive, ensureGymUploadStructure, timestampLabel, shortId } from '@/lib/googleDrive';
+import { getAdminClient } from '@/lib/supabaseServer';
+import { SLOT_NAMES } from '@/lib/slots';
 
 export async function POST(req: NextRequest) {
   try {
-    const { gymName } = await req.json();
+    const { gymId } = await req.json();
     
-    if (!gymName) {
+    if (!gymId) {
       return NextResponse.json({ 
-        error: 'gymName required',
-        details: 'Please provide a gym name in the request body'
+        error: 'gymId required',
+        details: 'Please provide a gym ID in the request body'
       }, { status: 400 });
     }
 
-    console.log(`🚀 Initializing upload structure for gym: ${gymName}`);
+    console.log(`🚀 Initializing upload structure for gym ID: ${gymId}`);
 
     // Validate environment variables
     const driveRootId = process.env.GOOGLE_GYM_ROOT_FOLDER_ID || process.env.GOOGLE_SHARED_DRIVE_ID;
@@ -24,28 +26,77 @@ export async function POST(req: NextRequest) {
       }, { status: 500 });
     }
 
-    const drive = getDrive();
-    const uploadId = newUploadId();
-    const dateStr = new Date().toISOString().slice(0, 10);
+    // Look up canonical gym name from Supabase
+    const supa = getAdminClient();
+    const { data: gymRow, error: gymError } = await supa
+      .from('gyms')
+      .select('id, "Gym Name"')
+      .eq('id', gymId)
+      .single();
 
-    console.log(`📅 Creating upload structure for date: ${dateStr}, upload ID: ${uploadId}`);
+    if (gymError || !gymRow) {
+      console.error('❌ Failed to fetch gym data:', gymError);
+      return NextResponse.json({ 
+        error: 'Gym not found',
+        details: 'Failed to fetch gym data from database'
+      }, { status: 404 });
+    }
+
+    const gymName = gymRow['Gym Name'] || 'Unknown Gym';
+    console.log(`🏋️ Found gym: ${gymName}`);
+
+    const drive = getDrive();
+    const uploadLabel = `${timestampLabel()}_${shortId()}`;
+    const uploadId = shortId(); // Use short ID as upload ID
+
+    console.log(`📅 Creating upload structure with label: ${uploadLabel}`);
 
     const structure = await ensureGymUploadStructure(drive, {
       driveRootId,
       gymName,
-      uploadId,
-      dateStr
+      uploadLabel,
+      slotNames: SLOT_NAMES
     });
 
-    const response = {
-      uploadId,
-      dateStr,
-      ...structure,
-      message: 'Upload structure created successfully'
-    };
+    // Persist upload data to Supabase
+    const { error: uploadError } = await supa
+      .from('uploads')
+      .insert([{ 
+        upload_id: uploadId, 
+        gym_id: gymId, 
+        gym_name: gymName, 
+        upload_folder_id: structure.uploadFolderId 
+      }]);
 
-    console.log(`✅ Upload initialization completed for ${gymName}`);
-    return NextResponse.json(response);
+    if (uploadError) {
+      console.error('❌ Failed to insert upload record:', uploadError);
+      return NextResponse.json({ 
+        error: 'Failed to persist upload data',
+        details: 'Database error occurred'
+      }, { status: 500 });
+    }
+
+    // Persist slot data to Supabase
+    const slotRecords = SLOT_NAMES.map(slot => ({
+      upload_id: uploadId,
+      slot_name: slot,
+      drive_folder_id: structure.slotFolders[slot]
+    }));
+
+    const { error: slotError } = await supa
+      .from('upload_slots')
+      .insert(slotRecords);
+
+    if (slotError) {
+      console.error('❌ Failed to insert slot records:', slotError);
+      return NextResponse.json({ 
+        error: 'Failed to persist slot data',
+        details: 'Database error occurred'
+      }, { status: 500 });
+    }
+
+    console.log(`✅ Upload initialization completed for ${gymName}, upload ID: ${uploadId}`);
+    return NextResponse.json({ uploadId });
 
   } catch (error) {
     console.error('❌ Upload initialization failed:', error);
@@ -55,6 +106,13 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ 
           error: 'Google Drive authentication not configured',
           details: 'Please configure GOOGLE_APPLICATION_CREDENTIALS_JSON environment variable'
+        }, { status: 500 });
+      }
+      
+      if (error.message.includes('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')) {
+        return NextResponse.json({ 
+          error: 'Database not configured',
+          details: 'Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables'
         }, { status: 500 });
       }
       

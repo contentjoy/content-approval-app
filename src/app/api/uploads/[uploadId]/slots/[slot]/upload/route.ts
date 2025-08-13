@@ -1,23 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDrive, startResumableSession, uploadToResumable } from '@/lib/googleDrive';
+import { getAdminClient } from '@/lib/supabaseServer';
+import { SLOT_NAMES, type SlotName } from '@/lib/slots';
 
 export const runtime = 'nodejs'; // ensure Node (not edge)
 export const maxDuration = 300; // 5 minutes max
 
-const VALID_SLOTS = new Set(['Slot-1', 'Slot-2', 'Slot-3', 'Slot-4']);
-
-interface RouteParams {
-  params: Promise<{ uploadId: string; slot: string }>;
-}
-
-export async function POST(req: NextRequest, { params }: RouteParams) {
+export async function POST(
+  req: NextRequest, 
+  { params }: { params: Promise<{ uploadId: string; slot: string }> }
+) {
   try {
     const { slot, uploadId } = await params;
     
-    if (!VALID_SLOTS.has(slot)) {
+    if (!SLOT_NAMES.includes(slot as SlotName)) {
       return NextResponse.json({ 
         error: 'Invalid slot',
-        details: `Slot must be one of: ${Array.from(VALID_SLOTS).join(', ')}`
+        details: `Slot must be one of: ${SLOT_NAMES.join(', ')}`
       }, { status: 400 });
     }
 
@@ -36,14 +35,24 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       }, { status: 400 });
     }
 
-    // Client must send the slot folder id in header
-    const parentId = req.headers.get('x-slot-folder-id');
-    if (!parentId) {
+    // Look up slot folder ID from Supabase
+    const supa = getAdminClient();
+    const { data: slotData, error: slotError } = await supa
+      .from('upload_slots')
+      .select('drive_folder_id')
+      .eq('upload_id', uploadId)
+      .eq('slot_name', slot)
+      .single();
+
+    if (slotError || !slotData?.drive_folder_id) {
+      console.error('❌ Failed to fetch slot folder ID:', slotError);
       return NextResponse.json({ 
-        error: 'Missing slot folder ID',
-        details: 'x-slot-folder-id header is required to specify upload destination'
-      }, { status: 400 });
+        error: 'Slot not found',
+        details: 'Failed to fetch slot folder information from database'
+      }, { status: 404 });
     }
+
+    const parentId = slotData.drive_folder_id;
 
     // Validate file size
     const maxMb = Number(process.env.MAX_UPLOAD_MB || '2048'); // Default 2GB
@@ -68,13 +77,29 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     await uploadToResumable(uploadUrl, body);
 
+    // Persist file data to Supabase
+    const { error: fileError } = await supa
+      .from('files')
+      .insert([{
+        upload_id: uploadId,
+        slot_name: slot,
+        drive_file_id: fileId,
+        name: filename,
+        size_bytes: sizeBytes,
+        mime
+      }]);
+
+    if (fileError) {
+      console.error('❌ Failed to persist file data:', fileError);
+      // Don't fail the upload if database insert fails, but log it
+      console.warn('⚠️ File uploaded but failed to persist metadata');
+    }
+
     const response = {
       ok: true,
       driveFileId: fileId,
       name: filename,
-      slot,
-      uploadId,
-      message: 'File uploaded successfully'
+      slot
     };
 
     console.log(`✅ Upload completed for slot ${slot}: ${filename} (${fileId})`);
@@ -103,6 +128,13 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         return NextResponse.json({ 
           error: 'Upload failed',
           details: error.message
+        }, { status: 500 });
+      }
+
+      if (error.message.includes('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')) {
+        return NextResponse.json({ 
+          error: 'Database not configured',
+          details: 'Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables'
         }, { status: 500 });
       }
     }

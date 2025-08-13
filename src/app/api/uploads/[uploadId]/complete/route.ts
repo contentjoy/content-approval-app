@@ -1,40 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDrive } from '@/lib/googleDrive';
+import { getAdminClient } from '@/lib/supabaseServer';
 
-interface RouteParams {
-  params: Promise<{ uploadId: string }>;
-}
-
-export async function POST(req: NextRequest, { params }: RouteParams) {
+export async function POST(
+  req: NextRequest, 
+  { params }: { params: Promise<{ uploadId: string }> }
+) {
   try {
     const { uploadId } = await params;
-    const { uploadFolderId, manifest } = await req.json();
     
     console.log(`🏁 Completing upload: ${uploadId}`);
 
-    // If no uploadFolderId provided, just return success (noop)
-    if (!uploadFolderId) {
-      console.log(`ℹ️ No upload folder ID provided, marking upload ${uploadId} as complete`);
+    // Get upload and file data from Supabase
+    const supa = getAdminClient();
+    
+    // Get upload details
+    const { data: uploadData, error: uploadError } = await supa
+      .from('uploads')
+      .select('*')
+      .eq('upload_id', uploadId)
+      .single();
+
+    if (uploadError || !uploadData) {
+      console.error('❌ Failed to fetch upload data:', uploadError);
       return NextResponse.json({ 
-        ok: true, 
-        message: 'Upload marked as complete',
-        uploadId 
-      });
+        error: 'Upload not found',
+        details: 'Failed to fetch upload information from database'
+      }, { status: 404 });
     }
 
-    console.log(`📝 Creating manifest file for upload ${uploadId} in folder ${uploadFolderId}`);
+    // Get all files for this upload
+    const { data: filesData, error: filesError } = await supa
+      .from('files')
+      .select('*')
+      .eq('upload_id', uploadId)
+      .order('slot_name');
 
-    // Create upload manifest with metadata
+    if (filesError) {
+      console.error('❌ Failed to fetch files data:', filesError);
+      return NextResponse.json({ 
+        error: 'Failed to fetch files',
+        details: 'Database error occurred while fetching files'
+      }, { status: 500 });
+    }
+
+    // Build manifest from database data
     const manifestData = {
       uploadId,
-      completedAt: new Date().toISOString(),
-      manifest: manifest || {},
+      gymId: uploadData.gym_id,
+      gymName: uploadData.gym_name,
+      createdAt: uploadData.created_at || new Date().toISOString(),
+      uploadFolderId: uploadData.upload_folder_id,
+      files: filesData?.map(file => ({
+        slot: file.slot_name,
+        name: file.name,
+        driveFileId: file.drive_file_id,
+        sizeBytes: file.size_bytes,
+        mime: file.mime
+      })) || [],
       metadata: {
         totalSlots: 4,
-        slots: ['Slot-1', 'Slot-2', 'Slot-3', 'Slot-4'],
-        status: 'completed'
+        slots: ['Photos', 'Videos', 'Facility Videos', 'Facility Video'],
+        status: 'completed',
+        totalFiles: filesData?.length || 0
       }
     };
+
+    console.log(`📝 Creating manifest file for upload ${uploadId} with ${manifestData.files.length} files`);
 
     const drive = getDrive();
     
@@ -42,7 +74,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     const { data } = await drive.files.create({
       requestBody: {
         name: 'upload.json',
-        parents: [uploadFolderId],
+        parents: [uploadData.upload_folder_id],
         mimeType: 'application/json',
         description: `Upload manifest for ${uploadId}`,
       },
@@ -86,6 +118,13 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         return NextResponse.json({ 
           error: 'Authentication failed',
           details: 'Failed to authenticate with Google Drive'
+        }, { status: 500 });
+      }
+
+      if (error.message.includes('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')) {
+        return NextResponse.json({ 
+          error: 'Database not configured',
+          details: 'Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables'
         }, { status: 500 });
       }
     }
