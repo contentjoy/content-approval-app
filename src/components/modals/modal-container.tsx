@@ -8,6 +8,7 @@ import { SchedulingModal } from './scheduling-modal'
 import { CommentsModal } from './comments-modal'
 import { RegenerateModal } from './regenerate-modal'
 import { FeedbackModal } from './feedback-modal'
+import { UploadModal } from './upload-modal'
 
 export function ModalContainer() {
   const { isOpen, modalType, post, carouselPosts, approvedPosts, bulkPosts, closeModal } = useModalStore() as any
@@ -81,6 +82,10 @@ export function ModalContainer() {
       if (!post) return null
       return (
         <FeedbackModal isOpen={isOpen} onClose={closeModal} post={post} carouselPosts={carouselPosts} onSuccess={handleSuccess} />
+      )
+    case 'upload':
+      return (
+        <UploadModal isOpen={isOpen} onClose={closeModal} onSuccess={handleSuccess} />
       )
     // case 'comments':
     //   if (!post) return null

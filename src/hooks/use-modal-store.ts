@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { SocialMediaPost } from '@/types'
 
-export type ModalType = 'approve' | 'disapprove' | 'edit-caption' | 'schedule' | 'comments' | 'regenerate' | 'feedback' | null
+export type ModalType = 'approve' | 'disapprove' | 'edit-caption' | 'schedule' | 'comments' | 'regenerate' | 'feedback' | 'upload' | null
 
 interface ModalState {
   isOpen: boolean

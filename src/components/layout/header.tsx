@@ -58,7 +58,10 @@ export function Header() {
           />
           
           {/* Upload Content Button - inline standard */}
-          <button className="btn-inline">
+          <button 
+            className="btn-inline"
+            onClick={() => openModal('upload')}
+          >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline content">Upload</span>
           </button>
