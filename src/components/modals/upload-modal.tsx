@@ -4,11 +4,6 @@ import React, { useState, useCallback, useEffect } from 'react'
 import { X, Upload, Image, Video, Building2, Camera } from 'lucide-react'
 import { Dashboard } from '@uppy/react'
 import Uppy from '@uppy/core'
-import Dropbox from '@uppy/dropbox'
-import Box from '@uppy/box'
-import GoogleDrive from '@uppy/google-drive'
-import OneDrive from '@uppy/onedrive'
-import Url from '@uppy/url'
 import FileInput from '@uppy/file-input'
 import { useBranding } from '@/contexts/branding-context'
 import { useAuth } from '@/contexts/auth-context'
@@ -99,28 +94,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         }
       })
       
-      // Add all the plugins
-      uppy.use(Dropbox, { 
-        companionUrl: 'https://companion.uppy.io'
-      })
-      
-      uppy.use(Box, { 
-        companionUrl: 'https://companion.uppy.io'
-      })
-      
-      // Note: Google Drive Picker requires API keys - using basic Google Drive instead
-      uppy.use(GoogleDrive, { 
-        companionUrl: 'https://companion.uppy.io'
-      })
-      
-      uppy.use(OneDrive, { 
-        companionUrl: 'https://companion.uppy.io'
-      })
-      
-      uppy.use(Url, { 
-        companionUrl: 'https://companion.uppy.io'
-      })
-      
+      // Only use local file input - remove external plugins that cause CSP issues
       uppy.use(FileInput)
       
       instances[slotName] = uppy

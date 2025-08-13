@@ -383,8 +383,9 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 .uppy-Dashboard-inner {
   background-color: var(--bg) !important;
   border: 1px solid var(--border) !important;
-  border-radius: 0.375rem !important;
+  border-radius: 0.75rem !important;
   box-shadow: none !important;
+  padding: 2rem !important;
 }
 
 .uppy-Dashboard-AddFiles {
@@ -392,7 +393,7 @@ p { font-size: var(--fs-base); line-height: 1.7; }
   color: var(--muted-text) !important;
   font-size: 1.125rem !important;
   font-weight: 500 !important;
-  margin-bottom: 1rem !important;
+  margin-bottom: 2rem !important;
 }
 
 .uppy-Dashboard-AddFiles--is-drag-over {
@@ -417,66 +418,77 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 
 .uppy-Dashboard-AddFiles-list {
   display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 1rem !important;
-  margin-top: 1rem !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: 1.5rem !important;
+  margin-top: 2rem !important;
+  width: 75% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
   justify-items: center !important;
 }
 
 @media (min-width: 768px) {
   .uppy-Dashboard-AddFiles-list {
-    grid-template-columns: repeat(6, 1fr) !important;
+    grid-template-columns: repeat(5, 1fr) !important;
   }
 }
 
 @media (max-width: 767px) {
   .uppy-Dashboard-AddFiles-list {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.5rem !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1rem !important;
+    width: 90% !important;
   }
 }
 
 .uppy-Dashboard-AddFiles-item {
-  background-color: var(--bg-elev-1) !important;
+  background-color: var(--surface) !important;
   border: 1px solid var(--border) !important;
-  border-radius: 0.375rem !important;
-  padding: 1rem !important;
+  border-radius: 0.75rem !important;
+  padding: 1.5rem 1rem !important;
   text-align: center !important;
   transition: all 0.2s ease !important;
   cursor: pointer !important;
   width: 100% !important;
   max-width: 80px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .uppy-Dashboard-AddFiles-item:hover {
   background-color: var(--hover) !important;
   border-color: var(--accent) !important;
+  transform: translateY(-2px) !important;
 }
 
 .uppy-Dashboard-AddFiles-itemIcon {
-  width: 2rem !important;
-  height: 2rem !important;
-  margin: 0 auto 0.5rem !important;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  margin: 0 auto 0.75rem !important;
 }
 
 .uppy-Dashboard-AddFiles-itemLabel {
   font-size: 0.75rem !important;
   color: var(--muted-text) !important;
   font-weight: 500 !important;
+  text-align: center !important;
+  line-height: 1.2 !important;
 }
 
 .uppy-Dashboard-Item {
   background-color: var(--bg-elev-1) !important;
   border: 1px solid var(--border) !important;
-  border-radius: 0.375rem !important;
-  padding: 0.5rem !important;
-  margin-bottom: 0.5rem !important;
+  border-radius: 0.75rem !important;
+  padding: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
   box-shadow: none !important;
 }
 
 .uppy-Dashboard-Item-preview {
   background-color: var(--bg-elev-1) !important;
-  border-radius: 0.375rem !important;
+  border-radius: 0.75rem !important;
 }
 
 .uppy-Dashboard-Item-name {
@@ -524,14 +536,14 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 }
 
 .uppy-Dashboard-Item-actions {
-  margin-top: 0.5rem !important;
+  margin-top: 0.75rem !important;
 }
 
 .uppy-Dashboard-Item-actionBtn {
   background-color: var(--accent) !important;
   color: white !important;
   border: none !important;
-  border-radius: 0.375rem !important;
+  border-radius: 0.5rem !important;
   padding: 0.5rem 1rem !important;
   font-size: 0.875rem !important;
   font-weight: 500 !important;
@@ -552,13 +564,13 @@ p { font-size: var(--fs-base); line-height: 1.7; }
   background-color: var(--accent) !important;
   color: white !important;
   border: none !important;
-  border-radius: 0.375rem !important;
-  padding: 0.5rem 1rem !important;
+  border-radius: 0.5rem !important;
+  padding: 0.75rem 1.5rem !important;
   font-size: 0.875rem !important;
   font-weight: 500 !important;
   cursor: pointer !important;
   transition: background-color 0.2s ease !important;
-  margin-top: 1rem !important;
+  margin-top: 1.5rem !important;
 }
 
 .uppy-Dashboard-AddMore:hover {
@@ -581,4 +593,26 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 
 .uppy-Dashboard-AddFiles-subtitle {
   display: none !important;
+}
+
+/* Custom upload area styling */
+.uppy-Dashboard-AddFiles--is-drag-over {
+  background-color: var(--hover) !important;
+  border: 2px dashed var(--accent) !important;
+  border-radius: 0.75rem !important;
+}
+
+/* File input button styling */
+.uppy-Dashboard-AddFiles-item[data-uppy-acquirer-id="FileInput"] {
+  background-color: var(--accent) !important;
+  color: white !important;
+  border-color: var(--accent) !important;
+}
+
+.uppy-Dashboard-AddFiles-item[data-uppy-acquirer-id="FileInput"]:hover {
+  background-color: color-mix(in srgb, var(--accent) 90%, transparent) !important;
+}
+
+.uppy-Dashboard-AddFiles-item[data-uppy-acquirer-id="FileInput"] .uppy-Dashboard-AddFiles-itemLabel {
+  color: white !important;
 }
