@@ -66,9 +66,9 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   const getGymIdForUpload = useCallback(async (): Promise<string> => {
     console.log('🔍 getGymIdForUpload called with:', { gymSlug, userGymId: user?.gymId, userGymName: user?.gymName })
     
+    // If no gym slug, we need user context
     if (!gymSlug) {
       console.log('⚠️ No gymSlug from URL, falling back to user context')
-      // Fallback to user context if no gym slug
       if (!user?.gymId) {
         console.error('❌ No gym ID available for upload - user context missing')
         throw new Error('No gym ID available for upload')
@@ -124,6 +124,38 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       return user.gymId
     }
   }, [gymSlug, user?.gymId])
+  
+  // Check if we can proceed with upload
+  const canUpload = useCallback(() => {
+    if (!gymSlug) {
+      // Need user context if no gym slug
+      return !!user?.gymId
+    }
+    // Can always try to upload if we have a gym slug (will look it up)
+    return true
+  }, [gymSlug, user?.gymId])
+  
+  // Check authentication status
+  const checkAuthStatus = useCallback(() => {
+    console.log('🔐 Checking auth status:', { 
+      user: !!user, 
+      gymSlug, 
+      canUpload: canUpload(),
+      sessionToken: typeof window !== 'undefined' ? !!localStorage.getItem('session_token') : false
+    })
+    
+    if (!user && !gymSlug) {
+      console.error('❌ No user context and no gym slug - cannot upload')
+      return false
+    }
+    
+    if (!user && gymSlug) {
+      console.log('⚠️ No user context but have gym slug - will attempt gym lookup')
+      return true
+    }
+    
+    return true
+  }, [user, gymSlug, canUpload])
   
   // Debug logging
   useEffect(() => {
@@ -250,6 +282,16 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
     try {
       console.log('🚀 Starting upload process...')
       console.log('🔍 Current state:', { gymSlug, gymName, userGymId: user?.gymId, userGymName: user?.gymName })
+      
+      // Check if we can proceed with upload
+      if (!checkAuthStatus()) {
+        const errorMsg = !user && !gymSlug 
+          ? 'Please log in to upload content' 
+          : 'Missing gym information - please refresh the page'
+        toast.error(errorMsg)
+        console.error('❌ Upload blocked:', errorMsg)
+        return
+      }
       
       // Collect files from all slots
       const filesBySlot: Record<SlotName, File[]> = {
