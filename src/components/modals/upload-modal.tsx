@@ -1,10 +1,9 @@
 'use client'
 
 import React, { useState, useCallback, useEffect } from 'react'
-import { X, Upload, Image, Video, Building2, Camera, Folder, Link, Cloud, HardDrive } from 'lucide-react'
+import { X, Upload, Image, Video, Building2, Camera } from 'lucide-react'
 import { Dashboard } from '@uppy/react'
 import Uppy from '@uppy/core'
-import FileInput from '@uppy/file-input'
 import { useBranding } from '@/contexts/branding-context'
 import { useAuth } from '@/contexts/auth-context'
 import { useParams } from 'next/navigation'
@@ -18,17 +17,6 @@ interface UploadModalProps {
   onClose: () => void
   onSuccess?: (detail?: any) => void
 }
-
-// Custom upload source configuration with proper Uppy plugin mapping
-const UPLOAD_SOURCES = [
-  { id: 'FileInput', label: 'My Device', icon: Folder, color: 'var(--primary)', plugin: 'file-input' },
-  { id: 'Dropbox', label: 'Dropbox', icon: Cloud, color: '#0061ff', plugin: 'dropbox' },
-  { id: 'Box', label: 'Box', icon: HardDrive, color: '#0061d5', plugin: 'box' },
-  { id: 'GoogleDrivePicker', label: 'Google Drive Picker', icon: HardDrive, color: '#4285f4', plugin: 'google-drive-picker' },
-  { id: 'GoogleDrive', label: 'Google Drive', icon: HardDrive, color: '#4285f4', plugin: 'google-drive' },
-  { id: 'OneDrive', label: 'OneDrive', icon: Cloud, color: '#0078d4', plugin: 'onedrive' },
-  { id: 'Url', label: 'Link', icon: Link, color: '#f97316', plugin: 'url' }
-] as const
 
 // File type restrictions for each slot
 const SLOT_CONFIG = {
@@ -72,12 +60,14 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
     const instances: Record<string, Uppy> = {}
     
     SLOT_NAMES.forEach(slotName => {
+      const config = SLOT_CONFIG[slotName]
       const uppy = new Uppy({
+        id: `uppy-${slotName.toLowerCase().replace(/\s+/g, '-')}`,
         restrictions: {
-          maxNumberOfFiles: Infinity, // Allow unlimited files
-          minNumberOfFiles: 0, // No minimum requirement
+          maxNumberOfFiles: config.maxFiles,
+          minNumberOfFiles: 0,
           maxFileSize: 50 * 1024 * 1024, // 50MB limit
-          allowedFileTypes: ['image/*', 'video/*'], // Accept all image and video types
+          allowedFileTypes: config.allowedTypes,
         },
         autoProceed: false,
         allowMultipleUploadBatches: true,
@@ -105,9 +95,6 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         }
       })
       
-      // Use FileInput plugin for local file uploads
-      uppy.use(FileInput)
-      
       instances[slotName] = uppy
     })
     
@@ -120,20 +107,6 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       console.log('Cleaning up Uppy instances')
     }
   }, [uppyInstances])
-
-  const handleUploadSourceClick = useCallback((sourceId: string) => {
-    if (sourceId === 'FileInput') {
-      // Trigger file input for local uploads
-      const uppy = uppyInstances[activeSlot]
-      const fileInput = document.querySelector(`[data-uppy-acquirer-id="FileInput"]`) as HTMLElement
-      if (fileInput) {
-        fileInput.click()
-      }
-    } else {
-      // Show info toast for external services (disabled due to CSP)
-      toast.success(`${UPLOAD_SOURCES.find(s => s.id === sourceId)?.label} integration is currently disabled for security reasons. Please use "My Device" to upload files.`)
-    }
-  }, [activeSlot, uppyInstances])
 
   const handleUpload = useCallback(async () => {
     if (!gymSlug || !gymName || !user?.gymId) {
@@ -228,6 +201,15 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   }, [gymSlug, gymName, user?.gymId, uppyInstances, onSuccess, onClose])
 
   const getActiveUppy = () => uppyInstances[activeSlot]
+  const getActiveConfig = () => SLOT_CONFIG[activeSlot]
+
+  // Get total files across all categories
+  const getTotalFiles = () => {
+    return SLOT_NAMES.reduce((total, slotName) => {
+      const uppy = uppyInstances[slotName]
+      return total + uppy.getFiles().length
+    }, 0)
+  }
 
   if (!isOpen) return null
 
@@ -294,13 +276,23 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                           {fileCount} files selected
                         </div>
                         <div className="text-xs text-[var(--geist-secondary)] mt-1">
-                          Accepts images & videos
+                          Accepts {config.allowedTypes.join(', ')}
                         </div>
                       </div>
                     </div>
                   </button>
                 )
               })}
+            </div>
+            
+            {/* Total Files Summary */}
+            <div className="mt-4 p-3 bg-[var(--geist-background)] rounded-md border border-[var(--accents-2)]">
+              <div className="text-sm font-medium text-[var(--geist-foreground)]">
+                Total Files: {getTotalFiles()}
+              </div>
+              <div className="text-xs text-[var(--geist-secondary)] mt-1">
+                Ready to upload to Google Drive
+              </div>
             </div>
           </div>
 
@@ -311,40 +303,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 {activeSlot}
               </h3>
               <p className="text-[var(--geist-secondary)] text-sm">
-                {SLOT_CONFIG[activeSlot].description}
+                {getActiveConfig().description}
               </p>
-            </div>
-
-            {/* Custom Upload Sources Grid */}
-            <div className="bg-[var(--geist-background)] border border-[var(--accents-2)] rounded-md p-6 mb-6">
-              {/* Title */}
-              <h4 className="text-lg font-medium text-[var(--geist-foreground)] mb-4 text-center">
-                Drop files here, browse files or import from:
-              </h4>
-              
-              {/* Upload Sources Grid */}
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-                {UPLOAD_SOURCES.map((source) => {
-                  const Icon = source.icon
-                  return (
-                    <button
-                      key={source.id}
-                      onClick={() => handleUploadSourceClick(source.id)}
-                      className="flex flex-col items-center justify-center p-4 bg-[var(--accents-1)] border border-[var(--accents-2)] rounded-md hover:bg-[var(--accents-2)] transition-all duration-200 group"
-                    >
-                      <div className="w-8 h-8 flex items-center justify-center mb-2">
-                        <Icon 
-                          className="w-8 h-8" 
-                          style={{ color: source.color }}
-                        />
-                      </div>
-                      <span className="text-xs text-[var(--geist-secondary)] font-medium text-center">
-                        {source.label}
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
             </div>
 
             {/* Uppy Dashboard */}
@@ -353,33 +313,35 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 uppy={getActiveUppy()}
                 plugins={[]}
                 width="100%"
-                height="300px"
+                height={450}
                 showProgressDetails={true}
                 proudlyDisplayPoweredByUppy={false}
                 theme="light"
                 showRemoveButtonAfterComplete={true}
+                showLinkToFileUploadResult={false}
+                note={`Accepted file types: ${getActiveConfig().allowedTypes.join(', ')}. Maximum size: 50MB`}
                 doneButtonHandler={() => {
                   console.log('Upload complete for current slot')
                 }}
               />
             </div>
 
-            {/* Upload Button */}
+            {/* Unified Upload Button */}
             <div className="mt-6 flex justify-end">
               <button
                 onClick={handleUpload}
-                disabled={isUploading || getActiveUppy().getFiles().length === 0}
-                className="px-4 py-2 bg-[var(--primary)] text-white rounded-md font-medium hover:bg-[var(--primary)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                disabled={isUploading || getTotalFiles() === 0}
+                className="px-6 py-3 bg-[var(--primary)] text-white rounded-md font-medium hover:bg-[var(--primary)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
               >
                 {isUploading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Uploading...</span>
+                    <span>Uploading {getTotalFiles()} files...</span>
                   </>
                 ) : (
                   <>
                     <Upload className="w-4 h-4" />
-                    <span>Upload to Google Drive</span>
+                    <span>Upload All Files to Google Drive</span>
                   </>
                 )}
               </button>
