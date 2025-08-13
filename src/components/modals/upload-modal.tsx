@@ -19,15 +19,15 @@ interface UploadModalProps {
   onSuccess?: (detail?: any) => void
 }
 
-// Custom upload source configuration
+// Custom upload source configuration with proper Uppy plugin mapping
 const UPLOAD_SOURCES = [
-  { id: 'device', label: 'My Device', icon: Folder, color: '#3b82f6' },
-  { id: 'dropbox', label: 'Dropbox', icon: Cloud, color: '#0061ff' },
-  { id: 'box', label: 'Box', icon: HardDrive, color: '#0061d5' },
-  { id: 'gdrive', label: 'Google Drive', icon: HardDrive, color: '#4285f4' },
-  { id: 'onedrive', label: 'OneDrive', icon: Cloud, color: '#0078d4' },
-  { id: 'url', label: 'Link', icon: Link, color: '#f97316' },
-  { id: 'fileinput', label: 'File Input', icon: Upload, color: '#10b981' }
+  { id: 'FileInput', label: 'My Device', icon: Folder, color: 'var(--primary)', plugin: 'file-input' },
+  { id: 'Dropbox', label: 'Dropbox', icon: Cloud, color: '#0061ff', plugin: 'dropbox' },
+  { id: 'Box', label: 'Box', icon: HardDrive, color: '#0061d5', plugin: 'box' },
+  { id: 'GoogleDrivePicker', label: 'Google Drive Picker', icon: HardDrive, color: '#4285f4', plugin: 'google-drive-picker' },
+  { id: 'GoogleDrive', label: 'Google Drive', icon: HardDrive, color: '#4285f4', plugin: 'google-drive' },
+  { id: 'OneDrive', label: 'OneDrive', icon: Cloud, color: '#0078d4', plugin: 'onedrive' },
+  { id: 'Url', label: 'Link', icon: Link, color: '#f97316', plugin: 'url' }
 ] as const
 
 // File type restrictions for each slot
@@ -105,7 +105,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         }
       })
       
-      // Only use local file input - remove external plugins that cause CSP issues
+      // Use FileInput plugin for local file uploads
       uppy.use(FileInput)
       
       instances[slotName] = uppy
@@ -117,13 +117,12 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   // Cleanup Uppy instances on unmount
   useEffect(() => {
     return () => {
-      // Cleanup will happen automatically when component unmounts
       console.log('Cleaning up Uppy instances')
     }
   }, [uppyInstances])
 
   const handleUploadSourceClick = useCallback((sourceId: string) => {
-    if (sourceId === 'device' || sourceId === 'fileinput') {
+    if (sourceId === 'FileInput') {
       // Trigger file input for local uploads
       const uppy = uppyInstances[activeSlot]
       const fileInput = document.querySelector(`[data-uppy-acquirer-id="FileInput"]`) as HTMLElement
@@ -241,18 +240,18 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-6xl mx-4 bg-[var(--bg)] rounded-3xl border border-border shadow-soft max-h-[90vh] overflow-hidden">
+      <div className="relative w-full max-w-6xl mx-4 bg-[var(--geist-background)] rounded-3xl border border-[var(--accents-2)] shadow-soft max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border">
+        <div className="flex items-center justify-between p-6 border-b border-[var(--accents-2)]">
           <div>
-            <h2 className="text-2xl font-bold text-[var(--text)]">Upload Content</h2>
-            <p className="text-[var(--muted-text)] mt-1">
+            <h2 className="text-2xl font-bold text-[var(--geist-foreground)]">Upload Content</h2>
+            <p className="text-[var(--geist-secondary)] mt-1">
               Upload content to {gymName || 'your gym'}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="h-10 w-10 rounded-full border border-border flex items-center justify-center text-[var(--text)] hover:bg-[var(--hover)] transition-colors"
+            className="h-10 w-10 rounded-full border border-[var(--accents-2)] flex items-center justify-center text-[var(--geist-foreground)] hover:bg-[var(--accents-1)] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -261,8 +260,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         {/* Content */}
         <div className="flex flex-col lg:flex-row h-[calc(90vh-120px)]">
           {/* Slot Selector */}
-          <div className="lg:w-64 p-4 border-r border-border bg-[var(--bg-elev-1)]">
-            <h3 className="font-semibold text-[var(--text)] mb-4">Content Types</h3>
+          <div className="lg:w-64 p-4 border-r border-[var(--accents-2)] bg-[var(--accents-1)]">
+            <h3 className="font-semibold text-[var(--geist-foreground)] mb-4">Content Types</h3>
             <div className="space-y-2">
               {SLOT_NAMES.map((slotName) => {
                 const config = SLOT_CONFIG[slotName]
@@ -275,26 +274,26 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                   <button
                     key={slotName}
                     onClick={() => setActiveSlot(slotName)}
-                    className={`w-full p-3 rounded-xl border-2 transition-all duration-200 text-left ${
+                    className={`w-full p-3 rounded-md border-2 transition-all duration-200 text-left ${
                       isActive 
-                        ? 'border-[var(--accent)] bg-[var(--accent)]/10' 
-                        : 'border-border hover:border-[var(--accent)]/50'
+                        ? 'border-[var(--primary)] bg-[var(--primary)]/10' 
+                        : 'border-[var(--accents-2)] hover:border-[var(--primary)]/50'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
                       <Icon className={`w-5 h-5 ${
-                        isActive ? 'text-[var(--accent)]' : 'text-[var(--muted-text)]'
+                        isActive ? 'text-[var(--primary)]' : 'text-[var(--geist-secondary)]'
                       }`} />
                       <div className="flex-1 min-w-0">
                         <div className={`font-medium ${
-                          isActive ? 'text-[var(--text)]' : 'text-[var(--text)]/80'
+                          isActive ? 'text-[var(--geist-foreground)]' : 'text-[var(--geist-foreground)]/80'
                         }`}>
                           {slotName}
                         </div>
-                        <div className="text-xs text-[var(--muted-text)] mt-1">
+                        <div className="text-xs text-[var(--geist-secondary)] mt-1">
                           {fileCount} files selected
                         </div>
-                        <div className="text-xs text-[var(--muted-text)] mt-1">
+                        <div className="text-xs text-[var(--geist-secondary)] mt-1">
                           Accepts images & videos
                         </div>
                       </div>
@@ -308,35 +307,38 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           {/* Upload Area */}
           <div className="flex-1 p-6">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-[var(--text)] mb-2">
+              <h3 className="text-lg font-semibold text-[var(--geist-foreground)] mb-2">
                 {activeSlot}
               </h3>
-              <p className="text-[var(--muted-text)] text-sm">
+              <p className="text-[var(--geist-secondary)] text-sm">
                 {SLOT_CONFIG[activeSlot].description}
               </p>
             </div>
 
             {/* Custom Upload Sources Grid */}
-            <div className="bg-[var(--bg)] border border-border rounded-xl p-6 mb-6">
-              <div className="grid grid-cols-5 gap-4 w-3/4 mx-auto">
+            <div className="bg-[var(--geist-background)] border border-[var(--accents-2)] rounded-md p-6 mb-6">
+              {/* Title */}
+              <h4 className="text-lg font-medium text-[var(--geist-foreground)] mb-4 text-center">
+                Drop files here, browse files or import from:
+              </h4>
+              
+              {/* Upload Sources Grid */}
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
                 {UPLOAD_SOURCES.map((source) => {
                   const Icon = source.icon
                   return (
                     <button
                       key={source.id}
                       onClick={() => handleUploadSourceClick(source.id)}
-                      className="flex flex-col items-center justify-center p-4 bg-[var(--surface)] border border-border rounded-xl hover:bg-[var(--hover)] hover:border-[var(--accent)] transition-all duration-200 group"
+                      className="flex flex-col items-center justify-center p-4 bg-[var(--accents-1)] border border-[var(--accents-2)] rounded-md hover:bg-[var(--accents-2)] transition-all duration-200 group"
                     >
-                      <div 
-                        className="w-10 h-10 rounded-lg flex items-center justify-center mb-2"
-                        style={{ backgroundColor: source.color + '20' }}
-                      >
+                      <div className="w-8 h-8 flex items-center justify-center mb-2">
                         <Icon 
-                          className="w-6 h-6" 
+                          className="w-8 h-8" 
                           style={{ color: source.color }}
                         />
                       </div>
-                      <span className="text-xs text-[var(--muted-text)] font-medium text-center">
+                      <span className="text-xs text-[var(--geist-secondary)] font-medium text-center">
                         {source.label}
                       </span>
                     </button>
@@ -346,7 +348,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             </div>
 
             {/* Uppy Dashboard */}
-            <div className="bg-[var(--bg-elev-1)] rounded-xl border border-border p-4">
+            <div className="bg-[var(--accents-1)] rounded-md border border-[var(--accents-2)] p-4">
               <Dashboard
                 uppy={getActiveUppy()}
                 plugins={[]}
@@ -357,7 +359,6 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 theme="light"
                 showRemoveButtonAfterComplete={true}
                 doneButtonHandler={() => {
-                  // Handle when user clicks done
                   console.log('Upload complete for current slot')
                 }}
               />
@@ -368,7 +369,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               <button
                 onClick={handleUpload}
                 disabled={isUploading || getActiveUppy().getFiles().length === 0}
-                className="px-6 py-3 bg-[var(--accent)] text-white rounded-xl font-medium hover:bg-[var(--accent)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                className="px-4 py-2 bg-[var(--primary)] text-white rounded-md font-medium hover:bg-[var(--primary)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
               >
                 {isUploading ? (
                   <>
