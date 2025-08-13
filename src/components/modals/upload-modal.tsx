@@ -74,6 +74,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
     })
   }, [isOpen, brandingGymName, user, gymName, gymSlug, params])
   
+  // Force fresh deployment - all previous fixes included
   const [activeSlot, setActiveSlot] = useState<typeof SLOT_NAMES[number]>('Photos')
   const [isUploading, setIsUploading] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
