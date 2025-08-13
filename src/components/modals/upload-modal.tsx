@@ -317,15 +317,16 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               plugins={[]}
               width="100%"
               height={400}
-              showProgressDetails={true}
+              showProgressDetails={false}
               proudlyDisplayPoweredByUppy={false}
               theme="light"
               showRemoveButtonAfterComplete={true}
               showLinkToFileUploadResult={false}
-              note={`Accepted file types: ${getActiveConfig().allowedTypes.join(', ')}. Maximum size: 50MB`}
+              note={`Accepted file types: ${getActiveConfig().allowedTypes.join(', ')}. Maximum size: 50MB. Use the "Upload All Files to Google Drive" button below.`}
               doneButtonHandler={() => {
                 console.log('Upload complete for current slot')
               }}
+              hideUploadButton={true}
             />
 
             {/* Unified Upload Button */}
