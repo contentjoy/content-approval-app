@@ -11,6 +11,7 @@ import { SLOT_NAMES } from '@/lib/slots'
 import { initUpload, uploadFile, completeUpload } from '@/lib/contentUploadClient'
 import type { SlotName } from '@/lib/slots'
 import toast from 'react-hot-toast'
+import { Modal } from '@/components/ui/modal'
 
 // Import required Uppy CSS files
 import '@uppy/core/dist/style.css'
@@ -218,37 +219,26 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      
-      {/* Modal */}
-      <div className="relative w-full max-w-6xl bg-[var(--geist-background)] rounded-3xl border border-[var(--accents-2)] shadow-soft max-h-[90vh] flex flex-col">
-        {/* Header - Fixed, always visible */}
-        <div className="flex items-center justify-between p-4 lg:p-6 border-b border-[var(--accents-2)] bg-[var(--geist-background)] flex-shrink-0">
-          <div>
-            <h2 className="text-xl lg:text-2xl font-bold text-[var(--geist-foreground)]">Upload Content</h2>
-            <p className="text-[var(--geist-secondary)] mt-1 text-sm lg:text-base">
-              Upload content to {gymName || 'your gym'}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="h-8 w-8 lg:h-10 lg:w-10 rounded-full border border-[var(--accents-2)] flex items-center justify-center text-[var(--geist-foreground)] hover:bg-[var(--accents-1)] transition-colors flex-shrink-0"
-          >
-            <X className="w-4 h-4 lg:w-5 lg:w-5" />
-          </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Upload Content"
+      size="xl"
+    >
+      <div className="space-y-6">
+        {/* Gym Info */}
+        <div className="bg-[var(--surface)] rounded-2xl p-4 border border-border">
+          <p className="text-sm text-muted-text">
+            Upload content to {gymName || 'your gym'}
+          </p>
         </div>
 
-        {/* Content - Scrollable container with proper height constraints */}
-        <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden" style={{ maxHeight: 'calc(90vh - 120px)' }}>
-          {/* Slot Selector - Fixed height, scrollable on mobile */}
-          <div className="lg:w-64 p-4 border-b lg:border-b-0 lg:border-r border-[var(--accents-2)] bg-[var(--accents-1)] flex-shrink-0 lg:flex-shrink-0">
-            <h3 className="font-semibold text-[var(--geist-foreground)] mb-4">Content Types</h3>
-            <div className="space-y-2">
+        {/* Content Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Slot Selector */}
+          <div className="lg:col-span-1 space-y-4">
+            <h3 className="font-semibold text-text">Content Types</h3>
+            <div className="space-y-3">
               {SLOT_NAMES.map((slotName) => {
                 const config = SLOT_CONFIG[slotName]
                 const Icon = config.icon
@@ -262,24 +252,24 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                     onClick={() => setActiveSlot(slotName)}
                     className={`w-full p-3 rounded-md border-2 transition-all duration-200 text-left ${
                       isActive 
-                        ? 'border-[var(--primary)] bg-[var(--primary)]/10' 
-                        : 'border-[var(--accents-2)] hover:border-[var(--primary)]/50'
+                        ? 'border-accent bg-accent/10' 
+                        : 'border-border hover:border-accent/50'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
                       <Icon className={`w-5 h-5 ${
-                        isActive ? 'text-[var(--primary)]' : 'text-[var(--geist-secondary)]'
+                        isActive ? 'text-accent' : 'text-muted-text'
                       }`} />
                       <div className="flex-1 min-w-0">
                         <div className={`font-medium ${
-                          isActive ? 'text-[var(--geist-foreground)]' : 'text-[var(--geist-foreground)]/80'
+                          isActive ? 'text-text' : 'text-text/80'
                         }`}>
                           {slotName}
                         </div>
-                        <div className="text-xs text-[var(--geist-secondary)] mt-1">
+                        <div className="text-xs text-muted-text mt-1">
                           {fileCount} files selected
                         </div>
-                        <div className="text-xs text-[var(--geist-secondary)] mt-1">
+                        <div className="text-xs text-muted-text mt-1">
                           Accepts {config.allowedTypes.join(', ')}
                         </div>
                       </div>
@@ -290,51 +280,53 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             </div>
             
             {/* Total Files Summary */}
-            <div className="mt-4 p-3 bg-[var(--geist-background)] rounded-md border border-[var(--accents-2)]">
-              <div className="text-sm font-medium text-[var(--geist-foreground)]">
+            <div className="p-3 bg-[var(--surface)] rounded-md border border-border">
+              <div className="text-sm font-medium text-text">
                 Total Files: {getTotalFiles()}
               </div>
-              <div className="text-xs text-[var(--geist-secondary)] mt-1">
+              <div className="text-xs text-muted-text mt-1">
                 Ready to upload to Google Drive
               </div>
             </div>
           </div>
 
-          {/* Upload Area - Scrollable content with proper height */}
-          <div className="flex-1 p-4 lg:p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 120px)' }}>
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-[var(--geist-foreground)] mb-2">
+          {/* Upload Area */}
+          <div className="lg:col-span-3 space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold text-text mb-2">
                 {activeSlot}
               </h3>
-              <p className="text-[var(--geist-secondary)] text-sm">
+              <p className="text-muted-text text-sm">
                 {getActiveConfig().description}
               </p>
             </div>
 
             {/* Uppy Dashboard */}
-            <Dashboard
-              uppy={getActiveUppy()}
-              plugins={[]}
-              width="100%"
-              height={400}
-              showProgressDetails={false}
-              proudlyDisplayPoweredByUppy={false}
-              theme="light"
-              showRemoveButtonAfterComplete={true}
-              showLinkToFileUploadResult={false}
-              note={`Accepted file types: ${getActiveConfig().allowedTypes.join(', ')}. Maximum size: 50MB. Use the "Upload All Files to Google Drive" button below.`}
-              doneButtonHandler={() => {
-                console.log('Upload complete for current slot')
-              }}
-              hideUploadButton={true}
-            />
+            <div className="border border-border rounded-lg p-4">
+              <Dashboard
+                uppy={getActiveUppy()}
+                plugins={[]}
+                width="100%"
+                height={400}
+                showProgressDetails={false}
+                proudlyDisplayPoweredByUppy={false}
+                theme="light"
+                showRemoveButtonAfterComplete={true}
+                showLinkToFileUploadResult={false}
+                note={`Accepted file types: ${getActiveConfig().allowedTypes.join(', ')}. Maximum size: 50MB. Use the "Upload All Files to Google Drive" button below.`}
+                doneButtonHandler={() => {
+                  console.log('Upload complete for current slot')
+                }}
+                hideUploadButton={true}
+              />
+            </div>
 
-            {/* Unified Upload Button */}
-            <div className="mt-6 flex justify-end">
+            {/* Upload Button */}
+            <div className="flex justify-end">
               <button
                 onClick={handleUpload}
                 disabled={isUploading || getTotalFiles() === 0}
-                className="px-4 py-2 lg:px-6 lg:py-3 bg-[var(--primary)] text-white rounded-md font-medium hover:bg-[var(--primary)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                className="px-6 py-3 bg-accent text-white rounded-md font-medium hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
               >
                 {isUploading ? (
                   <>
@@ -352,6 +344,6 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
