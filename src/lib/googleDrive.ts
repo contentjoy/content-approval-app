@@ -88,19 +88,48 @@ export async function ensureGymUploadStructure(drive: drive_v3.Drive, p: {
   try {
     console.log(`🏗️ Creating upload structure for gym: ${p.gymName}, upload: ${p.uploadLabel}`);
     
+    // Step 1: Ensure gym name folder exists (create if not)
     const gymFolderId = await ensureFolder(drive, sanitizeName(p.gymName), p.driveRootId);
-    const uploadFolderId = await ensureFolder(drive, p.uploadLabel, gymFolderId);
+    console.log(`🏋️ Gym folder ensured: ${p.gymName} (${gymFolderId})`);
     
-    const slotFolders: Record<string, string> = {};
+    // Step 2: Create timestamp folder inside gym folder
+    const timestampFolderId = await ensureFolder(drive, p.uploadLabel, gymFolderId);
+    console.log(`📅 Timestamp folder created: ${p.uploadLabel} (${timestampFolderId})`);
+    
+    // Step 3: Create "Raw footage" and "Final footage" folders
+    const rawFootageFolderId = await ensureFolder(drive, 'Raw footage', timestampFolderId);
+    const finalFootageFolderId = await ensureFolder(drive, 'Final footage', timestampFolderId);
+    console.log(`🎬 Raw footage folder created: Raw footage (${rawFootageFolderId})`);
+    console.log(`✨ Final footage folder created: Final footage (${finalFootageFolderId})`);
+    
+    // Step 4: Create slot folders inside both Raw and Final footage folders
+    const rawSlotFolders: Record<string, string> = {};
+    const finalSlotFolders: Record<string, string> = {};
+    
     for (const slot of p.slotNames) {
-      slotFolders[slot] = await ensureFolder(drive, slot, uploadFolderId);
+      // Create slot folder in Raw footage
+      rawSlotFolders[slot] = await ensureFolder(drive, slot, rawFootageFolderId);
+      console.log(`📁 Raw ${slot} folder created: ${slot} (${rawSlotFolders[slot]})`);
+      
+      // Create slot folder in Final footage
+      finalSlotFolders[slot] = await ensureFolder(drive, slot, finalFootageFolderId);
+      console.log(`📁 Final ${slot} folder created: ${slot} (${finalSlotFolders[slot]})`);
     }
     
-    console.log(`✅ Upload structure created successfully`);
-    return { gymFolderId, uploadFolderId, slotFolders };
+    console.log(`✅ Upload structure created successfully with Raw and Final footage folders`);
+    return { 
+      gymFolderId, 
+      timestampFolderId, 
+      rawFootageFolderId,
+      finalFootageFolderId,
+      rawSlotFolders, 
+      finalSlotFolders,
+      // For backward compatibility, return the raw slot folders as the main slot folders
+      slotFolders: rawSlotFolders
+    };
   } catch (error) {
-    console.error('❌ Error creating gym upload structure:', error);
-    throw error;
+    console.error(`❌ Error creating upload structure:`, error);
+    throw new Error(`Failed to create upload structure: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 

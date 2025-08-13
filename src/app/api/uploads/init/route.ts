@@ -58,14 +58,17 @@ export async function POST(req: NextRequest) {
       slotNames: SLOT_NAMES
     });
 
-    // Persist upload data to Supabase
+    // Persist upload data to Supabase with new folder structure
     const { error: uploadError } = await supa
       .from('uploads')
       .insert([{ 
         upload_id: uploadId, 
         gym_id: gymId, 
         gym_name: gymName, 
-        upload_folder_id: structure.uploadFolderId 
+        upload_folder_id: structure.timestampFolderId,
+        gym_folder_id: structure.gymFolderId,
+        raw_footage_folder_id: structure.rawFootageFolderId,
+        final_footage_folder_id: structure.finalFootageFolderId
       }]);
 
     if (uploadError) {

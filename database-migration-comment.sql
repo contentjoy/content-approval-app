@@ -10,6 +10,9 @@ CREATE TABLE uploads (
   gym_id UUID NOT NULL REFERENCES gyms(id),
   gym_name TEXT NOT NULL,
   upload_folder_id TEXT NOT NULL,
+  gym_folder_id TEXT NOT NULL,
+  raw_footage_folder_id TEXT NOT NULL,
+  final_footage_folder_id TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -18,7 +21,7 @@ CREATE TABLE uploads (
 CREATE TABLE upload_slots (
   id SERIAL PRIMARY KEY,
   upload_id TEXT NOT NULL REFERENCES uploads(upload_id) ON DELETE CASCADE,
-  slot_name TEXT NOT NULL CHECK (slot_name IN ('Photos', 'Videos', 'Facility Videos', 'Facility Video')),
+  slot_name TEXT NOT NULL CHECK (slot_name IN ('Photos', 'Videos', 'Facility Photos', 'Facility Videos')),
   drive_folder_id TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(upload_id, slot_name)
@@ -28,7 +31,7 @@ CREATE TABLE upload_slots (
 CREATE TABLE files (
   id SERIAL PRIMARY KEY,
   upload_id TEXT NOT NULL REFERENCES uploads(upload_id) ON DELETE CASCADE,
-  slot_name TEXT NOT NULL CHECK (slot_name IN ('Photos', 'Videos', 'Facility Videos', 'Facility Video')),
+  slot_name TEXT NOT NULL CHECK (slot_name IN ('Photos', 'Videos', 'Facility Photos', 'Facility Videos')),
   drive_file_id TEXT NOT NULL,
   name TEXT NOT NULL,
   size_bytes BIGINT,
@@ -46,4 +49,9 @@ CREATE INDEX idx_files_slot_name ON files(slot_name);
 -- ALTER TABLE uploads ENABLE ROW LEVEL SECURITY;
 -- ALTER TABLE upload_slots ENABLE ROW LEVEL SECURITY;
 -- ALTER TABLE files ENABLE ROW LEVEL SECURITY;
+
+-- 6. If you need to add the new columns to an existing table, run:
+-- ALTER TABLE uploads ADD COLUMN gym_folder_id TEXT;
+-- ALTER TABLE uploads ADD COLUMN raw_footage_folder_id TEXT;
+-- ALTER TABLE uploads ADD COLUMN final_footage_folder_id TEXT;
 */

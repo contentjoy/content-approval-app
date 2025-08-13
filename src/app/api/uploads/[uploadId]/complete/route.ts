@@ -51,6 +51,9 @@ export async function POST(
       gymName: uploadData.gym_name,
       createdAt: uploadData.created_at || new Date().toISOString(),
       uploadFolderId: uploadData.upload_folder_id,
+      gymFolderId: uploadData.gym_folder_id,
+      rawFootageFolderId: uploadData.raw_footage_folder_id,
+      finalFootageFolderId: uploadData.final_footage_folder_id,
       files: filesData?.map(file => ({
         slot: file.slot_name,
         name: file.name,
@@ -60,9 +63,16 @@ export async function POST(
       })) || [],
       metadata: {
         totalSlots: 4,
-        slots: ['Photos', 'Videos', 'Facility Videos', 'Facility Video'],
+        slots: ['Photos', 'Videos', 'Facility Photos', 'Facility Videos'],
         status: 'completed',
-        totalFiles: filesData?.length || 0
+        totalFiles: filesData?.length || 0,
+        folderStructure: {
+          gym: uploadData.gym_name,
+          timestamp: uploadData.upload_folder_id,
+          rawFootage: 'Raw footage',
+          finalFootage: 'Final footage',
+          contentTypes: ['Photos', 'Videos', 'Facility Photos', 'Facility Videos']
+        }
       }
     };
 

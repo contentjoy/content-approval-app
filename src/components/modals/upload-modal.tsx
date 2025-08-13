@@ -280,6 +280,11 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               <div className="text-xs text-muted-text mt-1">
                 Ready to upload to Google Drive
               </div>
+              <div className="text-xs text-muted-text mt-2 pt-2 border-t border-border">
+                <div className="font-medium">Folder Structure:</div>
+                <div>📁 {gymName || 'Gym'} → 📅 Timestamp → 🎬 Raw footage + ✨ Final footage</div>
+                <div className="text-xs mt-1">Each with: Photos, Videos, Facility Photos, Facility Videos</div>
+              </div>
             </div>
           </div>
 
