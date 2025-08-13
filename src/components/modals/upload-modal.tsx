@@ -53,21 +53,26 @@ const SLOT_CONFIG = {
 } as const
 
 export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
-  const { gymName } = useBranding()
+  const { gymName: brandingGymName } = useBranding()
   const { user } = useAuth()
   const params = useParams()
   const gymSlug = typeof params.gymSlug === 'string' ? params.gymSlug : null
+  
+  // Use gym name from user context if available, fallback to branding context
+  const gymName = user?.gymName || brandingGymName
   
   // Debug logging
   useEffect(() => {
     console.log('UploadModal debug:', { 
       isOpen, 
-      gymName, 
+      brandingGymName,
+      userGymName: user?.gymName,
+      finalGymName: gymName,
       user: user ? { gymId: user.gymId, gymName: user.gymName } : 'null',
       gymSlug,
       params 
     })
-  }, [isOpen, gymName, user, gymSlug, params])
+  }, [isOpen, brandingGymName, user, gymName, gymSlug, params])
   
   const [activeSlot, setActiveSlot] = useState<typeof SLOT_NAMES[number]>('Photos')
   const [isUploading, setIsUploading] = useState(false)
@@ -305,7 +310,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 Total Files: {getTotalFiles()}
               </div>
               <div className="text-xs text-muted-text mt-1">
-                Ready to upload
+                Ready to upload to {gymName || 'your gym'}
               </div>
             </div>
           </div>
