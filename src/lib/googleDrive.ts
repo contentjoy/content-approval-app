@@ -205,14 +205,26 @@ export async function startResumableSession(drive: drive_v3.Drive, p: {
       throw new Error('No resumable session location header received');
     }
     
-    const fileData = await initRes.json();
-    const fileId = fileData?.id;
-    if (!fileId) {
-      throw new Error('No file ID returned from resumable init');
+    // For resumable uploads, Google Drive doesn't always return a JSON body
+    // The important thing is the location header, not the response body
+    let fileId: string | undefined;
+    
+    try {
+      // Try to get JSON response if available
+      const responseText = await initRes.text();
+      if (responseText.trim()) {
+        const fileData = JSON.parse(responseText);
+        fileId = fileData?.id;
+        console.log(`📄 Response body: ${responseText}`);
+      }
+    } catch (parseError) {
+      console.log('ℹ️ No JSON response body from Google Drive (this is normal for resumable uploads)');
     }
     
-    console.log(`✅ Resumable session started: ${fileId}`);
-    return { uploadUrl: location, fileId };
+    // For resumable uploads, we don't need the file ID immediately
+    // It will be created when we complete the upload
+    console.log(`✅ Resumable session started with location: ${location}`);
+    return { uploadUrl: location, fileId: fileId || 'pending' };
   } catch (error) {
     console.error('❌ Error starting resumable session:', error);
     throw error;
