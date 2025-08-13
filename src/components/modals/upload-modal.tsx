@@ -226,13 +226,6 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       size="xl"
     >
       <div className="space-y-6">
-        {/* Gym Info */}
-        <div className="bg-[var(--surface)] rounded-2xl p-4 border border-border">
-          <p className="text-sm text-muted-text">
-            Upload content to {gymName || 'your gym'}
-          </p>
-        </div>
-
         {/* Content Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Slot Selector */}
