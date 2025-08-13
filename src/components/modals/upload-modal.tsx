@@ -270,13 +270,6 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   }, [uppyInstances])
 
   const handleUpload = useCallback(async () => {
-    if (!gymSlug || !gymName || !user?.gymId) {
-      console.error('Missing gym information or user not authenticated')
-      console.log('Debug info:', { gymSlug, gymName, user: user ? { gymId: user.gymId } : 'null' })
-      toast.error('Please log in to upload files')
-      return
-    }
-
     setIsUploading(true)
 
     try {
