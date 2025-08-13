@@ -227,7 +227,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       
       {/* Modal */}
       <div className="relative w-full max-w-6xl bg-[var(--geist-background)] rounded-3xl border border-[var(--accents-2)] shadow-soft max-h-[90vh] flex flex-col">
-        {/* Header */}
+        {/* Header - Fixed, always visible */}
         <div className="flex items-center justify-between p-4 lg:p-6 border-b border-[var(--accents-2)] bg-[var(--geist-background)] flex-shrink-0">
           <div>
             <h2 className="text-xl lg:text-2xl font-bold text-[var(--geist-foreground)]">Upload Content</h2>
@@ -243,10 +243,10 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           </button>
         </div>
 
-        {/* Content - Fixed height container with proper scrolling */}
-        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden" style={{ height: 'calc(90vh - 120px)' }}>
-          {/* Slot Selector - Fixed height */}
-          <div className="lg:w-64 p-4 border-b lg:border-b-0 lg:border-r border-[var(--accents-2)] bg-[var(--accents-1)] flex-shrink-0">
+        {/* Content - Scrollable container with fixed height */}
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+          {/* Slot Selector - Fixed height, scrollable on mobile */}
+          <div className="lg:w-64 p-4 border-b lg:border-b-0 lg:border-r border-[var(--accents-2)] bg-[var(--accents-1)] flex-shrink-0 lg:flex-shrink-0">
             <h3 className="font-semibold text-[var(--geist-foreground)] mb-4">Content Types</h3>
             <div className="space-y-2">
               {SLOT_NAMES.map((slotName) => {
@@ -300,8 +300,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             </div>
           </div>
 
-          {/* Upload Area - Scrollable with fixed height */}
-          <div className="flex-1 p-4 lg:p-6 overflow-y-auto" style={{ height: 'calc(90vh - 120px)' }}>
+          {/* Upload Area - Scrollable content */}
+          <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-[var(--geist-foreground)] mb-2">
                 {activeSlot}
