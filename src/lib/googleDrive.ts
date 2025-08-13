@@ -19,11 +19,35 @@ export function getAuth() {
     throw new Error('GOOGLE_APPLICATION_CREDENTIALS_JSON missing client_email or private_key');
   }
   
-  return new google.auth.JWT({
-    email: creds.client_email,
-    key: creds.private_key,
-    scopes: DRIVE_SCOPE,
-  });
+  // Fix private key format for Vercel/Node.js compatibility
+  let privateKey = creds.private_key;
+  
+  // Handle escaped newlines that might cause OpenSSL issues
+  if (privateKey.includes('\\n')) {
+    privateKey = privateKey.replace(/\\n/g, '\n');
+  }
+  
+  // Ensure proper PEM format
+  if (!privateKey.startsWith('-----BEGIN PRIVATE KEY-----')) {
+    throw new Error('Invalid private key format - must be PEM encoded');
+  }
+  
+  console.log(`🔑 Google Auth: Using service account ${creds.client_email}`);
+  console.log(`🔑 Private key length: ${privateKey.length} characters`);
+  
+  try {
+    return new google.auth.JWT({
+      email: creds.client_email,
+      key: privateKey,
+      scopes: DRIVE_SCOPE,
+    });
+  } catch (authError) {
+    console.error('❌ Google Auth JWT creation failed:', authError);
+    if (authError instanceof Error && authError.message.includes('DECODER routines')) {
+      throw new Error('Google service account private key format error - check GOOGLE_APPLICATION_CREDENTIALS_JSON encoding');
+    }
+    throw authError;
+  }
 }
 
 export function getDrive(auth = getAuth()) {

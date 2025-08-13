@@ -13,6 +13,7 @@ import type { SlotName } from '@/lib/slots'
 import toast from 'react-hot-toast'
 import { Modal } from '@/components/ui/modal'
 import { motion, AnimatePresence } from 'framer-motion'
+import { supabase } from '@/lib/supabase'
 
 // Import required Uppy CSS files
 import '@uppy/core/dist/style.css'
@@ -60,6 +61,45 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   
   // Use gym name from user context if available, fallback to branding context
   const gymName = user?.gymName || brandingGymName
+  
+  // Get the correct gym ID for uploads - use gymSlug from URL if available
+  const getGymIdForUpload = useCallback(async (): Promise<string> => {
+    if (!gymSlug) {
+      // Fallback to user context if no gym slug
+      if (!user?.gymId) {
+        throw new Error('No gym ID available for upload')
+      }
+      return user.gymId
+    }
+    
+    // Look up gym by slug to get the correct gym ID
+    try {
+      const { data: gym, error } = await supabase
+        .from('gyms')
+        .select('id, "Gym Name"')
+        .eq('slug', gymSlug)
+        .single()
+      
+      if (error || !gym) {
+        console.error('Failed to find gym by slug:', gymSlug, error)
+        // Fallback to user context
+        if (!user?.gymId) {
+          throw new Error(`Gym not found for slug: ${gymSlug}`)
+        }
+        return user.gymId
+      }
+      
+      console.log(`🔍 Found gym by slug: ${gymSlug} -> ${gym['Gym Name']} (ID: ${gym.id})`)
+      return gym.id
+    } catch (error) {
+      console.error('Error looking up gym by slug:', error)
+      // Fallback to user context
+      if (!user?.gymId) {
+        throw new Error(`Failed to look up gym for slug: ${gymSlug}`)
+      }
+      return user.gymId
+    }
+  }, [gymSlug, user?.gymId])
   
   // Debug logging
   useEffect(() => {
@@ -174,7 +214,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       toast.success(`Starting upload of ${totalFiles} files...`)
       
       // Step 1: Initialize upload
-      const uploadId = await initUpload(user.gymId)
+      const gymId = await getGymIdForUpload()
+      const uploadId = await initUpload(gymId)
       console.log('Upload initialized with ID:', uploadId)
       
       // Step 2: Upload files to respective slots
