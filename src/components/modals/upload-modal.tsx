@@ -62,6 +62,12 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   // Use gym name from user context if available, fallback to branding context
   const gymName = user?.gymName || brandingGymName
   
+  // Convert URL slug to database gym name format
+  const slugToGymName = useCallback((slug: string): string => {
+    // Convert "kokoro-demo" to "kokoro demo"
+    return slug.replace(/-/g, ' ')
+  }, [])
+  
   // Get the correct gym ID for uploads - use gymSlug from URL if available
   const getGymIdForUpload = useCallback(async (): Promise<string> => {
     console.log('🔍 getGymIdForUpload called with:', { gymSlug, userGymId: user?.gymId, userGymName: user?.gymName })
@@ -77,17 +83,19 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       return user.gymId
     }
     
-    console.log(`🔍 Looking up gym by name: ${gymSlug}`)
+    // Convert slug to gym name format
+    const gymName = slugToGymName(gymSlug)
+    console.log(`🔍 Looking up gym by name: ${gymSlug} -> "${gymName}"`)
     
-    // Look up gym by slug to get the correct gym ID
+    // Look up gym by converted name to get the correct gym ID
     try {
-      console.log(`🔍 Looking up gym by name: ${gymSlug}`)
+      console.log(`🔍 Looking up gym by name: ${gymSlug} -> "${gymName}"`)
       
-      // Use 'Gym Name' column instead of 'slug' since that column doesn't exist
+      // Use 'Gym Name' column with the converted name (spaces instead of dashes)
       const { data: gym, error } = await supabase
         .from('gyms')
         .select('id, "Gym Name"')
-        .eq('"Gym Name"', gymSlug)
+        .eq('"Gym Name"', gymName)
         .single()
       
       console.log('📊 Supabase query result:', { gym, error })
@@ -97,36 +105,36 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         // Fallback to user context
         if (!user?.gymId) {
           console.error('❌ Fallback failed - no user gym ID available')
-          throw new Error(`Gym not found for name: ${gymSlug}`)
+          throw new Error(`Gym not found for name: "${gymName}"`)
         }
         console.log('✅ Falling back to user gym ID:', user.gymId)
         return user.gymId
       }
       
       if (!gym) {
-        console.error('❌ No gym found with name:', gymSlug)
+        console.error('❌ No gym found with name:', `"${gymName}"`)
         // Fallback to user context
         if (!user?.gymId) {
           console.error('❌ Fallback failed - no user gym ID available')
-          throw new Error(`Gym not found for name: ${gymSlug}`)
+          throw new Error(`Gym not found for name: "${gymName}"`)
         }
         console.log('✅ Falling back to user gym ID:', user.gymId)
         return user.gymId
       }
       
-      console.log(`✅ Found gym by name: ${gymSlug} -> ${gym['Gym Name']} (ID: ${gym.id})`)
+      console.log(`✅ Found gym by name: ${gymSlug} -> "${gymName}" (ID: ${gym.id})`)
       return gym.id
     } catch (error) {
       console.error('❌ Error looking up gym by name:', error)
       // Fallback to user context
       if (!user?.gymId) {
         console.error('❌ Fallback failed - no user gym ID available')
-        throw new Error(`Failed to look up gym for name: ${gymSlug}`)
+        throw new Error(`Failed to look up gym for name: "${gymName}"`)
       }
       console.log('✅ Falling back to user gym ID:', user.gymId)
       return user.gymId
     }
-  }, [gymSlug, user?.gymId])
+  }, [gymSlug, user?.gymId, slugToGymName])
   
   // Check if we can proceed with upload
   const canUpload = useCallback(() => {
