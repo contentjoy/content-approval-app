@@ -250,8 +250,10 @@ export async function uploadToResumable(uploadUrl: string, body: ReadableStream 
       body: fetchBody,
       headers: {
         'Content-Type': 'application/octet-stream',
-      }
-    });
+      },
+      // Required for Node.js 18+ when sending a body
+      duplex: 'half'
+    } as RequestInit & { duplex: 'half' });
     
     if (!put.ok) {
       const txt = await put.text();
