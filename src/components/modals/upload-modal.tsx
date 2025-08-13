@@ -243,8 +243,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           </button>
         </div>
 
-        {/* Content - Scrollable container with fixed height */}
-        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+        {/* Content - Scrollable container with proper height constraints */}
+        <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
           {/* Slot Selector - Fixed height, scrollable on mobile */}
           <div className="lg:w-64 p-4 border-b lg:border-b-0 lg:border-r border-[var(--accents-2)] bg-[var(--accents-1)] flex-shrink-0 lg:flex-shrink-0">
             <h3 className="font-semibold text-[var(--geist-foreground)] mb-4">Content Types</h3>
@@ -300,8 +300,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             </div>
           </div>
 
-          {/* Upload Area - Scrollable content */}
-          <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
+          {/* Upload Area - Scrollable content with proper height */}
+          <div className="flex-1 p-4 lg:p-6 overflow-y-auto min-h-0">
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-[var(--geist-foreground)] mb-2">
                 {activeSlot}
