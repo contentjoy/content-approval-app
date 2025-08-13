@@ -388,6 +388,31 @@ p { font-size: var(--fs-base); line-height: 1.7; }
   padding: 0 !important;
 }
 
+/* Uppy Dashboard Header - Fix dark mode theming */
+.uppy-Dashboard-header {
+  background-color: var(--geist-background) !important;
+  border-bottom: 1px solid var(--accents-2) !important;
+}
+
+.uppy-Dashboard-header-title {
+  color: var(--geist-foreground) !important;
+}
+
+.uppy-Dashboard-header-subtitle {
+  color: var(--geist-secondary) !important;
+}
+
+.uppy-Dashboard-header-actions button {
+  background-color: var(--accents-1) !important;
+  color: var(--geist-foreground) !important;
+  border: 1px solid var(--accents-2) !important;
+  border-radius: 0.375rem !important;
+}
+
+.uppy-Dashboard-header-actions button:hover {
+  background-color: var(--accents-2) !important;
+}
+
 .uppy-Dashboard-AddFiles {
   text-align: center !important;
   color: var(--geist-secondary) !important;

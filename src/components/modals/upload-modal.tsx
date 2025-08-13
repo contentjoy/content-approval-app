@@ -226,9 +226,9 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-6xl bg-[var(--geist-background)] rounded-3xl border border-[var(--accents-2)] shadow-soft max-h-[90vh] overflow-hidden">
+      <div className="relative w-full max-w-6xl bg-[var(--geist-background)] rounded-3xl border border-[var(--accents-2)] shadow-soft max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 lg:p-6 border-b border-[var(--accents-2)] flex-shrink-0">
+        <div className="flex items-center justify-between p-4 lg:p-6 border-b border-[var(--accents-2)] bg-[var(--geist-background)] flex-shrink-0">
           <div>
             <h2 className="text-xl lg:text-2xl font-bold text-[var(--geist-foreground)]">Upload Content</h2>
             <p className="text-[var(--geist-secondary)] mt-1 text-sm lg:text-base">
@@ -243,8 +243,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           </button>
         </div>
 
-        {/* Content - Make scrollable on mobile */}
-        <div className="flex flex-col lg:flex-row h-[calc(90vh-80px)] lg:h-[calc(90vh-120px)] overflow-hidden">
+        {/* Content - Make scrollable on mobile and desktop */}
+        <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
           {/* Slot Selector - Fixed height on mobile, scrollable on larger screens */}
           <div className="lg:w-64 p-4 border-b lg:border-b-0 lg:border-r border-[var(--accents-2)] bg-[var(--accents-1)] flex-shrink-0">
             <h3 className="font-semibold text-[var(--geist-foreground)] mb-4">Content Types</h3>
@@ -300,8 +300,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             </div>
           </div>
 
-          {/* Upload Area - Scrollable on mobile */}
-          <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
+          {/* Upload Area - Scrollable on mobile and desktop */}
+          <div className="flex-1 p-4 lg:p-6 overflow-y-auto min-h-0">
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-[var(--geist-foreground)] mb-2">
                 {activeSlot}
