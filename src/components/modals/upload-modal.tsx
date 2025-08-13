@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useEffect } from 'react'
-import { X, Upload, Image, Video, Building2, Camera } from 'lucide-react'
+import { X, Upload, Image, Video, Building2, Camera, Folder, Link, Cloud, HardDrive } from 'lucide-react'
 import { Dashboard } from '@uppy/react'
 import Uppy from '@uppy/core'
 import FileInput from '@uppy/file-input'
@@ -18,6 +18,17 @@ interface UploadModalProps {
   onClose: () => void
   onSuccess?: (detail?: any) => void
 }
+
+// Custom upload source configuration
+const UPLOAD_SOURCES = [
+  { id: 'device', label: 'My Device', icon: Folder, color: '#3b82f6' },
+  { id: 'dropbox', label: 'Dropbox', icon: Cloud, color: '#0061ff' },
+  { id: 'box', label: 'Box', icon: HardDrive, color: '#0061d5' },
+  { id: 'gdrive', label: 'Google Drive', icon: HardDrive, color: '#4285f4' },
+  { id: 'onedrive', label: 'OneDrive', icon: Cloud, color: '#0078d4' },
+  { id: 'url', label: 'Link', icon: Link, color: '#f97316' },
+  { id: 'fileinput', label: 'File Input', icon: Upload, color: '#10b981' }
+] as const
 
 // File type restrictions for each slot
 const SLOT_CONFIG = {
@@ -110,6 +121,20 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       console.log('Cleaning up Uppy instances')
     }
   }, [uppyInstances])
+
+  const handleUploadSourceClick = useCallback((sourceId: string) => {
+    if (sourceId === 'device' || sourceId === 'fileinput') {
+      // Trigger file input for local uploads
+      const uppy = uppyInstances[activeSlot]
+      const fileInput = document.querySelector(`[data-uppy-acquirer-id="FileInput"]`) as HTMLElement
+      if (fileInput) {
+        fileInput.click()
+      }
+    } else {
+      // Show info toast for external services (disabled due to CSP)
+      toast.success(`${UPLOAD_SOURCES.find(s => s.id === sourceId)?.label} integration is currently disabled for security reasons. Please use "My Device" to upload files.`)
+    }
+  }, [activeSlot, uppyInstances])
 
   const handleUpload = useCallback(async () => {
     if (!gymSlug || !gymName || !user?.gymId) {
@@ -291,13 +316,42 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               </p>
             </div>
 
+            {/* Custom Upload Sources Grid */}
+            <div className="bg-[var(--bg)] border border-border rounded-xl p-6 mb-6">
+              <div className="grid grid-cols-5 gap-4 w-3/4 mx-auto">
+                {UPLOAD_SOURCES.map((source) => {
+                  const Icon = source.icon
+                  return (
+                    <button
+                      key={source.id}
+                      onClick={() => handleUploadSourceClick(source.id)}
+                      className="flex flex-col items-center justify-center p-4 bg-[var(--surface)] border border-border rounded-xl hover:bg-[var(--hover)] hover:border-[var(--accent)] transition-all duration-200 group"
+                    >
+                      <div 
+                        className="w-10 h-10 rounded-lg flex items-center justify-center mb-2"
+                        style={{ backgroundColor: source.color + '20' }}
+                      >
+                        <Icon 
+                          className="w-6 h-6" 
+                          style={{ color: source.color }}
+                        />
+                      </div>
+                      <span className="text-xs text-[var(--muted-text)] font-medium text-center">
+                        {source.label}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
             {/* Uppy Dashboard */}
             <div className="bg-[var(--bg-elev-1)] rounded-xl border border-border p-4">
               <Dashboard
                 uppy={getActiveUppy()}
                 plugins={[]}
                 width="100%"
-                height="400px"
+                height="300px"
                 showProgressDetails={true}
                 proudlyDisplayPoweredByUppy={false}
                 theme="light"
@@ -326,7 +380,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                     <Upload className="w-4 h-4" />
                     <span>Upload to Google Drive</span>
                   </>
-                  )}
+                )}
               </button>
             </div>
           </div>
