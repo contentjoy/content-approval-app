@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDrive, ensureGymUploadStructure, timestampLabel, shortId } from '@/lib/googleDrive';
-import { getAdminClient } from '@/lib/supabaseServer';
+import { supabase } from '@/lib/supabase';
 import { SLOT_NAMES } from '@/lib/slots';
 
 export async function POST(req: NextRequest) {
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     console.log(`✅ Drive root ID found: ${driveRootId}`);
 
     // Look up canonical gym name from Supabase
-    const supa = getAdminClient();
+    const supa = supabase;
     console.log(`🔍 Looking up gym data for ID: ${gymId}`);
     
     const { data: gymRow, error: gymError } = await supa

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDrive, startResumableSession, uploadToResumable } from '@/lib/googleDrive';
-import { getAdminClient } from '@/lib/supabaseServer';
+import { supabase } from '@/lib/supabase';
 import { SLOT_NAMES, type SlotName } from '@/lib/slots';
 
 export const runtime = 'nodejs'; // ensure Node (not edge)
@@ -36,7 +36,7 @@ export async function POST(
     }
 
     // Look up slot folder ID from Supabase
-    const supa = getAdminClient();
+    const supa = supabase;
     const { data: slotData, error: slotError } = await supa
       .from('upload_slots')
       .select('drive_folder_id')

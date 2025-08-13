@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDrive } from '@/lib/googleDrive';
-import { getAdminClient } from '@/lib/supabaseServer';
+import { supabase } from '@/lib/supabase';
 
 export async function POST(
   req: NextRequest, 
@@ -12,7 +12,7 @@ export async function POST(
     console.log(`🏁 Completing upload: ${uploadId}`);
 
     // Get upload and file data from Supabase
-    const supa = getAdminClient();
+    const supa = supabase;
     
     // Get upload details
     const { data: uploadData, error: uploadError } = await supa
