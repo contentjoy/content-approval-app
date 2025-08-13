@@ -12,6 +12,7 @@ import { initUpload, uploadFile, completeUpload } from '@/lib/contentUploadClien
 import type { SlotName } from '@/lib/slots'
 import toast from 'react-hot-toast'
 import { Modal } from '@/components/ui/modal'
+import { motion, AnimatePresence } from 'framer-motion'
 
 // Import required Uppy CSS files
 import '@uppy/core/dist/style.css'
@@ -59,6 +60,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   
   const [activeSlot, setActiveSlot] = useState<typeof SLOT_NAMES[number]>('Photos')
   const [isUploading, setIsUploading] = useState(false)
+  const [showConfetti, setShowConfetti] = useState(false)
   
   // Create Uppy instances for each slot
   const [uppyInstances] = useState(() => {
@@ -186,7 +188,15 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       // Step 3: Complete upload
       await completeUpload(uploadId)
       console.log('Upload completed successfully')
-      toast.success(`Successfully uploaded ${totalFiles} files to Google Drive!`)
+      
+      // Show confetti and success message
+      setShowConfetti(true)
+      toast.success('Content uploaded!')
+      
+      // Hide confetti after 2 seconds
+      setTimeout(() => {
+        setShowConfetti(false)
+      }, 2000)
       
       onSuccess?.({ 
         uploadId, 
@@ -278,12 +288,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 Total Files: {getTotalFiles()}
               </div>
               <div className="text-xs text-muted-text mt-1">
-                Ready to upload to Google Drive
-              </div>
-              <div className="text-xs text-muted-text mt-2 pt-2 border-t border-border">
-                <div className="font-medium">Folder Structure:</div>
-                <div>📁 {gymName || 'Gym'} → 📅 Timestamp → 🎬 Raw footage + ✨ Final footage</div>
-                <div className="text-xs mt-1">Each with: Photos, Videos, Facility Photos, Facility Videos</div>
+                Ready to upload
               </div>
             </div>
           </div>
@@ -334,7 +339,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 ) : (
                   <>
                     <Upload className="w-4 h-4" />
-                    <span>Upload All Files to Google Drive</span>
+                    <span>Upload content</span>
                   </>
                 )}
               </button>
@@ -342,6 +347,84 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           </div>
         </div>
       </div>
+      
+      {/* Confetti Celebration */}
+      <AnimatePresence>
+        {showConfetti && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 pointer-events-none z-[60]"
+          >
+            <ConfettiCelebration />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Modal>
+  )
+}
+
+// Confetti Celebration Component
+function ConfettiCelebration() {
+  const [particles, setParticles] = useState<Array<{
+    id: number
+    x: number
+    y: number
+    color: string
+    size: number
+    speed: number
+  }>>([])
+
+  useEffect(() => {
+    const colors = ['#3b82f6', '#8b5cf6', '#ef4444', '#10b981', '#f59e0b']
+    const newParticles = Array.from({ length: 150 }, (_, i) => ({
+      id: i,
+      x: Math.random() * window.innerWidth,
+      y: -20,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: Math.random() * 8 + 4,
+      speed: Math.random() * 6 + 4
+    }))
+    
+    setParticles(newParticles)
+
+    const interval = setInterval(() => {
+      setParticles(prev => 
+        prev.map(particle => ({
+          ...particle,
+          y: particle.y + particle.speed
+        })).filter(particle => particle.y < window.innerHeight + 50)
+      )
+    }, 30)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div className="fixed inset-0 pointer-events-none">
+      {particles.map(particle => (
+        <motion.div
+          key={particle.id}
+          className="absolute w-2 h-2 rounded-full"
+          style={{
+            left: particle.x,
+            top: particle.y,
+            backgroundColor: particle.color,
+            width: particle.size,
+            height: particle.size
+          }}
+          animate={{
+            rotate: [0, 360],
+            scale: [1, 0.8, 1]
+          }}
+          transition={{
+            duration: 1,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      ))}
+    </div>
   )
 }
