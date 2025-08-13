@@ -34,6 +34,7 @@ export function getAuth() {
   
   console.log(`🔑 Google Auth: Using service account ${creds.client_email}`);
   console.log(`🔑 Private key length: ${privateKey.length} characters`);
+  console.log(`🔑 Project ID: ${creds.project_id}`);
   
   try {
     return new google.auth.JWT({

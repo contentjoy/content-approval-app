@@ -117,6 +117,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   // Force fresh deployment - trigger Vercel rebuild
   // All previous fixes included: OpenSSL fix, gym ID resolution, enhanced error handling
   // Environment variable now correctly formatted in Vercel - force refresh deployment
+  // Enhanced Uppy configuration with better validation, error handling, and progress tracking
   const [activeSlot, setActiveSlot] = useState<typeof SLOT_NAMES[number]>('Photos')
   const [isUploading, setIsUploading] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
@@ -139,31 +140,64 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         allowMultipleUploadBatches: true,
         locale: {
           strings: {
-            dropHereOr: 'Drop files here or %{browse}',
-            browse: 'browse files',
-            uploadComplete: 'Upload complete',
-            uploadFailed: 'Upload failed',
-            processing: 'Processing...',
+            dropPaste: `Drop files here or ${slotName.toLowerCase()}`,
+            browse: `Browse ${slotName.toLowerCase()}`,
+            uploadComplete: `${slotName} upload complete`,
+            uploadFailed: `${slotName} upload failed`,
+            processing: `Processing ${slotName.toLowerCase()}...`,
             uploadXFiles: {
               0: 'Upload %{smart_count} file',
               1: 'Upload %{smart_count} files'
-            },
-            addMore: 'Add more files',
-            addMoreFiles: 'Add more files',
-            done: 'Done',
-            removeFile: 'Remove file',
-            cancel: 'Cancel',
-            retry: 'Retry',
-            pause: 'Pause',
-            resume: 'Resume'
+            }
           },
           pluralize: (count: number) => count === 1 ? 0 : 1
+        },
+        onBeforeFileAdded: (file) => {
+          // Enhanced file validation
+          const fileExtension = file.extension?.toLowerCase()
+          if (!config.allowedTypes.includes(`.${fileExtension}`)) {
+            const error = new Error(`File type .${fileExtension} not allowed for ${slotName}`)
+            error.name = 'FileTypeError'
+            throw error
+          }
+          
+          // Check file size
+          if (file.size && file.size > 50 * 1024 * 1024) {
+            const error = new Error(`File size exceeds 50MB limit`)
+            error.name = 'FileSizeError'
+            throw error
+          }
+          
+          console.log(`✅ File validated: ${file.name} (${slotName})`)
+          return file
+        },
+        onBeforeUpload: (files) => {
+          console.log(`🚀 Starting upload for ${slotName}: ${Object.keys(files).length} files`)
+          return files
         }
       })
       
-      // Enable better file previews
-      uppy.on('file-added', (file) => {
-        console.log(`File added to ${slotName}:`, file.name, file.type)
+      // Enhanced error handling
+      uppy.on('upload-error', (file, error, response) => {
+        if (file) {
+          console.error(`❌ Upload error for ${file.name} in ${slotName}:`, error)
+          toast.error(`Failed to upload ${file.name}: ${error.message}`)
+        }
+      })
+      
+      // Better progress tracking
+      uppy.on('upload-progress', (file, progress) => {
+        if (file && progress.bytesUploaded === progress.bytesTotal) {
+          console.log(`✅ ${file.name} upload complete`)
+        }
+      })
+      
+      // Success handling
+      uppy.on('upload-success', (file, response) => {
+        if (file) {
+          console.log(`✅ ${file.name} uploaded successfully to ${slotName}`)
+          toast.success(`${file.name} uploaded to ${slotName}`)
+        }
       })
       
       instances[slotName] = uppy
