@@ -64,13 +64,20 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   
   // Get the correct gym ID for uploads - use gymSlug from URL if available
   const getGymIdForUpload = useCallback(async (): Promise<string> => {
+    console.log('🔍 getGymIdForUpload called with:', { gymSlug, userGymId: user?.gymId, userGymName: user?.gymName })
+    
     if (!gymSlug) {
+      console.log('⚠️ No gymSlug from URL, falling back to user context')
       // Fallback to user context if no gym slug
       if (!user?.gymId) {
+        console.error('❌ No gym ID available for upload - user context missing')
         throw new Error('No gym ID available for upload')
       }
+      console.log('✅ Using gym ID from user context:', user.gymId)
       return user.gymId
     }
+    
+    console.log(`🔍 Looking up gym by slug: ${gymSlug}`)
     
     // Look up gym by slug to get the correct gym ID
     try {
@@ -80,23 +87,40 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         .eq('slug', gymSlug)
         .single()
       
-      if (error || !gym) {
-        console.error('Failed to find gym by slug:', gymSlug, error)
+      console.log('📊 Supabase query result:', { gym, error })
+      
+      if (error) {
+        console.error('❌ Supabase query error:', error)
         // Fallback to user context
         if (!user?.gymId) {
+          console.error('❌ Fallback failed - no user gym ID available')
           throw new Error(`Gym not found for slug: ${gymSlug}`)
         }
+        console.log('✅ Falling back to user gym ID:', user.gymId)
         return user.gymId
       }
       
-      console.log(`🔍 Found gym by slug: ${gymSlug} -> ${gym['Gym Name']} (ID: ${gym.id})`)
+      if (!gym) {
+        console.error('❌ No gym found with slug:', gymSlug)
+        // Fallback to user context
+        if (!user?.gymId) {
+          console.error('❌ Fallback failed - no user gym ID available')
+          throw new Error(`Gym not found for slug: ${gymSlug}`)
+        }
+        console.log('✅ Falling back to user gym ID:', user.gymId)
+        return user.gymId
+      }
+      
+      console.log(`✅ Found gym by slug: ${gymSlug} -> ${gym['Gym Name']} (ID: ${gym.id})`)
       return gym.id
     } catch (error) {
-      console.error('Error looking up gym by slug:', error)
+      console.error('❌ Error looking up gym by slug:', error)
       // Fallback to user context
       if (!user?.gymId) {
+        console.error('❌ Fallback failed - no user gym ID available')
         throw new Error(`Failed to look up gym for slug: ${gymSlug}`)
       }
+      console.log('✅ Falling back to user gym ID:', user.gymId)
       return user.gymId
     }
   }, [gymSlug, user?.gymId])
@@ -224,6 +248,9 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
     setIsUploading(true)
 
     try {
+      console.log('🚀 Starting upload process...')
+      console.log('🔍 Current state:', { gymSlug, gymName, userGymId: user?.gymId, userGymName: user?.gymName })
+      
       // Collect files from all slots
       const filesBySlot: Record<SlotName, File[]> = {
         'Photos': [],
@@ -245,13 +272,17 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         return
       }
 
-      console.log(`Starting upload of ${totalFiles} files...`)
+      console.log(`📁 Starting upload of ${totalFiles} files...`)
       toast.success(`Starting upload of ${totalFiles} files...`)
       
       // Step 1: Initialize upload
+      console.log('🔍 Getting gym ID for upload...')
       const gymId = await getGymIdForUpload()
+      console.log('✅ Got gym ID:', gymId)
+      
+      console.log('🚀 Initializing upload with gym ID:', gymId)
       const uploadId = await initUpload(gymId)
-      console.log('Upload initialized with ID:', uploadId)
+      console.log('✅ Upload initialized with ID:', uploadId)
       
       // Step 2: Upload files to respective slots
       const uploadResults: Record<SlotName, string[]> = {
