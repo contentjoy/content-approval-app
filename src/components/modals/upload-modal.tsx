@@ -4,12 +4,19 @@ import React, { useState, useCallback, useEffect } from 'react'
 import { X, Upload, Image, Video, Building2, Camera } from 'lucide-react'
 import { Dashboard } from '@uppy/react'
 import Uppy from '@uppy/core'
+import Dropbox from '@uppy/dropbox'
+import Box from '@uppy/box'
+import GoogleDrive from '@uppy/google-drive'
+import OneDrive from '@uppy/onedrive'
+import Url from '@uppy/url'
+import FileInput from '@uppy/file-input'
 import { useBranding } from '@/contexts/branding-context'
 import { useAuth } from '@/contexts/auth-context'
 import { useParams } from 'next/navigation'
 import { SLOT_NAMES } from '@/lib/slots'
 import { initUpload, uploadFile, completeUpload } from '@/lib/contentUploadClient'
 import type { SlotName } from '@/lib/slots'
+import toast from 'react-hot-toast'
 
 interface UploadModalProps {
   isOpen: boolean
@@ -59,16 +66,62 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
     const instances: Record<string, Uppy> = {}
     
     SLOT_NAMES.forEach(slotName => {
-      const config = SLOT_CONFIG[slotName]
       const uppy = new Uppy({
         restrictions: {
-          maxNumberOfFiles: config.maxFiles,
-          allowedFileTypes: config.allowedTypes,
-          maxFileSize: 100 * 1024 * 1024, // 100MB limit
+          maxNumberOfFiles: Infinity, // Allow unlimited files
+          minNumberOfFiles: 0, // No minimum requirement
+          maxFileSize: 50 * 1024 * 1024, // 50MB limit
+          allowedFileTypes: ['image/*', 'video/*'], // Accept all image and video types
         },
         autoProceed: false,
-        allowMultipleUploadBatches: false,
+        allowMultipleUploadBatches: true,
+        locale: {
+          strings: {
+            dropHereOr: 'Drop files here or %{browse}',
+            browse: 'browse files',
+            uploadComplete: 'Upload complete',
+            uploadFailed: 'Upload failed',
+            processing: 'Processing...',
+            uploadXFiles: {
+              0: 'Upload %{smart_count} file',
+              1: 'Upload %{smart_count} files'
+            },
+            addMore: 'Add more files',
+            addMoreFiles: 'Add more files',
+            done: 'Done',
+            removeFile: 'Remove file',
+            cancel: 'Cancel',
+            retry: 'Retry',
+            pause: 'Pause',
+            resume: 'Resume'
+          },
+          pluralize: (count: number) => count === 1 ? 0 : 1
+        }
       })
+      
+      // Add all the plugins
+      uppy.use(Dropbox, { 
+        companionUrl: 'https://companion.uppy.io'
+      })
+      
+      uppy.use(Box, { 
+        companionUrl: 'https://companion.uppy.io'
+      })
+      
+      // Note: Google Drive Picker requires API keys - using basic Google Drive instead
+      uppy.use(GoogleDrive, { 
+        companionUrl: 'https://companion.uppy.io'
+      })
+      
+      uppy.use(OneDrive, { 
+        companionUrl: 'https://companion.uppy.io'
+      })
+      
+      uppy.use(Url, { 
+        companionUrl: 'https://companion.uppy.io'
+      })
+      
+      uppy.use(FileInput)
       
       instances[slotName] = uppy
     })
@@ -87,6 +140,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   const handleUpload = useCallback(async () => {
     if (!gymSlug || !gymName || !user?.gymId) {
       console.error('Missing gym information or user not authenticated')
+      toast.error('Please log in to upload files')
       return
     }
 
@@ -110,11 +164,12 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       // Check if we have any files to upload
       const totalFiles = Object.values(filesBySlot).flat().length
       if (totalFiles === 0) {
-        console.log('No files to upload')
+        toast.error('Please select files to upload')
         return
       }
 
       console.log(`Starting upload of ${totalFiles} files...`)
+      toast.success(`Starting upload of ${totalFiles} files...`)
       
       // Step 1: Initialize upload
       const uploadId = await initUpload(user.gymId)
@@ -140,10 +195,12 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             const result = await uploadFile(uploadId, slotName, file)
             uploadResults[slotName as SlotName].push(result.driveFileId)
             console.log(`✅ Uploaded ${file.name} to ${slotName}`)
+            toast.success(`Uploaded ${file.name} to ${slotName}`)
           } catch (error) {
             const errorMessage = `Failed to upload ${file.name} to ${slotName}: ${error instanceof Error ? error.message : 'Unknown error'}`
             console.error(errorMessage)
             errors.push(errorMessage)
+            toast.error(errorMessage)
             // Stop the batch if any file fails
             throw new Error(errorMessage)
           }
@@ -153,6 +210,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       // Step 3: Complete upload
       await completeUpload(uploadId)
       console.log('Upload completed successfully')
+      toast.success(`Successfully uploaded ${totalFiles} files to Google Drive!`)
       
       onSuccess?.({ 
         uploadId, 
@@ -164,7 +222,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       
     } catch (error) {
       console.error('Upload failed:', error)
-      // TODO: Show error toast/notification
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed'
+      toast.error(errorMessage)
     } finally {
       setIsUploading(false)
     }
@@ -234,10 +293,10 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                           {slotName}
                         </div>
                         <div className="text-xs text-[var(--muted-text)] mt-1">
-                          {fileCount} / {config.maxFiles} files
+                          {fileCount} files selected
                         </div>
                         <div className="text-xs text-[var(--muted-text)] mt-1">
-                          {config.allowedTypes.join(', ')}
+                          Accepts images & videos
                         </div>
                       </div>
                     </div>
@@ -268,6 +327,11 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 showProgressDetails={true}
                 proudlyDisplayPoweredByUppy={false}
                 theme="light"
+                showRemoveButtonAfterComplete={true}
+                doneButtonHandler={() => {
+                  // Handle when user clicks done
+                  console.log('Upload complete for current slot')
+                }}
               />
             </div>
 
