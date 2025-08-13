@@ -218,7 +218,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -226,27 +226,27 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-6xl mx-4 bg-[var(--geist-background)] rounded-3xl border border-[var(--accents-2)] shadow-soft max-h-[90vh] overflow-hidden">
+      <div className="relative w-full max-w-6xl bg-[var(--geist-background)] rounded-3xl border border-[var(--accents-2)] shadow-soft max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[var(--accents-2)]">
+        <div className="flex items-center justify-between p-4 lg:p-6 border-b border-[var(--accents-2)] flex-shrink-0">
           <div>
-            <h2 className="text-2xl font-bold text-[var(--geist-foreground)]">Upload Content</h2>
-            <p className="text-[var(--geist-secondary)] mt-1">
+            <h2 className="text-xl lg:text-2xl font-bold text-[var(--geist-foreground)]">Upload Content</h2>
+            <p className="text-[var(--geist-secondary)] mt-1 text-sm lg:text-base">
               Upload content to {gymName || 'your gym'}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="h-10 w-10 rounded-full border border-[var(--accents-2)] flex items-center justify-center text-[var(--geist-foreground)] hover:bg-[var(--accents-1)] transition-colors"
+            className="h-8 w-8 lg:h-10 lg:w-10 rounded-full border border-[var(--accents-2)] flex items-center justify-center text-[var(--geist-foreground)] hover:bg-[var(--accents-1)] transition-colors flex-shrink-0"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 lg:w-5 lg:h-5" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="flex flex-col lg:flex-row h-[calc(90vh-120px)]">
-          {/* Slot Selector */}
-          <div className="lg:w-64 p-4 border-r border-[var(--accents-2)] bg-[var(--accents-1)]">
+        {/* Content - Make scrollable on mobile */}
+        <div className="flex flex-col lg:flex-row h-[calc(90vh-80px)] lg:h-[calc(90vh-120px)] overflow-hidden">
+          {/* Slot Selector - Fixed height on mobile, scrollable on larger screens */}
+          <div className="lg:w-64 p-4 border-b lg:border-b-0 lg:border-r border-[var(--accents-2)] bg-[var(--accents-1)] flex-shrink-0">
             <h3 className="font-semibold text-[var(--geist-foreground)] mb-4">Content Types</h3>
             <div className="space-y-2">
               {SLOT_NAMES.map((slotName) => {
@@ -300,8 +300,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             </div>
           </div>
 
-          {/* Upload Area */}
-          <div className="flex-1 p-6">
+          {/* Upload Area - Scrollable on mobile */}
+          <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-[var(--geist-foreground)] mb-2">
                 {activeSlot}
@@ -316,7 +316,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               uppy={getActiveUppy()}
               plugins={[]}
               width="100%"
-              height={450}
+              height={400}
               showProgressDetails={true}
               proudlyDisplayPoweredByUppy={false}
               theme="light"
@@ -333,7 +333,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               <button
                 onClick={handleUpload}
                 disabled={isUploading || getTotalFiles() === 0}
-                className="px-6 py-3 bg-[var(--primary)] text-white rounded-md font-medium hover:bg-[var(--primary)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+                className="px-4 py-2 lg:px-6 lg:py-3 bg-[var(--primary)] text-white rounded-md font-medium hover:bg-[var(--primary)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
               >
                 {isUploading ? (
                   <>
