@@ -226,7 +226,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-6xl bg-[var(--geist-background)] rounded-3xl border border-[var(--accents-2)] shadow-soft max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="relative w-full max-w-6xl bg-[var(--geist-background)] rounded-3xl border border-[var(--accents-2)] shadow-soft max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 lg:p-6 border-b border-[var(--accents-2)] bg-[var(--geist-background)] flex-shrink-0">
           <div>
@@ -239,13 +239,13 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             onClick={onClose}
             className="h-8 w-8 lg:h-10 lg:w-10 rounded-full border border-[var(--accents-2)] flex items-center justify-center text-[var(--geist-foreground)] hover:bg-[var(--accents-1)] transition-colors flex-shrink-0"
           >
-            <X className="w-4 h-4 lg:w-5 lg:h-5" />
+            <X className="w-4 h-4 lg:w-5 lg:w-5" />
           </button>
         </div>
 
-        {/* Content - Make scrollable on mobile and desktop */}
-        <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
-          {/* Slot Selector - Fixed height on mobile, scrollable on larger screens */}
+        {/* Content - Fixed height container with proper scrolling */}
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden" style={{ height: 'calc(90vh - 120px)' }}>
+          {/* Slot Selector - Fixed height */}
           <div className="lg:w-64 p-4 border-b lg:border-b-0 lg:border-r border-[var(--accents-2)] bg-[var(--accents-1)] flex-shrink-0">
             <h3 className="font-semibold text-[var(--geist-foreground)] mb-4">Content Types</h3>
             <div className="space-y-2">
@@ -300,8 +300,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             </div>
           </div>
 
-          {/* Upload Area - Scrollable on mobile and desktop */}
-          <div className="flex-1 p-4 lg:p-6 overflow-y-auto min-h-0">
+          {/* Upload Area - Scrollable with fixed height */}
+          <div className="flex-1 p-4 lg:p-6 overflow-y-auto" style={{ height: 'calc(90vh - 120px)' }}>
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-[var(--geist-foreground)] mb-2">
                 {activeSlot}
