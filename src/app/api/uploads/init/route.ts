@@ -26,8 +26,12 @@ export async function POST(req: NextRequest) {
       }, { status: 500 });
     }
 
+    console.log(`✅ Drive root ID found: ${driveRootId}`);
+
     // Look up canonical gym name from Supabase
     const supa = getAdminClient();
+    console.log(`🔍 Looking up gym data for ID: ${gymId}`);
+    
     const { data: gymRow, error: gymError } = await supa
       .from('gyms')
       .select('id, "Gym Name"')
@@ -45,18 +49,49 @@ export async function POST(req: NextRequest) {
     const gymName = gymRow['Gym Name'] || 'Unknown Gym';
     console.log(`🏋️ Found gym: ${gymName}`);
 
-    const drive = getDrive();
+    // Test Google Drive connection
+    console.log(`🔌 Testing Google Drive connection...`);
+    let drive;
+    try {
+      drive = getDrive();
+      console.log(`✅ Google Drive connection successful`);
+    } catch (driveError) {
+      console.error('❌ Google Drive connection failed:', driveError);
+      return NextResponse.json({ 
+        error: 'Google Drive connection failed',
+        details: driveError instanceof Error ? driveError.message : 'Unknown drive error'
+      }, { status: 500 });
+    }
+
     const uploadLabel = `${timestampLabel()}_${shortId()}`;
     const uploadId = shortId(); // Use short ID as upload ID
 
     console.log(`📅 Creating upload structure with label: ${uploadLabel}`);
 
-    const structure = await ensureGymUploadStructure(drive, {
-      driveRootId,
-      gymName,
-      uploadLabel,
-      slotNames: SLOT_NAMES
-    });
+    // Test folder creation
+    let structure;
+    try {
+      structure = await ensureGymUploadStructure(drive, {
+        driveRootId,
+        gymName,
+        uploadLabel,
+        slotNames: SLOT_NAMES
+      });
+      console.log(`✅ Folder structure created successfully:`, {
+        gymFolderId: structure.gymFolderId,
+        timestampFolderId: structure.timestampFolderId,
+        rawFootageFolderId: structure.rawFootageFolderId,
+        finalFootageFolderId: structure.finalFootageFolderId
+      });
+    } catch (structureError) {
+      console.error('❌ Folder structure creation failed:', structureError);
+      return NextResponse.json({ 
+        error: 'Failed to create folder structure',
+        details: structureError instanceof Error ? structureError.message : 'Unknown structure error'
+      }, { status: 500 });
+    }
+
+    console.log(`💾 Persisting upload data to database...`);
 
     // Persist upload data to Supabase with new folder structure
     const { error: uploadError } = await supa
@@ -89,7 +124,10 @@ export async function POST(req: NextRequest) {
       }, { status: 500 });
     }
 
+    console.log(`✅ Upload record persisted successfully`);
+
     // Persist slot data to Supabase
+    console.log(`💾 Persisting slot data to database...`);
     const slotRecords = SLOT_NAMES.map(slot => ({
       upload_id: uploadId,
       slot_name: slot,
@@ -104,9 +142,12 @@ export async function POST(req: NextRequest) {
       console.error('❌ Failed to insert slot records:', slotError);
       return NextResponse.json({ 
         error: 'Failed to persist slot data',
-        details: 'Database error occurred'
+        details: `Database error: ${slotError.message}`,
+        code: slotError.code
       }, { status: 500 });
     }
+
+    console.log(`✅ Slot records persisted successfully`);
 
     console.log(`✅ Upload initialization completed for ${gymName}, upload ID: ${uploadId}`);
     return NextResponse.json({ uploadId });
@@ -139,7 +180,8 @@ export async function POST(req: NextRequest) {
     
     return NextResponse.json({ 
       error: 'Upload initialization failed',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
     }, { status: 500 });
   }
 }
