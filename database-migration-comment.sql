@@ -54,4 +54,16 @@ CREATE INDEX idx_files_slot_name ON files(slot_name);
 -- ALTER TABLE uploads ADD COLUMN gym_folder_id TEXT;
 -- ALTER TABLE uploads ADD COLUMN raw_footage_folder_id TEXT;
 -- ALTER TABLE uploads ADD COLUMN final_footage_folder_id TEXT;
+
+-- 7. IMPORTANT: If you have existing tables, run these ALTER commands:
+-- ALTER TABLE uploads ADD COLUMN IF NOT EXISTS gym_folder_id TEXT;
+-- ALTER TABLE uploads ADD COLUMN IF NOT EXISTS raw_footage_folder_id TEXT;
+-- ALTER TABLE uploads ADD COLUMN IF NOT EXISTS final_footage_folder_id TEXT;
+
+-- 8. Update existing records to have placeholder values (if needed):
+-- UPDATE uploads SET 
+--   gym_folder_id = upload_folder_id,
+--   raw_footage_folder_id = upload_folder_id,
+--   final_footage_folder_id = upload_folder_id
+-- WHERE gym_folder_id IS NULL;
 */
