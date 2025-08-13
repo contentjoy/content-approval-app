@@ -116,6 +116,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   
   // Force fresh deployment - trigger Vercel rebuild
   // All previous fixes included: OpenSSL fix, gym ID resolution, enhanced error handling
+  // Environment variable now correctly formatted in Vercel - force refresh deployment
   const [activeSlot, setActiveSlot] = useState<typeof SLOT_NAMES[number]>('Photos')
   const [isUploading, setIsUploading] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
