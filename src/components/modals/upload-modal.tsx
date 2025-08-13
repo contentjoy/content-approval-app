@@ -312,23 +312,21 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             </div>
 
             {/* Uppy Dashboard */}
-            <div className="bg-[var(--accents-1)] rounded-md border border-[var(--accents-2)] p-4">
-              <Dashboard
-                uppy={getActiveUppy()}
-                plugins={[]}
-                width="100%"
-                height={450}
-                showProgressDetails={true}
-                proudlyDisplayPoweredByUppy={false}
-                theme="light"
-                showRemoveButtonAfterComplete={true}
-                showLinkToFileUploadResult={false}
-                note={`Accepted file types: ${getActiveConfig().allowedTypes.join(', ')}. Maximum size: 50MB`}
-                doneButtonHandler={() => {
-                  console.log('Upload complete for current slot')
-                }}
-              />
-            </div>
+            <Dashboard
+              uppy={getActiveUppy()}
+              plugins={[]}
+              width="100%"
+              height={450}
+              showProgressDetails={true}
+              proudlyDisplayPoweredByUppy={false}
+              theme="light"
+              showRemoveButtonAfterComplete={true}
+              showLinkToFileUploadResult={false}
+              note={`Accepted file types: ${getActiveConfig().allowedTypes.join(', ')}. Maximum size: 50MB`}
+              doneButtonHandler={() => {
+                console.log('Upload complete for current slot')
+              }}
+            />
 
             {/* Unified Upload Button */}
             <div className="mt-6 flex justify-end">
