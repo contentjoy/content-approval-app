@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getDrive } from '@/lib/googleDrive';
+import { getDrive, ensureFolder } from '@/lib/googleDrive';
 import { PassThrough } from 'stream';
 
 export const runtime = 'nodejs';
@@ -92,16 +92,16 @@ async function createFolderStructure(gymName: string) {
     const uploadLabel = `${gymName} ${timestamp}`;
     
     // Step 1: Create or find gym folder inside the "Clients" folder
-    const gymFolderId = await createOrFindFolder(drive, gymName, clientsFolderId, sharedDriveId);
+    const gymFolderId = await ensureFolder(drive, gymName, clientsFolderId);
     console.log('🏋️ Gym folder:', gymFolderId);
     
     // Step 2: Create timestamp folder
-    const timestampFolderId = await createOrFindFolder(drive, uploadLabel, gymFolderId, sharedDriveId);
+    const timestampFolderId = await ensureFolder(drive, uploadLabel, gymFolderId);
     console.log('📅 Timestamp folder:', timestampFolderId);
     
     // Step 3: Create Raw footage and Final footage folders
-    const rawFootageFolderId = await createOrFindFolder(drive, 'Raw footage', timestampFolderId, sharedDriveId);
-    const finalFootageFolderId = await createOrFindFolder(drive, 'Final footage', timestampFolderId, sharedDriveId);
+    const rawFootageFolderId = await ensureFolder(drive, 'Raw footage', timestampFolderId);
+    const finalFootageFolderId = await ensureFolder(drive, 'Final footage', timestampFolderId);
     console.log('🎬 Raw footage folder:', rawFootageFolderId);
     console.log('✨ Final footage folder:', finalFootageFolderId);
     
@@ -111,8 +111,8 @@ async function createFolderStructure(gymName: string) {
     const finalSlotFolders: Record<string, string> = {};
     
     for (const slot of slotNames) {
-      rawSlotFolders[slot] = await createOrFindFolder(drive, slot, rawFootageFolderId, sharedDriveId);
-      finalSlotFolders[slot] = await createOrFindFolder(drive, slot, finalFootageFolderId, sharedDriveId);
+      rawSlotFolders[slot] = await ensureFolder(drive, slot, rawFootageFolderId);
+      finalSlotFolders[slot] = await ensureFolder(drive, slot, finalFootageFolderId);
       console.log(`📁 ${slot} folders created`);
     }
     
@@ -127,46 +127,6 @@ async function createFolderStructure(gymName: string) {
     
   } catch (error) {
     console.error('❌ Failed to create folder structure:', error);
-    throw error;
-  }
-}
-
-async function createOrFindFolder(drive: any, name: string, parentId: string, sharedDriveId: string): Promise<string> {
-  try {
-    // Check if folder already exists
-    const { data: existingFolders } = await drive.files.list({
-      q: `name='${name}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`,
-      fields: 'files(id,name)',
-      supportsAllDrives: true,
-      includeItemsFromAllDrives: true,
-    });
-    
-    if (existingFolders.files && existingFolders.files.length > 0) {
-      console.log(`📁 Found existing folder: ${name}`);
-      return existingFolders.files[0].id!;
-    }
-    
-    // Create new folder in the shared drive context
-    const { data: newFolder } = await drive.files.create({
-      requestBody: {
-        name,
-        mimeType: 'application/vnd.google-apps.folder',
-        parents: [parentId],
-      },
-      fields: 'id',
-      supportsAllDrives: true,
-      driveId: sharedDriveId,
-    } as any);
-    
-    if (!newFolder.id) {
-      throw new Error('Failed to create folder - no ID returned');
-    }
-    
-    console.log(`✅ Created folder: ${name} (${newFolder.id})`);
-    return newFolder.id;
-    
-  } catch (error) {
-    console.error(`❌ Error creating/finding folder ${name}:`, error);
     throw error;
   }
 }
@@ -364,11 +324,10 @@ async function handleFolderCreation(files: any[], gymSlug: string, gymName: stri
         
         // Create the session folder inside the timestamp folder
         console.log(`📁 Creating session folder '${folderName}' inside parent folder ${parentFolderId}`)
-        const sessionFolderId = await createOrFindFolder(
+        const sessionFolderId = await ensureFolder(
           getDrive(), 
           folderName, 
-          parentFolderId, 
-          '0ALOLvWQ1QTx5Uk9PVA'
+          parentFolderId
         )
         
         results.push({
