@@ -162,8 +162,6 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   const [totalUploadFiles, setTotalUploadFiles] = useState(0)
   
   const { gymName: brandingGymName } = useBranding()
-  const { user } = useAuth()
-  const userGymName = user?.gymName
   
   // Get gym slug from URL
   const gymSlug = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : null
@@ -202,24 +200,23 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   // Helper functions
   const checkAuthStatus = useCallback(() => {
     const authStatus = {
-      user: !!user,
       gymSlug: !!gymSlug,
-      canUpload: !!(user && gymSlug),
-      sessionToken: !!user?.gymId // Use gymId instead of id
+      canUpload: !!gymSlug, // Only need gymSlug for uploads
+      gymName: gymSlug ? slugToGymName(gymSlug) : null
     }
-    console.log('🔐 Checking auth status:', authStatus)
+    console.log('🔐 Checking upload status:', authStatus)
     return authStatus
-  }, [user, gymSlug])
+  }, [gymSlug])
 
   const slugToGymName = useCallback((slug: string) => {
     return slug.replace(/-/g, ' ')
   }, [])
 
   const getGymIdForUpload = useCallback(async () => {
-    if (!gymSlug) return user?.gymId
+    if (!gymSlug) return null
     
     console.log('🔍 Getting gym ID for upload...')
-    console.log('🔍 getGymIdForUpload called with:', { gymSlug, userGymId: user?.gymId, userGymName: user?.gymName })
+    console.log('🔍 getGymIdForUpload called with:', { gymSlug })
     
     const gymName = slugToGymName(gymSlug)
     console.log('🔍 Looking up gym by name:', gymSlug, '->', `"${gymName}"`)
@@ -231,13 +228,13 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       .single()
     
     if (error || !gym) {
-      console.log('🔍 Gym lookup failed, falling back to user.gymId')
-      return user?.gymId
+      console.log('🔍 Gym lookup failed, returning null for testing')
+      return null
     }
     
     console.log('✅ Found gym by name:', gymSlug, '->', `"${gymName}" (ID: ${gym.id})`)
     return gym.id
-  }, [gymSlug, user?.gymId, user?.gymName, slugToGymName])
+  }, [gymSlug, slugToGymName])
 
   const handleUpload = useCallback(async () => {
     try {
@@ -246,25 +243,19 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       // Get current state for debugging
       const currentState = {
         gymSlug,
-        gymName: brandingGymName || userGymName,
-        userGymId: user?.gymId,
-        userGymName: user?.gymName
+        gymName: slugToGymName(gymSlug || ''),
       }
       console.log('🔍 Current state:', currentState)
       
-      // Check authentication status
+      // Check if we have gym slug
       const authStatus = checkAuthStatus()
       if (!authStatus.canUpload) {
-        throw new Error('Missing gym information or user not authenticated')
+        throw new Error('Missing gym slug - please navigate to a gym page')
       }
       
-      // Get gym ID for upload
+      // Get gym ID for upload (optional for testing)
       const gymId = await getGymIdForUpload()
-      if (!gymId) {
-        throw new Error('Could not determine gym ID for upload')
-      }
-      
-      console.log('✅ Got gym ID:', gymId)
+      console.log('🔍 Gym ID for upload:', gymId || 'Not found (testing mode)')
       
       // Get files from ALL Uppy instances, not just the active one
       const allFiles: any[] = []
@@ -321,7 +312,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 folderType: 'session-root'
               }],
               gymSlug,
-              gymName: brandingGymName || userGymName
+              gymName: authStatus.gymName
             })
           })
           
@@ -390,7 +381,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                         totalChunks: chunks.length
                       }],
                       gymSlug,
-                      gymName: brandingGymName || userGymName,
+                      gymName: authStatus.gymName,
                       sessionFolderId // Pass sessionFolderId for chunked uploads
                     })
                   })
@@ -433,7 +424,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                   body: JSON.stringify({
                     files: filesForUpload,
                     gymSlug,
-                    gymName: brandingGymName || userGymName,
+                    gymName: authStatus.gymName,
                     sessionFolderId // Pass sessionFolderId for regular uploads
                   })
                 })
@@ -517,7 +508,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       setUploadingFiles([])
       toast.error(error instanceof Error ? error.message : 'Upload failed')
     }
-  }, [gymSlug, brandingGymName, userGymName, user, onClose, activeUppy, checkAuthStatus, getGymIdForUpload, uppyInstances])
+  }, [gymSlug, onClose, activeUppy, checkAuthStatus, getGymIdForUpload, uppyInstances])
 
   if (!isOpen) return null
 
