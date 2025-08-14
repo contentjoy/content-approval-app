@@ -6,8 +6,7 @@ import { Dashboard } from '@uppy/react'
 import Uppy from '@uppy/core'
 import { useBranding } from '@/hooks/use-branding'
 import { useAuth } from '@/contexts/auth-context'
-import { toast } from '@/components/ui/toast'
-import { ConfettiCelebration } from '@/components/ui/progress-bar'
+import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 import { Modal } from '@/components/ui/modal'
 
@@ -86,7 +85,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
     return () => {
       if (uppy) {
         console.log('Cleaning up Uppy instance')
-        uppy.close()
+        // uppy.close() // Remove this line as it doesn't exist
       }
     }
   }, [uppy])
@@ -97,7 +96,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       user: !!user,
       gymSlug: !!gymSlug,
       canUpload: !!(user && gymSlug),
-      sessionToken: !!user?.id
+      sessionToken: !!user?.gymId // Use gymId instead of id
     }
     console.log('🔐 Checking auth status:', authStatus)
     return authStatus
@@ -255,7 +254,14 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       </div>
 
       {/* Confetti Celebration */}
-      {showConfetti && <ConfettiCelebration />}
+      {/* {showConfetti && <ConfettiCelebration />} */}
+      {showConfetti && (
+        <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
+          <div className="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+            🎉 Upload Successful!
+          </div>
+        </div>
+      )}
     </Modal>
   )
 }
