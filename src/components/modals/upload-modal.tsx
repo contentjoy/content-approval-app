@@ -160,6 +160,9 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       // Show immediate success toast for better UX
       toast.success('Success! Content sent to team')
       
+      // Close modal quickly for better UX
+      onClose()
+      
       // Start background upload process
       setTimeout(async () => {
         try {
@@ -174,13 +177,11 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               const progress = Math.round(((i + 1) / allFiles.length) * 100)
               setUploadProgress(progress)
               
-              // TEMPORARY: Use the working upload-to-drive API
-              const filesForUpload = [{
-                name: file.name,
-                type: file.type,
-                size: file.size,
-                data: await file.data.arrayBuffer().then((buffer: ArrayBuffer) => Buffer.from(buffer).toString('base64'))
-              }]
+              // Show progress toast
+              toast.success(`Uploading ${file.name}... (${progress}%)`, {
+                duration: 2000,
+                icon: '📤'
+              })
               
               // For large files (>5MB), use chunked upload
               if (file.size > 5 * 1024 * 1024) {
@@ -191,8 +192,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 const chunks = []
                 const buffer = Buffer.from(await file.data.arrayBuffer())
                 
-                for (let i = 0; i < buffer.length; i += chunkSize) {
-                  chunks.push(buffer.slice(i, i + chunkSize))
+                for (let j = 0; j < buffer.length; j += chunkSize) {
+                  chunks.push(buffer.slice(j, j + chunkSize))
                 }
                 
                 console.log(`📦 Uploading ${chunks.length} chunks for ${file.name}...`)
@@ -228,6 +229,12 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                   // Update progress for each chunk
                   const chunkProgress = Math.round(((i + chunkIndex + 1) / (allFiles.length + chunks.length - 1)) * 100)
                   setUploadProgress(chunkProgress)
+                  
+                  // Show chunk progress toast
+                  toast.success(`Chunk ${chunkIndex + 1}/${chunks.length} uploaded for ${file.name}`, {
+                    duration: 1500,
+                    icon: '📦'
+                  })
                 }
                 
                 console.log(`✅ All chunks uploaded for ${file.name}`)
@@ -240,6 +247,13 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 
               } else {
                 // Small files use regular upload
+                const filesForUpload = [{
+                  name: file.name,
+                  type: file.type,
+                  size: file.size,
+                  data: await file.data.arrayBuffer().then((buffer: ArrayBuffer) => Buffer.from(buffer).toString('base64'))
+                }]
+
                 const response = await fetch('/api/upload-to-drive', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -272,6 +286,12 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 success: false,
                 error: error instanceof Error ? error.message : 'Unknown error'
               })
+              
+              // Show error toast
+              toast.error(`Failed to upload ${file.name}: ${error instanceof Error ? error.message : 'Unknown error'}`, {
+                duration: 5000,
+                icon: '❌'
+              })
             }
           }
           
@@ -283,7 +303,10 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           // Show completion message
           const successCount = uploadResults.filter(r => r.success).length
           if (successCount > 0) {
-            toast.success(`Upload completed! ${successCount}/${allFiles.length} files uploaded successfully`)
+            toast.success(`🎉 Upload completed! ${successCount}/${allFiles.length} files uploaded successfully`, {
+              duration: 5000,
+              icon: '✅'
+            })
             setShowConfetti(true)
           }
           
@@ -295,17 +318,19 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             })
           })
           
-          // Close modal after a short delay
+          // Hide confetti after delay
           setTimeout(() => {
-            onClose()
             setShowConfetti(false)
-          }, 2000)
+          }, 3000)
           
         } catch (error) {
           console.error('❌ Background upload failed:', error)
           setIsUploading(false)
           setUploadingFiles([])
-          toast.error('Upload failed. Please try again.')
+          toast.error('Upload failed. Please try again.', {
+            duration: 5000,
+            icon: '❌'
+          })
         }
       }, 100) // Small delay to show immediate feedback
       
@@ -385,8 +410,10 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 width="100%"
                 height="400px"
                 proudlyDisplayPoweredByUppy={false}
-                showProgressDetails={true}
+                showProgressDetails={false}
+                showRemoveButtonAfterComplete={false}
                 doneButtonHandler={() => {}}
+                note="Drag and drop files here, or click to browse"
               />
             </div>
             
@@ -395,26 +422,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               Accepted file types: {SLOT_CONFIG[activeSlot]?.allowedTypes.join(', ')}. Maximum size: 50MB.
             </div>
             
-            {/* Upload Progress */}
-            {isUploading && (
-              <div className="space-y-4">
-                <div className="flex justify-between text-sm">
-                  <span>Uploading files...</span>
-                  <span>{uploadProgress}%</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-3">
-                  <div 
-                    className="bg-primary h-3 rounded-full transition-all duration-300 ease-out"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-                {uploadingFiles.length > 0 && (
-                  <div className="text-xs text-muted-foreground">
-                    Currently uploading: {uploadingFiles[0]}...
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Upload Progress - Removed since modal closes quickly */}
+            {/* Progress is now shown in toast notifications */}
           </div>
         </div>
         
