@@ -167,7 +167,7 @@ export async function uploadFileDirectly(drive: drive_v3.Drive, p: {
   sizeBytes?: number;
 }): Promise<{ fileId: string }> {
   // Declare fileBuffer in outer scope so it's accessible in catch block
-  let fileBuffer: Buffer;
+  let fileBuffer: Buffer | undefined;
   
   try {
     console.log(`🚀 Starting ULTIMATE SIMPLE upload for: ${p.filename}`);
