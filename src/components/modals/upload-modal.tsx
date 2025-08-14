@@ -10,6 +10,10 @@ import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 import { Modal } from '@/components/ui/modal'
 
+// Import required Uppy CSS files
+import '@uppy/core/dist/style.css'
+import '@uppy/dashboard/dist/style.css'
+
 interface UploadModalProps {
   isOpen: boolean
   onClose: () => void
@@ -42,7 +46,10 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       restrictions: {
         maxFileSize: 50 * 1024 * 1024, // 50MB
         allowedFileTypes: ['image/*', 'video/*'],
+        maxNumberOfFiles: 20,
       },
+      autoProceed: false,
+      allowMultipleUploadBatches: true,
       locale: {
         strings: {
           dropPaste: 'Drop files here, or %{browse}',
@@ -74,6 +81,14 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       if (file) {
         console.error('❌ File error:', error)
         toast.error(`Error with ${file.name}: ${error.message}`)
+      }
+    })
+
+    // Handle upload success
+    uppyInstance.on('upload-success', (file, response) => {
+      if (file) {
+        console.log('✅ File uploaded successfully:', file.name)
+        toast.success(`File ${file.name} uploaded successfully!`)
       }
     })
 
@@ -193,63 +208,106 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Upload Content">
       <div className="space-y-6">
-        {/* Slot Navigation */}
-        <div className="flex space-x-2 overflow-x-auto pb-2">
-          {SLOT_NAMES.map((slotName) => {
-            const config = SLOT_CONFIG[slotName]
-            const Icon = config.icon
-            const isActive = activeSlot === slotName
-            const fileCount = uppy.getFiles().length
+        {/* Content Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Slot Selector */}
+          <div className="lg:col-span-1 space-y-4">
+            <h3 className="font-semibold text-foreground">Content Types</h3>
+            <div className="space-y-3">
+              {SLOT_NAMES.map((slotName) => {
+                const config = SLOT_CONFIG[slotName]
+                const Icon = config.icon
+                const isActive = activeSlot === slotName
+                const fileCount = uppy.getFiles().length
+                
+                return (
+                  <button
+                    key={slotName}
+                    onClick={() => setActiveSlot(slotName)}
+                    className={`w-full p-3 rounded-md border-2 transition-all duration-200 text-left ${
+                      isActive 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <Icon className={`w-5 h-5 ${
+                        isActive ? 'text-primary' : 'text-muted-foreground'
+                      }`} />
+                      <div className="flex-1 min-w-0">
+                        <div className={`font-medium ${
+                          isActive ? 'text-foreground' : 'text-foreground/80'
+                        }`}>
+                          {slotName}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {fileCount} files selected
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Accepts {config.allowedTypes.join(', ')}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
             
-            return (
+            {/* Total Files Summary */}
+            <div className="p-3 bg-muted rounded-md border border-border">
+              <div className="text-sm font-medium text-foreground">
+                Total Files: {getTotalFiles()}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                Ready to upload to {brandingGymName || userGymName || 'your gym'}
+              </div>
+            </div>
+          </div>
+
+          {/* Upload Area */}
+          <div className="lg:col-span-3 space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                {activeSlot}
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                Upload {activeSlot.toLowerCase()} for your content library
+              </p>
+            </div>
+
+            {/* Uppy Dashboard */}
+            <div className="border border-border rounded-lg p-4">
+              <Dashboard
+                uppy={uppy}
+                plugins={[]}
+                width="100%"
+                height={450}
+                proudlyDisplayPoweredByUppy={false}
+                showProgressDetails={true}
+                theme="light"
+                showRemoveButtonAfterComplete={true}
+                showLinkToFileUploadResult={false}
+                note={`Accepted file types: ${SLOT_CONFIG[activeSlot].allowedTypes.join(', ')}. Maximum size: 50MB.`}
+                doneButtonHandler={() => {
+                  console.log('Upload complete for current slot')
+                }}
+                hideUploadButton={true}
+                showSelectedFiles={true}
+              />
+            </div>
+
+            {/* Upload Button */}
+            <div className="flex justify-end">
               <button
-                key={slotName}
-                onClick={() => setActiveSlot(slotName)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${
-                  isActive
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border hover:border-primary/50'
-                }`}
+                onClick={handleUpload}
+                disabled={getTotalFiles() === 0}
+                className="px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
               >
-                <Icon className="w-4 h-4" />
-                <span className="whitespace-nowrap">{slotName}</span>
-                {fileCount > 0 && (
-                  <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
-                    {fileCount}
-                  </span>
-                )}
+                <Upload className="w-4 h-4" />
+                <span>Upload Content</span>
               </button>
-            )
-          })}
-        </div>
-
-        {/* File Upload Area */}
-        <div className="border border-border rounded-lg p-4">
-          <Dashboard
-            uppy={uppy}
-            plugins={[]}
-            width="100%"
-            height="400px"
-            proudlyDisplayPoweredByUppy={false}
-          />
-        </div>
-
-        {/* Upload Button */}
-        <div className="flex justify-end space-x-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleUpload}
-            disabled={getTotalFiles() === 0}
-            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-          >
-            <Upload className="w-4 h-4" />
-            <span>Upload Content</span>
-          </button>
+            </div>
+          </div>
         </div>
       </div>
 
