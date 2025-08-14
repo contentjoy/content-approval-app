@@ -4,11 +4,11 @@ import React, { createContext, useContext, useEffect, useState, useCallback, Rea
 import { getGymBySlug, getAgencyBranding } from '@/lib/database'
 
 interface BrandingData {
-  logo: string | null
+  whiteLogo: string | null
+  blackLogo: string | null
   primaryColor: string | null
   agencyName: string | null
   gymName: string | null
-  gymProfileImageUrl: string | null
   gymPrimaryColor: string | null
   isLoading: boolean
   error: string | null
@@ -29,11 +29,11 @@ interface BrandingProviderProps {
 export function BrandingProvider({ children, initialGymSlug }: BrandingProviderProps) {
   const [gymSlug, setGymSlug] = useState<string | null>(initialGymSlug || null)
   const [brandingData, setBrandingData] = useState<BrandingData>({
-    logo: null,
+    whiteLogo: null,
+    blackLogo: null,
     primaryColor: null,
     agencyName: null,
     gymName: null,
-    gymProfileImageUrl: null,
     gymPrimaryColor: null,
     isLoading: false,
     error: null
@@ -134,11 +134,11 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
       }
 
       const newBrandingData: BrandingData = {
-        logo: agency['Logo'],
+        whiteLogo: (gym as any)['White Logo URL'] || null,
+        blackLogo: (gym as any)['Black Logo URL'] || null,
         primaryColor: agency['Primary Color'],
         agencyName: agency['Partner name'],
         gymName: gym['Gym Name'],
-        gymProfileImageUrl: (gym as any)['Profile Image URL'] || null,
         gymPrimaryColor: (gym as any)['Primary color'] || null,
         isLoading: false,
         error: null

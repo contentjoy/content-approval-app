@@ -9,6 +9,7 @@ interface LogoProps {
   className?: string
   fallbackText?: string
   showFallback?: boolean
+  useDarkLogo?: boolean
 }
 
 const sizeClasses = {
@@ -20,35 +21,54 @@ const sizeClasses = {
 
 // textSizes removed as it's unused in current implementation
 
-export function Logo({ 
-  size = 'md', 
-  className = '', 
+export function Logo({
+  size = 'md',
   fallbackText,
-  showFallback = true 
+  showFallback = true,
+  className = '',
+  useDarkLogo = false
 }: LogoProps) {
-  const { logo, agencyName, gymName, isLoading } = useBranding()
-
+  const { whiteLogo, blackLogo, agencyName, gymName, isLoading } = useBranding()
+  
+  // Determine which logo to use based on theme preference
+  const logoSrc = useDarkLogo ? (blackLogo || whiteLogo) : (whiteLogo || blackLogo)
+  
   if (isLoading) {
+    return <div className={`animate-pulse bg-muted rounded ${sizeClasses[size]}`} />
+  }
+
+  if (logoSrc) {
     return (
-      <div className={`${sizeClasses[size]} ${className} animate-pulse bg-bg-elev-1 rounded-lg`} />
+      <img
+        src={logoSrc}
+        alt={agencyName || gymName || 'Agency Logo'}
+        className={`${sizeClasses[size]} ${className}`}
+      />
     )
   }
-  const logoSrc = logo || ''
-  return (
-    <div className={`${sizeClasses[size]} ${className} relative rounded-lg bg-[color:var(--bg-elev-1)] overflow-hidden`}>
-      {logoSrc ? (
-        <Image
-          src={logoSrc}
-          alt={agencyName || gymName || 'Agency Logo'}
-          fill
-          className="object-contain p-1.5"
-          sizes="64px"
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-muted-text">
-          {agencyName?.[0] || 'A'}
-        </div>
-      )}
-    </div>
-  )
+
+  // Fallback: show first letter in a circle with brand color
+  if (showFallback && (agencyName || gymName)) {
+    const displayName = agencyName || gymName
+    const firstLetter = displayName.charAt(0).toUpperCase()
+    
+    return (
+      <div 
+        className={`${sizeClasses[size]} rounded-full flex items-center justify-center font-bold text-white ${className}`}
+        style={{ backgroundColor: 'var(--primary-color, #000000)' }}
+      >
+        {firstLetter}
+      </div>
+    )
+  }
+
+  if (fallbackText) {
+    return (
+      <span className={`font-bold text-foreground ${sizeClasses[size]} ${className}`}>
+        {fallbackText}
+      </span>
+    )
+  }
+
+  return null
 }

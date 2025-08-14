@@ -18,6 +18,9 @@ export interface Gym {
   "Last name": string
   "Status": string
   "passcode"?: string | null
+  "White Logo URL"?: string | null
+  "Black Logo URL"?: string | null
+  "Profile Image URL"?: string | null
   "social_accounts"?: {
     facebook?: { page_id: string; access_token: string; connected_at: string }
     instagram?: { account_id: string; access_token: string; connected_at: string }

@@ -34,7 +34,7 @@ export function PostCard({
   const [isExpanded, setIsExpanded] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
-  const { logo, gymName, gymProfileImageUrl, gymPrimaryColor } = useBranding()
+  const { gymName, gymPrimaryColor } = useBranding()
   const { openModal } = useModalStore()
   const { showToast } = useToast()
   const { downloadMedia, isDownloading } = useDownload()
@@ -147,16 +147,9 @@ export function PostCard({
         {/* Top Section */}
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-2">
-            {gymProfileImageUrl ? (
-              <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={gymProfileImageUrl} alt="profile" className="h-full w-full object-cover" />
-              </div>
-            ) : (
-              <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold" style={{ backgroundColor: gymPrimaryColor || '#94a3b8', color: '#fff' }}>
-                {(post['Gym Name'] || gymName || 'G').charAt(0).toUpperCase()}
-              </div>
-            )}
+            <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style={{ backgroundColor: gymPrimaryColor || '#94a3b8' }}>
+              {(post['Gym Name'] || gymName || 'G').charAt(0).toUpperCase()}
+            </div>
             <span className="text-sm font-semibold text-text">{post['Gym Name'] || gymName || 'Gym'}</span>
           </div>
           <div className="relative" ref={menuRef}>

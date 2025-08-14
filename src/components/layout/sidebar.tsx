@@ -21,7 +21,7 @@ export function Sidebar() {
   const router = useRouter()
   const params = useParams()
   const gymSlug = params.gymSlug as string
-  const { gymName, gymProfileImageUrl, logo, primaryColor, gymPrimaryColor } = useBranding()
+  const { gymName, primaryColor, gymPrimaryColor } = useBranding()
   const { user, logout } = useAuth()
 
   const [lockedExpanded, setLockedExpanded] = useState<boolean>(false)
@@ -89,17 +89,6 @@ export function Sidebar() {
     >
       {/* Top: Gym avatar + name (mobile only) */}
       <div className="pt-4 px-3 flex items-center gap-3 md:hidden">
-        {gymProfileImageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={gymProfileImageUrl} alt="Gym avatar" className="h-6 w-6 rounded-full object-cover border border-border" />
-        ) : (
-          <div
-            className="h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-semibold text-white"
-            style={{ backgroundColor: gymPrimaryColor || primaryColor || '#000000' }}
-          >
-            {(gymName || 'G').charAt(0).toUpperCase()}
-          </div>
-        )}
         {/* Name (mobile only) */}
         <span className="text-sm font-semibold text-foreground">{gymName || 'Gym'}</span>
       </div>
@@ -133,17 +122,12 @@ export function Sidebar() {
           className="w-full flex items-center gap-3 px-3 py-2 text-foreground hover:text-accent transition-colors"
           aria-label="Open profile"
         >
-          {gymProfileImageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={gymProfileImageUrl} alt="Gym logo" className="h-8 w-8 rounded-full object-cover border border-border" />
-          ) : (
-            <div
-              className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold text-white"
-              style={{ backgroundColor: gymPrimaryColor || primaryColor || '#000000' }}
-            >
-              {(gymName || 'G').charAt(0).toUpperCase()}
-            </div>
-          )}
+          <div
+            className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold text-white"
+            style={{ backgroundColor: gymPrimaryColor || primaryColor || '#000000' }}
+          >
+            {(gymName || 'G').charAt(0).toUpperCase()}
+          </div>
           <span className={`text-sm whitespace-nowrap overflow-hidden ${isExpanded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}>
             {gymName || 'Profile'}
           </span>
@@ -158,12 +142,12 @@ export function Sidebar() {
             style={{ left: isExpanded ? undefined : 8 }}
           >
             <div className="flex items-center gap-3 mb-3">
-              {gymProfileImageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={gymProfileImageUrl} alt="Gym logo" className="h-10 w-10 rounded-full object-cover border border-border" />
-              ) : (
-                <div className="h-10 w-10 rounded-full bg-gray-300" />
-              )}
+              <div
+                className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-semibold text-white"
+                style={{ backgroundColor: gymPrimaryColor || primaryColor || '#000000' }}
+              >
+                {(gymName || 'G').charAt(0).toUpperCase()}
+              </div>
               <div>
                 <div className="text-sm font-bold text-text">{gymName || 'Gym'}</div>
                 <div className="text-xs text-muted-text">{user?.gymName || ''}</div>

@@ -2,8 +2,12 @@
 -- This is a comment-only file documenting the required schema changes
 -- Run these SQL commands in your Supabase database:
 
--- 1. Create uploads table to track upload sessions
+-- 1. Add new logo fields to gyms table
 /*
+ALTER TABLE gyms ADD COLUMN IF NOT EXISTS "White Logo URL" TEXT;
+ALTER TABLE gyms ADD COLUMN IF NOT EXISTS "Black Logo URL" TEXT;
+
+-- 2. Create uploads table to track upload sessions
 CREATE TABLE uploads (
   id SERIAL PRIMARY KEY,
   upload_id TEXT UNIQUE NOT NULL,
@@ -17,7 +21,7 @@ CREATE TABLE uploads (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 2. Create upload_slots table to track slot folders
+-- 3. Create upload_slots table to track slot folders
 CREATE TABLE upload_slots (
   id SERIAL PRIMARY KEY,
   upload_id TEXT NOT NULL REFERENCES uploads(upload_id) ON DELETE CASCADE,
@@ -27,7 +31,7 @@ CREATE TABLE upload_slots (
   UNIQUE(upload_id, slot_name)
 );
 
--- 3. Create files table to track uploaded files
+-- 4. Create files table to track uploaded files
 CREATE TABLE files (
   id SERIAL PRIMARY KEY,
   upload_id TEXT NOT NULL REFERENCES uploads(upload_id) ON DELETE CASCADE,
@@ -39,28 +43,28 @@ CREATE TABLE files (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 4. Create indexes for performance
+-- 5. Create indexes for performance
 CREATE INDEX idx_uploads_gym_id ON uploads(gym_id);
 CREATE INDEX idx_upload_slots_upload_id ON upload_slots(upload_id);
 CREATE INDEX idx_files_upload_id ON files(upload_id);
 CREATE INDEX idx_files_slot_name ON files(slot_name);
 
--- 5. Enable Row Level Security (RLS) if needed
+-- 6. Enable Row Level Security (RLS) if needed
 -- ALTER TABLE uploads ENABLE ROW LEVEL SECURITY;
 -- ALTER TABLE upload_slots ENABLE ROW LEVEL SECURITY;
 -- ALTER TABLE files ENABLE ROW LEVEL SECURITY;
 
--- 6. If you need to add the new columns to an existing table, run:
+-- 7. If you need to add the new columns to an existing table, run:
 -- ALTER TABLE uploads ADD COLUMN gym_folder_id TEXT;
 -- ALTER TABLE uploads ADD COLUMN raw_footage_folder_id TEXT;
 -- ALTER TABLE uploads ADD COLUMN final_footage_folder_id TEXT;
 
--- 7. IMPORTANT: If you have existing tables, run these ALTER commands:
+-- 8. IMPORTANT: If you have existing tables, run these ALTER commands:
 -- ALTER TABLE uploads ADD COLUMN IF NOT EXISTS gym_folder_id TEXT;
 -- ALTER TABLE uploads ADD COLUMN IF NOT EXISTS raw_footage_folder_id TEXT;
 -- ALTER TABLE uploads ADD COLUMN IF NOT EXISTS final_footage_folder_id TEXT;
 
--- 8. Update existing records to have placeholder values (if needed):
+-- 9. Update existing records to have placeholder values (if needed):
 -- UPDATE uploads SET 
 --   gym_folder_id = upload_folder_id,
 --   raw_footage_folder_id = upload_folder_id,

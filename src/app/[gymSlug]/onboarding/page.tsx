@@ -46,7 +46,8 @@ interface FormData {
   testimonial: string
   
   // Media
-  profileImageUrl: string
+  whiteLogoUrl: string
+  blackLogoUrl: string
 }
 
 const steps = [
@@ -106,9 +107,9 @@ export default function OnboardingPage() {
     instagramUrl: '',
     socialPlatforms: [],
     cta: '',
-    testimonial: ''
-    ,
-    profileImageUrl: ''
+    testimonial: '',
+    whiteLogoUrl: '',
+    blackLogoUrl: ''
   })
 
   // Load existing data if available
@@ -134,7 +135,8 @@ export default function OnboardingPage() {
             email: gym['Email'] || '',
             businessName: gym['Gym Name'] || '',
             brandColor: gym['Primary color'] || '#000000',
-            profileImageUrl: gym['Profile Image URL'] || ''
+            whiteLogoUrl: (gym as any)['White Logo URL'] || '',
+            blackLogoUrl: (gym as any)['Black Logo URL'] || ''
           }))
         }
       }
@@ -197,7 +199,8 @@ export default function OnboardingPage() {
           'Social Platforms': formData.socialPlatforms,
           'Primary offer': formData.cta,
           'Client Info': formData.testimonial,
-          'Profile Image URL': formData.profileImageUrl,
+          'White Logo URL': formData.whiteLogoUrl,
+          'Black Logo URL': formData.blackLogoUrl,
           'Status': 'active'
         })
         .eq('id', gymId)
@@ -244,7 +247,8 @@ export default function OnboardingPage() {
         },
         
         media: {
-          profile_image_url: formData.profileImageUrl
+          white_logo_url: formData.whiteLogoUrl,
+          black_logo_url: formData.blackLogoUrl
         },
         
         // Metadata
@@ -443,13 +447,29 @@ export default function OnboardingPage() {
       case 2:
         return (
           <div className="space-y-6">
-            {/* Profile Image Upload */}
+            {/* Logo Uploads */}
             <div>
-              <label className="block text-sm font-medium text-text mb-2">Profile Image</label>
-              <ProfileImageUploader
-                currentUrl={formData.profileImageUrl}
-                onUploaded={(url) => updateFormData('profileImageUrl', url)}
+              <label className="block text-sm font-medium text-text mb-2">Upload White Logo</label>
+              <LogoUploader
+                currentUrl={formData.whiteLogoUrl}
+                onUploaded={(url) => updateFormData('whiteLogoUrl', url)}
+                logoType="white"
+                gymName={gymSlug}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text mb-2">Upload Black Logo</label>
+              <LogoUploader
+                currentUrl={formData.blackLogoUrl}
+                onUploaded={(url) => updateFormData('blackLogoUrl', url)}
+                logoType="black"
+                gymName={gymSlug}
+              />
+            </div>
+
+            <div className="text-sm text-text-secondary bg-card-bg p-4 rounded-lg border border-card-border">
+              <p>Upload the transparent black and white logo for your business that will appear in your social media posts.</p>
             </div>
 
             <div>
@@ -719,8 +739,18 @@ export default function OnboardingPage() {
   )
 }
 
-// Simple uploader that saves a file to Supabase Storage and returns a public URL
-function ProfileImageUploader({ currentUrl, onUploaded }: { currentUrl: string; onUploaded: (url: string) => void }) {
+// Logo uploader that saves files to Google Drive and returns URLs
+function LogoUploader({ 
+  currentUrl, 
+  onUploaded, 
+  logoType, 
+  gymName 
+}: { 
+  currentUrl: string; 
+  onUploaded: (url: string) => void; 
+  logoType: 'white' | 'black'; 
+  gymName: string;
+}) {
   const [dragOver, setDragOver] = useState(false)
   const [uploading, setUploading] = useState(false)
 
@@ -728,24 +758,41 @@ function ProfileImageUploader({ currentUrl, onUploaded }: { currentUrl: string; 
     if (!file) return
     setUploading(true)
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `profile_${Date.now()}.${fileExt}`
-      const filePath = `${fileName}`
-
-      // Use a dedicated bucket named "profile-images"
-      const { error: uploadError } = await supabase.storage.from('profile-images').upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true,
-        contentType: file.type,
+      // Upload to Google Drive using the new logo API
+      const response = await fetch('/api/upload-logos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          files: [{
+            name: `${gymName} - ${logoType} logo`,
+            type: file.type,
+            size: file.size,
+            data: await file.arrayBuffer().then(buffer => Buffer.from(buffer).toString('base64')),
+            isLogo: true,
+            logoType,
+            gymName
+          }],
+          gymSlug: gymName,
+          gymName: gymName
+        })
       })
-      if (uploadError) throw uploadError
 
-      const { data: publicUrlData } = supabase.storage.from('profile-images').getPublicUrl(filePath)
-      const url = publicUrlData.publicUrl
-      onUploaded(url)
+      if (!response.ok) {
+        throw new Error('Failed to upload logo')
+      }
+
+      const result = await response.json()
+      if (result.results && result.results[0]?.fileId) {
+        // For now, we'll use the file ID as the URL since we need to construct the Google Drive URL
+        // In a real implementation, you might want to store the actual Google Drive URL
+        const logoUrl = `https://drive.google.com/file/d/${result.results[0].fileId}/view`
+        onUploaded(logoUrl)
+      } else {
+        throw new Error('No file ID returned from upload')
+      }
     } catch (e: any) {
-      console.error('Supabase upload failed:', e)
-      alert(`Failed to upload image: ${e?.message || 'Please try again.'}`)
+      console.error('Logo upload failed:', e)
+      alert(`Failed to upload logo: ${e?.message || 'Please try again.'}`)
     } finally {
       setUploading(false)
       setDragOver(false)
@@ -762,8 +809,8 @@ function ProfileImageUploader({ currentUrl, onUploaded }: { currentUrl: string; 
     <div>
       {currentUrl && (
         <div className="mb-3 flex items-center space-x-3">
-          <img src={currentUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover border border-card-border" />
-          <span className="text-sm text-text-secondary">Current profile image</span>
+          <img src={currentUrl} alt={`${logoType} logo`} className="w-16 h-16 rounded-lg object-contain border border-card-border bg-white" />
+          <span className="text-sm text-text-secondary">Current {logoType} logo</span>
         </div>
       )}
       <div
@@ -772,7 +819,7 @@ function ProfileImageUploader({ currentUrl, onUploaded }: { currentUrl: string; 
         onDrop={onDrop}
         className={`border-2 ${dragOver ? 'border-primary' : 'border-dashed border-card-border'} rounded-lg p-4 text-center bg-card-bg`}
       >
-        <p className="text-sm text-text mb-2">Drag and drop an image here, or</p>
+        <p className="text-sm text-text mb-2">Drag and drop a {logoType} logo here, or</p>
         <label className="inline-block">
           <span className="px-3 py-2 rounded-lg bg-primary text-white cursor-pointer">Choose file</span>
           <input

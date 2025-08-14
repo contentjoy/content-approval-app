@@ -17,7 +17,7 @@ import { useAuth } from '@/contexts/auth-context'
 import SettingsModal from '@/components/modals/settings-modal'
 
 export function Header() {
-  const { gymName, isLoading, gymProfileImageUrl } = useBranding()
+  const { gymName, isLoading } = useBranding()
   const { user } = useAuth()
   const params = useParams()
   const pathname = usePathname()
@@ -91,16 +91,12 @@ export function Header() {
             <button
               onClick={() => setProfileOpen(v => !v)}
               aria-label="Open account menu"
-              className="h-[28px] w-[28px] rounded-full overflow-hidden flex items-center justify-center bg-[var(--background)] text-[var(--text)] border border-[var(--border)]"
+              className="h-[28px] w-[28px] rounded-full overflow-hidden flex items-center justify-center text-white border border-[var(--border)]"
+              style={{ backgroundColor: 'var(--primary-color, #000000)' }}
             >
-              {gymProfileImageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={gymProfileImageUrl} alt="profile" className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-lg font-bold leading-none">
-                  {(user?.gymName || gymName || 'G').charAt(0).toUpperCase()}
-                </span>
-              )}
+              <span className="text-sm font-bold leading-none">
+                {(user?.gymName || gymName || 'G').charAt(0).toUpperCase()}
+              </span>
             </button>
             <div className="absolute right-0">
               <PopoutMenu
