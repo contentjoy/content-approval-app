@@ -1,45 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { google } from 'googleapis';
 import { supabase } from '@/lib/supabase';
-import { uploadFileDirectly, getDrive } from '@/lib/googleDrive';
+import { getDrive } from '@/lib/googleDrive';
+import { PassThrough } from 'stream';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max
-
-// Google Service Account configuration
-function getAuth() {
-  try {
-    const credentialsJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
-    if (!credentialsJson) {
-      throw new Error('GOOGLE_APPLICATION_CREDENTIALS_JSON not configured');
-    }
-
-    const credentials = JSON.parse(credentialsJson);
-    
-    // Handle escaped newlines in private key
-    if (credentials.private_key) {
-      credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
-    }
-
-    // Validate PEM format
-    if (!credentials.private_key || !credentials.private_key.includes('-----BEGIN PRIVATE KEY-----')) {
-      throw new Error('Invalid private key format');
-    }
-
-    console.log('✅ Google credentials loaded successfully');
-    
-    // Create JWT for service account
-    const jwt = new google.auth.JWT();
-    jwt.fromJSON(credentials);
-    jwt.scopes = ['https://www.googleapis.com/auth/drive'];
-    
-    return jwt;
-  } catch (error) {
-    console.error('❌ Failed to load Google credentials:', error);
-    throw error;
-  }
-}
-
 
 
 export async function POST(req: NextRequest) {
@@ -105,7 +70,6 @@ export async function POST(req: NextRequest) {
         
         try {
           // Try multipart upload with fixed PassThrough stream
-          const { PassThrough } = require('stream');
           const fileMetadata = {
             name: file.name,
             parents: [targetFolderId],

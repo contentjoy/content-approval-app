@@ -188,6 +188,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         try {
           console.log(`📤 Uploading ${file.name}...`)
           
+          // TEMPORARILY DISABLED - Using the working upload-to-drive API instead
+          /*
           // Call the existing working upload route with proper typing
           const uploadUrl = `/api/uploads/${gymId as string}/slots/Photos/upload?filename=${encodeURIComponent(file.name)}&mime=${encodeURIComponent(file.type)}&sizeBytes=${file.size}`
           
@@ -208,6 +210,39 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             name: file.name,
             success: true,
             fileId: result.driveFileId
+          })
+          */
+          
+          // TEMPORARY: Use the working upload-to-drive API
+          const filesForUpload = [{
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            data: await file.data.arrayBuffer().then(buffer => Buffer.from(buffer).toString('base64'))
+          }]
+          
+          const response = await fetch('/api/upload-to-drive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              files: filesForUpload,
+              gymSlug,
+              gymName: brandingGymName || userGymName
+            })
+          })
+          
+          if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || `Upload failed: ${response.status}`)
+          }
+          
+          const result = await response.json()
+          console.log(`✅ File uploaded successfully: ${file.name}`)
+          
+          uploadResults.push({
+            name: file.name,
+            success: true,
+            fileId: result.results[0]?.fileId || 'unknown'
           })
           
         } catch (error) {
