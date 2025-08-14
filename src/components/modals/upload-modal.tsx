@@ -24,10 +24,10 @@ const SLOT_NAMES = ['Photos', 'Videos', 'Facility Photos', 'Facility Videos'] as
 type SlotName = typeof SLOT_NAMES[number]
 
 const SLOT_CONFIG = {
-  'Photos': { icon: Image, maxFiles: 10, allowedTypes: ['.jpg', '.jpeg', '.png', '.gif', '.webp'] },
-  'Videos': { icon: Video, maxFiles: 5, allowedTypes: ['.mp4', '.mov', '.avi', '.mkv', '.webm'] },
-  'Facility Photos': { icon: Building2, maxFiles: 8, allowedTypes: ['.jpg', '.jpeg', '.png', '.gif', '.webp'] },
-  'Facility Videos': { icon: Camera, maxFiles: 3, allowedTypes: ['.mp4', '.mov', '.avi', '.mkv', '.webm'] }
+  'Photos': { icon: Image, maxFiles: 50, allowedTypes: ['.jpg', '.jpeg', '.png', '.gif', '.webp'] },
+  'Videos': { icon: Video, maxFiles: 30, allowedTypes: ['.mp4', '.mov', '.avi', '.mkv', '.webm'] },
+  'Facility Photos': { icon: Building2, maxFiles: 40, allowedTypes: ['.jpg', '.jpeg', '.png', '.gif', '.webp'] },
+  'Facility Videos': { icon: Camera, maxFiles: 20, allowedTypes: ['.mp4', '.mov', '.avi', '.mkv', '.webm'] }
 }
 
 export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
@@ -51,8 +51,11 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         restrictions: {
           maxFileSize: 50 * 1024 * 1024, // 50MB
           allowedFileTypes: SLOT_CONFIG[slotName].allowedTypes,
-          maxNumberOfFiles: SLOT_CONFIG[slotName].maxFiles
-        }
+          maxNumberOfFiles: SLOT_CONFIG[slotName].maxFiles, // Use SLOT_CONFIG values
+          minNumberOfFiles: 1
+        },
+        autoProceed: false,
+        allowMultipleUploadBatches: true
       })
     })
     return instances
