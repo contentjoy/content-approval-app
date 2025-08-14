@@ -50,16 +50,18 @@ export function Logo({
   // Fallback: show first letter in a circle with brand color
   if (showFallback && (agencyName || gymName)) {
     const displayName = agencyName || gymName
-    const firstLetter = displayName.charAt(0).toUpperCase()
-    
-    return (
-      <div 
-        className={`${sizeClasses[size]} rounded-full flex items-center justify-center font-bold text-white ${className}`}
-        style={{ backgroundColor: 'var(--primary-color, #000000)' }}
-      >
-        {firstLetter}
-      </div>
-    )
+    if (displayName) {
+      const firstLetter = displayName.charAt(0).toUpperCase()
+      
+      return (
+        <div 
+          className={`${sizeClasses[size]} rounded-full flex items-center justify-center font-bold text-white ${className}`}
+          style={{ backgroundColor: 'var(--primary-color, #000000)' }}
+        >
+          {firstLetter}
+        </div>
+      )
+    }
   }
 
   if (fallbackText) {
