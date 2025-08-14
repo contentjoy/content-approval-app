@@ -45,7 +45,9 @@ interface FormData {
   cta: string
   testimonial: string
   
-  // Media
+  // Media - now store File objects locally
+  whiteLogoFile: File | null
+  blackLogoFile: File | null
   whiteLogoUrl: string
   blackLogoUrl: string
 }
@@ -108,6 +110,8 @@ export default function OnboardingPage() {
     socialPlatforms: [],
     cta: '',
     testimonial: '',
+    whiteLogoFile: null,
+    blackLogoFile: null,
     whiteLogoUrl: '',
     blackLogoUrl: ''
   })
@@ -145,7 +149,7 @@ export default function OnboardingPage() {
     loadGymData()
   }, [])
 
-  const updateFormData = (field: keyof FormData, value: string | string[]) => {
+  const updateFormData = (field: keyof FormData, value: string | string[] | File | null) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -207,6 +211,97 @@ export default function OnboardingPage() {
 
       if (updateError) throw updateError
 
+      // Upload logos to Google Drive if files were selected
+      let whiteLogoUrl = formData.whiteLogoUrl
+      let blackLogoUrl = formData.blackLogoUrl
+
+      if (formData.whiteLogoFile || formData.blackLogoFile) {
+        console.log('📤 Uploading logos to Google Drive...')
+        
+        try {
+          // Upload white logo if selected
+          if (formData.whiteLogoFile) {
+            const whiteLogoResponse = await fetch('/api/upload-logos', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                files: [{
+                  name: `${gymSlug} - white logo`,
+                  type: formData.whiteLogoFile.type,
+                  size: formData.whiteLogoFile.size,
+                  data: await formData.whiteLogoFile.arrayBuffer().then(buffer => Buffer.from(buffer).toString('base64')),
+                  isLogo: true,
+                  logoType: 'white',
+                  gymName: gymSlug
+                }],
+                gymSlug: gymSlug,
+                gymName: gymSlug
+              })
+            })
+
+            if (whiteLogoResponse.ok) {
+              const result = await whiteLogoResponse.json()
+              if (result.results && result.results[0]?.fileId) {
+                whiteLogoUrl = `https://drive.google.com/file/d/${result.results[0].fileId}/view`
+                console.log('✅ White logo uploaded successfully')
+              }
+            } else {
+              console.warn('⚠️ White logo upload failed, using existing URL')
+            }
+          }
+
+          // Upload black logo if selected
+          if (formData.blackLogoFile) {
+            const blackLogoResponse = await fetch('/api/upload-logos', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                files: [{
+                  name: `${gymSlug} - black logo`,
+                  type: formData.blackLogoFile.type,
+                  size: formData.blackLogoFile.size,
+                  data: await formData.blackLogoFile.arrayBuffer().then(buffer => Buffer.from(buffer).toString('base64')),
+                  isLogo: true,
+                  logoType: 'black',
+                  gymName: gymSlug
+                }],
+                gymSlug: gymSlug,
+                gymName: gymSlug
+              })
+            })
+
+            if (blackLogoResponse.ok) {
+              const result = await blackLogoResponse.json()
+              if (result.results && result.results[0]?.fileId) {
+                blackLogoUrl = `https://drive.google.com/file/d/${result.results[0].fileId}/view`
+                console.log('✅ Black logo uploaded successfully')
+              }
+            } else {
+              console.warn('⚠️ Black logo upload failed, using existing URL')
+            }
+          }
+
+          // Update the database with the new logo URLs if they changed
+          if (whiteLogoUrl !== formData.whiteLogoUrl || blackLogoUrl !== formData.blackLogoUrl) {
+            const { error: logoUpdateError } = await supabase
+              .from('gyms')
+              .update({
+                'White Logo URL': whiteLogoUrl,
+                'Black Logo URL': blackLogoUrl
+              })
+              .eq('id', gymId)
+
+            if (logoUpdateError) {
+              console.warn('⚠️ Failed to update logo URLs in database:', logoUpdateError)
+            }
+          }
+
+        } catch (logoError) {
+          console.error('❌ Logo upload error:', logoError)
+          // Don't fail the onboarding if logo upload fails, just log the error
+        }
+      }
+
       // Send data to onboarding webhook with gym name and email
       const webhookData = {
         // Gym identification
@@ -247,8 +342,8 @@ export default function OnboardingPage() {
         },
         
         media: {
-          white_logo_url: formData.whiteLogoUrl,
-          black_logo_url: formData.blackLogoUrl
+          white_logo_url: whiteLogoUrl,
+          black_logo_url: blackLogoUrl
         },
         
         // Metadata
@@ -452,7 +547,7 @@ export default function OnboardingPage() {
               <label className="block text-sm font-medium text-text mb-2">Upload White Logo</label>
               <LogoUploader
                 currentUrl={formData.whiteLogoUrl}
-                onUploaded={(url) => updateFormData('whiteLogoUrl', url)}
+                onFileSelected={(file, logoType) => updateFormData('whiteLogoFile', file)}
                 logoType="white"
                 gymName={gymSlug}
               />
@@ -462,7 +557,7 @@ export default function OnboardingPage() {
               <label className="block text-sm font-medium text-text mb-2">Upload Black Logo</label>
               <LogoUploader
                 currentUrl={formData.blackLogoUrl}
-                onUploaded={(url) => updateFormData('blackLogoUrl', url)}
+                onFileSelected={(file, logoType) => updateFormData('blackLogoFile', file)}
                 logoType="black"
                 gymName={gymSlug}
               />
@@ -739,78 +834,78 @@ export default function OnboardingPage() {
   )
 }
 
-// Logo uploader that saves files to Google Drive and returns URLs
+// Logo uploader that stores files locally for later upload
 function LogoUploader({ 
   currentUrl, 
-  onUploaded, 
+  onFileSelected, 
   logoType, 
   gymName 
 }: { 
   currentUrl: string; 
-  onUploaded: (url: string) => void; 
+  onFileSelected: (file: File, logoType: 'white' | 'black') => void; 
   logoType: 'white' | 'black'; 
   gymName: string;
 }) {
   const [dragOver, setDragOver] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
-  const handleFiles = async (file: File) => {
+  const handleFiles = (file: File) => {
     if (!file) return
-    setUploading(true)
-    try {
-      // Upload to Google Drive using the new logo API
-      const response = await fetch('/api/upload-logos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          files: [{
-            name: `${gymName} - ${logoType} logo`,
-            type: file.type,
-            size: file.size,
-            data: await file.arrayBuffer().then(buffer => Buffer.from(buffer).toString('base64')),
-            isLogo: true,
-            logoType,
-            gymName
-          }],
-          gymSlug: gymName,
-          gymName: gymName
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to upload logo')
-      }
-
-      const result = await response.json()
-      if (result.results && result.results[0]?.fileId) {
-        // For now, we'll use the file ID as the URL since we need to construct the Google Drive URL
-        // In a real implementation, you might want to store the actual Google Drive URL
-        const logoUrl = `https://drive.google.com/file/d/${result.results[0].fileId}/view`
-        onUploaded(logoUrl)
-      } else {
-        throw new Error('No file ID returned from upload')
-      }
-    } catch (e: any) {
-      console.error('Logo upload failed:', e)
-      alert(`Failed to upload logo: ${e?.message || 'Please try again.'}`)
-    } finally {
-      setUploading(false)
-      setDragOver(false)
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file')
+      return
     }
+    
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB')
+      return
+    }
+    
+    setSelectedFile(file)
+    onFileSelected(file, logoType)
   }
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     const file = e.dataTransfer.files?.[0]
-    if (file) void handleFiles(file)
+    if (file) handleFiles(file)
+  }
+
+  const removeFile = () => {
+    setSelectedFile(null)
+    onFileSelected(null as any, logoType)
   }
 
   return (
     <div>
-      {currentUrl && (
+      {(currentUrl || selectedFile) && (
         <div className="mb-3 flex items-center space-x-3">
-          <img src={currentUrl} alt={`${logoType} logo`} className="w-16 h-16 rounded-lg object-contain border border-card-border bg-white" />
-          <span className="text-sm text-text-secondary">Current {logoType} logo</span>
+          <img 
+            src={selectedFile ? URL.createObjectURL(selectedFile) : currentUrl} 
+            alt={`${logoType} logo`} 
+            className="w-16 h-16 rounded-lg object-contain border border-card-border bg-white" 
+          />
+          <div className="flex-1">
+            <span className="text-sm text-text-secondary block">
+              {selectedFile ? 'Selected' : 'Current'} {logoType} logo
+            </span>
+            {selectedFile && (
+              <span className="text-xs text-text-secondary block">
+                {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)}MB)
+              </span>
+            )}
+          </div>
+          {selectedFile && (
+            <button
+              onClick={removeFile}
+              className="text-red-500 hover:text-red-700 text-sm"
+            >
+              Remove
+            </button>
+          )}
         </div>
       )}
       <div
@@ -828,11 +923,11 @@ function LogoUploader({
             className="hidden"
             onChange={(e) => {
               const file = e.target.files?.[0]
-              if (file) void handleFiles(file)
+              if (file) handleFiles(file)
             }}
           />
         </label>
-        {uploading && <p className="text-xs text-text-secondary mt-2">Uploading…</p>}
+        <p className="text-xs text-text-secondary mt-2">PNG, JPG, GIF up to 10MB</p>
       </div>
     </div>
   )
