@@ -547,14 +547,14 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} title="Upload Content">
-        <div className="space-y-8">
-          {/* Content Layout - Much better desktop spacing */}
-          <div className="grid grid-cols-1 2xl:grid-cols-6 gap-10">
-            {/* Slot Selector - Better proportions on desktop */}
-            <div className="2xl:col-span-2 space-y-6">
-              <h3 className="font-semibold text-foreground text-xl">Content Types</h3>
-              <div className="space-y-4">
+      <Modal isOpen={isOpen} onClose={onClose} title="Upload Content" size="xl">
+        <div className="space-y-6 sm:space-y-8">
+          {/* Content Layout - Responsive grid that works on all screen sizes */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 sm:gap-6 lg:gap-8">
+            {/* Slot Selector - Responsive proportions */}
+            <div className="lg:col-span-1 xl:col-span-1 2xl:col-span-2 space-y-4 sm:space-y-6">
+              <h3 className="font-semibold text-foreground text-lg sm:text-xl">Content Types</h3>
+              <div className="space-y-3 sm:space-y-4">
                 {SLOT_NAMES.map((slotName) => {
                   const config = SLOT_CONFIG[slotName]
                   const Icon = config.icon
@@ -565,23 +565,23 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                     <button
                       key={slotName}
                       onClick={() => setActiveSlot(slotName as SlotName)}
-                      className={`w-full p-5 rounded-xl border-2 transition-all duration-300 text-left hover:scale-[1.02] ${
+                      className={`w-full p-3 sm:p-4 lg:p-5 rounded-xl border-2 transition-all duration-300 text-left hover:scale-[1.02] ${
                         isActive 
                           ? 'border-primary bg-primary/10 shadow-xl' 
                           : 'border-border hover:border-primary/50 hover:bg-muted/50'
                       }`}
                     >
-                      <div className="flex items-center space-x-4">
-                        <Icon className={`w-7 h-7 ${
+                      <div className="flex items-center space-x-3 sm:space-x-4">
+                        <Icon className={`w-6 h-6 sm:w-7 sm:h-7 ${
                           isActive ? 'text-primary' : 'text-muted-foreground'
                         }`} />
                         <div className="flex-1 min-w-0">
-                          <div className={`font-semibold text-lg ${
+                          <div className={`font-semibold text-base sm:text-lg ${
                             isActive ? 'text-foreground' : 'text-foreground/80'
                           }`}>
                             {slotName}
                           </div>
-                          <div className="text-sm text-muted-foreground mt-2">
+                          <div className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">
                             {fileCount} files selected
                           </div>
                           <div className="text-xs text-muted-foreground mt-1">
@@ -595,17 +595,17 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               </div>
             </div>
             
-            {/* Upload Area - Much more spacious on desktop */}
-            <div className="2xl:col-span-4 space-y-8">
+            {/* Upload Area - Responsive sizing */}
+            <div className="lg:col-span-2 xl:col-span-3 2xl:col-span-4 space-y-6 sm:space-y-8">
               <div>
-                <h3 className="text-2xl font-semibold text-foreground mb-3">{activeSlot}</h3>
-                <p className="text-muted-foreground text-lg">
+                <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-2 sm:mb-3">{activeSlot}</h3>
+                <p className="text-sm sm:text-base lg:text-lg text-muted-foreground">
                   Upload {activeSlot.toLowerCase()} for your content library
                 </p>
               </div>
               
-              {/* Upload Zone - Larger and more prominent */}
-              <div className="border-2 border-dashed border-muted-foreground/30 rounded-2xl p-10 text-center hover:border-primary/50 transition-colors">
+              {/* Upload Zone - Responsive sizing */}
+              <div className="border-2 border-dashed border-muted-foreground/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 xl:p-10 text-center hover:border-primary/50 transition-colors">
                 {/* Custom CSS to override Uppy Dashboard styling */}
                 <style jsx>{`
                   .uppy-Dashboard-inner {
@@ -645,7 +645,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                   uppy={activeUppy}
                   plugins={['Webcam']}
                   width="100%"
-                  height="400px"
+                  height="300px"
                   proudlyDisplayPoweredByUppy={false}
                   showProgressDetails={false}
                   showRemoveButtonAfterComplete={false}
@@ -657,20 +657,17 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               </div>
               
               {/* File Info */}
-              <div className="text-sm text-muted-foreground text-center">
+              <div className="text-xs sm:text-sm text-muted-foreground text-center">
                 Accepted file types: {SLOT_CONFIG[activeSlot]?.allowedTypes.join(', ')}. Maximum size: 50MB.
               </div>
-              
-              {/* Upload Progress - Removed since modal closes quickly */}
-              {/* Progress is now shown in toast notifications */}
             </div>
           </div>
           
-          {/* Action Buttons - Better spacing */}
-          <div className="flex justify-end space-x-4 pt-6 border-t">
+          {/* Action Buttons - Responsive spacing */}
+          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 border-t">
             <button
               onClick={onClose}
-              className="px-8 py-3 rounded-xl border border-border hover:bg-muted transition-colors font-medium"
+              className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 rounded-xl border border-border hover:bg-muted transition-colors font-medium"
               disabled={isUploading}
             >
               Cancel
@@ -678,7 +675,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             <button
               onClick={handleUpload}
               disabled={Object.values(uppyInstances).every(uppy => uppy.getFiles().length === 0) || isUploading}
-              className={`px-10 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-3 ${
+              className={`w-full sm:w-auto px-6 sm:px-10 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-3 ${
                 Object.values(uppyInstances).every(uppy => uppy.getFiles().length === 0) || isUploading
                   ? 'bg-muted text-muted-foreground cursor-not-allowed'
                   : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl'
@@ -686,12 +683,12 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             >
               {isUploading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                   <span>Uploading...</span>
                 </>
               ) : (
                 <>
-                  <ArrowUp className="w-5 h-5" />
+                  <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>Upload Content</span>
                 </>
               )}
