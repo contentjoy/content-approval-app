@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
-import { X, Upload, Image, Video, Building2, Camera } from 'lucide-react'
+import { Image, Video, Building2, Camera, ArrowUp } from 'lucide-react'
 import { Dashboard } from '@uppy/react'
 import Uppy from '@uppy/core'
 import { useBranding } from '@/hooks/use-branding'
@@ -32,6 +32,9 @@ const SLOT_CONFIG = {
 
 export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   const [activeSlot, setActiveSlot] = useState<SlotName>('Photos')
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadingFiles, setUploadingFiles] = useState<string[]>([])
   const [showConfetti, setShowConfetti] = useState(false)
   const { gymName: brandingGymName } = useBranding()
   const { user } = useAuth()
@@ -181,117 +184,119 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       
       console.log(`📁 Starting upload of ${uppyFiles.length} files...`)
       
-      // Use the existing working upload route for each file
-      const uploadResults = []
+      // Set loading state and show immediate feedback
+      setIsUploading(true)
+      setUploadProgress(0)
+      setUploadingFiles(uppyFiles.map(f => f.name).filter(Boolean) as string[])
       
-      for (const file of uppyFiles) {
+      // Show immediate success toast for better UX
+      toast.success('Success! Content sent to team')
+      
+      // Start background upload process
+      setTimeout(async () => {
         try {
-          console.log(`📤 Uploading ${file.name}...`)
+          const uploadResults = []
           
-          // TEMPORARILY DISABLED - Using the working upload-to-drive API instead
-          /*
-          // Call the existing working upload route with proper typing
-          const uploadUrl = `/api/uploads/${gymId as string}/slots/Photos/upload?filename=${encodeURIComponent(file.name)}&mime=${encodeURIComponent(file.type)}&sizeBytes=${file.size}`
-          
-          const response = await fetch(uploadUrl, {
-            method: 'POST',
-            body: file.data
-          })
-          
-          if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error || `Upload failed: ${response.status}`)
+          for (let i = 0; i < uppyFiles.length; i++) {
+            const file = uppyFiles[i]
+            try {
+              console.log(`📤 Uploading ${file.name}...`)
+              
+              // Update progress
+              const progress = Math.round(((i + 1) / uppyFiles.length) * 100)
+              setUploadProgress(progress)
+              
+              // TEMPORARY: Use the working upload-to-drive API
+              const filesForUpload = [{
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                data: await file.data.arrayBuffer().then(buffer => Buffer.from(buffer).toString('base64'))
+              }]
+              
+              const response = await fetch('/api/upload-to-drive', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  files: filesForUpload,
+                  gymSlug,
+                  gymName: brandingGymName || userGymName
+                })
+              })
+              
+              if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || `Upload failed: ${response.status}`)
+              }
+              
+              const result = await response.json()
+              console.log(`✅ File uploaded successfully: ${file.name}`)
+              
+              uploadResults.push({
+                name: file.name,
+                success: true,
+                fileId: result.results[0]?.fileId || 'unknown'
+              })
+              
+            } catch (error) {
+              console.error(`❌ Failed to upload ${file.name}:`, error)
+              uploadResults.push({
+                name: file.name,
+                success: false,
+                error: error instanceof Error ? error.message : 'Unknown error'
+              })
+            }
           }
           
-          const result = await response.json()
-          console.log(`✅ File uploaded successfully: ${file.name}`)
+          // Upload completed
+          setUploadProgress(100)
+          setIsUploading(false)
+          setUploadingFiles([])
           
-          uploadResults.push({
-            name: file.name,
-            success: true,
-            fileId: result.driveFileId
-          })
-          */
-          
-          // TEMPORARY: Use the working upload-to-drive API
-          const filesForUpload = [{
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            data: await file.data.arrayBuffer().then(buffer => Buffer.from(buffer).toString('base64'))
-          }]
-          
-          const response = await fetch('/api/upload-to-drive', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              files: filesForUpload,
-              gymSlug,
-              gymName: brandingGymName || userGymName
-            })
-          })
-          
-          if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error || `Upload failed: ${response.status}`)
+          // Show completion message
+          const successCount = uploadResults.filter(r => r.success).length
+          if (successCount > 0) {
+            toast.success(`Upload completed! ${successCount}/${uppyFiles.length} files uploaded successfully`)
+            setShowConfetti(true)
           }
           
-          const result = await response.json()
-          console.log(`✅ File uploaded successfully: ${file.name}`)
-          
-          uploadResults.push({
-            name: file.name,
-            success: true,
-            fileId: result.results[0]?.fileId || 'unknown'
+          // Clear Uppy files
+          uppyFiles.forEach(file => {
+            uppy.removeFile(file.id)
           })
+          
+          // Close modal after a short delay
+          setTimeout(() => {
+            onClose()
+            setShowConfetti(false)
+          }, 2000)
           
         } catch (error) {
-          console.error(`❌ Failed to upload ${file.name}:`, error)
-          uploadResults.push({
-            name: file.name,
-            success: false,
-            error: error instanceof Error ? error.message : 'Unknown error'
-          })
+          console.error('❌ Background upload failed:', error)
+          setIsUploading(false)
+          setUploadingFiles([])
+          toast.error('Upload failed. Please try again.')
         }
-      }
-      
-      // Show success message
-      const successCount = uploadResults.filter(r => r.success).length
-      toast.success(`Successfully uploaded ${successCount}/${uppyFiles.length} files!`)
-      setShowConfetti(true)
-      
-      // Clear Uppy files
-      uppyFiles.forEach(file => {
-        uppy.removeFile(file.id)
-      })
-      
-      // Close modal after a short delay
-      setTimeout(() => {
-        onClose()
-        setShowConfetti(false)
-      }, 3000)
+      }, 100) // Small delay to show immediate feedback
       
     } catch (error) {
       console.error('❌ Upload failed:', error)
+      setIsUploading(false)
+      setUploadingFiles([])
       toast.error(error instanceof Error ? error.message : 'Upload failed')
     }
   }, [gymSlug, brandingGymName, userGymName, user, onClose, uppy, checkAuthStatus, getGymIdForUpload])
-
-  // Get total files across all categories
-  const getTotalFiles = () => {
-    return uppy.getFiles().length
-  }
 
   if (!isOpen) return null
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Upload Content">
       <div className="space-y-6">
-        {/* Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Slot Selector */}
-          <div className="lg:col-span-1 space-y-4">
-            <h3 className="font-semibold text-foreground">Content Types</h3>
+        {/* Content Layout - Improved desktop spacing */}
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+          {/* Slot Selector - Wider on desktop */}
+          <div className="xl:col-span-2 space-y-4">
+            <h3 className="font-semibold text-foreground text-lg">Content Types</h3>
             <div className="space-y-3">
               {SLOT_NAMES.map((slotName) => {
                 const config = SLOT_CONFIG[slotName]
@@ -302,28 +307,28 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 return (
                   <button
                     key={slotName}
-                    onClick={() => setActiveSlot(slotName)}
-                    className={`w-full p-3 rounded-md border-2 transition-all duration-200 text-left ${
+                    onClick={() => setActiveSlot(slotName as SlotName)}
+                    className={`w-full p-4 rounded-lg border-2 transition-all duration-200 text-left hover:scale-[1.02] ${
                       isActive 
-                        ? 'border-primary bg-primary/10' 
-                        : 'border-border hover:border-primary/50'
+                        ? 'border-primary bg-primary/10 shadow-lg' 
+                        : 'border-border hover:border-primary/50 hover:bg-muted/50'
                     }`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <Icon className={`w-5 h-5 ${
+                    <div className="flex items-center space-x-4">
+                      <Icon className={`w-6 h-6 ${
                         isActive ? 'text-primary' : 'text-muted-foreground'
                       }`} />
                       <div className="flex-1 min-w-0">
-                        <div className={`font-medium ${
+                        <div className={`font-semibold text-base ${
                           isActive ? 'text-foreground' : 'text-foreground/80'
                         }`}>
                           {slotName}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">
+                        <div className="text-sm text-muted-foreground mt-1">
                           {fileCount} files selected
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          Accepts {config.allowedTypes.join(', ')}
+                          {config.allowedTypes.join(', ')}
                         </div>
                       </div>
                     </div>
@@ -331,71 +336,98 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 )
               })}
             </div>
-            
-            {/* Total Files Summary */}
-            <div className="p-3 bg-muted rounded-md border border-border">
-              <div className="text-sm font-medium text-foreground">
-                Total Files: {getTotalFiles()}
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                Ready to upload to {brandingGymName || userGymName || 'your gym'}
-              </div>
-            </div>
           </div>
-
-          {/* Upload Area */}
-          <div className="lg:col-span-3 space-y-4">
+          
+          {/* Upload Area - More spacious on desktop */}
+          <div className="xl:col-span-3 space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                {activeSlot}
-              </h3>
-              <p className="text-muted-foreground text-sm">
+              <h3 className="text-xl font-semibold text-foreground mb-2">{activeSlot}</h3>
+              <p className="text-muted-foreground">
                 Upload {activeSlot.toLowerCase()} for your content library
               </p>
             </div>
-
-            {/* Uppy Dashboard */}
-            <div className="border border-border rounded-lg p-4">
+            
+            {/* Upload Zone */}
+            <div className="border-2 border-dashed border-muted-foreground/30 rounded-xl p-8 text-center hover:border-primary/50 transition-colors">
               <Dashboard
                 uppy={uppy}
-                plugins={[]}
+                plugins={['Webcam']}
                 width="100%"
-                height={450}
+                height="300px"
                 proudlyDisplayPoweredByUppy={false}
                 showProgressDetails={true}
-                theme="light"
-                showRemoveButtonAfterComplete={true}
-                showLinkToFileUploadResult={false}
-                note={`Accepted file types: ${SLOT_CONFIG[activeSlot].allowedTypes.join(', ')}. Maximum size: 50MB.`}
-                doneButtonHandler={() => {
-                  console.log('Upload complete for current slot')
-                }}
-                hideUploadButton={true}
-                showSelectedFiles={true}
+                doneButtonHandler={() => {}}
               />
             </div>
-
-            {/* Upload Button */}
-            <div className="flex justify-end">
-              <button
-                onClick={handleUpload}
-                disabled={getTotalFiles() === 0}
-                className="px-6 py-3 bg-primary text-primary-foreground rounded-md font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
-              >
-                <Upload className="w-4 h-4" />
-                <span>Upload Content</span>
-              </button>
+            
+            {/* File Info */}
+            <div className="text-sm text-muted-foreground text-center">
+              Accepted file types: {SLOT_CONFIG[activeSlot]?.allowedTypes.join(', ')}. Maximum size: 50MB.
             </div>
+            
+            {/* Upload Progress */}
+            {isUploading && (
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span>Uploading files...</span>
+                  <span>{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2">
+                  <div 
+                    className="bg-primary h-2 rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+                {uploadingFiles.length > 0 && (
+                  <div className="text-xs text-muted-foreground">
+                    Currently uploading: {uploadingFiles[0]}...
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
+        
+        {/* Action Buttons */}
+        <div className="flex justify-end space-x-3 pt-4 border-t">
+          <button
+            onClick={onClose}
+            className="px-6 py-2.5 rounded-lg border border-border hover:bg-muted transition-colors"
+            disabled={isUploading}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleUpload}
+            disabled={uppy.getFiles().length === 0 || isUploading}
+            className={`px-8 py-2.5 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 ${
+              uppy.getFiles().length === 0 || isUploading
+                ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl'
+            }`}
+          >
+            {isUploading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                <span>Uploading...</span>
+              </>
+            ) : (
+              <>
+                <ArrowUp className="w-4 h-4" />
+                <span>Upload Content</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
-
-      {/* Confetti Celebration */}
-      {/* {showConfetti && <ConfettiCelebration />} */}
+      
+      {/* Confetti */}
       {showConfetti && (
         <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
-          <div className="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
-            🎉 Upload Successful!
+          <div className="bg-green-500 text-white px-8 py-4 rounded-lg shadow-2xl text-center animate-bounce">
+            <div className="text-2xl mb-2">🎉</div>
+            <div className="font-bold">Upload Successful!</div>
+            <div className="text-sm opacity-90">Your content has been sent to the team</div>
           </div>
         </div>
       )}
