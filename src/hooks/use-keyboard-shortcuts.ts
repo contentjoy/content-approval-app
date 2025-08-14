@@ -14,6 +14,7 @@ interface KeyboardShortcutsConfig {
   onBulkMode: () => void
   onEscape: () => void
   isEnabled?: boolean
+  isBulkMode?: boolean
 }
 
 export function useKeyboardShortcuts({
