@@ -173,24 +173,68 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       console.log('✅ Got gym ID:', gymId)
       
       // Get files from Uppy
-      const files = uppy.getFiles()
-      if (files.length === 0) {
+      const uppyFiles = uppy.getFiles()
+      if (uppyFiles.length === 0) {
         toast.error('Please select files to upload')
         return
       }
       
-      console.log(`📁 Starting upload of ${files.length} files to Google Drive...`)
+      console.log(`📁 Starting upload of ${uppyFiles.length} files...`)
       
-      // TODO: Implement direct Google Drive upload using OAuth
-      // For now, show success message
-      toast.success(`Upload process initiated for ${files.length} files!`)
+      // Use the existing working upload route for each file
+      const uploadResults = []
+      
+      for (const file of uppyFiles) {
+        try {
+          console.log(`📤 Uploading ${file.name}...`)
+          
+          // Call the existing working upload route with proper typing
+          const uploadUrl = `/api/uploads/${gymId as string}/slots/Photos/upload?filename=${encodeURIComponent(file.name)}&mime=${encodeURIComponent(file.type)}&sizeBytes=${file.size}`
+          
+          const response = await fetch(uploadUrl, {
+            method: 'POST',
+            body: file.data
+          })
+          
+          if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || `Upload failed: ${response.status}`)
+          }
+          
+          const result = await response.json()
+          console.log(`✅ File uploaded successfully: ${file.name}`)
+          
+          uploadResults.push({
+            name: file.name,
+            success: true,
+            fileId: result.driveFileId
+          })
+          
+        } catch (error) {
+          console.error(`❌ Failed to upload ${file.name}:`, error)
+          uploadResults.push({
+            name: file.name,
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error'
+          })
+        }
+      }
+      
+      // Show success message
+      const successCount = uploadResults.filter(r => r.success).length
+      toast.success(`Successfully uploaded ${successCount}/${uppyFiles.length} files!`)
       setShowConfetti(true)
+      
+      // Clear Uppy files
+      uppyFiles.forEach(file => {
+        uppy.removeFile(file.id)
+      })
       
       // Close modal after a short delay
       setTimeout(() => {
         onClose()
         setShowConfetti(false)
-      }, 2000)
+      }, 3000)
       
     } catch (error) {
       console.error('❌ Upload failed:', error)
