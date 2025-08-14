@@ -51,7 +51,7 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
       v.removeEventListener('loadedmetadata', onLoadedMetadata)
       v.removeEventListener('seeked', onSeeked)
     }
-  }, [src])
+  }, [src, onLoaded])
 
   return (
     <div className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: aspect }}>

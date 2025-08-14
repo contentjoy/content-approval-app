@@ -3,19 +3,19 @@ import { useBranding as useBrandingContext } from '@/contexts/branding-context'
 /**
  * Custom hook for accessing branding data throughout the app
  * 
- * @returns Branding data including logo, primary color, agency name, gym name, and loading states
+ * @returns Branding data including logos, primary color, agency name, gym name, and loading states
  * 
  * @example
  * ```tsx
  * function MyComponent() {
- *   const { logo, primaryColor, agencyName, gymName, isLoading, error } = useBranding()
+ *   const { whiteLogo, blackLogo, primaryColor, agencyName, gymName, isLoading, error } = useBranding()
  *   
  *   if (isLoading) return <div>Loading...</div>
  *   if (error) return <div>Error: {error}</div>
  *   
  *   return (
  *     <div style={{ backgroundColor: primaryColor }}>
- *       <img src={logo} alt={agencyName} />
+ *       <img src={whiteLogo || blackLogo} alt={agencyName} />
  *       <h1>Welcome to {gymName}</h1>
  *     </div>
  *   )
@@ -64,6 +64,6 @@ export function useBrandColors() {
  * @returns Boolean indicating if branding data is loaded
  */
 export function useBrandingLoaded() {
-  const { isLoading, error, logo, primaryColor } = useBranding()
-  return !isLoading && !error && (logo || primaryColor)
+  const { isLoading, error, whiteLogo, blackLogo, primaryColor } = useBranding()
+  return !isLoading && !error && ((whiteLogo || blackLogo) || primaryColor)
 }

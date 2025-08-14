@@ -14,35 +14,21 @@ interface KeyboardShortcutsConfig {
   onBulkMode: () => void
   onEscape: () => void
   isEnabled?: boolean
-  isBulkMode?: boolean
 }
 
 export function useKeyboardShortcuts({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   posts,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   selectedIndex,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onNavigateUp,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onNavigateDown,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onApprove,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onDisapprove,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onToggleSelection,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onBulkMode,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onEscape,
-  isEnabled = false,
-  isBulkMode = false
+  isEnabled = false
 }: KeyboardShortcutsConfig) {
-  const lastKeyTime = useRef(0)
-  const keySequence = useRef<string[]>([])
-
-  const handleKeyDown = useCallback((_event: KeyboardEvent) => {
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
     // Shortcuts disabled
     return
   }, [])
@@ -55,9 +41,4 @@ export function useKeyboardShortcuts({
   }, [handleKeyDown, isEnabled])
 
   return { shortcuts: [] }
-}
-
-function showShortcutsHelp() {
-  // You can implement a modal or toast showing keyboard shortcuts
-  console.log('Keyboard shortcuts help triggered')
 }

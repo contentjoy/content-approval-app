@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { useBranding } from '@/contexts/branding-context'
-import Image from 'next/image'
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
