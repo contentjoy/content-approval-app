@@ -11,7 +11,7 @@ import { FeedbackModal } from './feedback-modal'
 import { UploadModal } from './upload-modal'
 
 export function ModalContainer() {
-  const { isOpen, modalType, post, carouselPosts, approvedPosts, bulkPosts, closeModal } = useModalStore() as any
+  const { isOpen, modalType, post, carouselPosts, approvedPosts, bulkPosts, closeModal, isUploading } = useModalStore() as any
 
   if (!isOpen) {
     return null
@@ -22,6 +22,11 @@ export function ModalContainer() {
     try {
       window.dispatchEvent(new CustomEvent('post-updated', { detail }))
     } catch (_) {}
+  }
+
+  const handleUploadStateChange = (uploading: boolean) => {
+    // Update the modal store with upload state
+    useModalStore.getState().setUploading(uploading)
   }
 
   switch (modalType) {
@@ -85,7 +90,12 @@ export function ModalContainer() {
       )
     case 'upload':
       return (
-        <UploadModal isOpen={isOpen} onClose={closeModal} onSuccess={handleSuccess} />
+        <UploadModal 
+          isOpen={isOpen} 
+          onClose={closeModal} 
+          onSuccess={handleSuccess}
+          onUploadStateChange={handleUploadStateChange}
+        />
       )
     // case 'comments':
     //   if (!post) return null
@@ -99,8 +109,7 @@ export function ModalContainer() {
     //   )
     // case 'feedback':
     //   if (!post) return null
-    //   return (
-    //     <FeedbackModal isOpen={isOpen} onClose={closeModal} post={post} onSuccess={handleSuccess} />
+    //     <FeedbackModal isOpen={isOpen} onClose={closeModal} post={post} carouselPosts={carouselPosts} onSuccess={handleSuccess} />
     //   )
     default:
       return null

@@ -15,6 +15,8 @@ import { HorizontalNav } from './horizontal-nav'
 import { PopoutMenu } from './popout-menu'
 import { useAuth } from '@/contexts/auth-context'
 import SettingsModal from '@/components/modals/settings-modal'
+import { useState } from 'react'
+import { useToast } from '@/components/ui/toast'
 
 export function Header() {
   const { gymName, isLoading } = useBranding()
@@ -23,15 +25,28 @@ export function Header() {
   const pathname = usePathname()
   const gymSlug = typeof params.gymSlug === 'string' ? params.gymSlug : null
   const { total, approved } = usePostStats(gymSlug)
-  const { openModal, approvedPosts } = useModalStore()
+  const { openModal, approvedPosts, isUploading } = useModalStore()
+  const { showToast } = useToast()
   const [menuOpen, setMenuOpen] = React.useState(false)
-  const [profileOpen, setProfileOpen] = React.useState(false)
-  const [settingsOpen, setSettingsOpen] = React.useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const menuVariants = useMemo(() => ({
     open: { rotate: 180, transition: { duration: 0.3 } },
     closed: { rotate: 0 }
   }), [])
+
+  const handleUploadClick = () => {
+    if (isUploading) {
+      showToast({
+        type: 'warning',
+        title: 'Upload in Progress',
+        message: 'Please wait until complete before uploading new content'
+      })
+      return
+    }
+    openModal('upload')
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full bg-[var(--navbar)]">
@@ -60,7 +75,7 @@ export function Header() {
           {/* Upload Content Button - inline standard */}
           <button 
             className="btn-inline"
-            onClick={() => openModal('upload')}
+            onClick={handleUploadClick}
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline content">Upload</span>

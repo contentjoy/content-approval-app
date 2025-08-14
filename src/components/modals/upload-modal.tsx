@@ -18,6 +18,7 @@ interface UploadModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess?: (data: any) => void
+  onUploadStateChange?: (isUploading: boolean) => void
 }
 
 const SLOT_NAMES = ['Photos', 'Videos', 'Facility Photos', 'Facility Videos'] as const
@@ -148,7 +149,7 @@ function FloatingUploadProgress({
   )
 }
 
-export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
+export function UploadModal({ isOpen, onClose, onSuccess, onUploadStateChange }: UploadModalProps) {
   const [activeSlot, setActiveSlot] = useState<SlotName>('Photos')
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -165,7 +166,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   
   // Get gym slug from URL
   const gymSlug = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : null
-  
+
   // Create separate Uppy instances for each content type
   const uppyInstances = useMemo(() => {
     const instances: Record<SlotName, Uppy> = {} as Record<SlotName, Uppy>
@@ -196,6 +197,11 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       }
     }
   }, [activeUppy])
+
+  // Notify parent component when upload state changes
+  useEffect(() => {
+    onUploadStateChange?.(isUploading)
+  }, [isUploading, onUploadStateChange])
 
   // Helper functions
   const checkAuthStatus = useCallback(() => {
@@ -276,7 +282,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       setUploadProgress(0)
       setUploadingFiles(allFiles.map(f => f.name).filter(Boolean) as string[])
       
-      // Show floating progress component
+      // Show floating progress component BEFORE closing modal
       setShowFloatingProgress(true)
       setCurrentUploadFile(allFiles[0]?.name || '')
       setTotalUploadFiles(allFiles.length)
@@ -285,7 +291,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       // Show immediate success toast for better UX
       toast.success('Success! Content sent to team')
       
-      // Close modal quickly for better UX
+      // Close modal after setting up floating progress
       onClose()
       
       // Start background upload process
@@ -343,7 +349,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               // Show progress toast
               toast.success(`Uploading ${file.name}... (${progress}%)`, {
                 duration: 2000,
-                icon: '��'
+                icon: '📤'
               })
               
               // For large files (>5MB), use chunked upload
@@ -495,6 +501,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           console.error('❌ Background upload failed:', error)
           setIsUploading(false)
           setUploadingFiles([])
+          setShowFloatingProgress(false)
           toast.error('Upload failed. Please try again.', {
             duration: 5000,
             icon: '❌'
@@ -506,9 +513,15 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       console.error('❌ Upload failed:', error)
       setIsUploading(false)
       setUploadingFiles([])
+      setShowFloatingProgress(false)
       toast.error(error instanceof Error ? error.message : 'Upload failed')
     }
   }, [gymSlug, onClose, activeUppy, checkAuthStatus, getGymIdForUpload, uppyInstances])
+
+  // Don't render modal if upload is in progress
+  if (isUploading) {
+    return null
+  }
 
   if (!isOpen) return null
 
@@ -667,7 +680,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         </div>
       </Modal>
 
-      {/* Floating Upload Progress Component */}
+      {/* Floating Upload Progress Component - Now rendered outside modal */}
       <FloatingUploadProgress
         isVisible={showFloatingProgress}
         progress={uploadProgress}

@@ -10,9 +10,11 @@ interface ModalState {
   carouselPosts: SocialMediaPost[]
   approvedPosts: SocialMediaPost[]
   bulkPosts: SocialMediaPost[]
+  isUploading: boolean
   openModal: (type: ModalType, post?: SocialMediaPost | null, carouselPosts?: SocialMediaPost[], approvedPosts?: SocialMediaPost[], bulkPosts?: SocialMediaPost[]) => void
   setApprovedPosts: (posts: SocialMediaPost[]) => void
   closeModal: () => void
+  setUploading: (isUploading: boolean) => void
 }
 
 export const useModalStore = create<ModalState>((set) => ({
@@ -22,7 +24,13 @@ export const useModalStore = create<ModalState>((set) => ({
   carouselPosts: [],
   approvedPosts: [],
   bulkPosts: [],
+  isUploading: false,
   openModal: (type, post = null, carouselPosts = [], approvedPosts = [], bulkPosts = []) => {
+    // Don't open upload modal if upload is in progress
+    if (type === 'upload' && useModalStore.getState().isUploading) {
+      return
+    }
+    
     set({
       isOpen: true,
       modalType: type,
@@ -44,5 +52,8 @@ export const useModalStore = create<ModalState>((set) => ({
       approvedPosts: [],
       bulkPosts: []
     })
+  },
+  setUploading: (isUploading) => {
+    set({ isUploading })
   }
 }))
