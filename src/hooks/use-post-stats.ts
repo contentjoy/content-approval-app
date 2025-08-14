@@ -32,10 +32,22 @@ export function usePostStats(gymSlug: string | null): PostStats {
       try {
         const posts = await getPostsForGymBySlug(gymSlug)
         
-        const total = posts.length
-        const pending = posts.filter(p => p['Approval Status']?.toLowerCase() === 'pending').length
-        const approved = posts.filter(p => p['Approval Status']?.toLowerCase() === 'approved').length
-        const rejected = posts.filter(p => 
+        // Get current month boundaries
+        const now = new Date()
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+        
+        // Filter posts by current month
+        const currentMonthPosts = posts.filter(post => {
+          if (!post.updated_at) return false
+          const postDate = new Date(post.updated_at)
+          return postDate >= startOfMonth && postDate <= endOfMonth
+        })
+        
+        const total = currentMonthPosts.length
+        const pending = currentMonthPosts.filter(p => p['Approval Status']?.toLowerCase() === 'pending').length
+        const approved = currentMonthPosts.filter(p => p['Approval Status']?.toLowerCase() === 'approved').length
+        const rejected = currentMonthPosts.filter(p => 
           p['Approval Status']?.toLowerCase() === 'disapproved' || 
           p['Approval Status']?.toLowerCase() === 'rejected'
         ).length

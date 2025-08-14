@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { format, eachMonthOfInterval, parseISO, isSameMonth } from "date-fns";
 import { useCalendar } from "../../calendar-context";
 import type { IEvent } from "../../interfaces";
+import { EventDetailsDialog } from "../../dialogs/event-details-dialog";
 
 interface IProps {
 	singleDayEvents: IEvent[];
@@ -160,13 +161,14 @@ export function CalendarYearView({ singleDayEvents, multiDayEvents }: IProps) {
 							{monthEvents.length > 0 && (
 								<div className="mt-2 space-y-1">
 									{monthEvents.slice(0, 2).map((event) => (
-										<div
-											key={event.id}
-											className={`text-xs p-1 rounded truncate ${getEventColorClasses(event.color)}`}
-											title={event.title}
-										>
-											{event.title}
-										</div>
+										<EventDetailsDialog key={event.id} event={event}>
+											<div
+												className={`text-xs p-1 rounded truncate cursor-pointer hover:opacity-80 transition-opacity ${getEventColorClasses(event.color)}`}
+												title={event.title}
+											>
+												{event.title}
+											</div>
+										</EventDetailsDialog>
 									))}
 									{monthEvents.length > 2 && (
 										<div className="text-xs text-muted-foreground text-center">

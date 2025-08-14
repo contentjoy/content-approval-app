@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { startOfWeek, endOfWeek, eachDayOfInterval, format, isSameDay, parseISO } from "date-fns";
 import { useCalendar } from "../../calendar-context";
 import type { IEvent } from "../../interfaces";
+import { EventBadge } from "../event-badge";
 
 interface IProps {
 	singleDayEvents: IEvent[];
@@ -13,19 +14,6 @@ interface IProps {
 }
 
 const TIME_SLOTS = Array.from({ length: 24 }, (_, i) => i); // 0-23 hours
-
-// Theme-based color mapping for events
-const getEventColorClasses = (color: string) => {
-	const colorMap: Record<string, string> = {
-		teal: "bg-teal-100 text-teal-800 border border-teal-200 hover:bg-teal-200 dark:bg-teal-700 dark:text-white dark:border-teal-600 dark:hover:bg-teal-600",
-		blue: "bg-blue-100 text-blue-800 border border-blue-200 hover:bg-blue-200 dark:bg-blue-700 dark:text-white dark:border-blue-600 dark:hover:bg-blue-600",
-		green: "bg-green-100 text-green-800 border border-green-200 hover:bg-green-200 dark:bg-green-700 dark:text-white dark:border-green-600 dark:hover:bg-green-600",
-		amber: "bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 dark:bg-amber-700 dark:text-white dark:border-amber-600 dark:hover:bg-amber-600",
-		red: "bg-red-100 text-red-800 border border-red-200 hover:bg-red-200 dark:bg-red-700 dark:text-white dark:border-red-600 dark:hover:bg-red-600",
-		purple: "bg-purple-100 text-purple-800 border border-purple-200 hover:bg-purple-200 dark:bg-purple-700 dark:text-white dark:border-purple-600 dark:hover:bg-purple-600",
-	};
-	return colorMap[color] || colorMap.blue;
-};
 
 export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
 	const { selectedDate } = useCalendar();
@@ -113,14 +101,13 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
 							
 							return (
 								<div key={day.toISOString()} className="p-1 border-r border-b min-h-[60px] relative">
-									{events.map((event) => (
-										<div
+									{events.map((event, index) => (
+										<EventBadge
 											key={event.id}
-											className={`text-xs p-1 mb-1 rounded truncate cursor-pointer transition-colors ${getEventColorClasses(event.color)}`}
-											title={`${event.title} - ${format(parseISO(event.startDate), 'h:mm a')}`}
-										>
-											{event.title}
-										</div>
+											event={event}
+											cellDate={day}
+											index={index}
+										/>
 									))}
 								</div>
 							);

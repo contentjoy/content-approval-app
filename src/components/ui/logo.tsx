@@ -37,10 +37,26 @@ export function Logo({
   }
 
   if (logoSrc) {
+    // If it's an agency logo, wrap it in a themed frame
+    if (agencyLogo && logoSrc === agencyLogo) {
+      return (
+        <div 
+          className={`${sizeClasses[size]} bg-surface rounded-lg p-2 flex items-center justify-center ${className}`}
+        >
+          <img
+            src={logoSrc}
+            alt={agencyName || 'Agency Logo'}
+            className="h-[65%] w-[65%] object-contain"
+          />
+        </div>
+      )
+    }
+    
+    // Regular logo display (gym logos, etc.)
     return (
       <img
         src={logoSrc}
-        alt={agencyName || gymName || 'Agency Logo'}
+        alt={agencyName || gymName || 'Logo'}
         className={`${sizeClasses[size]} ${className}`}
       />
     )
