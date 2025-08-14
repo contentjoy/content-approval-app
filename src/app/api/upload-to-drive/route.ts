@@ -336,19 +336,47 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
 // Handle folder creation requests
 async function handleFolderCreation(files: any[], gymSlug: string, gymName: string) {
   console.log('📁 Processing folder creation...')
+  console.log('📁 Gym slug:', gymSlug)
+  console.log('📁 Gym name:', gymName)
   const results = []
 
   for (const file of files) {
     if (file.isFolder) {
       try {
         const folderName = file.name
-        const folderId = await createOrFindFolder(getDrive(), folderName, '0', '0ALOLvWQ1QTx5Uk9PVA')
+        console.log(`📁 Creating folder: ${folderName}`)
+        console.log(`📁 Folder type: ${file.folderType}`)
+        
+        // Create proper gym folder structure first
+        console.log('🏗️ Creating gym folder structure...')
+        const folderStructure = await createFolderStructure(gymName)
+        console.log('✅ Gym folder structure created:', folderStructure)
+        
+        // For session root folders, use the timestamp folder as the parent
+        let parentFolderId = folderStructure.timestampFolderId
+        console.log(`📁 Using parent folder ID: ${parentFolderId}`)
+        
+        // If it's a specific folder type, use the appropriate parent
+        if (file.folderType === 'session-root') {
+          parentFolderId = folderStructure.timestampFolderId
+          console.log(`📁 Session root folder - using timestamp folder as parent: ${parentFolderId}`)
+        }
+        
+        // Create the session folder inside the timestamp folder
+        console.log(`📁 Creating session folder '${folderName}' inside parent folder ${parentFolderId}`)
+        const sessionFolderId = await createOrFindFolder(
+          getDrive(), 
+          folderName, 
+          parentFolderId, 
+          '0ALOLvWQ1QTx5Uk9PVA'
+        )
+        
         results.push({
           name: folderName,
           success: true,
-          folderId: folderId
+          fileId: sessionFolderId // Use fileId for consistency with other responses
         })
-        console.log(`✅ Folder created: ${folderName} (${folderId})`)
+        console.log(`✅ Session folder created: ${folderName} (${sessionFolderId})`)
       } catch (error) {
         console.error(`❌ Failed to create folder ${file.name}:`, error)
         results.push({
