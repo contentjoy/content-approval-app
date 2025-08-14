@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDrive, startResumableSession, uploadToResumable } from '@/lib/googleDrive';
+import { getDrive, uploadFileDirectly } from '@/lib/googleDrive';
 import { supabase } from '@/lib/supabase';
 import { SLOT_NAMES, type SlotName } from '@/lib/slots';
 
@@ -68,14 +68,15 @@ export async function POST(
     console.log(`📁 Uploading ${filename} (${mime}) to slot ${slot}, folder: ${parentId}`);
 
     const drive = getDrive();
-    const { uploadUrl, fileId } = await startResumableSession(drive, {
+    
+    // Use direct upload instead of resumable upload
+    const { fileId } = await uploadFileDirectly(drive, {
       filename,
       mime,
       parentId,
+      body,
       sizeBytes
     });
-
-    await uploadToResumable(uploadUrl, body);
 
     // Persist file data to Supabase
     const { error: fileError } = await supa
@@ -98,50 +99,21 @@ export async function POST(
     const response = {
       ok: true,
       driveFileId: fileId,
-      name: filename,
-      slot
+      filename,
+      slot,
+      sizeBytes
     };
 
-    console.log(`✅ Upload completed for slot ${slot}: ${filename} (${fileId})`);
+    console.log(`✅ Upload completed successfully for ${filename} in slot ${slot}`);
     return NextResponse.json(response);
 
   } catch (error) {
     const { slot } = await params;
     console.error(`❌ Upload failed for slot ${slot}:`, error);
     
-    if (error instanceof Error) {
-      if (error.message.includes('Failed to get access token')) {
-        return NextResponse.json({ 
-          error: 'Authentication failed',
-          details: 'Failed to authenticate with Google Drive'
-        }, { status: 500 });
-      }
-      
-      if (error.message.includes('Resumable init failed')) {
-        return NextResponse.json({ 
-          error: 'Upload initialization failed',
-          details: error.message
-        }, { status: 500 });
-      }
-      
-      if (error.message.includes('Resumable PUT failed')) {
-        return NextResponse.json({ 
-          error: 'Upload failed',
-          details: error.message
-        }, { status: 500 });
-      }
-
-      if (error.message.includes('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')) {
-        return NextResponse.json({ 
-          error: 'Database not configured',
-          details: 'Please configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables'
-        }, { status: 500 });
-      }
-    }
-    
     return NextResponse.json({ 
       error: 'Upload failed',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown upload error'
     }, { status: 500 });
   }
 }
