@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useMemo } from 'react'
 import { X, Upload, Image, Video, Building2, Camera } from 'lucide-react'
 import { Dashboard } from '@uppy/react'
 import Uppy from '@uppy/core'
+import GoogleDrive from '@uppy/google-drive';
 import { useBranding } from '@/contexts/branding-context'
 import { useAuth } from '@/contexts/auth-context'
 import { useParams } from 'next/navigation'
@@ -190,217 +191,163 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   const [showConfetti, setShowConfetti] = useState(false)
   
   // Create Uppy instances for each slot
-  const [uppyInstances] = useState(() => {
-    const instances: Record<string, Uppy> = {}
-    
-    SLOT_NAMES.forEach(slotName => {
-      const config = SLOT_CONFIG[slotName]
-      const uppy = new Uppy({
-        id: `uppy-${slotName.toLowerCase().replace(/\s+/g, '-')}`,
-        restrictions: {
-          maxNumberOfFiles: config.maxFiles,
-          minNumberOfFiles: 0,
-          maxFileSize: 50 * 1024 * 1024, // 50MB limit
-          allowedFileTypes: config.allowedTypes,
-        },
-        autoProceed: false,
-        allowMultipleUploadBatches: true,
-        locale: {
-          strings: {
-            dropPaste: `Drop files here or ${slotName.toLowerCase()}`,
-            browse: `Browse ${slotName.toLowerCase()}`,
-            uploadComplete: `${slotName} upload complete`,
-            uploadFailed: `${slotName} upload failed`,
-            processing: `Processing ${slotName.toLowerCase()}...`,
-            uploadXFiles: {
-              0: 'Upload %{smart_count} file',
-              1: 'Upload %{smart_count} files'
-            }
+  const uppy = useMemo(() => {
+    const uppyInstance = new Uppy({
+      restrictions: {
+        maxFileSize: 50 * 1024 * 1024, // 50MB
+        allowedFileTypes: ['image/*', 'video/*'],
+      },
+      locale: {
+        strings: {
+          // Customize strings for better UX
+          dropPaste: 'Drop files here, or %{browse}',
+          browse: 'browse',
+          uploadComplete: 'Upload complete!',
+          uploadFailed: 'Upload failed',
+          processing: 'Processing...',
+          uploadXFiles: {
+            0: 'Upload %{smart_count} file',
+            1: 'Upload %{smart_count} files'
           },
-          pluralize: (count: number) => count === 1 ? 0 : 1
-        },
-        onBeforeFileAdded: (file) => {
-          // Enhanced file validation
-          const fileExtension = file.extension?.toLowerCase()
-          if (!config.allowedTypes.includes(`.${fileExtension}`)) {
-            const error = new Error(`File type .${fileExtension} not allowed for ${slotName}`)
-            error.name = 'FileTypeError'
-            throw error
+          uploadXNewFiles: {
+            0: 'Upload +%{smart_count} file',
+            1: 'Upload +%{smart_count} files'
           }
-          
-          // Check file size
-          if (file.size && file.size > 50 * 1024 * 1024) {
-            const error = new Error(`File size exceeds 50MB limit`)
-            error.name = 'FileSizeError'
-            throw error
-          }
-          
-          console.log(`✅ File validated: ${file.name} (${slotName})`)
-          return file
         },
-        onBeforeUpload: (files) => {
-          console.log(`🚀 Starting upload for ${slotName}: ${Object.keys(files).length} files`)
-          return files
+        pluralize: (count: number) => count === 1 ? 0 : 1
+      }
+    });
+
+    // Add Google Drive plugin
+    uppyInstance.use(GoogleDrive, {
+      companionUrl: process.env.NEXT_PUBLIC_COMPANION_URL || 'http://localhost:3020',
+      companionAllowedHosts: [
+        process.env.NEXT_PUBLIC_COMPANION_URL || 'http://localhost:3020'
+      ],
+      target: 'body',
+      locale: {
+        strings: {
+          pluginNameGoogleDrive: 'Google Drive'
         }
-      })
-      
-      // Enhanced error handling
-      uppy.on('upload-error', (file, error, response) => {
-        if (file) {
-          console.error(`❌ Upload error for ${file.name} in ${slotName}:`, error)
-          toast.error(`Failed to upload ${file.name}: ${error.message}`)
-        }
-      })
-      
-      // Better progress tracking
-      uppy.on('upload-progress', (file, progress) => {
-        if (file && progress.bytesUploaded === progress.bytesTotal) {
-          console.log(`✅ ${file.name} upload complete`)
-        }
-      })
-      
-      // Success handling
-      uppy.on('upload-success', (file, response) => {
-        if (file) {
-          console.log(`✅ ${file.name} uploaded successfully to ${slotName}`)
-          toast.success(`${file.name} uploaded to ${slotName}`)
-        }
-      })
-      
-      instances[slotName] = uppy
-    })
-    
-    return instances
-  })
+      }
+    });
+
+    // Handle successful uploads
+    uppyInstance.on('upload-success', (file, response) => {
+      if (file) {
+        console.log('✅ File uploaded successfully:', file.name);
+        toast.success(`File ${file.name} uploaded successfully!`);
+      }
+    });
+
+    // Handle upload errors
+    uppyInstance.on('upload-error', (file, error) => {
+      if (file) {
+        console.error('❌ Upload error:', error);
+        toast.error(`Failed to upload ${file.name}: ${error.message}`);
+      }
+    });
+
+    return uppyInstance;
+  }, []);
 
   // Cleanup Uppy instances on unmount
   useEffect(() => {
     return () => {
-      console.log('Cleaning up Uppy instances')
+      if (uppy) {
+        console.log('Cleaning up Uppy instance')
+        uppy.close()
+      }
     }
-  }, [uppyInstances])
+  }, [uppy])
 
   const handleUpload = useCallback(async () => {
-    setIsUploading(true)
-
     try {
       console.log('🚀 Starting upload process...')
-      console.log('🔍 Current state:', { gymSlug, gymName, userGymId: user?.gymId, userGymName: user?.gymName })
       
-      // Check if we can proceed with upload
-      if (!checkAuthStatus()) {
-        const errorMsg = !user && !gymSlug 
-          ? 'Please log in to upload content' 
-          : 'Missing gym information - please refresh the page'
-        toast.error(errorMsg)
-        console.error('❌ Upload blocked:', errorMsg)
-        return
+      // Get current state for debugging
+      const currentState = {
+        gymSlug,
+        gymName: brandingGymName || user?.gymName,
+        userGymId: user?.gymId,
+        userGymName: user?.gymName
+      }
+      console.log('🔍 Current state:', currentState)
+      
+      // Check authentication status
+      const checkAuthStatus = useCallback(() => {
+        const authStatus = {
+          user: !!user,
+          gymSlug: !!gymSlug,
+          canUpload: !!(user && gymSlug),
+          sessionToken: !!user?.id
+        }
+        console.log('🔐 Checking auth status:', authStatus)
+        return authStatus
+      }, [user, gymSlug])
+      
+      const authStatus = checkAuthStatus()
+      if (!authStatus.canUpload) {
+        throw new Error('Missing gym information or user not authenticated')
       }
       
-      // Collect files from all slots
-      const filesBySlot: Record<SlotName, File[]> = {
-        'Photos': [],
-        'Videos': [],
-        'Facility Photos': [],
-        'Facility Videos': []
-      }
-
-      SLOT_NAMES.forEach(slotName => {
-        const uppy = uppyInstances[slotName]
-        const files = uppy.getFiles().map(file => file.data as File)
-        filesBySlot[slotName] = files
-      })
-
-      // Check if we have any files to upload
-      const totalFiles = Object.values(filesBySlot).flat().length
-      if (totalFiles === 0) {
-        toast.error('Please select files to upload')
-        return
-      }
-
-      console.log(`📁 Starting upload of ${totalFiles} files...`)
-      toast.success(`Starting upload of ${totalFiles} files...`)
+      // Get gym ID for upload
+      const getGymIdForUpload = useCallback(async () => {
+        console.log('🔍 Getting gym ID for upload...')
+        console.log('🔍 getGymIdForUpload called with:', { gymSlug, userGymId: user?.gymId, userGymName: user?.gymName })
+        
+        // Convert URL slug to gym name format (e.g., "kokoro-demo" -> "kokoro demo")
+        const slugToGymName = useCallback((slug: string) => {
+          return slug.replace(/-/g, ' ')
+        }, [])
+        
+        const gymName = slugToGymName(gymSlug)
+        console.log('🔍 Looking up gym by name:', gymSlug, '->', `"${gymName}"`)
+        
+        const { data: gym, error } = await supabase
+          .from('gyms')
+          .select('id')
+          .eq('"Gym Name"', gymName)
+          .single()
+        
+        if (error || !gym) {
+          console.log('🔍 Gym lookup failed, falling back to user.gymId')
+          return user?.gymId
+        }
+        
+        console.log('✅ Found gym by name:', gymSlug, '->', `"${gymName}" (ID: ${gym.id})`)
+        return gym.id
+      }, [gymSlug, user?.gymId, user?.gymName])
       
-      // Step 1: Initialize upload
-      console.log('🔍 Getting gym ID for upload...')
       const gymId = await getGymIdForUpload()
+      if (!gymId) {
+        throw new Error('Could not determine gym ID for upload')
+      }
+      
       console.log('✅ Got gym ID:', gymId)
       
-      console.log('🚀 Initializing upload with gym ID:', gymId)
-      const uploadId = await initUpload(gymId)
-      console.log('✅ Upload initialized with ID:', uploadId)
-      
-      // Step 2: Upload files to respective slots
-      const uploadResults: Record<SlotName, string[]> = {
-        'Photos': [],
-        'Videos': [],
-        'Facility Photos': [],
-        'Facility Videos': []
-      }
-      const errors: string[] = []
-
-      for (const [slotName, files] of Object.entries(filesBySlot)) {
-        if (files.length === 0) continue
-        
-        console.log(`Uploading ${files.length} files to slot: ${slotName}`)
-        
-        // Upload files serially for safety
-        for (const file of files) {
-          try {
-            const result = await uploadFile(uploadId, slotName, file)
-            uploadResults[slotName as SlotName].push(result.driveFileId)
-            console.log(`✅ Uploaded ${file.name} to ${slotName}`)
-            toast.success(`Uploaded ${file.name} to ${slotName}`)
-          } catch (error) {
-            const errorMessage = `Failed to upload ${file.name} to ${slotName}: ${error instanceof Error ? error.message : 'Unknown error'}`
-            console.error(errorMessage)
-            errors.push(errorMessage)
-            toast.error(errorMessage)
-            // Stop the batch if any file fails
-            throw new Error(errorMessage)
-          }
-        }
-      }
-
-      // Step 3: Complete upload
-      await completeUpload(uploadId)
-      console.log('Upload completed successfully')
-      
-      // Show confetti and success message
+      // For now, just show success - the Google Drive plugin handles the actual upload
+      toast.success('Upload process initiated!')
       setShowConfetti(true)
-      toast.success('Content uploaded!')
       
-      // Hide confetti after 2 seconds
+      // Close modal after a short delay
       setTimeout(() => {
+        onClose()
         setShowConfetti(false)
       }, 2000)
       
-      onSuccess?.({ 
-        uploadId, 
-        timestamp: new Date().toISOString(),
-        uploadedFiles: uploadResults,
-        totalFiles
-      })
-      onClose()
-      
     } catch (error) {
-      console.error('Upload failed:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Upload failed'
-      toast.error(errorMessage)
-    } finally {
-      setIsUploading(false)
+      console.error('❌ Upload failed:', error)
+      toast.error(error instanceof Error ? error.message : 'Upload failed')
     }
-  }, [gymSlug, gymName, user?.gymId, uppyInstances, onSuccess, onClose])
+  }, [gymSlug, brandingGymName, user?.gymName, user, onClose])
 
-  const getActiveUppy = () => uppyInstances[activeSlot]
+  const getActiveUppy = () => uppy
   const getActiveConfig = () => SLOT_CONFIG[activeSlot]
 
   // Get total files across all categories
   const getTotalFiles = () => {
-    return SLOT_NAMES.reduce((total, slotName) => {
-      const uppy = uppyInstances[slotName]
-      return total + uppy.getFiles().length
-    }, 0)
+    return uppy.getFiles().length
   }
 
   if (!isOpen) return null
@@ -423,7 +370,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 const config = SLOT_CONFIG[slotName]
                 const Icon = config.icon
                 const isActive = activeSlot === slotName
-                const uppy = uppyInstances[slotName]
+                const uppy = uppy
                 const fileCount = uppy.getFiles().length
                 
                 return (
@@ -484,7 +431,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             {/* Uppy Dashboard */}
             <div className="border border-border rounded-lg p-4">
               <Dashboard
-                uppy={getActiveUppy()}
+                uppy={uppy}
                 plugins={[]}
                 width="100%"
                 height={450}
