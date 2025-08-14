@@ -182,29 +182,88 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 data: await file.data.arrayBuffer().then((buffer: ArrayBuffer) => Buffer.from(buffer).toString('base64'))
               }]
               
-              const response = await fetch('/api/upload-to-drive', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  files: filesForUpload,
-                  gymSlug,
-                  gymName: brandingGymName || userGymName
+              // For large files (>5MB), use chunked upload
+              if (file.size > 5 * 1024 * 1024) {
+                console.log(`📦 Large file detected (${(file.size / (1024 * 1024)).toFixed(1)}MB), using chunked upload...`)
+                
+                // Split large files into chunks
+                const chunkSize = 4 * 1024 * 1024 // 4MB chunks
+                const chunks = []
+                const buffer = Buffer.from(await file.data.arrayBuffer())
+                
+                for (let i = 0; i < buffer.length; i += chunkSize) {
+                  chunks.push(buffer.slice(i, i + chunkSize))
+                }
+                
+                console.log(`📦 Uploading ${chunks.length} chunks for ${file.name}...`)
+                
+                // Upload chunks sequentially
+                for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
+                  const chunk = chunks[chunkIndex]
+                  const chunkData = chunk.toString('base64')
+                  
+                  const chunkResponse = await fetch('/api/upload-to-drive', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      files: [{
+                        name: `${file.name}.part${chunkIndex + 1}`,
+                        type: file.type,
+                        size: chunk.length,
+                        data: chunkData,
+                        isChunk: true,
+                        originalName: file.name,
+                        chunkIndex,
+                        totalChunks: chunks.length
+                      }],
+                      gymSlug,
+                      gymName: brandingGymName || userGymName
+                    })
+                  })
+                  
+                  if (!chunkResponse.ok) {
+                    throw new Error(`Chunk ${chunkIndex + 1} failed: ${chunkResponse.status}`)
+                  }
+                  
+                  // Update progress for each chunk
+                  const chunkProgress = Math.round(((i + chunkIndex + 1) / (allFiles.length + chunks.length - 1)) * 100)
+                  setUploadProgress(chunkProgress)
+                }
+                
+                console.log(`✅ All chunks uploaded for ${file.name}`)
+                
+                uploadResults.push({
+                  name: file.name,
+                  success: true,
+                  fileId: 'chunked-upload-complete'
                 })
-              })
-              
-              if (!response.ok) {
-                const errorData = await response.json()
-                throw new Error(errorData.error || `Upload failed: ${response.status}`)
+                
+              } else {
+                // Small files use regular upload
+                const response = await fetch('/api/upload-to-drive', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    files: filesForUpload,
+                    gymSlug,
+                    gymName: brandingGymName || userGymName
+                  })
+                })
+                
+                if (!response.ok) {
+                  const errorData = await response.json()
+                  throw new Error(errorData.error || `Upload failed: ${response.status}`)
+                }
+                
+                const result = await response.json()
+                console.log(`✅ File uploaded successfully: ${file.name}`)
+                
+                uploadResults.push({
+                  name: file.name,
+                  success: true,
+                  fileId: result.results[0]?.fileId || 'unknown'
+                })
               }
-              
-              const result = await response.json()
-              console.log(`✅ File uploaded successfully: ${file.name}`)
-              
-              uploadResults.push({
-                name: file.name,
-                success: true,
-                fileId: result.results[0]?.fileId || 'unknown'
-              })
               
             } catch (error) {
               console.error(`❌ Failed to upload ${file.name}:`, error)

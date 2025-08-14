@@ -8,205 +8,40 @@ export const maxDuration = 300; // 5 minutes max
 
 
 export async function POST(req: NextRequest) {
+  // Increase size limit for large video files
+  const maxSize = 100 * 1024 * 1024 // 100MB limit
+  
   try {
-    const { files, gymSlug, gymName } = await req.json();
-    
-    console.log('🚀 Starting Google Drive upload for gym:', gymName);
-    console.log('📁 Files to upload:', files.length);
+    const body = await req.json()
+    const { files, gymSlug, gymName } = body
     
     if (!files || files.length === 0) {
-      return NextResponse.json({ error: 'No files provided' }, { status: 400 });
+      return NextResponse.json({ error: 'No files provided' }, { status: 400 })
     }
     
-    if (!gymSlug || !gymName) {
-      return NextResponse.json({ error: 'Missing gym information' }, { status: 400 });
+    // Check total payload size
+    const totalSize = files.reduce((sum: number, file: any) => sum + (file.size || 0), 0)
+    if (totalSize > maxSize) {
+      return NextResponse.json({ 
+        error: `Total file size ${(totalSize / (1024 * 1024)).toFixed(1)}MB exceeds limit of ${maxSize / (1024 * 1024)}MB` 
+      }, { status: 413 })
     }
     
-    // Get gym ID from database
-    const { data: gym, error: gymError } = await supabase
-      .from('gyms')
-      .select('id')
-      .eq('"Gym Name"', gymName)
-      .single();
-    
-    if (gymError || !gym) {
-      console.error('❌ Gym lookup failed:', gymError);
-      return NextResponse.json({ error: 'Gym not found' }, { status: 404 });
+    // Check for chunked uploads
+    const hasChunks = files.some((file: any) => file.isChunk)
+    if (hasChunks) {
+      console.log('📦 Processing chunked upload...')
+      return await handleChunkedUpload(files, gymSlug, gymName)
     }
     
-    console.log('✅ Found gym:', gymName, 'ID:', gym.id);
-    
-    // Initialize Google Drive client using the working getDrive function
-    const drive = getDrive();
-    
-    console.log('✅ Google Drive client initialized');
-    
-    // Create folder structure
-    const folderStructure = await createFolderStructure(gymName);
-    console.log('✅ Folder structure created:', folderStructure);
-    
-    // Upload files to appropriate folders
-    const uploadResults = [];
-    
-    for (const file of files) {
-      try {
-        // Determine which slot folder to use based on file type
-        const slotName = determineSlotName(file);
-        const targetFolderId = folderStructure.rawSlotFolders[slotName];
-        
-        if (!targetFolderId) {
-          throw new Error(`No target folder found for slot: ${slotName}`);
-        }
-        
-        console.log(`📤 Uploading ${file.name} to Google Drive...`);
-        console.log(`📁 Uploading to folder: ${slotName} (${targetFolderId})`);
-        
-        // Convert base64 to buffer
-        const buffer = Buffer.from(file.data, 'base64');
-        console.log(`📊 File size: ${buffer.length} bytes`);
-        
-        // Get shared drive ID
-        const sharedDriveId = '0ALOLvWQ1QTx5Uk9PVA';
-        
-        try {
-          // Try multipart upload with fixed PassThrough stream
-          const fileMetadata = {
-            name: file.name,
-            parents: [targetFolderId],
-          };
-          const media = {
-            mimeType: file.type,
-            body: new PassThrough().end(buffer), // Key fix: Pipeable stream from buffer
-          };
-          
-          console.log(`🔄 Attempting multipart upload with PassThrough stream...`);
-          
-          const response = await drive.files.create({
-            resource: fileMetadata,
-            media,
-            fields: 'id,name,size,webViewLink',
-            supportsAllDrives: true,
-            driveId: sharedDriveId, // Explicit shared drive targeting
-          } as any);
-          
-          if (!response.data || !response.data.id) {
-            throw new Error('No file ID returned from multipart upload');
-          }
-          
-          console.log(`✅ File uploaded successfully with multipart: ${response.data.name} (${response.data.id})`);
-          
-          uploadResults.push({
-            name: file.name,
-            success: true,
-            fileId: response.data.id,
-            size: response.data.size,
-            webViewLink: response.data.webViewLink,
-            slot: slotName
-          });
-          
-        } catch (uploadError) {
-          console.error(`❌ Multipart upload failed:`, uploadError);
-          
-          // Fallback for small files: simple upload
-          if (buffer.length < 5 * 1024 * 1024) { // < 5MB
-            console.log(`🔄 Trying simple upload fallback for small file...`);
-            
-            try {
-              const fallbackResponse = await drive.files.create({
-                resource: {
-                  name: file.name,
-                  parents: [targetFolderId],
-                },
-                media: {
-                  mimeType: file.type,
-                  body: buffer, // Use buffer directly for simple upload
-                },
-                uploadType: 'media',
-                fields: 'id,name,size,webViewLink',
-                supportsAllDrives: true,
-                driveId: sharedDriveId,
-              } as any);
-              
-              if (!fallbackResponse.data || !fallbackResponse.data.id) {
-                throw new Error('No file ID returned from fallback upload');
-              }
-              
-              console.log(`✅ File uploaded successfully with fallback: ${fallbackResponse.data.name} (${fallbackResponse.data.id})`);
-              
-              uploadResults.push({
-                name: file.name,
-                success: true,
-                fileId: fallbackResponse.data.id,
-                size: fallbackResponse.data.size,
-                webViewLink: fallbackResponse.data.webViewLink,
-                slot: slotName
-              });
-              
-            } catch (fallbackError) {
-              console.error(`❌ Fallback upload also failed:`, fallbackError);
-              uploadResults.push({
-                name: file.name,
-                success: false,
-                error: fallbackError instanceof Error ? fallbackError.message : 'Fallback upload failed'
-              });
-            }
-          } else {
-            // File too large for simple upload fallback
-            uploadResults.push({
-              name: file.name,
-              success: false,
-              error: `File too large (${Math.round(buffer.length / (1024 * 1024))}MB) for fallback upload`
-            });
-          }
-        }
-        
-        console.log(`✅ File processed: ${file.name}`);
-      } catch (error) {
-        console.error(`❌ Failed to process ${file.name}:`, error);
-        uploadResults.push({ 
-          name: file.name, 
-          success: false, 
-          error: error instanceof Error ? error.message : 'Unknown error' 
-        });
-      }
-    }
-    
-    // Store upload record in database
-    const { error: dbError } = await supabase
-      .from('uploads')
-      .insert([{
-        upload_id: `upload_${Date.now()}`,
-        gym_id: gym.id,
-        gym_name: gymName,
-        upload_folder_id: folderStructure.timestampFolderId,
-        gym_folder_id: folderStructure.gymFolderId,
-        raw_footage_folder_id: folderStructure.rawFootageFolderId,
-        final_footage_folder_id: folderStructure.finalFootageFolderId,
-        status: 'completed',
-        files_uploaded: uploadResults.filter(r => r.success).length,
-        total_files: files.length
-      }]);
-    
-    if (dbError) {
-      console.error('⚠️ Failed to store upload record:', dbError);
-    }
-    
-    const successCount = uploadResults.filter(r => r.success).length;
-    console.log(`🎉 Upload completed: ${successCount}/${files.length} files successful`);
-    
-    return NextResponse.json({
-      success: true,
-      message: `Uploaded ${successCount}/${files.length} files successfully`,
-      folderStructure,
-      results: uploadResults
-    });
+    // Regular upload flow
+    return await handleRegularUpload(files, gymSlug, gymName)
     
   } catch (error) {
-    console.error('❌ Upload to Google Drive failed:', error);
+    console.error('❌ Upload error:', error)
     return NextResponse.json({ 
-      error: 'Upload failed',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+      error: error instanceof Error ? error.message : 'Upload failed' 
+    }, { status: 500 })
   }
 }
 
@@ -323,5 +158,274 @@ async function createOrFindFolder(drive: any, name: string, parentId: string, sh
   } catch (error) {
     console.error(`❌ Error creating/finding folder ${name}:`, error);
     throw error;
+  }
+}
+
+// Handle chunked uploads
+async function handleChunkedUpload(files: any[], gymSlug: string, gymName: string) {
+  console.log('📦 Processing chunked upload...')
+  
+  // Group chunks by original file
+  const chunkGroups = new Map<string, any[]>()
+  files.forEach(file => {
+    if (file.isChunk && file.originalName) {
+      if (!chunkGroups.has(file.originalName)) {
+        chunkGroups.set(file.originalName, [])
+      }
+      chunkGroups.get(file.originalName)!.push(file)
+    }
+  })
+  
+  // Sort chunks by index
+  chunkGroups.forEach(chunks => {
+    chunks.sort((a, b) => a.chunkIndex - b.chunkIndex)
+  })
+  
+  // Reconstruct and upload each file
+  const results = []
+  for (const [originalName, chunks] of chunkGroups) {
+    try {
+      console.log(`🔧 Reconstructing ${originalName} from ${chunks.length} chunks...`)
+      
+      // Combine chunks
+      const combinedBuffer = Buffer.concat(
+        chunks.map(chunk => Buffer.from(chunk.data, 'base64'))
+      )
+      
+      // Upload reconstructed file
+      const reconstructedFile = {
+        name: originalName,
+        type: chunks[0].type,
+        size: combinedBuffer.length,
+        data: combinedBuffer.toString('base64')
+      }
+      
+      const uploadResult = await uploadFileToDrive(
+        getDrive(),
+        reconstructedFile,
+        await createFolderStructure(gymName)
+      )
+      
+      results.push({
+        name: originalName,
+        success: true,
+        fileId: uploadResult.fileId || 'chunked-reconstructed'
+      })
+      
+    } catch (error) {
+      console.error(`❌ Failed to reconstruct ${originalName}:`, error)
+      results.push({
+        name: originalName,
+        success: false,
+        error: error instanceof Error ? error.message : 'Reconstruction failed'
+      })
+    }
+  }
+  
+  return NextResponse.json({
+    success: true,
+    message: `Processed ${results.filter(r => r.success).length}/${results.length} chunked files`,
+    results
+  })
+}
+
+// Handle regular uploads
+async function handleRegularUpload(files: any[], gymSlug: string, gymName: string) {
+  console.log('🚀 Starting regular Google Drive upload for gym:', gymName)
+  console.log('📁 Files to upload:', files.length)
+  
+  if (!gymSlug || !gymName) {
+    return NextResponse.json({ error: 'Missing gym information' }, { status: 400 })
+  }
+  
+  // Get gym ID from database
+  const { data: gym, error: gymError } = await supabase
+    .from('gyms')
+    .select('id')
+    .eq('"Gym Name"', gymName)
+    .single()
+  
+  if (gymError || !gym) {
+    console.error('❌ Gym lookup failed:', gymError)
+    return NextResponse.json({ error: 'Gym not found' }, { status: 404 })
+  }
+  
+  console.log('✅ Found gym:', gymName, 'ID:', gym.id)
+  
+  // Initialize Google Drive client
+  const drive = getDrive()
+  console.log('✅ Google Drive client initialized')
+  
+  // Create folder structure
+  const folderStructure = await createFolderStructure(gymName)
+  console.log('✅ Folder structure created:', folderStructure)
+  
+  // Upload files
+  const uploadResults = []
+  for (const file of files) {
+    try {
+      const slotName = determineSlotName(file)
+      const targetFolderId = folderStructure.rawSlotFolders[slotName]
+      
+      if (!targetFolderId) {
+        throw new Error(`No target folder found for slot: ${slotName}`)
+      }
+      
+      console.log(`📤 Uploading ${file.name} to Google Drive...`)
+      
+      const uploadResult = await uploadFileToDrive(drive, file, folderStructure)
+      uploadResults.push({
+        name: file.name,
+        success: true,
+        fileId: uploadResult.fileId,
+        slot: slotName
+      })
+      
+    } catch (error) {
+      console.error(`❌ Failed to process ${file.name}:`, error)
+      uploadResults.push({
+        name: file.name,
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+  
+  // Store upload record
+  const { error: dbError } = await supabase
+    .from('uploads')
+    .insert([{
+      upload_id: `upload_${Date.now()}`,
+      gym_id: gym.id,
+      gym_name: gymName,
+      upload_folder_id: folderStructure.timestampFolderId,
+      gym_folder_id: folderStructure.gymFolderId,
+      raw_footage_folder_id: folderStructure.rawFootageFolderId,
+      final_footage_folder_id: folderStructure.finalFootageFolderId,
+      status: 'completed',
+      files_uploaded: uploadResults.filter(r => r.success).length,
+      total_files: files.length
+    }])
+  
+  if (dbError) {
+    console.error('⚠️ Failed to store upload record:', dbError)
+  }
+  
+  const successCount = uploadResults.filter(r => r.success).length
+  console.log(`🎉 Upload completed: ${successCount}/${files.length} files successful`)
+  
+  return NextResponse.json({
+    success: true,
+    message: `Uploaded ${successCount}/${files.length} files successfully`,
+    folderStructure,
+    results: uploadResults
+  })
+}
+
+// Upload file to Google Drive
+async function uploadFileToDrive(drive: any, file: any, folderStructure: any) {
+  try {
+    const slotName = determineSlotName(file)
+    const targetFolderId = folderStructure.rawSlotFolders[slotName]
+    
+    if (!targetFolderId) {
+      throw new Error(`No target folder found for slot: ${slotName}`)
+    }
+    
+    console.log(`📤 Uploading ${file.name} to Google Drive...`)
+    console.log(`📁 Uploading to folder: ${slotName} (${targetFolderId})`)
+    
+    // Convert base64 to buffer
+    const buffer = Buffer.from(file.data, 'base64')
+    console.log(`📊 File size: ${buffer.length} bytes`)
+    
+    // Get shared drive ID
+    const sharedDriveId = '0ALOLvWQ1QTx5Uk9PVA'
+    
+    try {
+      // Try multipart upload with fixed PassThrough stream
+      const fileMetadata = {
+        name: file.name,
+        parents: [targetFolderId],
+      }
+      const media = {
+        mimeType: file.type,
+        body: new PassThrough().end(buffer), // Key fix: Pipeable stream from buffer
+      }
+      
+      console.log(`🔄 Attempting multipart upload with PassThrough stream...`)
+      
+      const response = await drive.files.create({
+        resource: fileMetadata,
+        media,
+        fields: 'id,name,size,webViewLink',
+        supportsAllDrives: true,
+        driveId: sharedDriveId, // Explicit shared drive targeting
+      } as any)
+      
+      if (!response.data || !response.data.id) {
+        throw new Error('No file ID returned from multipart upload')
+      }
+      
+      console.log(`✅ File uploaded successfully with multipart: ${response.data.name} (${response.data.id})`)
+      
+      return {
+        success: true,
+        fileId: response.data.id,
+        size: response.data.size,
+        webViewLink: response.data.webViewLink,
+        slot: slotName
+      }
+      
+    } catch (uploadError) {
+      console.error(`❌ Multipart upload failed:`, uploadError)
+      
+      // Fallback for small files: simple upload
+      if (buffer.length < 5 * 1024 * 1024) { // < 5MB
+        console.log(`🔄 Trying simple upload fallback for small file...`)
+        
+        try {
+          const fallbackResponse = await drive.files.create({
+            resource: {
+              name: file.name,
+              parents: [targetFolderId],
+            },
+            media: {
+              mimeType: file.type,
+              body: buffer, // Use buffer directly for simple upload
+            },
+            uploadType: 'media',
+            fields: 'id,name,size,webViewLink',
+            supportsAllDrives: true,
+            driveId: sharedDriveId,
+          } as any)
+          
+          if (!fallbackResponse.data || !fallbackResponse.data.id) {
+            throw new Error('No file ID returned from fallback upload')
+          }
+          
+          console.log(`✅ File uploaded successfully with fallback: ${fallbackResponse.data.name} (${fallbackResponse.data.id})`)
+          
+          return {
+            success: true,
+            fileId: fallbackResponse.data.id,
+            size: fallbackResponse.data.size,
+            webViewLink: fallbackResponse.data.webViewLink,
+            slot: slotName
+          }
+          
+        } catch (fallbackError) {
+          console.error(`❌ Fallback upload also failed:`, fallbackError)
+          throw new Error(`Fallback upload failed: ${fallbackError instanceof Error ? fallbackError.message : 'Unknown error'}`)
+        }
+      } else {
+        // File too large for simple upload fallback
+        throw new Error(`File too large (${Math.round(buffer.length / (1024 * 1024))}MB) for fallback upload`)
+      }
+    }
+    
+  } catch (error) {
+    console.error(`❌ Failed to upload ${file.name}:`, error)
+    throw error
   }
 }
