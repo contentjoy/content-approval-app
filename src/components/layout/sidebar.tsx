@@ -122,10 +122,7 @@ export function Sidebar() {
           className="w-full flex items-center gap-3 px-3 py-2 text-foreground hover:text-accent transition-colors"
           aria-label="Open profile"
         >
-          <div
-            className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold text-white"
-            style={{ backgroundColor: gymPrimaryColor || primaryColor || '#000000' }}
-          >
+          <div className="profile-icon profile-icon-md">
             {(gymName || 'G').charAt(0).toUpperCase()}
           </div>
           <span className={`text-sm whitespace-nowrap overflow-hidden ${isExpanded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}>
@@ -142,10 +139,7 @@ export function Sidebar() {
             style={{ left: isExpanded ? undefined : 8 }}
           >
             <div className="flex items-center gap-3 mb-3">
-              <div
-                className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-semibold text-white"
-                style={{ backgroundColor: gymPrimaryColor || primaryColor || '#000000' }}
-              >
+              <div className="profile-icon profile-icon-lg">
                 {(gymName || 'G').charAt(0).toUpperCase()}
               </div>
               <div>

@@ -147,7 +147,7 @@ export function PostCard({
         {/* Top Section */}
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold text-white" style={{ backgroundColor: gymPrimaryColor || '#94a3b8' }}>
+            <div className="profile-icon profile-icon-md">
               {(post['Gym Name'] || gymName || 'G').charAt(0).toUpperCase()}
             </div>
             <span className="text-sm font-semibold text-text">{post['Gym Name'] || gymName || 'Gym'}</span>

@@ -91,10 +91,9 @@ export function Header() {
             <button
               onClick={() => setProfileOpen(v => !v)}
               aria-label="Open account menu"
-              className="h-[28px] w-[28px] rounded-full overflow-hidden flex items-center justify-center text-white border border-[var(--border)]"
-              style={{ backgroundColor: 'var(--primary-color, #000000)' }}
+              className="profile-icon profile-icon-md border border-[var(--border)]"
             >
-              <span className="text-sm font-bold leading-none">
+              <span className="leading-none">
                 {(user?.gymName || gymName || 'G').charAt(0).toUpperCase()}
               </span>
             </button>

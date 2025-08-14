@@ -6,6 +6,7 @@ import { getGymBySlug, getAgencyBranding } from '@/lib/database'
 interface BrandingData {
   whiteLogo: string | null
   blackLogo: string | null
+  agencyLogo: string | null
   primaryColor: string | null
   agencyName: string | null
   gymName: string | null
@@ -31,6 +32,7 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
   const [brandingData, setBrandingData] = useState<BrandingData>({
     whiteLogo: null,
     blackLogo: null,
+    agencyLogo: null,
     primaryColor: null,
     agencyName: null,
     gymName: null,
@@ -113,6 +115,13 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
       root.style.setProperty('--brand-primary-light', lightenColor(defaultColor, 0.1))
       root.style.setProperty('--brand-primary-dark', darkenColor(defaultColor, 0.1))
     }
+
+    // Set gym primary color CSS variable
+    if (data.gymPrimaryColor) {
+      root.style.setProperty('--gym-primary-color', data.gymPrimaryColor)
+    } else {
+      root.style.setProperty('--gym-primary-color', 'var(--primary-color)')
+    }
   }, [lightenColor, darkenColor])
 
   const fetchBranding = useCallback(async (slug: string) => {
@@ -136,6 +145,7 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
       const newBrandingData: BrandingData = {
         whiteLogo: (gym as any)['White Logo URL'] || null,
         blackLogo: (gym as any)['Black Logo URL'] || null,
+        agencyLogo: agency['Logo'],
         primaryColor: agency['Primary Color'],
         agencyName: agency['Partner name'],
         gymName: gym['Gym Name'],

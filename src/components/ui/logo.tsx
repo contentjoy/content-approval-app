@@ -27,10 +27,10 @@ export function Logo({
   className = '',
   useDarkLogo = false
 }: LogoProps) {
-  const { whiteLogo, blackLogo, agencyName, gymName, isLoading } = useBranding()
+  const { whiteLogo, blackLogo, agencyLogo, agencyName, gymName, isLoading } = useBranding()
   
-  // Determine which logo to use based on theme preference
-  const logoSrc = useDarkLogo ? (blackLogo || whiteLogo) : (whiteLogo || blackLogo)
+  // Prioritize agency logo, then gym logos, then fallback
+  const logoSrc = agencyLogo || (useDarkLogo ? (blackLogo || whiteLogo) : (whiteLogo || blackLogo))
   
   if (isLoading) {
     return <div className={`animate-pulse bg-muted rounded ${sizeClasses[size]}`} />

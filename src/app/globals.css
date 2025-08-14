@@ -81,6 +81,28 @@
   --brand-primary-dark: var(--accent-strong);
 }
 
+/* Reusable profile icon styling */
+.profile-icon {
+  @apply rounded-full flex items-center justify-center text-white font-semibold;
+  background-color: var(--gym-primary-color, var(--primary-color, #000000));
+}
+
+.profile-icon-sm {
+  @apply h-6 w-6 text-xs;
+}
+
+.profile-icon-md {
+  @apply h-8 w-8 text-sm;
+}
+
+.profile-icon-lg {
+  @apply h-10 w-10 text-base;
+}
+
+.profile-icon-xl {
+  @apply h-12 w-12 text-lg;
+}
+
 /* Dark theme overrides (activated by data-theme="dark" on <html>) */
 [data-theme="dark"] {
   --geist-background: #000;
