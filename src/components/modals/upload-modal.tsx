@@ -186,8 +186,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               if (file.size > 5 * 1024 * 1024) {
                 console.log(`📦 Large file detected (${(file.size / (1024 * 1024)).toFixed(1)}MB), using chunked upload...`)
                 
-                // Split large files into chunks
-                const chunkSize = 4 * 1024 * 1024 // 4MB chunks
+                // Split large files into smaller chunks (1MB to respect server limits)
+                const chunkSize = 1 * 1024 * 1024 // 1MB chunks (much smaller than 4MB)
                 const chunks = []
                 const buffer = Buffer.from(await file.data.arrayBuffer())
                 

@@ -8,8 +8,11 @@ export const maxDuration = 300; // 5 minutes max
 
 
 export async function POST(req: NextRequest) {
-  // Increase size limit for large video files
-  const maxSize = 100 * 1024 * 1024 // 100MB limit
+  // Read max upload size from ENV (default to 2MB if not set)
+  const maxUploadSize = parseInt(process.env.MAX_UPLOAD_SIZE || '2048') * 1024 // Convert KB to bytes
+  const maxSize = Math.min(maxUploadSize, 100 * 1024 * 1024) // Cap at 100MB for safety
+  
+  console.log(`📏 Max upload size: ${maxUploadSize / 1024}KB (${maxSize / (1024 * 1024)}MB)`)
   
   try {
     const body = await req.json()
@@ -31,11 +34,11 @@ export async function POST(req: NextRequest) {
     const hasChunks = files.some((file: any) => file.isChunk)
     if (hasChunks) {
       console.log('📦 Processing chunked upload...')
-      return await handleChunkedUpload(files, gymSlug, gymName)
+      return await handleChunkedUpload(files, gymSlug, gymName, maxUploadSize)
     }
     
     // Regular upload flow
-    return await handleRegularUpload(files, gymSlug, gymName)
+    return await handleRegularUpload(files, gymSlug, gymName, maxUploadSize)
     
   } catch (error) {
     console.error('❌ Upload error:', error)
@@ -162,7 +165,7 @@ async function createOrFindFolder(drive: any, name: string, parentId: string, sh
 }
 
 // Handle chunked uploads
-async function handleChunkedUpload(files: any[], gymSlug: string, gymName: string) {
+async function handleChunkedUpload(files: any[], gymSlug: string, gymName: string, maxUploadSize: number) {
   console.log('📦 Processing chunked upload...')
   
   // Group chunks by original file
@@ -203,7 +206,8 @@ async function handleChunkedUpload(files: any[], gymSlug: string, gymName: strin
       const uploadResult = await uploadFileToDrive(
         getDrive(),
         reconstructedFile,
-        await createFolderStructure(gymName)
+        await createFolderStructure(gymName),
+        maxUploadSize
       )
       
       results.push({
@@ -230,7 +234,7 @@ async function handleChunkedUpload(files: any[], gymSlug: string, gymName: strin
 }
 
 // Handle regular uploads
-async function handleRegularUpload(files: any[], gymSlug: string, gymName: string) {
+async function handleRegularUpload(files: any[], gymSlug: string, gymName: string, maxUploadSize: number) {
   console.log('🚀 Starting regular Google Drive upload for gym:', gymName)
   console.log('📁 Files to upload:', files.length)
   
@@ -273,7 +277,7 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
       
       console.log(`📤 Uploading ${file.name} to Google Drive...`)
       
-      const uploadResult = await uploadFileToDrive(drive, file, folderStructure)
+      const uploadResult = await uploadFileToDrive(drive, file, folderStructure, maxUploadSize)
       uploadResults.push({
         name: file.name,
         success: true,
@@ -323,7 +327,7 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
 }
 
 // Upload file to Google Drive
-async function uploadFileToDrive(drive: any, file: any, folderStructure: any) {
+async function uploadFileToDrive(drive: any, file: any, folderStructure: any, maxUploadSize: number) {
   try {
     const slotName = determineSlotName(file)
     const targetFolderId = folderStructure.rawSlotFolders[slotName]
@@ -381,7 +385,7 @@ async function uploadFileToDrive(drive: any, file: any, folderStructure: any) {
       console.error(`❌ Multipart upload failed:`, uploadError)
       
       // Fallback for small files: simple upload
-      if (buffer.length < 5 * 1024 * 1024) { // < 5MB
+      if (buffer.length < maxUploadSize) { // Use maxUploadSize for fallback
         console.log(`🔄 Trying simple upload fallback for small file...`)
         
         try {
