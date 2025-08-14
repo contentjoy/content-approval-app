@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/auth-context";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { ToastProvider } from "@/components/ui/toast";
 import { ModalContainer } from "@/components/modals/modal-container";
+import { UploadProvider } from "@/contexts/upload-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,10 +55,12 @@ export default function RootLayout({
           <AuthProvider>
             <ToastProvider>
               <BrandingProvider>
-                <main className="flex-1">
-                  {children}
-                </main>
-                <ModalContainer />
+                <UploadProvider>
+                  <main className="flex-1">
+                    {children}
+                  </main>
+                  <ModalContainer />
+                </UploadProvider>
               </BrandingProvider>
             </ToastProvider>
           </AuthProvider>

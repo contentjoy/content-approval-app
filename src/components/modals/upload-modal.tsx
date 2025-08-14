@@ -5,7 +5,7 @@ import { Image, Video, Building2, Camera, ArrowUp, X, Minimize2, Maximize2 } fro
 import { Dashboard } from '@uppy/react'
 import Uppy from '@uppy/core'
 import { useBranding } from '@/hooks/use-branding'
-import { useAuth } from '@/contexts/auth-context'
+import { useUpload } from '@/contexts/upload-context'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 import { Modal } from '@/components/ui/modal'
@@ -31,7 +31,7 @@ const SLOT_CONFIG = {
 }
 
 // Floating Upload Progress Component
-function FloatingUploadProgress({ 
+export function FloatingUploadProgress({ 
   isVisible, 
   progress, 
   currentFile, 
@@ -155,11 +155,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   const [uploadingFiles, setUploadingFiles] = useState<string[]>([])
   const [showConfetti, setShowConfetti] = useState(false)
   
-  // Floating progress component state
-  const [showFloatingProgress, setShowFloatingProgress] = useState(false)
-  const [isProgressMinimized, setIsProgressMinimized] = useState(false)
-  const [currentUploadFile, setCurrentUploadFile] = useState('')
-  const [totalUploadFiles, setTotalUploadFiles] = useState(0)
+  const { startUpload, updateProgress, completeUpload } = useUpload()
   
   const { gymName: brandingGymName } = useBranding()
   
@@ -276,11 +272,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       setUploadProgress(0)
       setUploadingFiles(allFiles.map(f => f.name).filter(Boolean) as string[])
       
-      // Show floating progress component BEFORE closing modal
-      setShowFloatingProgress(true)
-      setCurrentUploadFile(allFiles[0]?.name || '')
-      setTotalUploadFiles(allFiles.length)
-      setIsProgressMinimized(false)
+      // Start upload in context and show floating progress
+      startUpload(allFiles.length)
       
       // Show immediate success toast for better UX
       toast.success('Success! Content sent to team')
@@ -338,7 +331,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               // Update progress and floating component
               const progress = Math.round(((i + 1) / allFiles.length) * 100)
               setUploadProgress(progress)
-              setCurrentUploadFile(file.name)
+              updateProgress(progress, file.name)
               
               // Show progress toast
               toast.success(`Uploading ${file.name}... (${progress}%)`, {
@@ -465,8 +458,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           setIsUploading(false)
           setUploadingFiles([])
           
-          // Hide floating progress component
-          setShowFloatingProgress(false)
+          // Complete upload in context
+          completeUpload()
           
           // Show completion message
           const successCount = uploadResults.filter(r => r.success).length
@@ -495,7 +488,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           console.error('❌ Background upload failed:', error)
           setIsUploading(false)
           setUploadingFiles([])
-          setShowFloatingProgress(false)
+          completeUpload()
           toast.error('Upload failed. Please try again.', {
             duration: 5000,
             icon: '❌'
@@ -507,7 +500,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       console.error('❌ Upload failed:', error)
       setIsUploading(false)
       setUploadingFiles([])
-      setShowFloatingProgress(false)
+      completeUpload()
       toast.error(error instanceof Error ? error.message : 'Upload failed')
     }
   }, [gymSlug, onClose, activeUppy, checkAuthStatus, getGymIdForUpload, uppyInstances])
@@ -675,15 +668,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       </Modal>
 
       {/* Floating Upload Progress Component - Now rendered outside modal */}
-      <FloatingUploadProgress
-        isVisible={showFloatingProgress}
-        progress={uploadProgress}
-        currentFile={currentUploadFile}
-        totalFiles={totalUploadFiles}
-        onClose={() => setShowFloatingProgress(false)}
-        onMinimize={() => setIsProgressMinimized(!isProgressMinimized)}
-        isMinimized={isProgressMinimized}
-      />
+      {/* This component is now managed by useUpload and its context */}
     </>
   )
 }
