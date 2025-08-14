@@ -333,7 +333,8 @@ async function handleFolderCreation(files: any[], gymSlug: string, gymName: stri
         results.push({
           name: folderName,
           success: true,
-          fileId: sessionFolderId // Use fileId for consistency with other responses
+          fileId: sessionFolderId, // Use fileId for consistency with other responses
+          folderStructure: folderStructure // Include the complete folder structure for reuse
         })
         console.log(`✅ Session folder created: ${folderName} (${sessionFolderId})`)
       } catch (error) {
@@ -356,7 +357,8 @@ async function handleFolderCreation(files: any[], gymSlug: string, gymName: stri
   return NextResponse.json({
     success: true,
     message: `Processed ${results.filter(r => r.success).length}/${results.length} folder creations`,
-    results
+    results,
+    folderStructure: results[0]?.folderStructure || null // Include folder structure for reuse
   })
 }
 

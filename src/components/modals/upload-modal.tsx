@@ -30,6 +30,21 @@ const SLOT_CONFIG = {
   'Facility Videos': { icon: Camera, maxFiles: 20, allowedTypes: ['.mp4', '.mov', '.avi', '.mkv', '.webm'] }
 }
 
+// Function to determine slot name based on file type
+function determineSlotName(file: any): string {
+  const isImage = file.type.startsWith('image/');
+  const isVideo = file.type.startsWith('video/');
+  
+  if (isImage) {
+    return 'Photos';
+  } else if (isVideo) {
+    return 'Videos';
+  } else {
+    // Default to Photos for unknown types
+    return 'Photos';
+  }
+}
+
 // Floating Upload Progress Component
 export function FloatingUploadProgress({ 
   isVisible, 
@@ -286,13 +301,13 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         try {
           const uploadResults = []
           
-          // Create single folder structure for this upload session
+          // Create single folder structure for this upload session ONCE
           console.log('🏗️ Creating folder structure for upload session...')
           const sessionTimestamp = new Date().toISOString().split('T')[0] + 'T' + new Date().toTimeString().split(' ')[0].replace(/:/g, '-')
           const sessionFolderName = `Upload Session ${sessionTimestamp}`
           
-          // Create the root session folder first
-          const sessionFolderResponse = await fetch('/api/upload-to-drive', {
+          // Create the complete folder structure first - this will be reused for all files
+          const folderStructureResponse = await fetch('/api/upload-to-drive', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -309,24 +324,32 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             })
           })
           
-          if (!sessionFolderResponse.ok) {
-            throw new Error('Failed to create session folder')
+          if (!folderStructureResponse.ok) {
+            throw new Error('Failed to create folder structure')
           }
           
-          const sessionFolderResult = await sessionFolderResponse.json()
-          const sessionFolderId = sessionFolderResult.results[0]?.fileId
+          const folderStructureResult = await folderStructureResponse.json()
+          const sessionFolderId = folderStructureResult.results[0]?.fileId
           
           if (!sessionFolderId) {
             throw new Error('No session folder ID returned')
           }
           
-          console.log('✅ Session folder created:', sessionFolderId)
+          console.log('✅ Folder structure created:', sessionFolderId)
           
-          // Now upload all files to the same session folder
+          // Get the folder structure details for file placement
+          const folderStructure = folderStructureResult.folderStructure
+          if (!folderStructure) {
+            throw new Error('No folder structure details returned')
+          }
+          
+          console.log('📁 Using folder structure:', folderStructure)
+          
+          // Now upload all files to the appropriate folders based on their type
           for (let i = 0; i < allFiles.length; i++) {
             const file = allFiles[i]
             try {
-              console.log(`📤 Uploading ${file.name} to session folder...`)
+              console.log(`📤 Uploading ${file.name} to appropriate folder...`)
               
               // Update progress and floating component
               const progress = Math.round(((i + 1) / allFiles.length) * 100)
@@ -338,6 +361,16 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 duration: 2000,
                 icon: '📤'
               })
+              
+              // Determine which folder to use based on file type and slot
+              const slotName = determineSlotName(file)
+              const targetFolderId = folderStructure.rawSlotFolders[slotName]
+              
+              if (!targetFolderId) {
+                throw new Error(`No folder found for slot: ${slotName}`)
+              }
+              
+              console.log(`📁 Uploading ${file.name} to ${slotName} folder (${targetFolderId})`)
               
               // For large files (>5MB), use chunked upload
               if (file.size > 5 * 1024 * 1024) {
@@ -375,7 +408,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                       }],
                       gymSlug,
                       gymName: authStatus.gymName,
-                      sessionFolderId // Pass sessionFolderId for chunked uploads
+                      sessionFolderId: targetFolderId // Use the specific slot folder
                     })
                   })
                   
@@ -403,7 +436,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 })
                 
               } else {
-                // Small files use regular upload
+                // Small files use regular upload to the specific slot folder
                 const filesForUpload = [{
                   name: file.name,
                   type: file.type,
@@ -418,7 +451,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                     files: filesForUpload,
                     gymSlug,
                     gymName: authStatus.gymName,
-                    sessionFolderId // Pass sessionFolderId for regular uploads
+                    sessionFolderId: targetFolderId // Use the specific slot folder
                   })
                 })
                 
