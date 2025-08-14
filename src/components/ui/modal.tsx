@@ -64,7 +64,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`w-full ${sizeClasses[size]} max-h-[95vh] sm:max-h-[90vh] bg-[var(--surface)] border border-border rounded-md overflow-hidden`}
+            className={`w-full h-full sm:h-auto ${sizeClasses[size]} sm:max-h-[90vh] bg-[var(--surface)] border border-border rounded-none sm:rounded-md overflow-hidden`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
@@ -83,8 +83,8 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
               </button>
             </div>
 
-            {/* Content - scrollable on mobile */}
-            <div className="p-4 sm:p-5 lg:p-6 overflow-y-auto max-h-[calc(95vh-4rem)] sm:max-h-[calc(90vh-4rem)]">
+            {/* Content - scrollable on mobile with better bottom padding */}
+            <div className="p-4 sm:p-5 lg:p-6 overflow-y-auto h-full sm:h-auto max-h-[calc(100vh-4rem)] sm:max-h-[calc(90vh-4rem)] pb-20 sm:pb-6">
               {children}
             </div>
           </motion.div>

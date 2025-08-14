@@ -663,8 +663,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             </div>
           </div>
           
-          {/* Action Buttons - Responsive spacing */}
-          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 border-t">
+          {/* Action Buttons - Responsive spacing with extra bottom padding on mobile */}
+          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6 pb-4 sm:pb-0 border-t">
             <button
               onClick={onClose}
               className="w-full sm:w-auto px-6 sm:px-8 py-2 sm:py-3 rounded-xl border border-border hover:bg-muted transition-colors font-medium"
