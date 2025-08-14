@@ -158,7 +158,7 @@ export async function ensureGymUploadStructure(drive: drive_v3.Drive, p: {
   }
 }
 
-// Direct upload to shared drive - bypasses service account storage quota issues
+// SIMPLE, WORKING file upload to Google Drive
 export async function uploadFileDirectly(drive: drive_v3.Drive, p: {
   filename: string;
   mime: string;
@@ -167,14 +167,15 @@ export async function uploadFileDirectly(drive: drive_v3.Drive, p: {
   sizeBytes?: number;
 }): Promise<{ fileId: string }> {
   try {
-    console.log(`🚀 Starting direct upload for: ${p.filename}`);
+    console.log(`🚀 Starting SIMPLE upload for: ${p.filename}`);
     
-    // Convert body to Buffer first, then to readable stream
+    // Convert ReadableStream to Buffer - SIMPLE APPROACH
     let fileBuffer: Buffer;
+    
     if (p.body instanceof Buffer) {
       fileBuffer = p.body;
     } else if (p.body instanceof ReadableStream) {
-      // Convert ReadableStream to Buffer
+      // Convert ReadableStream to Buffer - NO COMPLEX STREAM STUFF
       const chunks: Uint8Array[] = [];
       const reader = p.body.getReader();
       
@@ -184,19 +185,14 @@ export async function uploadFileDirectly(drive: drive_v3.Drive, p: {
         chunks.push(value);
       }
       
-      // Combine chunks into single buffer
       fileBuffer = Buffer.concat(chunks);
     } else {
       throw new Error('Invalid body type - expected Buffer or ReadableStream');
     }
     
-    // Create readable stream from Buffer for Google Drive API
-    const { Readable } = await import('stream');
-    const uploadBody = Readable.from(fileBuffer);
+    console.log(`📤 Uploading ${fileBuffer.length} bytes to Google Drive...`);
     
-    console.log(`📤 Uploading ${fileBuffer.length} bytes to shared drive...`);
-    
-    // Upload directly to shared drive using the API client
+    // SIMPLE: Upload the buffer directly to Google Drive
     const res = await drive.files.create({
       requestBody: {
         name: p.filename,
@@ -204,7 +200,7 @@ export async function uploadFileDirectly(drive: drive_v3.Drive, p: {
       },
       media: {
         mimeType: p.mime,
-        body: uploadBody,
+        body: fileBuffer, // Just pass the buffer directly
       },
       supportsAllDrives: true,
       fields: 'id,name,size',
