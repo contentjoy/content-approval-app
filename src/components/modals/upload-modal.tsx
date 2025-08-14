@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react'
-import { Image, Video, Building2, Camera, ArrowUp } from 'lucide-react'
+import { Image, Video, Building2, Camera, ArrowUp, X, Minimize2, Maximize2 } from 'lucide-react'
 import { Dashboard } from '@uppy/react'
 import Uppy from '@uppy/core'
 import { useBranding } from '@/hooks/use-branding'
@@ -30,12 +30,137 @@ const SLOT_CONFIG = {
   'Facility Videos': { icon: Camera, maxFiles: 20, allowedTypes: ['.mp4', '.mov', '.avi', '.mkv', '.webm'] }
 }
 
+// Floating Upload Progress Component
+function FloatingUploadProgress({ 
+  isVisible, 
+  progress, 
+  currentFile, 
+  totalFiles, 
+  onClose, 
+  onMinimize, 
+  isMinimized 
+}: {
+  isVisible: boolean
+  progress: number
+  currentFile: string
+  totalFiles: number
+  onClose: () => void
+  onMinimize: () => void
+  isMinimized: boolean
+}) {
+  if (!isVisible) return null
+
+  if (isMinimized) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50 bg-background border border-border rounded-lg shadow-xl p-3 min-w-[200px]">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-foreground">Uploading...</span>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={onMinimize}
+              className="p-1 hover:bg-muted rounded transition-colors"
+              title="Expand"
+            >
+              <Maximize2 className="w-4 h-4 text-muted-foreground" />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-muted rounded transition-colors"
+              title="Close"
+            >
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+        <div className="w-full bg-muted rounded-full h-2">
+          <div 
+            className="bg-primary h-2 rounded-full transition-all duration-300 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div className="text-xs text-muted-foreground mt-1">
+          {progress}% • {currentFile}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 bg-background border border-border rounded-lg shadow-xl p-4 min-w-[320px] max-w-[400px]">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="font-semibold text-foreground">Uploading Content</h3>
+          <p className="text-sm text-muted-foreground">
+            {currentFile} • {progress}% complete
+          </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={onMinimize}
+            className="p-2 hover:bg-muted rounded transition-colors"
+            title="Minimize"
+          >
+            <Minimize2 className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-muted rounded transition-colors"
+            title="Close"
+          >
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="space-y-3">
+        <div className="flex justify-between text-sm">
+          <span className="text-muted-foreground">Overall Progress</span>
+          <span className="font-medium">{progress}%</span>
+        </div>
+        <div className="w-full bg-muted rounded-full h-3">
+          <div 
+            className="bg-primary h-3 rounded-full transition-all duration-300 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        
+        {/* File Progress */}
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Current File</span>
+            <span className="font-medium">{currentFile}</span>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {Math.ceil((progress / 100) * totalFiles)} of {totalFiles} files processed
+          </div>
+        </div>
+
+        {/* Estimated Time */}
+        {progress > 0 && progress < 100 && (
+          <div className="text-xs text-muted-foreground">
+            Estimated time remaining: {Math.ceil((100 - progress) / 10)} minutes
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   const [activeSlot, setActiveSlot] = useState<SlotName>('Photos')
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadingFiles, setUploadingFiles] = useState<string[]>([])
   const [showConfetti, setShowConfetti] = useState(false)
+  
+  // Floating progress component state
+  const [showFloatingProgress, setShowFloatingProgress] = useState(false)
+  const [isProgressMinimized, setIsProgressMinimized] = useState(false)
+  const [currentUploadFile, setCurrentUploadFile] = useState('')
+  const [totalUploadFiles, setTotalUploadFiles] = useState(0)
+  
   const { gymName: brandingGymName } = useBranding()
   const { user } = useAuth()
   const userGymName = user?.gymName
@@ -160,6 +285,12 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       setUploadProgress(0)
       setUploadingFiles(allFiles.map(f => f.name).filter(Boolean) as string[])
       
+      // Show floating progress component
+      setShowFloatingProgress(true)
+      setCurrentUploadFile(allFiles[0]?.name || '')
+      setTotalUploadFiles(allFiles.length)
+      setIsProgressMinimized(false)
+      
       // Show immediate success toast for better UX
       toast.success('Success! Content sent to team')
       
@@ -176,14 +307,15 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             try {
               console.log(`📤 Uploading ${file.name}...`)
               
-              // Update progress
+              // Update progress and floating component
               const progress = Math.round(((i + 1) / allFiles.length) * 100)
               setUploadProgress(progress)
+              setCurrentUploadFile(file.name)
               
               // Show progress toast
               toast.success(`Uploading ${file.name}... (${progress}%)`, {
                 duration: 2000,
-                icon: '📤'
+                icon: '��'
               })
               
               // For large files (>5MB), use chunked upload
@@ -303,6 +435,9 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           setIsUploading(false)
           setUploadingFiles([])
           
+          // Hide floating progress component
+          setShowFloatingProgress(false)
+          
           // Show completion message
           const successCount = uploadResults.filter(r => r.success).length
           if (successCount > 0) {
@@ -348,168 +483,170 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   if (!isOpen) return null
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Upload Content">
-      <div className="space-y-8">
-        {/* Content Layout - Much better desktop spacing */}
-        <div className="grid grid-cols-1 2xl:grid-cols-6 gap-10">
-          {/* Slot Selector - Better proportions on desktop */}
-          <div className="2xl:col-span-2 space-y-6">
-            <h3 className="font-semibold text-foreground text-xl">Content Types</h3>
-            <div className="space-y-4">
-              {SLOT_NAMES.map((slotName) => {
-                const config = SLOT_CONFIG[slotName]
-                const Icon = config.icon
-                const isActive = activeSlot === slotName
-                const fileCount = uppyInstances[slotName]?.getFiles().length || 0
-                
-                return (
-                  <button
-                    key={slotName}
-                    onClick={() => setActiveSlot(slotName as SlotName)}
-                    className={`w-full p-5 rounded-xl border-2 transition-all duration-300 text-left hover:scale-[1.02] ${
-                      isActive 
-                        ? 'border-primary bg-primary/10 shadow-xl' 
-                        : 'border-border hover:border-primary/50 hover:bg-muted/50'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-4">
-                      <Icon className={`w-7 h-7 ${
-                        isActive ? 'text-primary' : 'text-muted-foreground'
-                      }`} />
-                      <div className="flex-1 min-w-0">
-                        <div className={`font-semibold text-lg ${
-                          isActive ? 'text-foreground' : 'text-foreground/80'
-                        }`}>
-                          {slotName}
-                        </div>
-                        <div className="text-sm text-muted-foreground mt-2">
-                          {fileCount} files selected
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {config.allowedTypes.join(', ')}
+    <>
+      <Modal isOpen={isOpen} onClose={onClose} title="Upload Content">
+        <div className="space-y-8">
+          {/* Content Layout - Much better desktop spacing */}
+          <div className="grid grid-cols-1 2xl:grid-cols-6 gap-10">
+            {/* Slot Selector - Better proportions on desktop */}
+            <div className="2xl:col-span-2 space-y-6">
+              <h3 className="font-semibold text-foreground text-xl">Content Types</h3>
+              <div className="space-y-4">
+                {SLOT_NAMES.map((slotName) => {
+                  const config = SLOT_CONFIG[slotName]
+                  const Icon = config.icon
+                  const isActive = activeSlot === slotName
+                  const fileCount = uppyInstances[slotName]?.getFiles().length || 0
+                  
+                  return (
+                    <button
+                      key={slotName}
+                      onClick={() => setActiveSlot(slotName as SlotName)}
+                      className={`w-full p-5 rounded-xl border-2 transition-all duration-300 text-left hover:scale-[1.02] ${
+                        isActive 
+                          ? 'border-primary bg-primary/10 shadow-xl' 
+                          : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-4">
+                        <Icon className={`w-7 h-7 ${
+                          isActive ? 'text-primary' : 'text-muted-foreground'
+                        }`} />
+                        <div className="flex-1 min-w-0">
+                          <div className={`font-semibold text-lg ${
+                            isActive ? 'text-foreground' : 'text-foreground/80'
+                          }`}>
+                            {slotName}
+                          </div>
+                          <div className="text-sm text-muted-foreground mt-2">
+                            {fileCount} files selected
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {config.allowedTypes.join(', ')}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </button>
-                )
-              })}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+            
+            {/* Upload Area - Much more spacious on desktop */}
+            <div className="2xl:col-span-4 space-y-8">
+              <div>
+                <h3 className="text-2xl font-semibold text-foreground mb-3">{activeSlot}</h3>
+                <p className="text-muted-foreground text-lg">
+                  Upload {activeSlot.toLowerCase()} for your content library
+                </p>
+              </div>
+              
+              {/* Upload Zone - Larger and more prominent */}
+              <div className="border-2 border-dashed border-muted-foreground/30 rounded-2xl p-10 text-center hover:border-primary/50 transition-colors">
+                {/* Custom CSS to override Uppy Dashboard styling */}
+                <style jsx>{`
+                  .uppy-Dashboard-inner {
+                    background: transparent !important;
+                  }
+                  .uppy-Dashboard-AddFiles {
+                    background: transparent !important;
+                    border: none !important;
+                  }
+                  .uppy-Dashboard-AddFiles-title {
+                    color: hsl(var(--foreground)) !important;
+                    background: transparent !important;
+                  }
+                  .uppy-Dashboard-AddFiles-list {
+                    background: transparent !important;
+                  }
+                  .uppy-Dashboard-AddFiles-item {
+                    background: hsl(var(--muted)) !important;
+                    border: 1px solid hsl(var(--border)) !important;
+                    color: hsl(var(--foreground)) !important;
+                  }
+                  .uppy-Dashboard-AddFiles-itemName {
+                    color: hsl(var(--foreground)) !important;
+                  }
+                  .uppy-Dashboard-AddFiles-itemSize {
+                    color: hsl(var(--muted-foreground)) !important;
+                  }
+                  .uppy-Dashboard-AddFiles-itemRemove {
+                    color: hsl(var(--muted-foreground)) !important;
+                  }
+                  .uppy-Dashboard-AddFiles-itemRemove:hover {
+                    color: hsl(var(--foreground)) !important;
+                  }
+                `}</style>
+                
+                <Dashboard
+                  uppy={activeUppy}
+                  plugins={['Webcam']}
+                  width="100%"
+                  height="400px"
+                  proudlyDisplayPoweredByUppy={false}
+                  showProgressDetails={false}
+                  showRemoveButtonAfterComplete={false}
+                  hideUploadButton={true}
+                  doneButtonHandler={() => {}}
+                  note="Drag and drop files here, or click to browse"
+                  theme="dark"
+                />
+              </div>
+              
+              {/* File Info */}
+              <div className="text-sm text-muted-foreground text-center">
+                Accepted file types: {SLOT_CONFIG[activeSlot]?.allowedTypes.join(', ')}. Maximum size: 50MB.
+              </div>
+              
+              {/* Upload Progress - Removed since modal closes quickly */}
+              {/* Progress is now shown in toast notifications */}
             </div>
           </div>
           
-          {/* Upload Area - Much more spacious on desktop */}
-          <div className="2xl:col-span-4 space-y-8">
-            <div>
-              <h3 className="text-2xl font-semibold text-foreground mb-3">{activeSlot}</h3>
-              <p className="text-muted-foreground text-lg">
-                Upload {activeSlot.toLowerCase()} for your content library
-              </p>
-            </div>
-            
-            {/* Upload Zone - Larger and more prominent */}
-            <div className="border-2 border-dashed border-muted-foreground/30 rounded-2xl p-10 text-center hover:border-primary/50 transition-colors">
-              {/* Custom CSS to override Uppy Dashboard styling */}
-              <style jsx>{`
-                .uppy-Dashboard-inner {
-                  background: transparent !important;
-                }
-                .uppy-Dashboard-AddFiles {
-                  background: transparent !important;
-                  border: none !important;
-                }
-                .uppy-Dashboard-AddFiles-title {
-                  color: hsl(var(--foreground)) !important;
-                  background: transparent !important;
-                }
-                .uppy-Dashboard-AddFiles-list {
-                  background: transparent !important;
-                }
-                .uppy-Dashboard-AddFiles-item {
-                  background: hsl(var(--muted)) !important;
-                  border: 1px solid hsl(var(--border)) !important;
-                  color: hsl(var(--foreground)) !important;
-                }
-                .uppy-Dashboard-AddFiles-itemName {
-                  color: hsl(var(--foreground)) !important;
-                }
-                .uppy-Dashboard-AddFiles-itemSize {
-                  color: hsl(var(--muted-foreground)) !important;
-                }
-                .uppy-Dashboard-AddFiles-itemRemove {
-                  color: hsl(var(--muted-foreground)) !important;
-                }
-                .uppy-Dashboard-AddFiles-itemRemove:hover {
-                  color: hsl(var(--foreground)) !important;
-                }
-              `}</style>
-              
-              <Dashboard
-                uppy={activeUppy}
-                plugins={['Webcam']}
-                width="100%"
-                height="400px"
-                proudlyDisplayPoweredByUppy={false}
-                showProgressDetails={false}
-                showRemoveButtonAfterComplete={false}
-                hideUploadButton={true}
-                doneButtonHandler={() => {}}
-                note="Drag and drop files here, or click to browse"
-                theme="dark"
-              />
-            </div>
-            
-            {/* File Info */}
-            <div className="text-sm text-muted-foreground text-center">
-              Accepted file types: {SLOT_CONFIG[activeSlot]?.allowedTypes.join(', ')}. Maximum size: 50MB.
-            </div>
-            
-            {/* Upload Progress - Removed since modal closes quickly */}
-            {/* Progress is now shown in toast notifications */}
+          {/* Action Buttons - Better spacing */}
+          <div className="flex justify-end space-x-4 pt-6 border-t">
+            <button
+              onClick={onClose}
+              className="px-8 py-3 rounded-xl border border-border hover:bg-muted transition-colors font-medium"
+              disabled={isUploading}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleUpload}
+              disabled={Object.values(uppyInstances).every(uppy => uppy.getFiles().length === 0) || isUploading}
+              className={`px-10 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-3 ${
+                Object.values(uppyInstances).every(uppy => uppy.getFiles().length === 0) || isUploading
+                  ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                  : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl'
+              }`}
+            >
+              {isUploading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  <span>Uploading...</span>
+                </>
+              ) : (
+                <>
+                  <ArrowUp className="w-5 h-5" />
+                  <span>Upload Content</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
-        
-        {/* Action Buttons - Better spacing */}
-        <div className="flex justify-end space-x-4 pt-6 border-t">
-          <button
-            onClick={onClose}
-            className="px-8 py-3 rounded-xl border border-border hover:bg-muted transition-colors font-medium"
-            disabled={isUploading}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleUpload}
-            disabled={Object.values(uppyInstances).every(uppy => uppy.getFiles().length === 0) || isUploading}
-            className={`px-10 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-3 ${
-              Object.values(uppyInstances).every(uppy => uppy.getFiles().length === 0) || isUploading
-                ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl'
-            }`}
-          >
-            {isUploading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                <span>Uploading...</span>
-              </>
-            ) : (
-              <>
-                <ArrowUp className="w-5 h-5" />
-                <span>Upload Content</span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-      
-      {/* Confetti */}
-      {showConfetti && (
-        <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
-          <div className="bg-green-500 text-white px-8 py-4 rounded-lg shadow-2xl text-center animate-bounce">
-            <div className="text-2xl mb-2">🎉</div>
-            <div className="font-bold">Upload Successful!</div>
-            <div className="text-sm opacity-90">Your content has been sent to the team</div>
-          </div>
-        </div>
-      )}
-    </Modal>
+      </Modal>
+
+      {/* Floating Upload Progress Component */}
+      <FloatingUploadProgress
+        isVisible={showFloatingProgress}
+        progress={uploadProgress}
+        currentFile={currentUploadFile}
+        totalFiles={totalUploadFiles}
+        onClose={() => setShowFloatingProgress(false)}
+        onMinimize={() => setIsProgressMinimized(!isProgressMinimized)}
+        isMinimized={isProgressMinimized}
+      />
+    </>
   )
 }
