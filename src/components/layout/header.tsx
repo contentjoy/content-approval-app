@@ -21,30 +21,21 @@ import { useToast } from '@/components/ui/toast'
 export function Header() {
   const { gymName, isLoading } = useBranding()
   const { user } = useAuth()
-  const params = useParams()
-  const pathname = usePathname()
-  const gymSlug = typeof params.gymSlug === 'string' ? params.gymSlug : null
-  const { total, approved } = usePostStats(gymSlug)
-  const { openModal, approvedPosts, isUploading } = useModalStore()
-  const { showToast } = useToast()
-  const [menuOpen, setMenuOpen] = React.useState(false)
+  const { openModal, approvedPosts } = useModalStore()
+  
+  // Get gym slug from URL
+  const gymSlug = typeof window !== 'undefined' ? window.location.pathname.split('/')[1] : null
+  const { approved, total } = usePostStats(gymSlug)
+  
   const [profileOpen, setProfileOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
 
-  const menuVariants = useMemo(() => ({
-    open: { rotate: 180, transition: { duration: 0.3 } },
+  const menuVariants = {
+    open: { rotate: 90 },
     closed: { rotate: 0 }
-  }), [])
+  }
 
   const handleUploadClick = () => {
-    if (isUploading) {
-      showToast({
-        type: 'warning',
-        title: 'Upload in Progress',
-        message: 'Please wait until complete before uploading new content'
-      })
-      return
-    }
     openModal('upload')
   }
 

@@ -18,7 +18,6 @@ interface UploadModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess?: (data: any) => void
-  onUploadStateChange?: (isUploading: boolean) => void
 }
 
 const SLOT_NAMES = ['Photos', 'Videos', 'Facility Photos', 'Facility Videos'] as const
@@ -149,7 +148,7 @@ function FloatingUploadProgress({
   )
 }
 
-export function UploadModal({ isOpen, onClose, onSuccess, onUploadStateChange }: UploadModalProps) {
+export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   const [activeSlot, setActiveSlot] = useState<SlotName>('Photos')
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -197,11 +196,6 @@ export function UploadModal({ isOpen, onClose, onSuccess, onUploadStateChange }:
       }
     }
   }, [activeUppy])
-
-  // Notify parent component when upload state changes
-  useEffect(() => {
-    onUploadStateChange?.(isUploading)
-  }, [isUploading, onUploadStateChange])
 
   // Helper functions
   const checkAuthStatus = useCallback(() => {
