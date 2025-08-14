@@ -103,6 +103,47 @@
   @apply h-12 w-12 text-lg;
 }
 
+/* Social media embed improvements */
+.instagram-media {
+  min-width: 100% !important;
+  min-height: 400px !important;
+  width: 100% !important;
+}
+
+.instagram-media iframe {
+  min-width: 100% !important;
+  min-height: 400px !important;
+  width: 100% !important;
+}
+
+/* Twitter/X embed improvements */
+.twitter-tweet {
+  min-width: 100% !important;
+  min-height: 400px !important;
+  width: 100% !important;
+}
+
+/* Facebook embed improvements */
+.fb-post {
+  min-width: 100% !important;
+  min-height: 400px !important;
+  width: 100% !important;
+}
+
+/* YouTube embed improvements */
+.youtube-embed {
+  min-width: 100% !important;
+  min-height: 400px !important;
+  width: 100% !important;
+}
+
+/* Generic iframe improvements */
+iframe {
+  min-width: 100% !important;
+  min-height: 400px !important;
+  width: 100% !important;
+}
+
 /* Dark theme overrides (activated by data-theme="dark" on <html>) */
 [data-theme="dark"] {
   --geist-background: #000;
