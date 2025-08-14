@@ -192,6 +192,10 @@ export async function startResumableSession(drive: drive_v3.Drive, p: {
       body: JSON.stringify({
         name: p.filename,
         parents: [p.parentId],
+        // Explicitly specify this is for a shared drive
+        supportsAllDrives: true,
+        // Ensure the file is created in the shared drive context
+        corpora: 'allDrives'
       }),
     });
     
