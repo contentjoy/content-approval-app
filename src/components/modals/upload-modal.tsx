@@ -407,6 +407,41 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             
             {/* Upload Zone - Larger and more prominent */}
             <div className="border-2 border-dashed border-muted-foreground/30 rounded-2xl p-10 text-center hover:border-primary/50 transition-colors">
+              {/* Custom CSS to override Uppy Dashboard styling */}
+              <style jsx>{`
+                .uppy-Dashboard-inner {
+                  background: transparent !important;
+                }
+                .uppy-Dashboard-AddFiles {
+                  background: transparent !important;
+                  border: none !important;
+                }
+                .uppy-Dashboard-AddFiles-title {
+                  color: hsl(var(--foreground)) !important;
+                  background: transparent !important;
+                }
+                .uppy-Dashboard-AddFiles-list {
+                  background: transparent !important;
+                }
+                .uppy-Dashboard-AddFiles-item {
+                  background: hsl(var(--muted)) !important;
+                  border: 1px solid hsl(var(--border)) !important;
+                  color: hsl(var(--foreground)) !important;
+                }
+                .uppy-Dashboard-AddFiles-itemName {
+                  color: hsl(var(--foreground)) !important;
+                }
+                .uppy-Dashboard-AddFiles-itemSize {
+                  color: hsl(var(--muted-foreground)) !important;
+                }
+                .uppy-Dashboard-AddFiles-itemRemove {
+                  color: hsl(var(--muted-foreground)) !important;
+                }
+                .uppy-Dashboard-AddFiles-itemRemove:hover {
+                  color: hsl(var(--foreground)) !important;
+                }
+              `}</style>
+              
               <Dashboard
                 uppy={activeUppy}
                 plugins={['Webcam']}
@@ -415,8 +450,10 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 proudlyDisplayPoweredByUppy={false}
                 showProgressDetails={false}
                 showRemoveButtonAfterComplete={false}
+                hideUploadButton={true}
                 doneButtonHandler={() => {}}
                 note="Drag and drop files here, or click to browse"
+                theme="dark"
               />
             </div>
             
