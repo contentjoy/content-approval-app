@@ -158,7 +158,7 @@ export async function ensureGymUploadStructure(drive: drive_v3.Drive, p: {
   }
 }
 
-// SIMPLE, WORKING file upload to Google Drive
+// ULTIMATE SIMPLE SOLUTION: Use Google Drive API correctly
 export async function uploadFileDirectly(drive: drive_v3.Drive, p: {
   filename: string;
   mime: string;
@@ -166,16 +166,17 @@ export async function uploadFileDirectly(drive: drive_v3.Drive, p: {
   body: ReadableStream | Buffer;
   sizeBytes?: number;
 }): Promise<{ fileId: string }> {
+  // Declare fileBuffer in outer scope so it's accessible in catch block
+  let fileBuffer: Buffer;
+  
   try {
-    console.log(`🚀 Starting SIMPLE upload for: ${p.filename}`);
+    console.log(`🚀 Starting ULTIMATE SIMPLE upload for: ${p.filename}`);
     
-    // Convert ReadableStream to Buffer - SIMPLE APPROACH
-    let fileBuffer: Buffer;
-    
+    // Convert ReadableStream to Buffer
     if (p.body instanceof Buffer) {
       fileBuffer = p.body;
     } else if (p.body instanceof ReadableStream) {
-      // Convert ReadableStream to Buffer - NO COMPLEX STREAM STUFF
+      // Convert ReadableStream to Buffer
       const chunks: Uint8Array[] = [];
       const reader = p.body.getReader();
       
@@ -192,7 +193,7 @@ export async function uploadFileDirectly(drive: drive_v3.Drive, p: {
     
     console.log(`📤 Uploading ${fileBuffer.length} bytes to Google Drive...`);
     
-    // SIMPLE: Upload the buffer directly to Google Drive
+    // ULTIMATE SIMPLE: Use the Google Drive API's file upload method
     const res = await drive.files.create({
       requestBody: {
         name: p.filename,
@@ -200,7 +201,7 @@ export async function uploadFileDirectly(drive: drive_v3.Drive, p: {
       },
       media: {
         mimeType: p.mime,
-        body: fileBuffer, // Just pass the buffer directly
+        body: fileBuffer,
       },
       supportsAllDrives: true,
       fields: 'id,name,size',
@@ -214,6 +215,40 @@ export async function uploadFileDirectly(drive: drive_v3.Drive, p: {
     return { fileId: res.data.id };
   } catch (error) {
     console.error('❌ Error uploading file directly:', error);
+    
+    // If the error is about pipe and we have a fileBuffer, try alternative method
+    if (error instanceof Error && error.message.includes('pipe') && fileBuffer) {
+      console.log('🔄 Trying alternative upload method...');
+      
+      try {
+        // Alternative: Use the Google Drive API's simple upload method
+        const res = await drive.files.create({
+          requestBody: {
+            name: p.filename,
+            parents: [p.parentId],
+          },
+          media: {
+            mimeType: p.mime,
+            body: fileBuffer,
+          },
+          supportsAllDrives: true,
+          fields: 'id,name,size',
+          // Force simple upload
+          uploadType: 'media'
+        });
+        
+        if (!res.data.id) {
+          throw new Error('No file ID returned from alternative upload');
+        }
+        
+        console.log(`✅ File uploaded successfully with alternative method: ${res.data.name} (${res.data.id})`);
+        return { fileId: res.data.id };
+      } catch (altError) {
+        console.error('❌ Alternative upload method also failed:', altError);
+        throw error; // Throw the original error
+      }
+    }
+    
     throw error;
   }
 }
