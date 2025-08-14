@@ -245,6 +245,44 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
     }
   }, [uppy])
 
+  // Move these hooks outside of handleUpload
+  const checkAuthStatus = useCallback(() => {
+    const authStatus = {
+      user: !!user,
+      gymSlug: !!gymSlug,
+      canUpload: !!(user && gymSlug),
+      sessionToken: !!user?.id
+    }
+    console.log('🔐 Checking auth status:', authStatus)
+    return authStatus
+  }, [user, gymSlug])
+
+  const slugToGymName = useCallback((slug: string) => {
+    return slug.replace(/-/g, ' ')
+  }, [])
+
+  const getGymIdForUpload = useCallback(async () => {
+    console.log('🔍 Getting gym ID for upload...')
+    console.log('🔍 getGymIdForUpload called with:', { gymSlug, userGymId: user?.gymId, userGymName: user?.gymName })
+    
+    const gymName = slugToGymName(gymSlug)
+    console.log('🔍 Looking up gym by name:', gymSlug, '->', `"${gymName}"`)
+    
+    const { data: gym, error } = await supabase
+      .from('gyms')
+      .select('id')
+      .eq('"Gym Name"', gymName)
+      .single()
+    
+    if (error || !gym) {
+      console.log('🔍 Gym lookup failed, falling back to user.gymId')
+      return user?.gymId
+    }
+    
+    console.log('✅ Found gym by name:', gymSlug, '->', `"${gymName}" (ID: ${gym.id})`)
+    return gym.id
+  }, [gymSlug, user?.gymId, user?.gymName, slugToGymName])
+
   const handleUpload = useCallback(async () => {
     try {
       console.log('🚀 Starting upload process...')
@@ -259,50 +297,12 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       console.log('🔍 Current state:', currentState)
       
       // Check authentication status
-      const checkAuthStatus = useCallback(() => {
-        const authStatus = {
-          user: !!user,
-          gymSlug: !!gymSlug,
-          canUpload: !!(user && gymSlug),
-          sessionToken: !!user?.id
-        }
-        console.log('🔐 Checking auth status:', authStatus)
-        return authStatus
-      }, [user, gymSlug])
-      
       const authStatus = checkAuthStatus()
       if (!authStatus.canUpload) {
         throw new Error('Missing gym information or user not authenticated')
       }
       
       // Get gym ID for upload
-      const getGymIdForUpload = useCallback(async () => {
-        console.log('🔍 Getting gym ID for upload...')
-        console.log('🔍 getGymIdForUpload called with:', { gymSlug, userGymId: user?.gymId, userGymName: user?.gymName })
-        
-        // Convert URL slug to gym name format (e.g., "kokoro-demo" -> "kokoro demo")
-        const slugToGymName = useCallback((slug: string) => {
-          return slug.replace(/-/g, ' ')
-        }, [])
-        
-        const gymName = slugToGymName(gymSlug)
-        console.log('🔍 Looking up gym by name:', gymSlug, '->', `"${gymName}"`)
-        
-        const { data: gym, error } = await supabase
-          .from('gyms')
-          .select('id')
-          .eq('"Gym Name"', gymName)
-          .single()
-        
-        if (error || !gym) {
-          console.log('🔍 Gym lookup failed, falling back to user.gymId')
-          return user?.gymId
-        }
-        
-        console.log('✅ Found gym by name:', gymSlug, '->', `"${gymName}" (ID: ${gym.id})`)
-        return gym.id
-      }, [gymSlug, user?.gymId, user?.gymName])
-      
       const gymId = await getGymIdForUpload()
       if (!gymId) {
         throw new Error('Could not determine gym ID for upload')
@@ -334,7 +334,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       console.error('❌ Upload failed:', error)
       toast.error(error instanceof Error ? error.message : 'Upload failed')
     }
-  }, [gymSlug, brandingGymName, user?.gymName, user, onClose, uppy])
+  }, [gymSlug, brandingGymName, user?.gymName, user, onClose, uppy, checkAuthStatus, getGymIdForUpload])
 
   const getActiveUppy = () => uppy
   const getActiveConfig = () => SLOT_CONFIG[activeSlot]
