@@ -169,7 +169,7 @@ export async function uploadFileDirectly(drive: drive_v3.Drive, p: {
   try {
     console.log(`🚀 Starting direct upload for: ${p.filename}`);
     
-    // Convert body to Buffer if it's a ReadableStream
+    // Convert body to Buffer first, then to readable stream
     let fileBuffer: Buffer;
     if (p.body instanceof Buffer) {
       fileBuffer = p.body;
@@ -185,11 +185,14 @@ export async function uploadFileDirectly(drive: drive_v3.Drive, p: {
       }
       
       // Combine chunks into single buffer
-      const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
       fileBuffer = Buffer.concat(chunks);
     } else {
       throw new Error('Invalid body type - expected Buffer or ReadableStream');
     }
+    
+    // Create readable stream from Buffer for Google Drive API
+    const { Readable } = await import('stream');
+    const uploadBody = Readable.from(fileBuffer);
     
     console.log(`📤 Uploading ${fileBuffer.length} bytes to shared drive...`);
     
@@ -201,7 +204,7 @@ export async function uploadFileDirectly(drive: drive_v3.Drive, p: {
       },
       media: {
         mimeType: p.mime,
-        body: fileBuffer,
+        body: uploadBody,
       },
       supportsAllDrives: true,
       fields: 'id,name,size',
