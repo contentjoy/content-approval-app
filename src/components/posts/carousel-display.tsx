@@ -51,9 +51,29 @@ export function CarouselDisplay({ post, className = '', carouselPosts = [], prio
     setIsLoading(false)
   }
 
-  const handleImageError = () => {
+  const handleImageError = async () => {
+    console.log('🖼️ Carousel image failed to load, deleting post:', currentPost.id)
     setIsLoading(false)
     setHasError(true)
+    if (currentPost?.id) {
+      try {
+        const response = await fetch('/api/posts/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ postId: currentPost.id })
+        })
+        
+        if (response.ok) {
+          console.log('✅ Carousel post deleted successfully, dispatching refresh event')
+          // Dispatch event to refresh parent lists
+          window.dispatchEvent(new CustomEvent('post-deleted', { detail: { id: currentPost.id } }))
+        } else {
+          console.error('❌ Failed to delete carousel post:', response.status)
+        }
+      } catch (error) {
+        console.error('❌ Error deleting carousel post:', error)
+      }
+    }
   }
 
   const isVideoSlide = (p: SocialMediaPost) => {
@@ -62,9 +82,29 @@ export function CarouselDisplay({ post, className = '', carouselPosts = [], prio
     return t === 'video' || /\.(mp4|mov|m4v|webm|ogg)(\?|#|$)/.test(url)
   }
 
-  const handleVideoError = () => {
+  const handleVideoError = async () => {
+    console.log('🎥 Carousel video failed to load, deleting post:', currentPost.id)
     setIsLoading(false)
     setHasError(true)
+    if (currentPost?.id) {
+      try {
+        const response = await fetch('/api/posts/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ postId: currentPost.id })
+        })
+        
+        if (response.ok) {
+          console.log('✅ Carousel post deleted successfully, dispatching refresh event')
+          // Dispatch event to refresh parent lists
+          window.dispatchEvent(new CustomEvent('post-deleted', { detail: { id: currentPost.id } }))
+        } else {
+          console.error('❌ Failed to delete carousel post:', response.status)
+        }
+      } catch (error) {
+        console.error('❌ Error deleting carousel post:', error)
+      }
+    }
   }
 
   // Touch swipe support

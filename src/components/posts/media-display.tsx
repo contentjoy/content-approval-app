@@ -33,33 +33,52 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
   }
 
   const handleImageError = async () => {
+    console.log('🖼️ Image failed to load, deleting post:', post.id)
     setIsLoading(false)
     setHasError(true)
     if (post?.id) {
       try {
-        await fetch('/api/posts/delete', {
+        const response = await fetch('/api/posts/delete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ postId: post.id })
         })
-        // Optionally dispatch an event so parent lists can refresh
-        window.dispatchEvent(new CustomEvent('post-deleted', { detail: { id: post.id } }))
-      } catch {}
+        
+        if (response.ok) {
+          console.log('✅ Post deleted successfully, dispatching refresh event')
+          // Dispatch event to refresh parent lists
+          window.dispatchEvent(new CustomEvent('post-deleted', { detail: { id: post.id } }))
+        } else {
+          console.error('❌ Failed to delete post:', response.status)
+        }
+      } catch (error) {
+        console.error('❌ Error deleting post:', error)
+      }
     }
   }
 
   const handleVideoError = async () => {
+    console.log('🎥 Video failed to load, deleting post:', post.id)
     setIsLoading(false)
     setHasError(true)
     if (post?.id) {
       try {
-        await fetch('/api/posts/delete', {
+        const response = await fetch('/api/posts/delete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ postId: post.id })
         })
-        window.dispatchEvent(new CustomEvent('post-deleted', { detail: { id: post.id } }))
-      } catch {}
+        
+        if (response.ok) {
+          console.log('✅ Post deleted successfully, dispatching refresh event')
+          // Dispatch event to refresh parent lists
+          window.dispatchEvent(new CustomEvent('post-deleted', { detail: { id: post.id } }))
+        } else {
+          console.error('❌ Failed to delete post:', response.status)
+        }
+      } catch (error) {
+        console.error('❌ Error deleting post:', error)
+      }
     }
   }
 

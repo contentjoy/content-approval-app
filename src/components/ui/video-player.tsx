@@ -103,6 +103,7 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
   }, [onLoaded])
 
   const handleVideoError = useCallback(() => {
+    console.log('🎥 Video error detected in VideoPlayer')
     setIsLoading(false)
     setHasError(true)
     onError?.()
@@ -138,8 +139,25 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
       handleVideoReady()
     }
 
-    const handleError = () => {
+    const handleError = (event: Event) => {
+      console.log('🎥 Video element error event:', event)
+      console.log('🎥 Video error details:', video.error)
       handleVideoError()
+    }
+
+    const handleAbort = () => {
+      console.log('🎥 Video load aborted')
+      handleVideoError()
+    }
+
+    const handleStalled = () => {
+      console.log('🎥 Video stalled')
+      handleVideoError()
+    }
+
+    const handleSuspend = () => {
+      console.log('🎥 Video suspended')
+      // Don't treat suspend as an error, it's normal for paused videos
     }
 
     // Add event listeners
@@ -149,6 +167,9 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
     video.addEventListener('loadstart', handleLoadStart)
     video.addEventListener('loadeddata', handleLoadedData)
     video.addEventListener('error', handleError)
+    video.addEventListener('abort', handleAbort)
+    video.addEventListener('stalled', handleStalled)
+    video.addEventListener('suspend', handleSuspend)
 
     return () => {
       video.removeEventListener('loadedmetadata', handleLoadedMetadata)
@@ -157,6 +178,9 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
       video.removeEventListener('loadstart', handleLoadStart)
       video.removeEventListener('loadeddata', handleLoadedData)
       video.removeEventListener('error', handleError)
+      video.removeEventListener('abort', handleAbort)
+      video.removeEventListener('stalled', handleStalled)
+      video.removeEventListener('suspend', handleSuspend)
     }
   }, [handleVideoReady, handleVideoError, isReady])
 
@@ -172,6 +196,21 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
 
     return () => clearTimeout(timeout)
   }, [isLoading, hasError, isVisible])
+
+  // Network error detection - check if video actually loaded after a delay
+  useEffect(() => {
+    if (!isVisible || hasError || isReady) return
+
+    const networkTimeout = setTimeout(() => {
+      const video = videoRef.current
+      if (video && video.readyState === 0 && !hasError) {
+        console.log('🎥 Video network timeout - readyState is 0, treating as error')
+        handleVideoError()
+      }
+    }, 5000) // 5 second network timeout
+
+    return () => clearTimeout(networkTimeout)
+  }, [isVisible, hasError, isReady, handleVideoError])
 
   return (
     <div ref={containerRef} className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: aspect }}>
