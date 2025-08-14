@@ -16,13 +16,20 @@ export async function POST(req: NextRequest) {
   
   try {
     const body = await req.json()
-    const { files, gymSlug, gymName } = body
+    const { files, gymSlug, gymName, sessionFolderId } = body
     
     if (!files || files.length === 0) {
       return NextResponse.json({ error: 'No files provided' }, { status: 400 })
     }
     
-    // Check total payload size
+    // Check for folder creation requests
+    const hasFolders = files.some((file: any) => file.isFolder)
+    if (hasFolders) {
+      console.log('📁 Processing folder creation...')
+      return await handleFolderCreation(files, gymSlug, gymName)
+    }
+    
+    // Check total payload size (skip for folder creation)
     const totalSize = files.reduce((sum: number, file: any) => sum + (file.size || 0), 0)
     if (totalSize > maxSize) {
       return NextResponse.json({ 
@@ -34,11 +41,11 @@ export async function POST(req: NextRequest) {
     const hasChunks = files.some((file: any) => file.isChunk)
     if (hasChunks) {
       console.log('📦 Processing chunked upload...')
-      return await handleChunkedUpload(files, gymSlug, gymName, maxUploadSize)
+      return await handleChunkedUpload(files, gymSlug, gymName, maxUploadSize, sessionFolderId)
     }
     
     // Regular upload flow
-    return await handleRegularUpload(files, gymSlug, gymName, maxUploadSize)
+    return await handleRegularUpload(files, gymSlug, gymName, sessionFolderId, maxUploadSize)
     
   } catch (error) {
     console.error('❌ Upload error:', error)
@@ -165,7 +172,7 @@ async function createOrFindFolder(drive: any, name: string, parentId: string, sh
 }
 
 // Handle chunked uploads
-async function handleChunkedUpload(files: any[], gymSlug: string, gymName: string, maxUploadSize: number) {
+async function handleChunkedUpload(files: any[], gymSlug: string, gymName: string, maxUploadSize: number, sessionFolderId: string) {
   console.log('📦 Processing chunked upload...')
   
   // Group chunks by original file
@@ -206,7 +213,7 @@ async function handleChunkedUpload(files: any[], gymSlug: string, gymName: strin
       const uploadResult = await uploadFileToDrive(
         getDrive(),
         reconstructedFile,
-        await createFolderStructure(gymName),
+        sessionFolderId, // Pass sessionFolderId here
         maxUploadSize
       )
       
@@ -234,7 +241,7 @@ async function handleChunkedUpload(files: any[], gymSlug: string, gymName: strin
 }
 
 // Handle regular uploads
-async function handleRegularUpload(files: any[], gymSlug: string, gymName: string, maxUploadSize: number) {
+async function handleRegularUpload(files: any[], gymSlug: string, gymName: string, sessionFolderId: string, maxUploadSize: number) {
   console.log('🚀 Starting regular Google Drive upload for gym:', gymName)
   console.log('📁 Files to upload:', files.length)
   
@@ -277,7 +284,7 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
       
       console.log(`📤 Uploading ${file.name} to Google Drive...`)
       
-      const uploadResult = await uploadFileToDrive(drive, file, folderStructure, maxUploadSize)
+      const uploadResult = await uploadFileToDrive(drive, file, sessionFolderId, maxUploadSize)
       uploadResults.push({
         name: file.name,
         success: true,
@@ -302,7 +309,7 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
       upload_id: `upload_${Date.now()}`,
       gym_id: gym.id,
       gym_name: gymName,
-      upload_folder_id: folderStructure.timestampFolderId,
+      upload_folder_id: sessionFolderId, // Use sessionFolderId here
       gym_folder_id: folderStructure.gymFolderId,
       raw_footage_folder_id: folderStructure.rawFootageFolderId,
       final_footage_folder_id: folderStructure.finalFootageFolderId,
@@ -326,18 +333,57 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
   })
 }
 
+// Handle folder creation requests
+async function handleFolderCreation(files: any[], gymSlug: string, gymName: string) {
+  console.log('📁 Processing folder creation...')
+  const results = []
+
+  for (const file of files) {
+    if (file.isFolder) {
+      try {
+        const folderName = file.name
+        const folderId = await createOrFindFolder(getDrive(), folderName, '0', '0ALOLvWQ1QTx5Uk9PVA')
+        results.push({
+          name: folderName,
+          success: true,
+          folderId: folderId
+        })
+        console.log(`✅ Folder created: ${folderName} (${folderId})`)
+      } catch (error) {
+        console.error(`❌ Failed to create folder ${file.name}:`, error)
+        results.push({
+          name: file.name,
+          success: false,
+          error: error instanceof Error ? error.message : 'Folder creation failed'
+        })
+      }
+    } else {
+      results.push({
+        name: file.name,
+        success: false,
+        error: 'File is not a folder'
+      })
+    }
+  }
+
+  return NextResponse.json({
+    success: true,
+    message: `Processed ${results.filter(r => r.success).length}/${results.length} folder creations`,
+    results
+  })
+}
+
 // Upload file to Google Drive
-async function uploadFileToDrive(drive: any, file: any, folderStructure: any, maxUploadSize: number) {
+async function uploadFileToDrive(drive: any, file: any, folderId: string, maxUploadSize: number) {
   try {
     const slotName = determineSlotName(file)
-    const targetFolderId = folderStructure.rawSlotFolders[slotName]
     
-    if (!targetFolderId) {
-      throw new Error(`No target folder found for slot: ${slotName}`)
+    if (!folderId) {
+      throw new Error('No folder ID provided for upload')
     }
     
     console.log(`📤 Uploading ${file.name} to Google Drive...`)
-    console.log(`📁 Uploading to folder: ${slotName} (${targetFolderId})`)
+    console.log(`📁 Uploading to folder: ${slotName} (${folderId})`)
     
     // Convert base64 to buffer
     const buffer = Buffer.from(file.data, 'base64')
@@ -350,7 +396,7 @@ async function uploadFileToDrive(drive: any, file: any, folderStructure: any, ma
       // Try multipart upload with fixed PassThrough stream
       const fileMetadata = {
         name: file.name,
-        parents: [targetFolderId],
+        parents: [folderId],
       }
       const media = {
         mimeType: file.type,
@@ -392,7 +438,7 @@ async function uploadFileToDrive(drive: any, file: any, folderStructure: any, ma
           const fallbackResponse = await drive.files.create({
             resource: {
               name: file.name,
-              parents: [targetFolderId],
+              parents: [folderId],
             },
             media: {
               mimeType: file.type,

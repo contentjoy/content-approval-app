@@ -302,10 +302,47 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         try {
           const uploadResults = []
           
+          // Create single folder structure for this upload session
+          console.log('🏗️ Creating folder structure for upload session...')
+          const sessionTimestamp = new Date().toISOString().split('T')[0] + 'T' + new Date().toTimeString().split(' ')[0].replace(/:/g, '-')
+          const sessionFolderName = `Upload Session ${sessionTimestamp}`
+          
+          // Create the root session folder first
+          const sessionFolderResponse = await fetch('/api/upload-to-drive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              files: [{
+                name: sessionFolderName,
+                type: 'application/vnd.google-apps.folder',
+                size: 0,
+                data: '', // Empty for folder creation
+                isFolder: true,
+                folderType: 'session-root'
+              }],
+              gymSlug,
+              gymName: brandingGymName || userGymName
+            })
+          })
+          
+          if (!sessionFolderResponse.ok) {
+            throw new Error('Failed to create session folder')
+          }
+          
+          const sessionFolderResult = await sessionFolderResponse.json()
+          const sessionFolderId = sessionFolderResult.results[0]?.fileId
+          
+          if (!sessionFolderId) {
+            throw new Error('No session folder ID returned')
+          }
+          
+          console.log('✅ Session folder created:', sessionFolderId)
+          
+          // Now upload all files to the same session folder
           for (let i = 0; i < allFiles.length; i++) {
             const file = allFiles[i]
             try {
-              console.log(`📤 Uploading ${file.name}...`)
+              console.log(`📤 Uploading ${file.name} to session folder...`)
               
               // Update progress and floating component
               const progress = Math.round(((i + 1) / allFiles.length) * 100)
@@ -353,7 +390,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                         totalChunks: chunks.length
                       }],
                       gymSlug,
-                      gymName: brandingGymName || userGymName
+                      gymName: brandingGymName || userGymName,
+                      sessionFolderId // Pass sessionFolderId for chunked uploads
                     })
                   })
                   
@@ -395,7 +433,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                   body: JSON.stringify({
                     files: filesForUpload,
                     gymSlug,
-                    gymName: brandingGymName || userGymName
+                    gymName: brandingGymName || userGymName,
+                    sessionFolderId // Pass sessionFolderId for regular uploads
                   })
                 })
                 
