@@ -162,7 +162,7 @@ async function handleChunkedUpload(files: any[], gymSlug: string, gymName: strin
         chunks.map(chunk => Buffer.from(chunk.data, 'base64'))
       )
       
-      // Upload reconstructed file
+      // Upload reconstructed file to the session folder (which should be the slot folder)
       const reconstructedFile = {
         name: originalName,
         type: chunks[0].type,
@@ -173,7 +173,7 @@ async function handleChunkedUpload(files: any[], gymSlug: string, gymName: strin
       const uploadResult = await uploadFileToDrive(
         getDrive(),
         reconstructedFile,
-        sessionFolderId, // Pass sessionFolderId here
+        sessionFolderId, // This should be the slot folder ID
         maxUploadSize
       )
       
@@ -244,7 +244,7 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
       
       console.log(`📤 Uploading ${file.name} to Google Drive...`)
       
-      const uploadResult = await uploadFileToDrive(drive, file, sessionFolderId, maxUploadSize)
+      const uploadResult = await uploadFileToDrive(drive, file, targetFolderId, maxUploadSize)
       uploadResults.push({
         name: file.name,
         success: true,
