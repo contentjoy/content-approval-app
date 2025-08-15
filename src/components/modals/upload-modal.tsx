@@ -749,7 +749,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           // FOLDER STRUCTURE EXPLANATION:
           // - sessionFolderId: The main upload session folder (e.g., "Upload Session 123")
           // - targetFolderId: The specific slot folder (e.g., "Videos" inside "Raw footage")
-          // - Chunked uploads: Use sessionFolderId (which should point to slot folder)
+          // - Chunked uploads: Use targetFolderId (slot folder like "Videos")
           // - Regular uploads: Use targetFolderId (slot folder directly)
           
           // PHASE 2: File Upload Progress (10-100%)
@@ -787,7 +787,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               // For large files (>5MB), use chunked upload
               if (file.size > 5 * 1024 * 1024) {
                 console.log(`📦 Large file detected (${(file.size / (1024 * 1024)).toFixed(1)}MB), using chunked upload...`)
-                console.log(`📦 Chunked upload will use sessionFolderId: ${sessionFolderId}`)
+                console.log(`📦 Chunked upload will use targetFolderId (slot folder): ${targetFolderId}`)
                 
                 // Split large files into 2MB chunks for faster uploads
                 const chunkSize = 2 * 1024 * 1024 // 2MB chunks for 1.5-2x speed improvement
@@ -806,7 +806,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                   const chunk = chunks[chunkIndex]
                   const chunkData = chunk.toString('base64')
                   
-                  console.log(`📦 Uploading chunk ${chunkIndex + 1}/${chunks.length} for ${file.name} to sessionFolderId: ${sessionFolderId}`)
+                  console.log(`📦 Uploading chunk ${chunkIndex + 1}/${chunks.length} for ${file.name} to targetFolderId: ${targetFolderId}`)
                   
                   const chunkResponse = await fetch('/api/upload-to-drive', {
                     method: 'POST',
@@ -824,7 +824,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                       }],
                       gymSlug,
                       gymName: authStatus.gymName,
-                      sessionFolderId: sessionFolderId // Use session folder for chunked uploads
+                      sessionFolderId: targetFolderId // Use slot folder (Videos/Photos) for chunked uploads
                     })
                   })
                   
