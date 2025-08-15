@@ -763,7 +763,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               
               // Update progress for this file
               const fileProgress = Math.round(((i + 1) / allFiles.length) * 90) + 10
-              setUploadProgress(fileProgress)
+              updateProgress(fileProgress, `Uploading ${file.name}...`)
               
               // Show progress toast for important milestones
               if (i === 0 || i === Math.floor(allFiles.length / 2) || i === allFiles.length - 1) {
@@ -846,7 +846,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                     
                     // Update progress for completed batch
                     const batchProgress = Math.round(((i + batchStart + batch.length) / (allFiles.length + chunks.length - 1)) * 90) + 10
-                    setUploadProgress(batchProgress)
+                    updateProgress(batchProgress, `Uploading ${file.name}...`)
                     
                     // Show batch progress toast with file size info
                     const batchSizeMB = (batch.reduce((sum, chunk) => sum + chunk.length, 0) / (1024 * 1024)).toFixed(1)

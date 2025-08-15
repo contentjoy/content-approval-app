@@ -87,25 +87,26 @@ async function createFolderStructure(gymName: string) {
     // Initialize Google Drive client
     const drive = getDrive();
     
-    // Create timestamp for this upload
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const uploadLabel = `${gymName} ${timestamp}`;
+    // Create ONE folder per day instead of per session to prevent folder explosion
+    const today = new Date();
+    const dateString = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const uploadLabel = `${gymName} ${dateString}`;
     
     // Step 1: Create or find gym folder inside the "Clients" folder
     const gymFolderId = await ensureFolder(drive, gymName, clientsFolderId);
     console.log('🏋️ Gym folder:', gymFolderId);
     
-    // Step 2: Create timestamp folder
+    // Step 2: Create or find today's folder (reuse if exists)
     const timestampFolderId = await ensureFolder(drive, uploadLabel, gymFolderId);
-    console.log('📅 Timestamp folder:', timestampFolderId);
+    console.log('📅 Today\'s folder (reused if exists):', timestampFolderId);
     
-    // Step 3: Create Raw footage and Final footage folders
+    // Step 3: Create Raw footage and Final footage folders (reuse if exist)
     const rawFootageFolderId = await ensureFolder(drive, 'Raw footage', timestampFolderId);
     const finalFootageFolderId = await ensureFolder(drive, 'Final footage', timestampFolderId);
     console.log('🎬 Raw footage folder:', rawFootageFolderId);
     console.log('✨ Final footage folder:', finalFootageFolderId);
     
-    // Step 4: Create slot folders in both Raw and Final footage
+    // Step 4: Create slot folders in both Raw and Final footage (reuse if exist)
     const slotNames = ['Photos', 'Videos', 'Facility Photos', 'Facility Videos'];
     const rawSlotFolders: Record<string, string> = {};
     const finalSlotFolders: Record<string, string> = {};
@@ -113,7 +114,7 @@ async function createFolderStructure(gymName: string) {
     for (const slot of slotNames) {
       rawSlotFolders[slot] = await ensureFolder(drive, slot, rawFootageFolderId);
       finalSlotFolders[slot] = await ensureFolder(drive, slot, finalFootageFolderId);
-      console.log(`📁 ${slot} folders created`);
+      console.log(`📁 ${slot} folders created/reused`);
     }
     
     return {
