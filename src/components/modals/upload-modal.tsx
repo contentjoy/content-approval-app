@@ -45,6 +45,80 @@ function determineSlotName(file: any): string {
   }
 }
 
+// Function to generate video thumbnail
+async function generateVideoThumbnail(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+      reject(new Error('Could not get canvas context'));
+      return;
+    }
+    
+    video.onloadedmetadata = () => {
+      // Set canvas size to desired thumbnail dimensions
+      canvas.width = 120;
+      canvas.height = 90;
+      
+      // Seek to 1 second into the video for a good thumbnail
+      video.currentTime = 1;
+    };
+    
+    video.onseeked = () => {
+      try {
+        // Draw the video frame to canvas
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Convert canvas to data URL
+        const thumbnail = canvas.toDataURL('image/jpeg', 0.8);
+        resolve(thumbnail);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    video.onerror = () => {
+      reject(new Error('Failed to load video for thumbnail generation'));
+    };
+    
+    // Create object URL for the video file
+    const videoUrl = URL.createObjectURL(file);
+    video.src = videoUrl;
+    video.load();
+    
+    // Clean up object URL after thumbnail generation
+    video.onended = () => {
+      URL.revokeObjectURL(videoUrl);
+    };
+  });
+}
+
+// Function to get file preview (image or video thumbnail)
+async function getFilePreview(file: File): Promise<string> {
+  if (file.type.startsWith('image/')) {
+    // For images, return the file directly as data URL
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.readAsDataURL(file);
+    });
+  } else if (file.type.startsWith('video/')) {
+    // For videos, generate thumbnail
+    try {
+      return await generateVideoThumbnail(file);
+    } catch (error) {
+      console.warn('Failed to generate video thumbnail:', error);
+      // Return a placeholder if thumbnail generation fails
+      return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiB2aWV3Qm94PSIwIDAgMTIwIDkwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMTA3MzNhIi8+CjxwYXRoIGQ9Ik00OCAzMkw0OCA1OEw2OCA0NUw0OCAzMloiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=';
+    }
+  }
+  
+  // Default placeholder for other file types
+  return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiB2aWV3Qm94PSIwIDAgMTIwIDkwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjNmI3MjgwIi8+CjxwYXRoIGQ9Ik02MCA0NUw2MCA2MEw3NSA1Mi41TDYwIDQ1WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg==';
+}
+
 // Floating Upload Progress Component
 export function FloatingUploadProgress({ 
   isVisible, 
@@ -163,6 +237,94 @@ export function FloatingUploadProgress({
   )
 }
 
+// Custom File Preview Component
+function FilePreview({ file, onRemove }: { file: any; onRemove: () => void }) {
+  const [preview, setPreview] = useState<string>('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string>('')
+
+  useEffect(() => {
+    const loadPreview = async () => {
+      try {
+        setIsLoading(true)
+        setError('')
+        const previewUrl = await getFilePreview(file)
+        setPreview(previewUrl)
+      } catch (err) {
+        console.error('Failed to load file preview:', err)
+        setError('Failed to load preview')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadPreview()
+  }, [file])
+
+  const isVideo = file.type.startsWith('video/')
+  const isImage = file.type.startsWith('image/')
+
+  return (
+    <div className="relative group bg-muted rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-all duration-200">
+      {/* File Preview */}
+      <div className="aspect-video w-full relative">
+        {isLoading ? (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          </div>
+        ) : error ? (
+          <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground text-sm">
+            <div className="text-center">
+              <div className="w-8 h-8 mx-auto mb-2 text-muted-foreground">
+                {isVideo ? <Video className="w-full h-full" /> : <Image className="w-full h-full" />}
+              </div>
+              <div className="text-xs">Preview failed</div>
+            </div>
+          </div>
+        ) : (
+          <>
+            {isVideo && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center">
+                  <div className="w-0 h-0 border-l-[12px] border-l-white border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent ml-1" />
+                </div>
+              </div>
+            )}
+            <img 
+              src={preview} 
+              alt={file.name}
+              className="w-full h-full object-cover"
+              onError={() => setError('Failed to load preview')}
+            />
+          </>
+        )}
+      </div>
+
+      {/* File Info Overlay */}
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-white">
+        <div className="text-xs font-medium truncate">{file.name}</div>
+        <div className="text-xs opacity-80">
+          {(file.size / (1024 * 1024)).toFixed(1)} MB
+        </div>
+      </div>
+
+      {/* Remove Button */}
+      <button
+        onClick={onRemove}
+        className="absolute top-2 right-2 w-6 h-6 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+        title="Remove file"
+      >
+        <X className="w-3 h-3" />
+      </button>
+
+      {/* File Type Badge */}
+      <div className="absolute top-2 left-2 px-2 py-1 bg-primary/90 text-primary-foreground text-xs rounded-md font-medium">
+        {isVideo ? 'VIDEO' : isImage ? 'IMAGE' : 'FILE'}
+      </div>
+    </div>
+  )
+}
+
 export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   const [activeSlot, setActiveSlot] = useState<SlotName>('Photos')
   const [isUploading, setIsUploading] = useState(false)
@@ -176,6 +338,14 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
     'Videos': 0,
     'Facility Photos': 0,
     'Facility Videos': 0
+  })
+  
+  // Add file previews state for each slot
+  const [filePreviews, setFilePreviews] = useState<Record<SlotName, Array<{ file: File; preview: string }>>>({
+    'Photos': [],
+    'Videos': [],
+    'Facility Photos': [],
+    'Facility Videos': []
   })
   
   const { startUpload, updateProgress, completeUpload } = useUpload()
@@ -216,6 +386,46 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       setFileCounts(newCounts)
     }
 
+    const updateFilePreviews = async () => {
+      const newPreviews: Record<SlotName, Array<{ file: File; preview: string }>> = {
+        'Photos': [],
+        'Videos': [],
+        'Facility Photos': [],
+        'Facility Videos': []
+      }
+
+      // Generate previews for all files in each slot
+      for (const slotName of SLOT_NAMES) {
+        const files = uppyInstances[slotName]?.getFiles() || []
+        const previews = []
+        
+        for (const file of files) {
+          try {
+            // Uppy file.data can be File or Blob, we need to ensure it's a File
+            if (file.data instanceof File) {
+              const preview = await getFilePreview(file.data)
+              previews.push({ file: file.data, preview })
+            } else {
+              // If it's a Blob, we can't generate a preview, use placeholder
+              const placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiB2aWV3Qm94PSIwIDAgMTIwIDkwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjNmI3MjgwIi8+CjxwYXRoIGQ9Ik02MCA0NUw2MCA2MEw3NSA1Mi41TDYwIDQ1WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg=='
+              previews.push({ file: file.data as File, preview: placeholder })
+            }
+          } catch (error) {
+            console.warn('Failed to generate preview for file:', file.name, error)
+            // Use placeholder if preview generation fails
+            const placeholder = file.data instanceof File && file.data.type.startsWith('video/') 
+              ? 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiB2aWV3Qm94PSIwIDAgMTIwIDkwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMTA3MzNhIi8+CjxwYXRoIGQ9Ik00OCAzMkw0OCA1OEw2OCA0NUw0OCAzMloiIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo='
+              : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiB2aWV3Qm94PSIwIDAgMTIwIDkwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjNmI3MjgwIi8+CjxwYXRoIGQ9Ik02MCA0NUw2MCA2MEw3NSA1Mi41TDYwIDQ1WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg=='
+            previews.push({ file: file.data as File, preview: placeholder })
+          }
+        }
+        
+        newPreviews[slotName] = previews
+      }
+      
+      setFilePreviews(newPreviews)
+    }
+
     // Add event listeners to each Uppy instance
     const cleanupFunctions: (() => void)[] = []
     
@@ -223,9 +433,15 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       const uppy = uppyInstances[slotName]
       if (uppy) {
         // Listen for file additions
-        const onFileAdded = () => updateFileCounts()
+        const onFileAdded = () => {
+          updateFileCounts()
+          updateFilePreviews()
+        }
         // Listen for file removals
-        const onFileRemoved = () => updateFileCounts()
+        const onFileRemoved = () => {
+          updateFileCounts()
+          updateFilePreviews()
+        }
         
         uppy.on('file-added', onFileAdded)
         uppy.on('file-removed', onFileRemoved)
@@ -237,8 +453,9 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       }
     })
 
-    // Initial file count update
+    // Initial file count and preview update
     updateFileCounts()
+    updateFilePreviews()
 
     // Cleanup function
     return () => {
@@ -250,6 +467,23 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   const totalFiles = useMemo(() => {
     return Object.values(fileCounts).reduce((sum, count) => sum + count, 0)
   }, [fileCounts])
+
+  // Function to remove a file from a specific slot
+  const removeFile = useCallback((slotName: SlotName, fileToRemove: File) => {
+    const uppy = uppyInstances[slotName]
+    if (uppy) {
+      const files = uppy.getFiles()
+      const fileToRemoveUppy = files.find(f => f.data === fileToRemove)
+      if (fileToRemoveUppy) {
+        uppy.removeFile(fileToRemoveUppy.id)
+      }
+    }
+  }, [uppyInstances])
+
+  // Function to get files for a specific slot
+  const getFilesForSlot = useCallback((slotName: SlotName) => {
+    return uppyInstances[slotName]?.getFiles() || []
+  }, [uppyInstances])
 
   // Cleanup Uppy instance on unmount
   useEffect(() => {
@@ -715,6 +949,22 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                   theme="dark"
                 />
               </div>
+
+              {/* File Preview Grid */}
+              {fileCounts[activeSlot] > 0 && (
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-foreground">Selected Files</h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {filePreviews[activeSlot].map((filePreview, index) => (
+                      <FilePreview
+                        key={`${filePreview.file.name}-${index}`}
+                        file={filePreview.file}
+                        onRemove={() => removeFile(activeSlot, filePreview.file)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
               
               {/* File Info */}
               <div className="text-xs sm:text-sm text-muted-foreground text-center">
