@@ -41,7 +41,6 @@ interface FormData {
   instagramUrl: string
   
   // Marketing & Content
-  socialPlatforms: string[]
   cta: string
   testimonial: string
   
@@ -73,15 +72,6 @@ const brandStyles = [
   'Rumble Boxing'
 ]
 
-const socialPlatforms = [
-  'Facebook',
-  'Instagram',
-  'Twitter',
-  'LinkedIn',
-  'TikTok',
-  'YouTube'
-]
-
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -107,7 +97,6 @@ export default function OnboardingPage() {
     results: '',
     googleMapUrl: '',
     instagramUrl: '',
-    socialPlatforms: [],
     cta: '',
     testimonial: '',
     whiteLogoFile: null,
@@ -169,7 +158,54 @@ export default function OnboardingPage() {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  // URL validation functions
+  const validateUrl = (url: string, fieldName: string): boolean => {
+    if (!url.trim()) return false
+    
+    // Check if URL starts with https://www.
+    if (!url.startsWith('https://www.')) {
+      toast.error(`${fieldName} must start with "https://www."`)
+      // Add shake effect to the form
+      document.querySelector('.onboarding-form')?.classList.add('shake')
+      setTimeout(() => {
+        document.querySelector('.onboarding-form')?.classList.remove('shake')
+      }, 600)
+      return false
+    }
+    
+    try {
+      new URL(url)
+      return true
+    } catch {
+      toast.error(`${fieldName} must be a valid URL`)
+      // Add shake effect to the form
+      document.querySelector('.onboarding-form')?.classList.add('shake')
+      setTimeout(() => {
+        document.querySelector('.onboarding-form')?.classList.remove('shake')
+      }, 600)
+      return false
+    }
+  }
+
+  const validateRequiredField = (value: string, fieldName: string): boolean => {
+    if (!value.trim()) {
+      toast.error(`${fieldName} is required`)
+      // Add shake effect to the form
+      document.querySelector('.onboarding-form')?.classList.add('shake')
+      setTimeout(() => {
+        document.querySelector('.onboarding-form')?.classList.remove('shake')
+      }, 600)
+      return false
+    }
+    return true
+  }
+
   const nextStep = () => {
+    // Validate current step before proceeding
+    if (!validateCurrentStep()) {
+      return
+    }
+    
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1)
     }
@@ -178,6 +214,44 @@ export default function OnboardingPage() {
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1)
+    }
+  }
+
+  const validateCurrentStep = (): boolean => {
+    switch (currentStep) {
+      case 1:
+        return (
+          validateRequiredField(formData.firstName, 'First Name') &&
+          validateRequiredField(formData.lastName, 'Last Name') &&
+          validateRequiredField(formData.phone, 'Phone')
+        )
+      case 2:
+        return (
+          validateRequiredField(formData.brandColor, 'Brand Color') &&
+          validateRequiredField(formData.brandStyle, 'Brand Style')
+        )
+      case 3:
+        return (
+          validateRequiredField(formData.audience, 'Target Audience') &&
+          validateRequiredField(formData.services, 'Services') &&
+          validateRequiredField(formData.results, 'Desired Results')
+        )
+      case 4:
+        return (
+          validateRequiredField(formData.website, 'Website') &&
+          validateRequiredField(formData.instagramUrl, 'Instagram URL') &&
+          validateRequiredField(formData.googleMapUrl, 'Google Maps URL') &&
+          validateUrl(formData.website, 'Website') &&
+          validateUrl(formData.instagramUrl, 'Instagram URL') &&
+          validateUrl(formData.googleMapUrl, 'Google Maps URL')
+        )
+      case 5:
+        return (
+          validateRequiredField(formData.cta, 'Call to Action') &&
+          validateRequiredField(formData.testimonial, 'Testimonial')
+        )
+      default:
+        return true
     }
   }
 
@@ -216,7 +290,6 @@ export default function OnboardingPage() {
           'Clients Desired Result': formData.results,
           'Google Map URL': formData.googleMapUrl,
           'Instagram URL': formData.instagramUrl,
-          'Social Platforms': formData.socialPlatforms,
           'Primary offer': formData.cta,
           'Client Info': formData.testimonial,
           'White Logo URL': formData.whiteLogoUrl,
@@ -376,7 +449,6 @@ export default function OnboardingPage() {
         },
         
         marketing_content: {
-          social_platforms: formData.socialPlatforms,
           primary_cta: formData.cta,
           testimonial: formData.testimonial
         },
@@ -498,7 +570,7 @@ export default function OnboardingPage() {
       case 4:
         return true // Optional fields
       case 5:
-        return formData.socialPlatforms.length > 0
+        return formData.cta && formData.testimonial
       default:
         return false
     }
@@ -511,69 +583,87 @@ export default function OnboardingPage() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-text mb-2">First Name</label>
+                <label className="block text-sm font-medium text-text mb-2">
+                  First Name <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   value={formData.firstName}
                   onChange={(e) => updateFormData('firstName', e.target.value)}
                   className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
                   placeholder="John"
+                  required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text mb-2">Last Name</label>
+                <label className="block text-sm font-medium text-text mb-2">
+                  Last Name <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   value={formData.lastName}
                   onChange={(e) => updateFormData('lastName', e.target.value)}
                   className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
                   placeholder="Doe"
+                  required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text mb-2">Phone</label>
+              <label className="block text-sm font-medium text-text mb-2">
+                Phone <span className="text-red-500">*</span>
+              </label>
               <input
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => updateFormData('phone', e.target.value)}
                 className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
                 placeholder="+1 (555) 123-4567"
+                required
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-text mb-2">Website</label>
+                <label className="block text-sm font-medium text-text mb-2">
+                  Website <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="url"
                   value={formData.website}
                   onChange={(e) => updateFormData('website', e.target.value)}
                   className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
-                  placeholder="https://yourgym.com"
+                  placeholder="https://www.yourgym.com"
+                  required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text mb-2">City</label>
+                <label className="block text-sm font-medium text-text mb-2">
+                  City <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   value={formData.city}
                   onChange={(e) => updateFormData('city', e.target.value)}
                   className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
                   placeholder="New York"
+                  required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text mb-2">Address</label>
+              <label className="block text-sm font-medium text-text mb-2">
+                Address <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={formData.address}
                 onChange={(e) => updateFormData('address', e.target.value)}
                 className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
                 placeholder="123 Main St, New York, NY 10001"
+                required
               />
             </div>
           </div>
@@ -627,11 +717,14 @@ export default function OnboardingPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text mb-2">Which brand sounds most like you?</label>
+              <label className="block text-sm font-medium text-text mb-2">
+                Which brand sounds most like you? <span className="text-red-500">*</span>
+              </label>
               <select
                 value={formData.brandStyle}
                 onChange={(e) => updateFormData('brandStyle', e.target.value)}
                 className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
+                required
               >
                 <option value="">Select an option</option>
                 {brandStyles.map(style => (
@@ -646,35 +739,44 @@ export default function OnboardingPage() {
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-text mb-2">Target Audience</label>
+              <label className="block text-sm font-medium text-text mb-2">
+                Target Audience <span className="text-red-500">*</span>
+              </label>
               <textarea
                 value={formData.audience}
                 onChange={(e) => updateFormData('audience', e.target.value)}
                 rows={3}
                 className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
                 placeholder="Describe your ideal clients and target audience..."
+                required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text mb-2">Services Offered</label>
+              <label className="block text-sm font-medium text-text mb-2">
+                Services Offered <span className="text-red-500">*</span>
+              </label>
               <textarea
                 value={formData.services}
                 onChange={(e) => updateFormData('services', e.target.value)}
                 rows={3}
                 className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
                 placeholder="List your main services and programs..."
+                required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text mb-2">Clients desired result</label>
+              <label className="block text-sm font-medium text-text mb-2">
+                Clients desired result <span className="text-red-500">*</span>
+              </label>
               <textarea
                 value={formData.results}
                 onChange={(e) => updateFormData('results', e.target.value)}
                 rows={3}
                 className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
                 placeholder="Share client success stories and achievements..."
+                required
               />
             </div>
           </div>
@@ -684,24 +786,30 @@ export default function OnboardingPage() {
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-text mb-2">Google Maps URL</label>
+              <label className="block text-sm font-medium text-text mb-2">
+                Google Maps URL <span className="text-red-500">*</span>
+              </label>
               <input
                 type="url"
                 value={formData.googleMapUrl}
                 onChange={(e) => updateFormData('googleMapUrl', e.target.value)}
                 className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
-                placeholder="https://maps.google.com/..."
+                placeholder="https://www.google.com/maps/..."
+                required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text mb-2">Instagram URL</label>
+              <label className="block text-sm font-medium text-text mb-2">
+                Instagram URL <span className="text-red-500">*</span>
+              </label>
               <input
                 type="url"
                 value={formData.instagramUrl}
                 onChange={(e) => updateFormData('instagramUrl', e.target.value)}
                 className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
-                placeholder="https://instagram.com/yourgym"
+                placeholder="https://www.instagram.com/yourgym"
+                required
               />
             </div>
           </div>
@@ -711,47 +819,30 @@ export default function OnboardingPage() {
         return (
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-text mb-4">Social Media Platforms</label>
-              <div className="grid grid-cols-2 gap-3">
-                {socialPlatforms.map(platform => (
-                  <label key={platform} className="flex items-center space-x-3 p-3 border border-card-border rounded-lg cursor-pointer hover:bg-card-bg">
-                    <input
-                      type="checkbox"
-                      checked={formData.socialPlatforms.includes(platform)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          updateFormData('socialPlatforms', [...formData.socialPlatforms, platform])
-                        } else {
-                          updateFormData('socialPlatforms', formData.socialPlatforms.filter(p => p !== platform))
-                        }
-                      }}
-                      className="w-4 h-4 text-primary border-card-border rounded focus:ring-primary"
-                    />
-                    <span className="text-text">{platform}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-text mb-2">Call to Action</label>
+              <label className="block text-sm font-medium text-text mb-2">
+                Call to Action <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={formData.cta}
                 onChange={(e) => updateFormData('cta', e.target.value)}
                 className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
                 placeholder="Join us today and transform your life!"
+                required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text mb-2">Client Testimonial</label>
+              <label className="block text-sm font-medium text-text mb-2">
+                Client Testimonial <span className="text-red-500">*</span>
+              </label>
               <textarea
                 value={formData.testimonial}
                 onChange={(e) => updateFormData('testimonial', e.target.value)}
                 rows={3}
                 className="w-full px-3 py-2 border border-card-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-background text-text"
                 placeholder="Share a powerful client testimonial..."
+                required
               />
             </div>
           </div>
@@ -764,7 +855,7 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-background p-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto onboarding-form">
         {/* Progress bar (mobile-friendly) */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
