@@ -158,35 +158,6 @@ export default function OnboardingPage() {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  // URL validation functions
-  const validateUrl = (url: string, fieldName: string): boolean => {
-    if (!url.trim()) return false
-    
-    // Check if URL starts with https://www.
-    if (!url.startsWith('https://www.')) {
-      toast.error(`${fieldName} must start with "https://www."`)
-      // Add shake effect to the form
-      document.querySelector('.onboarding-form')?.classList.add('shake')
-      setTimeout(() => {
-        document.querySelector('.onboarding-form')?.classList.remove('shake')
-      }, 600)
-      return false
-    }
-    
-    try {
-      new URL(url)
-      return true
-    } catch {
-      toast.error(`${fieldName} must be a valid URL`)
-      // Add shake effect to the form
-      document.querySelector('.onboarding-form')?.classList.add('shake')
-      setTimeout(() => {
-        document.querySelector('.onboarding-form')?.classList.remove('shake')
-      }, 600)
-      return false
-    }
-  }
-
   const validateRequiredField = (value: string, fieldName: string): boolean => {
     if (!value.trim()) {
       toast.error(`${fieldName} is required`)
@@ -240,10 +211,7 @@ export default function OnboardingPage() {
         return (
           validateRequiredField(formData.website, 'Website') &&
           validateRequiredField(formData.instagramUrl, 'Instagram URL') &&
-          validateRequiredField(formData.googleMapUrl, 'Google Maps URL') &&
-          validateUrl(formData.website, 'Website') &&
-          validateUrl(formData.instagramUrl, 'Instagram URL') &&
-          validateUrl(formData.googleMapUrl, 'Google Maps URL')
+          validateRequiredField(formData.googleMapUrl, 'Google Maps URL')
         )
       case 5:
         return (
