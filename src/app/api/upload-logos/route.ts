@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getDrive, ensureFolder } from '@/lib/googleDrive';
 
+interface LogoFile {
+  name: string;
+  type: string;
+  size: number;
+  data: string; // base64 encoded
+  isLogo: boolean;
+  logoType: 'white' | 'black';
+  gymName: string;
+}
+
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max
 
@@ -15,7 +25,7 @@ export async function POST(req: NextRequest) {
       gymSlug, 
       gymName,
       hasFiles: !!files,
-      filesData: files?.map(f => ({ name: f.name, type: f.type, size: f.size, isLogo: f.isLogo }))
+      filesData: files?.map((f: LogoFile) => ({ name: f.name, type: f.type, size: f.size, isLogo: f.isLogo }))
     })
     
     if (!files || files.length === 0) {
@@ -132,7 +142,7 @@ async function createLogoFolderStructure(drive: any, gymName: string) {
   }
 }
 
-async function uploadLogoToDrive(drive: any, file: any, logosFolderId: string) {
+async function uploadLogoToDrive(drive: any, file: LogoFile, logosFolderId: string) {
   try {
     console.log(`📤 Uploading logo ${file.name} to Google Drive...`);
     console.log(`📁 Uploading to logos folder: ${logosFolderId}`);
