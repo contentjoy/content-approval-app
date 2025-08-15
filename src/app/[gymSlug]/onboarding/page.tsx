@@ -504,33 +504,60 @@ export default function OnboardingPage() {
       try {
         setCreatingProfile(true)
         console.log('🔑 Attempting to create Ayrshare profile for gym:', gymSlug)
+        console.log('🔑 Gym ID:', gymId)
+        console.log('🔑 Gym Data:', gymData)
         
+        // Use gym slug as the profile name, fallback to gym name if needed
+        const profileName = gymSlug || gymData['Gym Name'] || 'gym'
+        console.log('🔑 Using profile name:', profileName)
+        
+        console.log('🔑 Making API call to /api/ayrshare/create-profile...')
         const r = await fetch('/api/ayrshare/create-profile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ gymName: formData.instagramUrl ? new URL(formData.instagramUrl).pathname.replace(/\//g, '') || gymSlug : gymSlug })
+          body: JSON.stringify({ gymName: profileName })
         })
+        
+        console.log('🔑 API response status:', r.status)
+        console.log('🔑 API response headers:', Object.fromEntries(r.headers.entries()))
         
         if (!r.ok) {
           const errorText = await r.text()
           console.error('❌ Ayrshare profile creation failed:', r.status, errorText)
+          console.error('🔍 Full error response:', errorText)
           throw new Error(`Failed to create profile: ${r.status} - ${errorText}`)
         }
         
-        const { profileKey } = await r.json()
+        const responseData = await r.json()
+        console.log('🔑 API response data:', responseData)
+        
+        const { profileKey } = responseData
+        if (!profileKey) {
+          console.error('❌ No profileKey in response data:', responseData)
+          throw new Error('No profileKey returned from Ayrshare API')
+        }
+        
         console.log('✅ Ayrshare profile created successfully:', profileKey)
         
         setProfileKey(profileKey)
-        const save = await updateGymProfileKey(gymId, profileKey)
-        if (!save.success) throw new Error(save.error || 'Failed to save profileKey')
         
+        // Save profile key to the profile_key column in gyms table
+        console.log('💾 Saving profile key to database...')
+        const save = await updateGymProfileKey(gymId, profileKey)
+        if (!save.success) {
+          console.error('❌ Failed to save profile key to database:', save.error)
+          throw new Error(`Failed to save profile key: ${save.error}`)
+        }
+        
+        console.log('✅ Profile key saved to database successfully in profile_key column')
         toast.success('Profile created. You can now connect social accounts.')
       } catch (err: any) {
         console.error('❌ Ayrshare profile create failed:', err)
         console.error('🔍 Error details:', {
           message: err.message,
           status: err.status,
-          details: err.details
+          details: err.details,
+          stack: err.stack
         })
         
         // Show more specific error message
@@ -538,6 +565,8 @@ export default function OnboardingPage() {
           toast.error('Ayrshare API not configured. Please contact support.')
         } else if (err.message?.includes('Failed to create profile')) {
           toast.error('Failed to create social profile. Please try again later.')
+        } else if (err.message?.includes('No profileKey returned')) {
+          toast.error('Profile creation failed - no profile key returned.')
         } else {
           toast.error('Failed to create social profile: ' + (err.message || 'Unknown error'))
         }

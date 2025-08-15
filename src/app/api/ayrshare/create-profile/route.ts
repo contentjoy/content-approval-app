@@ -23,7 +23,11 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    console.log('🔑 Ayrshare API key found, making request to create profile')
+    console.log('🔑 Ayrshare API key found, length:', process.env.AYRSHARE_API_KEY.length)
+    console.log('🔑 Making request to Ayrshare API...')
+
+    const requestBody = JSON.stringify({ title: gymName })
+    console.log('🔑 Request body:', requestBody)
 
     const res = await fetch('https://api.ayrshare.com/api/profiles', {
       method: 'POST',
@@ -31,15 +35,23 @@ export async function POST(request: NextRequest) {
         Authorization: `Bearer ${process.env.AYRSHARE_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ title: gymName }),
+      body: requestBody,
       // No-caching to ensure fresh profile creation
       cache: 'no-store',
     })
 
+    console.log('🔑 Ayrshare API response status:', res.status)
+    console.log('🔑 Ayrshare API response headers:', Object.fromEntries(res.headers.entries()))
+
     if (!res.ok) {
       const text = await res.text()
       console.error('❌ Ayrshare create profile error:', res.status, text)
-      console.error('🔍 Request details:', { gymName, hasApiKey: !!process.env.AYRSHARE_API_KEY })
+      console.error('🔍 Request details:', { 
+        gymName, 
+        hasApiKey: !!process.env.AYRSHARE_API_KEY,
+        apiKeyLength: process.env.AYRSHARE_API_KEY?.length,
+        requestBody
+      })
       return NextResponse.json({ 
         error: 'Failed to create profile',
         status: res.status,
@@ -48,6 +60,8 @@ export async function POST(request: NextRequest) {
     }
 
     const data = (await res.json()) as { profileKey?: string }
+    console.log('🔑 Ayrshare API response data:', data)
+    
     if (!data.profileKey) {
       console.error('❌ profileKey missing in Ayrshare response:', data)
       return NextResponse.json({ 

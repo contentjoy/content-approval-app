@@ -66,9 +66,15 @@ export default function SocialConnectPage() {
       if (gym?.social_accounts || gym?.ayrshare_profiles) {
         setPlatforms(prev => prev.map(platform => {
           const profile: any = gym.ayrshare_profiles?.[platform.id as keyof typeof gym.ayrshare_profiles]
+          const socialAccount = gym.social_accounts?.[platform.id as keyof typeof gym.social_accounts]
+          
+          // Check if platform is connected via either social_accounts or ayrshare_profiles
           const connected = Boolean(
-            gym.social_accounts?.[platform.id as keyof typeof gym.social_accounts] || profile?.profile_key
+            socialAccount?.access_token || 
+            socialAccount?.page_id || 
+            profile?.profile_key
           )
+          
           return {
             ...platform,
             connected,
@@ -98,8 +104,13 @@ export default function SocialConnectPage() {
         .select('profile_key')
         .eq('id', gymId)
         .single()
+      
       const profileKey = gym?.profile_key
-      if (!profileKey) throw new Error('Missing profile key. Please complete onboarding first.')
+      if (!profileKey) {
+        console.error('❌ No profile key found in profile_key column')
+        console.error('🔍 Available gym data:', gym)
+        throw new Error('Missing profile key. Please complete onboarding first.')
+      }
 
       // Generate JWT for Ayrshare authentication
       const response = await fetch('/api/ayrshare/generate-jwt', {
