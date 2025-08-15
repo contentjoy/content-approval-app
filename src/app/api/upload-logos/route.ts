@@ -112,26 +112,33 @@ async function createLogoFolderStructure(drive: any, gymName: string) {
   try {
     console.log('🏗️ Creating logo folder structure for:', gymName);
     
-    // Get the shared drive ID and clients folder ID from environment
+    // Get the shared drive ID
     const sharedDriveId = '0ALOLvWQ1QTx5Uk9PVA'; // New shared drive ID
-    const clientsFolderId = '1TCc0xlIA6raD3xBfWOXPMU0PWyTMNNnGD'; // "Clients" folder inside shared drive
     
     if (!sharedDriveId) {
       throw new Error('GOOGLE_SHARED_DRIVE_ID not configured');
     }
     
     console.log(`🏢 Using shared drive: ${sharedDriveId}`);
-    console.log(`📁 Using clients folder: ${clientsFolderId}`);
     
-    // Step 1: Create or find gym folder inside the "Clients" folder
+    // Step 1: Create or find "Clients" folder in the shared drive root
+    console.log('📁 Creating/finding Clients folder in shared drive root...');
+    const clientsFolderId = await ensureFolder(drive, 'Clients', sharedDriveId);
+    console.log('📁 Clients folder:', clientsFolderId);
+    
+    // Step 2: Create or find gym folder inside the "Clients" folder
+    console.log(`🏋️ Creating/finding gym folder: ${gymName}`);
     const gymFolderId = await ensureFolder(drive, gymName, clientsFolderId);
     console.log('🏋️ Gym folder:', gymFolderId);
     
-    // Step 2: Create logos folder inside the gym folder
+    // Step 3: Create logos folder inside the gym folder
+    console.log('🎨 Creating/finding Logos folder');
     const logosFolderId = await ensureFolder(drive, 'Logos', gymFolderId);
     console.log('🎨 Logos folder:', logosFolderId);
     
     return {
+      sharedDriveId,
+      clientsFolderId,
       gymFolderId,
       logosFolderId
     };
