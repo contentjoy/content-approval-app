@@ -708,3 +708,34 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 .shake {
   animation: shake 0.6s ease-in-out;
 }
+
+/* Upload progress bar animations */
+@keyframes progressPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.progress-bar-animated {
+  animation: progressPulse 2s ease-in-out infinite;
+}
+
+.progress-bar-smooth {
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Progress bar glow effect */
+.progress-bar-glow {
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+/* Setup phase progress bar */
+.progress-bar-setup {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  background-size: 200% 100%;
+  animation: progressShimmer 2s ease-in-out infinite;
+}
+
+@keyframes progressShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

@@ -139,11 +139,24 @@ export function FloatingUploadProgress({
 }) {
   if (!isVisible) return null
 
+  // Determine progress phase and message
+  const getProgressPhase = () => {
+    if (progress <= 10) {
+      return { phase: 'Setup', message: 'Preparing upload session...', color: 'bg-blue-500' }
+    } else if (progress < 100) {
+      return { phase: 'Uploading', message: 'Uploading files...', color: 'bg-green-500' }
+    } else {
+      return { phase: 'Complete', message: 'Upload finished!', color: 'bg-green-600' }
+    }
+  }
+
+  const { phase, message, color } = getProgressPhase()
+
   if (isMinimized) {
     return (
       <div className="fixed bottom-4 right-4 z-50 bg-background border border-border rounded-lg shadow-xl p-3 min-w-[200px]">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-foreground">Uploading...</span>
+          <span className="text-sm font-medium text-foreground">{phase}</span>
           <div className="flex items-center space-x-2">
             <button
               onClick={onMinimize}
@@ -163,12 +176,12 @@ export function FloatingUploadProgress({
         </div>
         <div className="w-full bg-muted rounded-full h-2">
           <div 
-            className="bg-primary h-2 rounded-full transition-all duration-300 ease-out"
+            className={`h-2 rounded-full transition-all duration-300 ease-out ${color} ${progress <= 10 ? 'progress-bar-setup' : 'progress-bar-smooth'}`}
             style={{ width: `${progress}%` }}
           />
         </div>
         <div className="text-xs text-muted-foreground mt-1">
-          {progress}% • {currentFile}
+          {progress}% • {currentFile || message}
         </div>
       </div>
     )
@@ -179,9 +192,12 @@ export function FloatingUploadProgress({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-foreground">Uploading Content</h3>
+          <h3 className="font-semibold text-foreground flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${color}`}></span>
+            {phase}
+          </h3>
           <p className="text-sm text-muted-foreground">
-            {currentFile} • {progress}% complete
+            {currentFile || message}
           </p>
         </div>
         <div className="flex items-center space-x-2">
@@ -210,24 +226,42 @@ export function FloatingUploadProgress({
         </div>
         <div className="w-full bg-muted rounded-full h-3">
           <div 
-            className="bg-primary h-3 rounded-full transition-all duration-300 ease-out"
+            className={`h-3 rounded-full transition-all duration-500 ease-out ${color} ${progress <= 10 ? 'progress-bar-setup' : 'progress-bar-smooth'}`}
             style={{ width: `${progress}%` }}
           />
         </div>
         
-        {/* File Progress */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Current File</span>
-            <span className="font-medium">{currentFile}</span>
+        {/* Progress Details */}
+        {progress <= 10 ? (
+          // Setup Phase
+          <div className="space-y-2">
+            <div className="text-sm text-muted-foreground">
+              Setting up upload session...
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Creating folder structure and preparing files
+            </div>
           </div>
-          <div className="text-xs text-muted-foreground">
-            {Math.ceil((progress / 100) * totalFiles)} of {totalFiles} files processed
+        ) : progress < 100 ? (
+          // Upload Phase
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Current File</span>
+              <span className="font-medium">{currentFile}</span>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {Math.ceil((progress - 10) / 90 * totalFiles)} of {totalFiles} files processed
+            </div>
           </div>
-        </div>
+        ) : (
+          // Complete Phase
+          <div className="text-sm text-green-600 font-medium text-center">
+            🎉 Upload completed successfully!
+          </div>
+        )}
 
         {/* Estimated Time */}
-        {progress > 0 && progress < 100 && (
+        {progress > 10 && progress < 100 && (
           <div className="text-xs text-muted-foreground">
             Estimated time remaining: {Math.ceil((100 - progress) / 10)} minutes
           </div>
@@ -577,21 +611,34 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       // Start upload in context and show floating progress
       startUpload(allFiles.length)
       
+      // Show immediate progress feedback
+      updateProgress(1, 'Initializing upload...')
+      
       // Show immediate success toast for better UX
       toast.success('Success! Content sent to team')
       
       // Close modal after setting up floating progress
       onClose()
       
-      // Start background upload process
+      // Start background upload process with enhanced progress feedback
       setTimeout(async () => {
         try {
           const uploadResults = []
           
-          // Create single folder structure for this upload session ONCE
+          // PHASE 1: Setup Progress (1-10%)
           console.log('🏗️ Creating folder structure for upload session...')
+          updateProgress(2, 'Setting up upload session...')
+          
+          // Add a small delay to show the progress moving
+          await new Promise(resolve => setTimeout(resolve, 300))
+          
           const sessionTimestamp = new Date().toISOString().split('T')[0] + 'T' + new Date().toTimeString().split(' ')[0].replace(/:/g, '-')
           const sessionFolderName = `Upload Session ${sessionTimestamp}`
+          
+          updateProgress(4, 'Preparing folders...')
+          await new Promise(resolve => setTimeout(resolve, 200))
+          
+          updateProgress(6, 'Creating folder structure...')
           
           // Create the complete folder structure first - this will be reused for all files
           const folderStructureResponse = await fetch('/api/upload-to-drive', {
@@ -615,6 +662,9 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             throw new Error('Failed to create folder structure')
           }
           
+          updateProgress(8, 'Finalizing setup...')
+          await new Promise(resolve => setTimeout(resolve, 200))
+          
           const folderStructureResult = await folderStructureResponse.json()
           const sessionFolderId = folderStructureResult.results[0]?.fileId
           
@@ -632,22 +682,26 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           
           console.log('📁 Using folder structure:', folderStructure)
           
+          // PHASE 2: File Upload Progress (10-100%)
+          updateProgress(10, 'Starting file uploads...')
+          
           // Now upload all files to the appropriate folders based on their type
           for (let i = 0; i < allFiles.length; i++) {
             const file = allFiles[i]
             try {
               console.log(`📤 Uploading ${file.name} to appropriate folder...`)
               
-              // Update progress and floating component
-              const progress = Math.round(((i + 1) / allFiles.length) * 100)
-              setUploadProgress(progress)
-              updateProgress(progress, file.name)
+              // Calculate progress: 10% (setup) + 90% (files) * (current file / total files)
+              const fileProgress = 10 + Math.round((i / allFiles.length) * 90)
+              updateProgress(fileProgress, `Uploading ${file.name}...`)
               
-              // Show progress toast
-              toast.success(`Uploading ${file.name}... (${progress}%)`, {
-                duration: 2000,
-                icon: '📤'
-              })
+              // Show progress toast for important milestones
+              if (i === 0 || i === Math.floor(allFiles.length / 2) || i === allFiles.length - 1) {
+                toast.success(`Uploading ${file.name}... (${fileProgress}%)`, {
+                  duration: 2000,
+                  icon: '📤'
+                })
+              }
               
               // Determine which folder to use based on file type and slot
               const slotName = determineSlotName(file)
