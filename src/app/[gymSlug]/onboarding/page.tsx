@@ -119,35 +119,51 @@ export default function OnboardingPage() {
   // Load existing data if available
   useEffect(() => {
     const loadGymData = async () => {
-      const storedGymId = localStorage.getItem('gym_id')
-      
-      if (storedGymId) {
-        setGymId(storedGymId)
+      try {
+        const storedGymId = localStorage.getItem('gym_id')
         
-        // Load existing gym data
-        const { data: gym } = await supabase
-          .from('gyms')
-          .select('*')
-          .eq('id', storedGymId)
-          .single()
+        if (storedGymId) {
+          console.log('🔍 Loading existing gym data for ID:', storedGymId)
+          setGymId(storedGymId)
+          
+          // Load existing gym data
+          const { data: gym, error } = await supabase
+            .from('gyms')
+            .select('*')
+            .eq('id', storedGymId)
+            .single()
 
-        if (gym) {
-          setFormData(prev => ({
-            ...prev,
-            firstName: gym['First name'] || '',
-            lastName: gym['Last name'] || '',
-            email: gym['Email'] || '',
-            businessName: gym['Gym Name'] || '',
-            brandColor: gym['Primary color'] || '#000000',
-            whiteLogoUrl: (gym as any)['White Logo URL'] || '',
-            blackLogoUrl: (gym as any)['Black Logo URL'] || ''
-          }))
+          if (error) {
+            console.warn('⚠️ Failed to load existing gym data:', error)
+            return
+          }
+
+          if (gym) {
+            console.log('✅ Loaded existing gym data:', gym['Gym Name'])
+            setFormData(prev => ({
+              ...prev,
+              firstName: gym['First name'] || '',
+              lastName: gym['Last name'] || '',
+              email: gym['Email'] || '',
+              businessName: gym['Gym Name'] || '',
+              brandColor: gym['Primary color'] || '#000000',
+              whiteLogoUrl: (gym as any)['White Logo URL'] || '',
+              blackLogoUrl: (gym as any)['Black Logo URL'] || ''
+            }))
+          }
+        } else {
+          console.log('ℹ️ No stored gym ID found, starting fresh onboarding')
         }
+      } catch (error) {
+        console.error('❌ Error loading gym data:', error)
       }
     }
 
-    loadGymData()
-  }, [])
+    // Only load data if we're on the onboarding page and have a gym slug
+    if (gymSlug) {
+      loadGymData()
+    }
+  }, [gymSlug])
 
   const updateFormData = (field: keyof FormData, value: string | string[] | File | null) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -214,6 +230,7 @@ export default function OnboardingPage() {
       // Upload logos to Google Drive if files were selected
       let whiteLogoUrl = formData.whiteLogoUrl
       let blackLogoUrl = formData.blackLogoUrl
+      let logoUploadErrors: string[] = []
 
       if (formData.whiteLogoFile || formData.blackLogoFile) {
         console.log('📤 Uploading logos to Google Drive...')
@@ -221,6 +238,7 @@ export default function OnboardingPage() {
         try {
           // Upload white logo if selected
           if (formData.whiteLogoFile) {
+            console.log('📤 Uploading white logo:', formData.whiteLogoFile.name)
             const whiteLogoResponse = await fetch('/api/upload-logos', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -244,14 +262,19 @@ export default function OnboardingPage() {
               if (result.results && result.results[0]?.fileId) {
                 whiteLogoUrl = `https://drive.google.com/file/d/${result.results[0].fileId}/view`
                 console.log('✅ White logo uploaded successfully')
+              } else {
+                throw new Error('No file ID returned from white logo upload')
               }
             } else {
-              console.warn('⚠️ White logo upload failed, using existing URL')
+              const errorText = await whiteLogoResponse.text()
+              console.error('❌ White logo upload failed:', whiteLogoResponse.status, errorText)
+              throw new Error(`White logo upload failed: ${whiteLogoResponse.status} - ${errorText}`)
             }
           }
 
           // Upload black logo if selected
           if (formData.blackLogoFile) {
+            console.log('📤 Uploading black logo:', formData.blackLogoFile.name)
             const blackLogoResponse = await fetch('/api/upload-logos', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -275,14 +298,19 @@ export default function OnboardingPage() {
               if (result.results && result.results[0]?.fileId) {
                 blackLogoUrl = `https://drive.google.com/file/d/${result.results[0].fileId}/view`
                 console.log('✅ Black logo uploaded successfully')
+              } else {
+                throw new Error('No file ID returned from black logo upload')
               }
             } else {
-              console.warn('⚠️ Black logo upload failed, using existing URL')
+              const errorText = await blackLogoResponse.text()
+              console.error('❌ Black logo upload failed:', blackLogoResponse.status, errorText)
+              throw new Error(`Black logo upload failed: ${blackLogoResponse.status} - ${errorText}`)
             }
           }
 
           // Update the database with the new logo URLs if they changed
           if (whiteLogoUrl !== formData.whiteLogoUrl || blackLogoUrl !== formData.blackLogoUrl) {
+            console.log('💾 Updating database with new logo URLs')
             const { error: logoUpdateError } = await supabase
               .from('gyms')
               .update({
@@ -293,13 +321,25 @@ export default function OnboardingPage() {
 
             if (logoUpdateError) {
               console.warn('⚠️ Failed to update logo URLs in database:', logoUpdateError)
+              logoUploadErrors.push('Failed to update logo URLs in database')
+            } else {
+              console.log('✅ Logo URLs updated in database successfully')
             }
           }
 
         } catch (logoError) {
           console.error('❌ Logo upload error:', logoError)
-          // Don't fail the onboarding if logo upload fails, just log the error
+          const errorMessage = logoError instanceof Error ? logoError.message : 'Unknown logo upload error'
+          logoUploadErrors.push(errorMessage)
+          
+          // Don't fail the onboarding if logo upload fails, but log the error
+          console.warn('⚠️ Logo upload failed, continuing with onboarding:', errorMessage)
         }
+      }
+
+      // If there were logo upload errors, log them but continue
+      if (logoUploadErrors.length > 0) {
+        console.warn('⚠️ Logo upload had issues:', logoUploadErrors)
       }
 
       // Send data to onboarding webhook with gym name and email

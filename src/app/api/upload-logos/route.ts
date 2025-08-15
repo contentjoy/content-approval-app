@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getDrive } from '@/lib/googleDrive';
+import { getDrive, ensureFolder } from '@/lib/googleDrive';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max
@@ -10,11 +10,21 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { files, gymSlug, gymName } = body
     
+    console.log('🎨 Logo upload request received:', { 
+      fileCount: files?.length || 0, 
+      gymSlug, 
+      gymName,
+      hasFiles: !!files,
+      filesData: files?.map(f => ({ name: f.name, type: f.type, size: f.size, isLogo: f.isLogo }))
+    })
+    
     if (!files || files.length === 0) {
+      console.error('❌ No files provided in request')
       return NextResponse.json({ error: 'No files provided' }, { status: 400 })
     }
 
     if (!gymSlug || !gymName) {
+      console.error('❌ Missing gym information:', { gymSlug, gymName })
       return NextResponse.json({ error: 'Missing gym information' }, { status: 400 })
     }
 
@@ -104,11 +114,11 @@ async function createLogoFolderStructure(drive: any, gymName: string) {
     console.log(`📁 Using clients folder: ${clientsFolderId}`);
     
     // Step 1: Create or find gym folder inside the "Clients" folder
-    const gymFolderId = await createOrFindFolder(drive, gymName, clientsFolderId, sharedDriveId);
+    const gymFolderId = await ensureFolder(drive, gymName, clientsFolderId);
     console.log('🏋️ Gym folder:', gymFolderId);
     
     // Step 2: Create logos folder inside the gym folder
-    const logosFolderId = await createOrFindFolder(drive, 'Logos', gymFolderId, sharedDriveId);
+    const logosFolderId = await ensureFolder(drive, 'Logos', gymFolderId);
     console.log('🎨 Logos folder:', logosFolderId);
     
     return {
@@ -118,46 +128,6 @@ async function createLogoFolderStructure(drive: any, gymName: string) {
     
   } catch (error) {
     console.error('❌ Failed to create logo folder structure:', error);
-    throw error;
-  }
-}
-
-async function createOrFindFolder(drive: any, name: string, parentId: string, sharedDriveId: string): Promise<string> {
-  try {
-    // Check if folder already exists
-    const { data: existingFolders } = await drive.files.list({
-      q: `name='${name}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`,
-      fields: 'files(id,name)',
-      supportsAllDrives: true,
-      includeItemsFromAllDrives: true,
-    });
-    
-    if (existingFolders.files && existingFolders.files.length > 0) {
-      console.log(`📁 Found existing folder: ${name}`);
-      return existingFolders.files[0].id!;
-    }
-    
-    // Create new folder in the shared drive context
-    const { data: newFolder } = await drive.files.create({
-      requestBody: {
-        name,
-        mimeType: 'application/vnd.google-apps.folder',
-        parents: [parentId],
-      },
-      fields: 'id',
-      supportsAllDrives: true,
-      driveId: sharedDriveId,
-    } as any);
-    
-    if (!newFolder.id) {
-      throw new Error('Failed to create folder - no ID returned');
-    }
-    
-    console.log(`✅ Created folder: ${name} (${newFolder.id})`);
-    return newFolder.id;
-    
-  } catch (error) {
-    console.error(`❌ Error creating/finding folder ${name}:`, error);
     throw error;
   }
 }
