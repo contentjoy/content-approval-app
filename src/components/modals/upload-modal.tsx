@@ -170,6 +170,14 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   const [uploadingFiles, setUploadingFiles] = useState<string[]>([])
   const [showConfetti, setShowConfetti] = useState(false)
   
+  // Add file count state for each slot
+  const [fileCounts, setFileCounts] = useState<Record<SlotName, number>>({
+    'Photos': 0,
+    'Videos': 0,
+    'Facility Photos': 0,
+    'Facility Videos': 0
+  })
+  
   const { startUpload, updateProgress, completeUpload } = useUpload()
   
   const { gymName: brandingGymName } = useBranding()
@@ -197,6 +205,51 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
   
   // Get current active Uppy instance
   const activeUppy = uppyInstances[activeSlot]
+
+  // Add event listeners for file changes to update file counts
+  useEffect(() => {
+    const updateFileCounts = () => {
+      const newCounts: Record<SlotName, number> = {} as Record<SlotName, number>
+      SLOT_NAMES.forEach(slotName => {
+        newCounts[slotName] = uppyInstances[slotName]?.getFiles().length || 0
+      })
+      setFileCounts(newCounts)
+    }
+
+    // Add event listeners to each Uppy instance
+    const cleanupFunctions: (() => void)[] = []
+    
+    SLOT_NAMES.forEach(slotName => {
+      const uppy = uppyInstances[slotName]
+      if (uppy) {
+        // Listen for file additions
+        const onFileAdded = () => updateFileCounts()
+        // Listen for file removals
+        const onFileRemoved = () => updateFileCounts()
+        
+        uppy.on('file-added', onFileAdded)
+        uppy.on('file-removed', onFileRemoved)
+        
+        cleanupFunctions.push(() => {
+          uppy.off('file-added', onFileAdded)
+          uppy.off('file-removed', onFileRemoved)
+        })
+      }
+    })
+
+    // Initial file count update
+    updateFileCounts()
+
+    // Cleanup function
+    return () => {
+      cleanupFunctions.forEach(cleanup => cleanup())
+    }
+  }, [uppyInstances])
+
+  // Calculate total files across all slots
+  const totalFiles = useMemo(() => {
+    return Object.values(fileCounts).reduce((sum, count) => sum + count, 0)
+  }, [fileCounts])
 
   // Cleanup Uppy instance on unmount
   useEffect(() => {
@@ -553,13 +606,20 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 sm:gap-6 lg:gap-8">
             {/* Slot Selector - Responsive proportions */}
             <div className="lg:col-span-1 xl:col-span-1 2xl:col-span-2 space-y-4 sm:space-y-6">
-              <h3 className="font-semibold text-foreground text-lg sm:text-xl">Content Types</h3>
+              <div>
+                <h3 className="font-semibold text-foreground text-lg sm:text-xl">Content Types</h3>
+                {totalFiles > 0 && (
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {totalFiles} total files selected
+                  </div>
+                )}
+              </div>
               <div className="space-y-3 sm:space-y-4">
                 {SLOT_NAMES.map((slotName) => {
                   const config = SLOT_CONFIG[slotName]
                   const Icon = config.icon
                   const isActive = activeSlot === slotName
-                  const fileCount = uppyInstances[slotName]?.getFiles().length || 0
+                  const fileCount = fileCounts[slotName] || 0
                   
                   return (
                     <button
@@ -674,9 +734,9 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             </button>
             <button
               onClick={handleUpload}
-              disabled={Object.values(uppyInstances).every(uppy => uppy.getFiles().length === 0) || isUploading}
+              disabled={Object.values(fileCounts).every(count => count === 0) || isUploading}
               className={`w-full sm:w-auto px-6 sm:px-10 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center space-x-3 ${
-                Object.values(uppyInstances).every(uppy => uppy.getFiles().length === 0) || isUploading
+                Object.values(fileCounts).every(count => count === 0) || isUploading
                   ? 'bg-muted text-muted-foreground cursor-not-allowed'
                   : 'bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl'
               }`}
