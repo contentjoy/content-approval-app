@@ -798,74 +798,44 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                   chunks.push(buffer.slice(j, j + chunkSize))
                 }
                 
-                console.log(`📦 Uploading ${chunks.length} chunks for ${file.name}...`)
+                console.log(`📦 Created ${chunks.length} chunks for ${file.name}, sending all chunks together for reconstruction...`)
                 
-                // Upload chunks with parallel processing (max 3 concurrent) for 1.5-2x speed improvement
-                const maxConcurrent = 3
-                const uploadChunk = async (chunkIndex: number) => {
-                  const chunk = chunks[chunkIndex]
-                  const chunkData = chunk.toString('base64')
-                  
-                  console.log(`📦 Uploading chunk ${chunkIndex + 1}/${chunks.length} for ${file.name} to targetFolderId: ${targetFolderId}`)
-                  
-                  const chunkResponse = await fetch('/api/upload-to-drive', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      files: [{
-                        name: `${file.name}.part${chunkIndex + 1}`,
-                        type: file.type,
-                        size: chunk.length,
-                        data: chunkData,
-                        isChunk: true,
-                        originalName: file.name,
-                        chunkIndex,
-                        totalChunks: chunks.length
-                      }],
-                      gymSlug,
-                      gymName: authStatus.gymName,
-                      sessionFolderId: targetFolderId // Use slot folder (Videos/Photos) for chunked uploads
-                    })
+                // Prepare all chunks for a single API call
+                const chunkFiles = chunks.map((chunk, index) => ({
+                  name: `${file.name}.part${index + 1}`,
+                  type: file.type,
+                  size: chunk.length,
+                  data: chunk.toString('base64'),
+                  isChunk: true,
+                  originalName: file.name,
+                  chunkIndex: index,
+                  totalChunks: chunks.length
+                }))
+                
+                // Send all chunks in one request for reconstruction
+                const chunkResponse = await fetch('/api/upload-to-drive', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    files: chunkFiles,
+                    gymSlug,
+                    gymName: authStatus.gymName,
+                    sessionFolderId: targetFolderId // Use slot folder (Videos/Photos) for chunked uploads
                   })
-                  
-                  if (!chunkResponse.ok) {
-                    throw new Error(`Chunk ${chunkIndex + 1} failed: ${chunkResponse.status}`)
-                  }
-                  
-                  return chunkIndex
+                })
+                
+                if (!chunkResponse.ok) {
+                  const errorData = await chunkResponse.text()
+                  throw new Error(`Chunked upload failed: ${chunkResponse.status} - ${errorData}`)
                 }
                 
-                // Process chunks in batches for parallel uploads
-                for (let batchStart = 0; batchStart < chunks.length; batchStart += maxConcurrent) {
-                  const batch = chunks.slice(batchStart, batchStart + maxConcurrent)
-                  const batchPromises = batch.map((_, index) => uploadChunk(batchStart + index))
-                  
-                  try {
-                    const completedChunks = await Promise.all(batchPromises)
-                    console.log(`✅ Batch ${Math.floor(batchStart / maxConcurrent) + 1} completed: chunks ${completedChunks.map(i => i + 1).join(', ')}`)
-                    
-                    // Update progress for completed batch
-                    const batchProgress = Math.round(((i + batchStart + batch.length) / (allFiles.length + chunks.length - 1)) * 90) + 10
-                    updateProgress(batchProgress, `Uploading ${file.name}...`)
-                    
-                    // Show batch progress toast with file size info
-                    const batchSizeMB = (batch.reduce((sum, chunk) => sum + chunk.length, 0) / (1024 * 1024)).toFixed(1)
-                    toast.success(`Batch ${Math.floor(batchStart / maxConcurrent) + 1} uploaded (${batchSizeMB}MB) for ${file.name}`, {
-                      duration: 1500,
-                      icon: '📦'
-                    })
-                  } catch (error) {
-                    console.error(`❌ Batch ${Math.floor(batchStart / maxConcurrent) + 1} failed:`, error)
-                    throw error
-                  }
-                }
-                
-                console.log(`✅ All chunks uploaded for ${file.name}`)
+                const chunkResult = await chunkResponse.json()
+                console.log(`✅ Chunked upload completed for ${file.name}:`, chunkResult)
                 
                 uploadResults.push({
                   name: file.name,
                   success: true,
-                  fileId: 'chunked-upload-complete'
+                  fileId: chunkResult.results?.[0]?.fileId || 'chunked-reconstructed'
                 })
                 
               } else {
