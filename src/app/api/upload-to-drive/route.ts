@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max
 
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   // Read max upload size from ENV (default to 2MB if not set)
   const maxUploadSize = parseInt(process.env.MAX_UPLOAD_SIZE || '2048') * 1024 // Convert KB to bytes
   const maxSize = Math.min(maxUploadSize, 100 * 1024 * 1024) // Cap at 100MB for safety
@@ -15,7 +15,56 @@ export async function POST(req: NextRequest) {
   console.log(`📏 Max upload size: ${maxUploadSize / 1024}KB (${maxSize / (1024 * 1024)}MB)`)
   
   try {
-    const body = await req.json()
+    const contentType = request.headers.get('content-type')
+    
+    // Handle FormData for chunked uploads
+    if (contentType && contentType.includes('multipart/form-data')) {
+      const formData = await request.formData()
+      const gymSlug = formData.get('gymSlug') as string
+      const gymName = formData.get('gymName') as string
+      const sessionFolderId = formData.get('sessionFolderId') as string
+      const isChunkedUpload = formData.get('isChunkedUpload') as string
+      const originalFileName = formData.get('originalFileName') as string
+      const totalChunks = parseInt(formData.get('totalChunks') as string)
+      
+      if (isChunkedUpload === 'true') {
+        console.log('📦 Processing chunked upload via FormData...')
+        console.log(`📁 Original file: ${originalFileName}, Total chunks: ${totalChunks}`)
+        
+        // Extract chunks from FormData
+        const chunks: Buffer[] = []
+        for (let i = 0; i < totalChunks; i++) {
+          const chunk = formData.get(`chunk_${i}`) as File
+          if (chunk) {
+            const chunkBuffer = Buffer.from(await chunk.arrayBuffer())
+            chunks.push(chunkBuffer)
+            console.log(`📦 Received chunk ${i + 1}/${totalChunks}: ${(chunkBuffer.length / (1024 * 1024)).toFixed(1)}MB`)
+          }
+        }
+        
+        if (chunks.length !== totalChunks) {
+          throw new Error(`Missing chunks: expected ${totalChunks}, got ${chunks.length}`)
+        }
+        
+        // Reconstruct the original file
+        const reconstructedFile = Buffer.concat(chunks)
+        console.log(`✅ File reconstructed: ${originalFileName} (${(reconstructedFile.length / (1024 * 1024)).toFixed(1)}MB)`)
+        
+        // Create a file object for the reconstructed file
+        const reconstructedFileObj = {
+          name: originalFileName,
+          type: 'video/mp4', // Default to video, could be made dynamic
+          size: reconstructedFile.length,
+          data: reconstructedFile.toString('base64')
+        }
+        
+        // Use the regular upload handler for the reconstructed file
+        return await handleRegularUpload([reconstructedFileObj], gymSlug, gymName, sessionFolderId, maxSize)
+      }
+    }
+    
+    // Handle JSON for regular uploads
+    const body = await request.json()
     const { files, gymSlug, gymName, sessionFolderId } = body
     
     if (!files || files.length === 0) {
@@ -37,15 +86,8 @@ export async function POST(req: NextRequest) {
       }, { status: 413 })
     }
     
-    // Check for chunked uploads
-    const hasChunks = files.some((file: any) => file.isChunk)
-    if (hasChunks) {
-      console.log('📦 Processing chunked upload...')
-      return await handleChunkedUpload(files, gymSlug, gymName, maxUploadSize, sessionFolderId)
-    }
-    
-    // Regular upload flow
-    return await handleRegularUpload(files, gymSlug, gymName, sessionFolderId, maxUploadSize)
+    // Regular upload flow (chunked uploads handled via FormData above)
+    return await handleRegularUpload(files, gymSlug, gymName, sessionFolderId, maxSize)
     
   } catch (error) {
     console.error('❌ Upload error:', error)
@@ -130,82 +172,6 @@ async function createFolderStructure(gymName: string) {
     console.error('❌ Failed to create folder structure:', error);
     throw error;
   }
-}
-
-// Handle chunked uploads
-async function handleChunkedUpload(files: any[], gymSlug: string, gymName: string, maxUploadSize: number, slotFolderId: string) {
-  console.log('📦 Processing chunked upload...')
-  console.log('📁 Target slot folder ID:', slotFolderId)
-  
-  // Group chunks by original file
-  const chunkGroups = new Map<string, any[]>()
-  files.forEach(file => {
-    if (file.isChunk && file.originalName) {
-      if (!chunkGroups.has(file.originalName)) {
-        chunkGroups.set(file.originalName, [])
-      }
-      chunkGroups.get(file.originalName)!.push(file)
-    }
-  })
-  
-  // Sort chunks by index
-  chunkGroups.forEach(chunks => {
-    chunks.sort((a, b) => a.chunkIndex - b.chunkIndex)
-  })
-  
-  // Reconstruct and upload each file
-  const results = []
-  const drive = getDrive()
-  
-  for (const [originalName, chunks] of chunkGroups) {
-    try {
-      console.log(`🔧 Reconstructing ${originalName} from ${chunks.length} chunks...`)
-      
-      // Combine chunks
-      const combinedBuffer = Buffer.concat(
-        chunks.map(chunk => Buffer.from(chunk.data, 'base64'))
-      )
-      
-      // Upload reconstructed file to the slot folder
-      const reconstructedFile = {
-        name: originalName,
-        type: chunks[0].type,
-        size: combinedBuffer.length,
-        data: combinedBuffer.toString('base64')
-      }
-      
-      console.log(`📤 Uploading reconstructed file ${originalName} (${(combinedBuffer.length / (1024 * 1024)).toFixed(1)}MB) to slot folder: ${slotFolderId}`)
-      
-      const uploadResult = await uploadFileToDrive(
-        drive,
-        reconstructedFile,
-        slotFolderId, // Use the slot folder ID directly
-        maxUploadSize
-      )
-      
-      console.log(`✅ Successfully uploaded reconstructed file: ${originalName} (${uploadResult.fileId})`)
-      
-      results.push({
-        name: originalName,
-        success: true,
-        fileId: uploadResult.fileId || 'chunked-reconstructed'
-      })
-      
-    } catch (error) {
-      console.error(`❌ Failed to reconstruct ${originalName}:`, error)
-      results.push({
-        name: originalName,
-        success: false,
-        error: error instanceof Error ? error.message : 'Reconstruction failed'
-      })
-    }
-  }
-  
-  return NextResponse.json({
-    success: true,
-    message: `Processed ${results.filter(r => r.success).length}/${results.length} chunked files`,
-    results
-  })
 }
 
 // Handle regular uploads

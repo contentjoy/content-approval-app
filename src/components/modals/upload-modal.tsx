@@ -813,15 +813,24 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 }))
                 
                 // Send all chunks in one request for reconstruction
+                const formData = new FormData()
+                if (gymSlug) formData.append('gymSlug', gymSlug)
+                if (authStatus.gymName) formData.append('gymName', authStatus.gymName)
+                formData.append('sessionFolderId', targetFolderId)
+                formData.append('isChunkedUpload', 'true')
+                formData.append('originalFileName', file.name)
+                formData.append('totalChunks', chunks.length.toString())
+                
+                // Add each chunk as a separate file field
+                chunks.forEach((chunk, index) => {
+                  const chunkUint8Array = new Uint8Array(chunk)
+                  const chunkBlob = new Blob([chunkUint8Array], { type: file.type })
+                  formData.append(`chunk_${index}`, chunkBlob, `${file.name}.part${index + 1}`)
+                })
+                
                 const chunkResponse = await fetch('/api/upload-to-drive', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    files: chunkFiles,
-                    gymSlug,
-                    gymName: authStatus.gymName,
-                    sessionFolderId: targetFolderId // Use slot folder (Videos/Photos) for chunked uploads
-                  })
+                  body: formData // Use FormData instead of JSON
                 })
                 
                 if (!chunkResponse.ok) {
