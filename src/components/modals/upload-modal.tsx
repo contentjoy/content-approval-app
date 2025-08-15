@@ -786,8 +786,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               
               // For large files (>5MB), use chunked upload
               if (file.size > 5 * 1024 * 1024) {
-                console.log(`📦 Large file detected (${(file.size / (1024 * 1024)).toFixed(1)}MB), using chunked upload...`)
-                console.log(`📦 Chunked upload will use targetFolderId (slot folder): ${targetFolderId}`)
+                console.log(`📦 Large file detected (${(file.size / (1024 * 1024)).toFixed(1)}MB), using streaming chunked upload...`)
+                console.log(`📦 Streaming upload will use targetFolderId (slot folder): ${targetFolderId}`)
                 
                 // Split large files into 2MB chunks for faster uploads
                 const chunkSize = 2 * 1024 * 1024 // 2MB chunks for 1.5-2x speed improvement
@@ -798,53 +798,85 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                   chunks.push(buffer.slice(j, j + chunkSize))
                 }
                 
-                console.log(`📦 Created ${chunks.length} chunks for ${file.name}, sending all chunks together for reconstruction...`)
+                console.log(`📦 Created ${chunks.length} chunks for ${file.name}, uploading individually...`)
                 
-                // Prepare all chunks for a single API call
-                const chunkFiles = chunks.map((chunk, index) => ({
-                  name: `${file.name}.part${index + 1}`,
-                  type: file.type,
-                  size: chunk.length,
-                  data: chunk.toString('base64'),
-                  isChunk: true,
-                  originalName: file.name,
-                  chunkIndex: index,
-                  totalChunks: chunks.length
-                }))
+                // Generate unique session ID for this upload
+                const sessionId = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+                console.log(`🆔 Created upload session: ${sessionId}`)
                 
-                // Send all chunks in one request for reconstruction
-                const formData = new FormData()
-                if (gymSlug) formData.append('gymSlug', gymSlug)
-                if (authStatus.gymName) formData.append('gymName', authStatus.gymName)
-                formData.append('sessionFolderId', targetFolderId)
-                formData.append('isChunkedUpload', 'true')
-                formData.append('originalFileName', file.name)
-                formData.append('totalChunks', chunks.length.toString())
-                
-                // Add each chunk as a separate file field
-                chunks.forEach((chunk, index) => {
-                  const chunkUint8Array = new Uint8Array(chunk)
-                  const chunkBlob = new Blob([chunkUint8Array], { type: file.type })
-                  formData.append(`chunk_${index}`, chunkBlob, `${file.name}.part${index + 1}`)
-                })
-                
-                const chunkResponse = await fetch('/api/upload-to-drive', {
-                  method: 'POST',
-                  body: formData // Use FormData instead of JSON
-                })
-                
-                if (!chunkResponse.ok) {
-                  const errorData = await chunkResponse.text()
-                  throw new Error(`Chunked upload failed: ${chunkResponse.status} - ${errorData}`)
+                // Upload chunks individually
+                const maxConcurrent = 3 // Upload 3 chunks at a time
+                for (let batchStart = 0; batchStart < chunks.length; batchStart += maxConcurrent) {
+                  const batch = chunks.slice(batchStart, batchStart + maxConcurrent)
+                  const batchPromises = batch.map(async (chunk, batchIndex) => {
+                    const chunkIndex = batchStart + batchIndex
+                    const chunkUint8Array = new Uint8Array(chunk)
+                    const chunkBlob = new Blob([chunkUint8Array], { type: file.type })
+                    
+                    const formData = new FormData()
+                    formData.append('sessionId', sessionId)
+                    formData.append('chunkIndex', chunkIndex.toString())
+                    formData.append('totalChunks', chunks.length.toString())
+                    formData.append('originalFileName', file.name)
+                    formData.append('fileType', file.type)
+                    if (gymSlug) formData.append('gymSlug', gymSlug)
+                    if (authStatus.gymName) formData.append('gymName', authStatus.gymName)
+                    formData.append('targetFolderId', targetFolderId)
+                    formData.append('chunk', chunkBlob, `${file.name}.part${chunkIndex + 1}`)
+                    
+                    console.log(`📦 Uploading chunk ${chunkIndex + 1}/${chunks.length} for ${file.name}...`)
+                    
+                    const response = await fetch('/api/upload-chunk', {
+                      method: 'POST',
+                      body: formData
+                    })
+                    
+                    if (!response.ok) {
+                      const errorData = await response.text()
+                      throw new Error(`Chunk ${chunkIndex + 1} failed: ${response.status} - ${errorData}`)
+                    }
+                    
+                    const result = await response.json()
+                    console.log(`✅ Chunk ${chunkIndex + 1} uploaded: ${result.message}`)
+                    
+                    return result
+                  })
+                  
+                  try {
+                    await Promise.all(batchPromises)
+                    console.log(`✅ Batch ${Math.floor(batchStart / maxConcurrent) + 1} completed: chunks ${batchStart + 1}-${Math.min(batchStart + maxConcurrent, chunks.length)}`)
+                    
+                    // Update progress
+                    const batchProgress = Math.round(((i + batchStart + batch.length) / (allFiles.length + chunks.length - 1)) * 80) + 10
+                    updateProgress(batchProgress, `Uploading ${file.name} chunks...`)
+                    
+                  } catch (error) {
+                    console.error(`❌ Batch ${Math.floor(batchStart / maxConcurrent) + 1} failed:`, error)
+                    throw error
+                  }
                 }
                 
-                const chunkResult = await chunkResponse.json()
-                console.log(`✅ Chunked upload completed for ${file.name}:`, chunkResult)
+                console.log(`✅ All chunks uploaded for ${file.name}, reconstructing file...`)
+                
+                // Reconstruct the file
+                const reconstructResponse = await fetch('/api/reconstruct-file', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ sessionId })
+                })
+                
+                if (!reconstructResponse.ok) {
+                  const errorData = await reconstructResponse.text()
+                  throw new Error(`File reconstruction failed: ${reconstructResponse.status} - ${errorData}`)
+                }
+                
+                const reconstructResult = await reconstructResponse.json()
+                console.log(`✅ File reconstruction completed for ${file.name}:`, reconstructResult)
                 
                 uploadResults.push({
                   name: file.name,
                   success: true,
-                  fileId: chunkResult.results?.[0]?.fileId || 'chunked-reconstructed'
+                  fileId: reconstructResult.fileId || 'streaming-reconstructed'
                 })
                 
               } else {
