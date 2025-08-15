@@ -463,14 +463,14 @@ export default function OnboardingPage() {
         gym_slug: gymSlug
       }
 
-      // Send to test webhook
-      const webhookUrl = process.env.ONBOARDING_TEST_WEBHOOK || 
-                        process.env.ONBOARDING_WEBHOOK_URL || 
+      // Send to production onboarding webhook
+      const webhookUrl = process.env.ONBOARDING_WEBHOOK_URL || 
+                        process.env.ONBOARDING_TEST_WEBHOOK || 
                         'https://contentjoy.app.n8n.cloud/webhook-test/156ef9a5-0ae7-4e65-acc1-a27aa533d90a'
       
       try {
-        console.log('🚀 Sending onboarding data to webhook:', webhookData)
-        console.log('🌐 Webhook URL:', webhookUrl)
+        console.log('🚀 Sending onboarding data to PRODUCTION webhook:', webhookData)
+        console.log('🌐 Production webhook URL:', webhookUrl)
         
         const webhookResponse = await fetch(webhookUrl, {
           method: 'POST',
