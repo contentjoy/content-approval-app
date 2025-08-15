@@ -230,7 +230,7 @@ export default function OnboardingPage() {
       // Upload logos to Google Drive if files were selected
       let whiteLogoUrl = formData.whiteLogoUrl
       let blackLogoUrl = formData.blackLogoUrl
-      let logoUploadErrors: string[] = []
+      const logoUploadErrors: string[] = []
 
       if (formData.whiteLogoFile || formData.blackLogoFile) {
         console.log('📤 Uploading logos to Google Drive...')
