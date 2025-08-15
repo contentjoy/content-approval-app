@@ -133,8 +133,9 @@ async function createFolderStructure(gymName: string) {
 }
 
 // Handle chunked uploads
-async function handleChunkedUpload(files: any[], gymSlug: string, gymName: string, maxUploadSize: number, sessionFolderId: string) {
+async function handleChunkedUpload(files: any[], gymSlug: string, gymName: string, maxUploadSize: number, slotFolderId: string) {
   console.log('📦 Processing chunked upload...')
+  console.log('📁 Target slot folder ID:', slotFolderId)
   
   // Group chunks by original file
   const chunkGroups = new Map<string, any[]>()
@@ -154,6 +155,8 @@ async function handleChunkedUpload(files: any[], gymSlug: string, gymName: strin
   
   // Reconstruct and upload each file
   const results = []
+  const drive = getDrive()
+  
   for (const [originalName, chunks] of chunkGroups) {
     try {
       console.log(`🔧 Reconstructing ${originalName} from ${chunks.length} chunks...`)
@@ -163,7 +166,7 @@ async function handleChunkedUpload(files: any[], gymSlug: string, gymName: strin
         chunks.map(chunk => Buffer.from(chunk.data, 'base64'))
       )
       
-      // Upload reconstructed file to the session folder (which should be the slot folder)
+      // Upload reconstructed file to the slot folder
       const reconstructedFile = {
         name: originalName,
         type: chunks[0].type,
@@ -171,12 +174,16 @@ async function handleChunkedUpload(files: any[], gymSlug: string, gymName: strin
         data: combinedBuffer.toString('base64')
       }
       
+      console.log(`📤 Uploading reconstructed file ${originalName} (${(combinedBuffer.length / (1024 * 1024)).toFixed(1)}MB) to slot folder: ${slotFolderId}`)
+      
       const uploadResult = await uploadFileToDrive(
-        getDrive(),
+        drive,
         reconstructedFile,
-        sessionFolderId, // This should be the slot folder ID
+        slotFolderId, // Use the slot folder ID directly
         maxUploadSize
       )
+      
+      console.log(`✅ Successfully uploaded reconstructed file: ${originalName} (${uploadResult.fileId})`)
       
       results.push({
         name: originalName,
