@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getDrive, ensureFolder } from '@/lib/googleDrive';
+import { PassThrough } from 'stream';
 
 interface LogoFile {
   name: string;
@@ -153,23 +154,23 @@ async function uploadLogoToDrive(drive: any, file: LogoFile, logosFolderId: stri
     
     // Convert base64 to buffer
     const buffer = Buffer.from(file.data, 'base64')
-    console.log(`📊 File size: ${buffer.length} bytes`);
+    console.log(`📊 File size: ${buffer.length} bytes`)
     
     // Get shared drive ID
     const sharedDriveId = '0ALOLvWQ1QTx5Uk9PVA'
     
     try {
-      // Try multipart upload
+      // Try multipart upload with fixed PassThrough stream (same as upload-to-drive)
       const fileMetadata = {
         name: file.name,
         parents: [logosFolderId],
       }
       const media = {
         mimeType: file.type,
-        body: buffer, // Use buffer directly for logo uploads
+        body: new PassThrough().end(buffer), // Key fix: Pipeable stream from buffer
       }
       
-      console.log(`🔄 Attempting multipart upload...`)
+      console.log(`🔄 Attempting multipart upload with PassThrough stream...`)
       
       const response = await drive.files.create({
         resource: fileMetadata,
@@ -183,7 +184,7 @@ async function uploadLogoToDrive(drive: any, file: LogoFile, logosFolderId: stri
         throw new Error('No file ID returned from multipart upload')
       }
       
-      console.log(`✅ Logo uploaded successfully: ${response.data.name} (${response.data.id})`)
+      console.log(`✅ Logo uploaded successfully with multipart: ${response.data.name} (${response.data.id})`)
       
       return {
         success: true,
@@ -195,7 +196,7 @@ async function uploadLogoToDrive(drive: any, file: LogoFile, logosFolderId: stri
     } catch (uploadError) {
       console.error(`❌ Multipart upload failed:`, uploadError)
       
-      // Fallback for small files: simple upload
+      // Fallback for small files: simple upload (same as upload-to-drive)
       console.log(`🔄 Trying simple upload fallback...`)
       
       try {
@@ -206,7 +207,7 @@ async function uploadLogoToDrive(drive: any, file: LogoFile, logosFolderId: stri
           },
           media: {
             mimeType: file.type,
-            body: buffer,
+            body: buffer, // Use buffer directly for simple upload
           },
           uploadType: 'media',
           fields: 'id,name,size,webViewLink',
