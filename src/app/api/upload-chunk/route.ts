@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSession, getSession, updateSessionActivity } from '@/lib/chunk-storage'
+import { storeChunk, getSession } from '@/lib/chunk-storage'
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,29 +28,23 @@ export async function POST(request: NextRequest) {
     
     console.log(`📦 Received chunk ${chunkIndex + 1}/${totalChunks} for ${originalFileName} (${(chunkBuffer.length / (1024 * 1024)).toFixed(1)}MB)`)
     
-    // Initialize or get existing session
-    let session = getSession(sessionId)
-    if (!session) {
-      const metadata = {
-        originalFileName,
-        fileType,
-        totalChunks,
-        gymSlug,
-        gymName,
-        targetFolderId,
-        createdAt: Date.now()
-      }
-      session = createSession(sessionId, metadata, totalChunks)
-      console.log(`🆕 Created new upload session: ${sessionId} for ${originalFileName}`)
-    }
+    // Store the chunk in the database
+    await storeChunk({
+      session_id: sessionId,
+      chunk_index: chunkIndex,
+      total_chunks: totalChunks,
+      original_file_name: originalFileName,
+      file_type: fileType,
+      chunk_data: chunkBuffer,
+      gym_slug: gymSlug || '',
+      gym_name: gymName || '',
+      target_folder_id: targetFolderId
+    })
     
-    // Store the chunk
-    session.chunks[chunkIndex] = chunkBuffer
-    updateSessionActivity(sessionId)
-    
-    // Check if all chunks are received
-    const receivedChunks = session.chunks.filter(chunk => chunk !== undefined).length
-    const isComplete = receivedChunks === totalChunks
+    // Check session status
+    const session = await getSession(sessionId)
+    const isComplete = session?.is_complete || false
+    const receivedChunks = session?.received_chunks || 0
     
     console.log(`📊 Session ${sessionId}: ${receivedChunks}/${totalChunks} chunks received`)
     
@@ -86,21 +80,26 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 })
     }
     
-    const session = getSession(sessionId)
+    const session = await getSession(sessionId)
     if (!session) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 })
     }
     
-    const receivedChunks = session.chunks.filter(chunk => chunk !== undefined).length
-    const isComplete = receivedChunks === session.metadata.totalChunks
-    
     return NextResponse.json({
-      sessionId,
-      metadata: session.metadata,
-      receivedChunks,
-      totalChunks: session.metadata.totalChunks,
-      isComplete,
-      lastActivity: session.lastActivity
+      sessionId: session.session_id,
+      metadata: {
+        originalFileName: session.original_file_name,
+        fileType: session.file_type,
+        totalChunks: session.total_chunks,
+        gymSlug: session.gym_slug,
+        gymName: session.gym_name,
+        targetFolderId: session.target_folder_id,
+        createdAt: session.created_at
+      },
+      receivedChunks: session.received_chunks,
+      totalChunks: session.total_chunks,
+      isComplete: session.is_complete,
+      lastActivity: session.last_activity
     })
     
   } catch (error) {

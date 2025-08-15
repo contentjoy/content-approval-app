@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getDrive } from '@/lib/googleDrive'
-import { getSession, deleteSession } from '@/lib/chunk-storage'
+import { getSession, getSessionChunks, deleteSession } from '@/lib/chunk-storage'
 import { PassThrough } from 'stream'
 
 // Upload file to Google Drive (copied from upload-to-drive route)
@@ -116,32 +116,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 })
     }
     
-    const session = getSession(sessionId)
+    // Get session status
+    const session = await getSession(sessionId)
     if (!session) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 })
     }
     
-    const { chunks, metadata } = session
-    const { originalFileName, fileType, totalChunks, gymSlug, gymName, targetFolderId } = metadata
-    
     // Verify all chunks are present
-    const receivedChunks = chunks.filter(chunk => chunk !== undefined).length
-    if (receivedChunks !== totalChunks) {
+    if (!session.is_complete) {
       return NextResponse.json({ 
-        error: `Incomplete: ${receivedChunks}/${totalChunks} chunks received` 
+        error: `Incomplete: ${session.received_chunks}/${session.total_chunks} chunks received` 
       }, { status: 400 })
     }
     
-    console.log(`🔧 Reconstructing ${originalFileName} from ${totalChunks} chunks...`)
+    console.log(`🔧 Reconstructing ${session.original_file_name} from ${session.total_chunks} chunks...`)
+    
+    // Get all chunks for this session
+    const chunks = await getSessionChunks(sessionId)
     
     // Reconstruct the file by concatenating all chunks
-    const reconstructedFile = Buffer.concat(chunks as Buffer[])
-    console.log(`✅ File reconstructed: ${originalFileName} (${(reconstructedFile.length / (1024 * 1024)).toFixed(1)}MB)`)
+    const reconstructedFile = Buffer.concat(chunks)
+    console.log(`✅ File reconstructed: ${session.original_file_name} (${(reconstructedFile.length / (1024 * 1024)).toFixed(1)}MB)`)
     
     // Create file object for upload
     const fileToUpload = {
-      name: originalFileName,
-      type: fileType,
+      name: session.original_file_name,
+      type: session.file_type,
       size: reconstructedFile.length,
       data: reconstructedFile.toString('base64')
     }
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
     const uploadResult = await uploadFileToDrive(
       drive,
       fileToUpload,
-      targetFolderId,
+      session.target_folder_id,
       100 * 1024 * 1024 // 100MB limit for reconstructed files
     )
     
@@ -161,17 +161,17 @@ export async function POST(request: NextRequest) {
       throw new Error(uploadResult.error || 'Upload to Google Drive failed')
     }
     
-    console.log(`✅ Successfully uploaded reconstructed file: ${originalFileName} (${uploadResult.fileId})`)
+    console.log(`✅ Successfully uploaded reconstructed file: ${session.original_file_name} (${uploadResult.fileId})`)
     
     // Clean up the session
-    deleteSession(sessionId)
+    await deleteSession(sessionId)
     console.log(`🧹 Cleaned up session: ${sessionId}`)
     
     return NextResponse.json({
       success: true,
       message: 'File reconstructed and uploaded successfully',
       fileId: uploadResult.fileId,
-      fileName: originalFileName,
+      fileName: session.original_file_name,
       fileSize: reconstructedFile.length
     })
     
