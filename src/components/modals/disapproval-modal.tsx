@@ -106,7 +106,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Post Preview */}
-        <div className="bg-[var(--surface)] rounded-lg p-4 border border-border">
+        <div className="bg-[var(--modal-surface)] rounded-lg p-4 border border-[var(--modal-border)]">
           <div className="flex items-center space-x-3 mb-3">
             <div className="w-10 h-10 bg-destructive/10 rounded-lg flex items-center justify-center">
               <XCircle className="w-5 h-5 text-destructive" />
@@ -137,7 +137,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
             id="feedback"
             rows={12}
             {...register('feedback')}
-            className="w-full px-3 py-2 border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--muted-text)] resize min-h-[10rem] max-h-[60vh] transition-all duration-200"
+            className="w-full px-3 py-2 border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent bg-[var(--modal-surface)] text-[var(--text)] placeholder:text-[var(--muted-text)] resize min-h-[10rem] max-h-[60vh] transition-all duration-200"
             placeholder="Please provide specific feedback on why this content is being disapproved..."
           />
           {errors.feedback && (
@@ -187,7 +187,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
         )}
 
         {/* Summary */}
-        <div className="border border-[var(--modal-border)] rounded-[12px] p-4">
+        <div className="bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] p-4">
           <h4 className="font-medium text-[var(--text)] mb-2">Summary</h4>
           <p className="text-sm text-[var(--muted-text)]">
             {isCarousel && watchedCarouselAction === 'all' 

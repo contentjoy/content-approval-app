@@ -133,7 +133,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Posts Ready Info */}
-        <div className="bg-[var(--surface)] rounded-[12px] p-4 border border-[var(--modal-border)]">
+        <div className="bg-[var(--modal-surface)] rounded-[12px] p-4 border border-[var(--modal-border)]">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-[var(--hover)] rounded-lg flex items-center justify-center">
               <CheckCircle className="w-5 h-5 text-[var(--text)]" />
@@ -160,7 +160,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
                 type="radio"
                 value="daily"
                 {...register('frequency')}
-                className="text-[var(--surface)] focus:ring-[var(--surface)]"
+                className="text-[var(--modal-surface)] focus:ring-[var(--modal-surface)]"
               />
               <div className="flex-1">
                 <div className="font-medium text-[var(--text)]">One post per day</div>
@@ -174,7 +174,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
                 type="radio"
                 value="every-other-day"
                 {...register('frequency')}
-                className="text-[var(--surface)] focus:ring-[var(--surface)]"
+                className="text-[var(--modal-surface)] focus:ring-[var(--modal-surface)]"
               />
               <div className="flex-1">
                 <div className="font-medium text-[var(--text)]">Every other day</div>
@@ -200,7 +200,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
               id="startDate"
               {...register('startDate')}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent transition-all duration-200"
+              className="w-full px-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200"
             />
             {errors.startDate && (
               <p className="mt-1 text-sm text-destructive">{errors.startDate.message}</p>
@@ -215,7 +215,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
               type="time"
               id="startTime"
               {...register('startTime')}
-              className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent transition-all duration-200"
+              className="w-full px-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200"
             />
             {errors.startTime && (
               <p className="mt-1 text-sm text-destructive">{errors.startTime.message}</p>
@@ -225,7 +225,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
 
         {/* Timeline Preview */}
         {watchedStartDate && (
-          <div className="bg-[var(--surface)] rounded-[12px] p-4 border border-[var(--modal-border)]">
+          <div className="bg-[var(--modal-surface)] rounded-[12px] p-4 border border-[var(--modal-border)]">
             <h4 className="font-medium text-[var(--text)] mb-2">Scheduling Timeline</h4>
             <div className="space-y-2 text-sm text-[var(--muted-text)]">
               <p><strong>Start Date:</strong> {new Date(watchedStartDate).toLocaleDateString('en-US', { 

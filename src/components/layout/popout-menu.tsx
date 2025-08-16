@@ -93,8 +93,8 @@ export function PopoutMenu({ isOpen, onClose, placement = 'desktop', onAccountSe
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className={
               placement === 'desktop'
-                ? 'absolute top-12 right-0 w-64 bg-[var(--surface)] border border-[var(--border)] rounded-md p-4 z-[60]'
-                : 'fixed top-[3.25rem] inset-x-0 w-full h-[calc(100vh-3.25rem)] bg-[var(--surface)] rounded-t-none p-4 z-[60] overflow-y-auto'
+                ? 'absolute top-12 right-0 w-64 bg-[var(--modal-bg)] border border-[var(--modal-border)] rounded-[24px] p-4 z-[60]'
+                : 'fixed top-[3.25rem] inset-x-0 w-full h-[calc(100vh-3.25rem)] bg-[var(--modal-bg)] rounded-t-none p-4 z-[60] overflow-y-auto'
             }
           >
             {content}
