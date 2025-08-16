@@ -6,13 +6,12 @@ import { PassThrough } from 'stream';
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes max
 
-
 export async function POST(request: NextRequest) {
-  // Read max upload size from ENV (default to 2MB if not set)
-  const maxUploadSize = parseInt(process.env.MAX_UPLOAD_SIZE || '2048') * 1024 // Convert KB to bytes
-  const maxSize = Math.min(maxUploadSize, 100 * 1024 * 1024) // Cap at 100MB for safety
+  // Set extremely high file size limits for large video uploads
+  const maxUploadSize = parseInt(process.env.MAX_UPLOAD_SIZE || '26214400') * 1024 // Convert KB to bytes (25GB default)
+  const maxSize = Math.min(maxUploadSize, 25 * 1024 * 1024 * 1024) // Cap at 25GB for safety
   
-  console.log(`📏 Max upload size: ${maxUploadSize / 1024}KB (${maxSize / (1024 * 1024)}MB)`)
+  console.log(`📏 Max upload size: ${maxUploadSize / (1024 * 1024 * 1024)}GB (${maxSize / (1024 * 1024 * 1024)}GB)`)
   
   try {
     const contentType = request.headers.get('content-type')
@@ -82,7 +81,7 @@ export async function POST(request: NextRequest) {
     const totalSize = files.reduce((sum: number, file: any) => sum + (file.size || 0), 0)
     if (totalSize > maxSize) {
       return NextResponse.json({ 
-        error: `Total file size ${(totalSize / (1024 * 1024)).toFixed(1)}MB exceeds limit of ${maxSize / (1024 * 1024)}MB` 
+        error: `Total file size ${(totalSize / (1024 * 1024 * 1024)).toFixed(1)}GB exceeds limit of ${maxSize / (1024 * 1024 * 1024)}GB` 
       }, { status: 413 })
     }
     
