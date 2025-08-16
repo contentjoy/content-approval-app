@@ -191,66 +191,66 @@ export function FloatingUploadProgress({
 
   if (isMinimized) {
     return (
-      <div className="fixed bottom-4 right-4 z-50 bg-background border border-border rounded-lg shadow-xl p-3 min-w-[200px]">
+      <div className="fixed bottom-4 right-4 z-50 bg-[var(--modal-bg)] border border-[var(--modal-border)] rounded-lg shadow-xl p-3 min-w-[200px]">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-foreground">{phase}</span>
+          <span className="text-sm font-medium text-[var(--text)]">{phase}</span>
           <div className="flex items-center space-x-2">
             <button
               onClick={onMinimize}
-              className="p-1 hover:bg-muted rounded transition-colors"
+              className="p-1 hover:bg-[var(--modal-surface)] rounded transition-colors"
               title="Expand"
             >
-              <Maximize2 className="w-4 h-4 text-muted-foreground" />
+              <Maximize2 className="w-4 h-4 text-[var(--muted-text)]" />
             </button>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-muted rounded transition-colors"
+              className="p-1 hover:bg-[var(--modal-surface)] rounded transition-colors"
               title="Close"
             >
-              <X className="w-4 h-4 text-muted-foreground" />
+              <X className="w-4 h-4 text-[var(--muted-text)]" />
             </button>
           </div>
         </div>
-        <div className="w-full bg-muted rounded-full h-2">
+        <div className="w-full bg-[var(--modal-surface)] rounded-full h-2">
           <div 
             className={`h-2 rounded-full transition-all duration-300 ease-out ${color} ${progress <= 10 ? 'progress-bar-setup' : 'progress-bar-smooth'}`}
-            style={{ width: `${progress}%` }}
+            style={{ width: `${Math.round(progress)}%` }}
           />
         </div>
-        <div className="text-xs text-muted-foreground mt-1">
-          {progress}% • {currentFile || message}
+        <div className="text-xs text-[var(--muted-text)] mt-1">
+          {Math.round(progress)}% • {currentFile || message}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 bg-background border border-border rounded-lg shadow-xl p-4 min-w-[320px] max-w-[400px]">
+    <div className="fixed bottom-4 right-4 z-50 bg-[var(--modal-bg)] border border-[var(--modal-border)] rounded-lg shadow-xl p-4 min-w-[320px] max-w-[400px]">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-foreground flex items-center gap-2">
+          <h3 className="font-semibold text-[var(--text)] flex items-center gap-2">
             <span className={`w-2 h-2 rounded-full ${color}`}></span>
             {phase}
           </h3>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-[var(--muted-text)]">
             {currentFile || message}
           </p>
         </div>
         <div className="flex items-center space-x-2">
           <button
             onClick={onMinimize}
-            className="p-2 hover:bg-muted rounded transition-colors"
+            className="p-2 hover:bg-[var(--modal-surface)] rounded transition-colors"
             title="Minimize"
           >
-            <Minimize2 className="w-4 h-4 text-muted-foreground" />
+            <Minimize2 className="w-4 h-4 text-[var(--muted-text)]" />
           </button>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-muted rounded transition-colors"
+            className="p-2 hover:bg-[var(--modal-surface)] rounded transition-colors"
             title="Close"
           >
-            <X className="w-4 h-4 text-muted-foreground" />
+            <X className="w-4 h-4 text-[var(--muted-text)]" />
           </button>
         </div>
       </div>
@@ -258,13 +258,13 @@ export function FloatingUploadProgress({
       {/* Progress Bar */}
       <div className="space-y-3">
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Overall Progress</span>
-          <span className="font-medium">{progress}%</span>
+          <span className="text-[var(--muted-text)]">Overall Progress</span>
+          <span className="font-medium">{Math.round(progress)}%</span>
         </div>
-        <div className="w-full bg-muted rounded-full h-3">
+        <div className="w-full bg-[var(--modal-surface)] rounded-full h-3">
           <div 
             className={`h-3 rounded-full transition-all duration-500 ease-out ${color} ${progress <= 10 ? 'progress-bar-setup' : 'progress-bar-smooth'}`}
-            style={{ width: `${progress}%` }}
+            style={{ width: `${Math.round(progress)}%` }}
           />
         </div>
         
@@ -272,10 +272,10 @@ export function FloatingUploadProgress({
         {progress <= 10 ? (
           // Setup Phase
           <div className="space-y-2">
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-[var(--muted-text)]">
               Setting up upload session...
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-[var(--muted-text)]">
               Creating folder structure and preparing files
             </div>
           </div>
@@ -283,10 +283,10 @@ export function FloatingUploadProgress({
           // Upload Phase
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Current File</span>
+              <span className="text-[var(--muted-text)]">Current File</span>
               <span className="font-medium">{currentFile}</span>
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-[var(--muted-text)]">
               {Math.ceil((progress - 10) / 90 * totalFiles)} of {totalFiles} files processed
             </div>
           </div>
@@ -299,7 +299,7 @@ export function FloatingUploadProgress({
 
         {/* Estimated Time */}
         {progress > 10 && progress < 100 && (
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-[var(--muted-text)]">
             Estimated time remaining: {Math.ceil((100 - progress) / 10)} minutes
           </div>
         )}
