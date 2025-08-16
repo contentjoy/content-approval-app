@@ -112,7 +112,7 @@ export function EnhancedFilters({
           <SlidersHorizontal className="w-4 h-4" />
           <span className="text-sm">Filters</span>
           {hasActiveFilters && (
-            <span className="bg-white/20 text-xs px-2 py-0.5 rounded-full">
+            <span className="bg-[var(--surface)] text-xs px-2 py-0.5 rounded-full">
               {[searchQuery, dateRange, selectedTags.length > 0, activeFilter !== 'all'].filter(Boolean).length}
             </span>
           )}
@@ -161,7 +161,7 @@ export function EnhancedFilters({
                       start: e.target.value, 
                       end: dateRange?.end || e.target.value 
                     })}
-                    className="w-full px-3 py-2 border border-[var(--border)] rounded-[12px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm transition-all duration-200 hover:bg-[var(--hover)]"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-[12px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm transition-all duration-200 hover:bg-[var(--hover)] bg-[var(--background)]"
                   />
                 </div>
                 <div>
@@ -173,7 +173,7 @@ export function EnhancedFilters({
                       start: dateRange?.start || e.target.value, 
                       end: e.target.value 
                     })}
-                    className="w-full px-3 py-2 border border-[var(--border)] rounded-[12px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm transition-all duration-200 hover:bg-[var(--hover)]"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-[12px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm transition-all duration-200 hover:bg-[var(--hover)] bg-[var(--background)]"
                   />
                 </div>
               </div>
