@@ -195,12 +195,16 @@ async function sendUploadWebhook(data: {
   folderStructure: any
   files: any[]
   webhookType: 'test' | 'production'
+  uploadResults?: any[] // Added for completion webhook
+  completionStatus?: 'completed' | 'failed' // Added for completion webhook
+  successCount?: number // Added for completion webhook
+  failedCount?: number // Added for completion webhook
 }) {
   console.log('📡 sendUploadWebhook FUNCTION CALLED!')
   console.log('📡 Function parameters:', JSON.stringify(data, null, 2))
   
   try {
-    const { gymName, folderStructure, files, webhookType } = data
+    const { gymName, folderStructure, files, webhookType, uploadResults, completionStatus, successCount, failedCount } = data
     
     console.log('📡 Processing webhook data...')
     
@@ -250,7 +254,7 @@ async function sendUploadWebhook(data: {
     // Prepare webhook payload
     const webhookPayload = {
       timestamp: new Date().toISOString(),
-      event: 'upload_started',
+      event: completionStatus === 'completed' ? 'upload_completed' : 'upload_started',
       gymName: gymName,
       totalFiles: files.length,
       fileCounts: {
@@ -267,6 +271,11 @@ async function sendUploadWebhook(data: {
         rawSlotFolders: folderStructure.rawSlotFolders,
         finalSlotFolders: folderStructure.finalSlotFolders
       },
+      // 🚨 ENHANCED: Include upload results and completion status
+      uploadResults: uploadResults || [],
+      completionStatus: completionStatus || 'started',
+      successCount: successCount || 0,
+      failedCount: failedCount || 0,
       // Note: Direct Drive links require additional API calls, 
       // but you can construct them in N8N using the folder IDs
       driveLinks: {
@@ -572,6 +581,25 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
     uploadResults.filter(r => !r.success).forEach((result, index) => {
       console.error(`❌ Failed file ${index + 1}:`, result.error || 'Unknown error')
     })
+  }
+  
+  // 🚨 CRITICAL FIX: Send webhook AFTER uploads complete with actual results
+  console.log('🚀 SENDING COMPLETION WEBHOOK with upload results...')
+  try {
+    const completionWebhookResult = await sendUploadWebhook({
+      gymName: folderGymName,
+      folderStructure,
+      files,
+      webhookType: 'test',
+      uploadResults, // Include actual upload results
+      completionStatus: 'completed',
+      successCount,
+      failedCount
+    })
+    console.log('✅ Completion webhook sent successfully:', completionWebhookResult)
+  } catch (completionWebhookError) {
+    console.error('⚠️ Completion webhook failed (non-blocking):', completionWebhookError)
+    // Don't fail the response if webhook fails
   }
   
   return NextResponse.json({
