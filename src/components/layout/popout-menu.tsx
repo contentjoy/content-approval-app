@@ -47,10 +47,6 @@ export function PopoutMenu({ isOpen, onClose, placement = 'desktop', onAccountSe
         </div>
       )}
       <div className="text-[var(--muted-text)] mb-2">{user?.gymName || 'User'}</div>
-      <Link href="/" className="no-underline hover:no-underline flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition">
-        <Home className="h-4 w-4 text-[var(--muted-text)] mr-2" />
-        Dashboard
-      </Link>
       <button onClick={() => { onClose(); onAccountSettings?.() }} className="flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition">
         <Settings className="h-4 w-4 text-[var(--muted-text)] mr-2" />
         Account Settings
@@ -62,7 +58,7 @@ export function PopoutMenu({ isOpen, onClose, placement = 'desktop', onAccountSe
       <div className="border-t border-[var(--border)] my-2" />
       <button onClick={toggleTheme} className="flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition">
         {theme === 'dark' ? <Sun className="h-4 w-4 text-[var(--muted-text)] mr-2" /> : <Moon className="h-4 w-4 text-[var(--muted-text)] mr-2" />}
-        Theme
+        {theme === 'dark' ? 'Dark mode' : 'Light mode'}
       </button>
       <button id="schedule-content" className="flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition" onClick={() => { onClose(); openModal('schedule', null, [], approvedPosts || []) }}>
         <CalendarIcon className="h-4 w-4 text-[var(--muted-text)] mr-2" />

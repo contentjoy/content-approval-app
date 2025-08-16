@@ -13,28 +13,28 @@
   --accents-2: #eaeaea;
 
   /* Primary brand color injected at runtime; fallback to --primary if present */
-  --primary-color: #000000;
+  --primary-color: #161618;
   --primary: var(--primary-color);
 
   /* Accent tokens derived from primary (override-able by agency color) */
-  --accent: var(--primary, var(--primary-color, #000000));
+  --accent: var(--primary, var(--primary-color, #161618));
   --accent-strong: color-mix(in srgb, var(--accent) 80%, black);
   --accent-soft: color-mix(in srgb, var(--accent) 60%, white);
 
   /* Light theme (updated per spec) */
-  --bg: #fafafa;
+  --bg: #F8F7F7;
   --bg-elev-1: #ffffff;
-  --surface: #ffffff;
-  --text: #171717;
-  --muted-text: #898989;
-  --border: #ebebeb;
-  --border-strong: #ebebeb;
-  /* App-wide hover background color */
-  --hover: #f2f2f2;
+  --surface: #252628;
+  --text: #1D1C1B;
+  --muted-text: #646363;
+  --border: #E8E8E8;
+  --border-strong: #E8E8E8;
+  --hover: #EEEDED;
+  --modal-surface: #FCFCFC;
 
   /* Geometry + radii */
-  --radius: 6px; /* rounded-md */
-  --radius-pill: 9999px;
+  --radius: 12px; /* Updated to 12px for cards */
+  --radius-pill: 999px; /* Updated to 999px per spec */
 
   /* Spacing + fonts */
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
@@ -66,25 +66,50 @@
   --ring-offset: var(--bg);
 
   /* Legacy colors for compatibility */
-  --navbar: #ffffff;
-  --sidebar: var(--accents-1);
+  --navbar: var(--bg);
+  --sidebar: var(--bg);
   --text-secondary: var(--muted-text);
   --card-bg: var(--surface);
   --card-border: var(--border);
-  --pill-bg: var(--accents-1);
-  --pill-border: var(--accents-2);
+  --pill-bg: var(--surface);
+  --pill-border: var(--border);
 
   /* Brand colors - can be overridden by JavaScript */
   --brand-primary: var(--accent);
-  --brand-primary-rgb: 0, 0, 0;
+  --brand-primary-rgb: 22, 22, 24;
   --brand-primary-light: var(--accent-soft);
   --brand-primary-dark: var(--accent-strong);
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --bg: #161618;
+  --bg-elev-1: #1a1a1c;
+  --surface: #F8F7F7;
+  --text: #F9F8F6;
+  --muted-text: #B5B5B5;
+  --border: #29292B;
+  --border-strong: #29292B;
+  --hover: #28282A;
+  --modal-surface: #3E3F41;
+  
+  /* Update legacy mappings for dark mode */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --navbar: var(--bg);
+  --sidebar: var(--bg);
+  --card-bg: var(--surface);
+  --card-border: var(--border);
+  --pill-bg: var(--surface);
+  --pill-border: var(--border);
 }
 
 /* Reusable profile icon styling */
 .profile-icon {
   @apply rounded-full flex items-center justify-center text-white font-semibold;
-  background-color: var(--gym-primary-color, var(--primary-color, #000000));
+  background-color: var(--gym-primary-color, var(--primary-color, #161618));
 }
 
 .profile-icon-sm {
@@ -99,8 +124,55 @@
   @apply h-10 w-10 text-base;
 }
 
-.profile-icon-xl {
-  @apply h-12 w-12 text-lg;
+/* New design system utility classes */
+.btn-pill {
+  @apply rounded-[999px] px-6 py-3 font-medium transition-all duration-200;
+}
+
+.btn-pill-sm {
+  @apply rounded-[999px] px-4 py-2 text-sm font-medium transition-all duration-200;
+}
+
+.btn-ghost {
+  @apply bg-transparent border border-border transition-all duration-200;
+}
+
+.btn-ghost:hover {
+  background-color: var(--hover);
+  border-color: var(--border-strong);
+}
+
+.card-modern {
+  @apply rounded-[12px] border border-border shadow-sm;
+}
+
+.card-modern {
+  background-color: var(--surface);
+}
+
+.modal-surface {
+  background-color: var(--modal-surface);
+}
+
+/* Filter tag styling - inverse fill system */
+.filter-tag {
+  @apply rounded-[999px] px-4 py-2 text-sm font-medium border transition-all duration-200;
+}
+
+.filter-tag-light {
+  @apply bg-[#F9F8F6] text-[#161618] border-[#161618];
+}
+
+.filter-tag-dark {
+  @apply bg-[#161618] text-[#F9F8F6] border-[#F9F8F6];
+}
+
+.filter-tag-active-light {
+  @apply bg-[#161618] text-[#F9F8F6] border-[#161618];
+}
+
+.filter-tag-active-dark {
+  @apply bg-[#F9F8F6] text-[#161618] border-[#F9F8F6];
 }
 
 /* Social media embed improvements */
@@ -142,50 +214,6 @@ iframe {
   min-width: 100% !important;
   min-height: 400px !important;
   width: 100% !important;
-}
-
-/* Dark theme overrides (activated by data-theme="dark" on <html>) */
-[data-theme="dark"] {
-  --geist-background: #000;
-  --geist-foreground: #fff;
-  --geist-secondary: #aaa;
-  --accents-1: #111;
-  --accents-2: #333;
-
-  --bg: #0a0a0a;
-  --bg-elev-1: #111111;
-  --surface: #111111;
-  --text: #fafafa;
-  --muted-text: #a3a3a3;
-  --border: #262626;
-  --border-strong: #404040;
-  --hover: #1a1a1a;
-
-  --background: var(--bg);
-  --foreground: var(--text);
-  --card: var(--surface);
-  --card-foreground: var(--text);
-  --popover: var(--surface);
-  --popover-foreground: var(--text);
-  --primary-foreground: var(--bg);
-  --secondary: var(--surface);
-  --secondary-foreground: var(--text);
-  --muted: var(--accents-1);
-  --muted-foreground: var(--muted-text);
-  --accent-foreground: var(--bg);
-  --input: var(--surface);
-  --ring: var(--accent);
-  --ring-offset: var(--bg);
-
-  --navbar: var(--bg);
-  --sidebar: var(--accents-1);
-  --text-secondary: var(--muted-text);
-  --card-bg: var(--surface);
-  --card-border: var(--border);
-  --pill-bg: var(--accents-1);
-  --pill-border: var(--accents-2);
-
-  --brand-primary-rgb: 255, 255, 255;
 }
 
 * {
@@ -405,14 +433,17 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 
   /* Inline button standard (used across app for compact actions) */
   .btn-inline {
-    @apply inline-flex items-center gap-1.5 rounded-md text-[14px] font-medium leading-[1.2] bg-transparent text-foreground select-none;
-    @apply h-8 px-3.5; /* 32px height, ~14px horizontal per side */
-    @apply transition-colors;
-    border: none;
-    box-shadow: 0 0 0 1px var(--border);
+    @apply inline-flex items-center gap-1.5 rounded-[999px] text-[13px] font-medium leading-[1.2] bg-transparent text-foreground select-none;
+    @apply h-9 px-5 py-2; /* Increased height and padding for pill shape */
+    @apply transition-all duration-200;
+    border: 1px solid var(--border);
+    box-shadow: none;
   }
-  .btn-inline:hover { background: var(--hover); }
-  .btn-inline .content { padding: 0 6px; }
+  .btn-inline:hover { 
+    background: var(--hover); 
+    border-color: var(--border-strong);
+  }
+  .btn-inline .content { padding: 0 4px; }
   
   .input-base {
     @apply flex h-10 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;

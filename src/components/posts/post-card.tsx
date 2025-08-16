@@ -142,7 +142,7 @@ export function PostCard({
         transition={{ duration: 0.3, ease: 'easeOut' }}
         whileHover={{ y: -2, scale: 1.02 }}
         className={`group ${className}`}
-        style={{ backgroundColor: 'var(--card-bg)', borderRadius: 'var(--radius)', border: '1px solid color-mix(in srgb, var(--card-border) 70%, transparent)' }}
+        style={{ backgroundColor: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)' }}
       >
         {/* Top Section */}
         <div className="flex items-center justify-between p-4">
@@ -153,7 +153,7 @@ export function PostCard({
             <span className="text-sm font-semibold text-text">{post['Gym Name'] || gymName || 'Gym'}</span>
           </div>
           <div className="relative" ref={menuRef}>
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-full hover:bg-bg-elev-1 text-text hover:text-accent">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-[999px] hover:bg-[var(--hover)] text-[var(--text)] hover:text-[var(--accent)] transition-all duration-200">
               <MoreVertical className="w-5 h-5" />
             </button>
             <AnimatePresence>
@@ -163,21 +163,21 @@ export function PostCard({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -6 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-48 bg-bg rounded-xl border border-border shadow-medium z-[99999]"
+                  className="absolute right-0 mt-2 w-48 bg-[var(--modal-surface)] rounded-[12px] border border-[var(--border)] shadow-xl z-[99999]"
                 >
-                  <button onClick={handleShare} className="w-full flex items-center px-4 py-3 text-sm text-text hover:bg-bg-elev-1">
+                  <button onClick={handleShare} className="w-full flex items-center px-4 py-3 text-sm text-[var(--text)] hover:bg-[var(--hover)] transition-all duration-200">
                     <svg className="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
                     Share
                   </button>
-                  <button onClick={handleDownload} className="w-full flex items-center px-4 py-3 text-sm text-text hover:bg-bg-elev-1">
+                  <button onClick={handleDownload} className="w-full flex items-center px-4 py-3 text-sm text-[var(--text)] hover:bg-[var(--hover)] transition-all duration-200">
                     <Download className="w-4 h-4 mr-3" />
                     Download
                   </button>
-                  <button onClick={handleEditCaption} className="w-full flex items-center px-4 py-3 text-sm text-text hover:bg-bg-elev-1">
+                  <button onClick={handleEditCaption} className="w-full flex items-center px-4 py-3 text-sm text-[var(--text)] hover:bg-[var(--hover)] transition-all duration-200">
                     <svg className="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                     Edit Caption
                   </button>
-                  <button onClick={handleRegenerate} className="w-full flex items-center px-4 py-3 text-sm text-text hover:bg-bg-elev-1">
+                  <button onClick={handleRegenerate} className="w-full flex items-center px-4 py-3 text-sm text-[var(--text)] hover:bg-[var(--hover)] transition-all duration-200">
                     <svg className="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
                     Regenerate
                   </button>

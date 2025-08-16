@@ -84,7 +84,7 @@ export function EnhancedFilters({
             placeholder="Search captions, content, or hashtags..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="block w-full pl-16 pr-4 py-2.5 border border-border rounded-md focus:ring-2 focus:ring-accent focus:border-transparent text-sm placeholder:text-muted-text bg-[var(--navbar)] h-11 leading-[44px]"
+            className="block w-full pl-16 pr-4 py-2.5 border border-[var(--border)] rounded-[999px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm placeholder:text-[var(--muted-text)] bg-[var(--navbar)] h-11 leading-[44px] transition-all duration-200"
           />
           {searchQuery && (
             <button
@@ -102,10 +102,10 @@ export function EnhancedFilters({
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowAdvanced(!showAdvanced)}
           className={`
-            flex items-center space-x-2 px-4 py-2.5 rounded-md border font-medium transition-all duration-200 h-11 text-sm
+            flex items-center space-x-2 px-4 py-2.5 rounded-[999px] border font-medium transition-all duration-200 h-11 text-sm
             ${showAdvanced || hasActiveFilters
-              ? 'bg-accent text-white border-accent'
-              : 'bg-[var(--navbar)] text-text border-border hover:border-accent'
+              ? 'bg-[var(--surface)] text-[var(--foreground)] border-[var(--border)]'
+              : 'bg-[var(--navbar)] text-[var(--text)] border-[var(--border)] hover:bg-[var(--hover)] hover:border-[var(--border-strong)]'
             }
           `}
         >
@@ -127,7 +127,7 @@ export function EnhancedFilters({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleReset}
-            className="flex items-center space-x-2 px-3 py-3 text-muted-text hover:text-text hover:bg-bg-elev-1 rounded-md transition-colors"
+            className="flex items-center space-x-2 px-3 py-3 text-[var(--muted-text)] hover:text-[var(--text)] hover:bg-[var(--hover)] rounded-[999px] transition-all duration-200"
             title="Reset all filters"
           >
             <RotateCcw className="w-4 h-4" />
@@ -143,7 +143,7 @@ export function EnhancedFilters({
             animate={{ opacity: 1, height: 'auto', y: 0 }}
             exit={{ opacity: 0, height: 0, y: -10 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="bg-bg-elev-1 border border-border rounded-xl p-6 space-y-6"
+            className="bg-[var(--modal-surface)] border border-[var(--border)] rounded-[12px] p-6 space-y-6"
           >
             {/* Date Range Filter */}
             <div>
@@ -161,7 +161,7 @@ export function EnhancedFilters({
                       start: e.target.value, 
                       end: dateRange?.end || e.target.value 
                     })}
-                    className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-sm bg-bg"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-[12px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm bg-[var(--bg)]"
                   />
                 </div>
                 <div>
@@ -173,7 +173,7 @@ export function EnhancedFilters({
                       start: dateRange?.start || e.target.value, 
                       end: e.target.value 
                     })}
-                    className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-sm bg-bg"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-[12px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm bg-[var(--bg)]"
                   />
                 </div>
               </div>
@@ -208,10 +208,10 @@ export function EnhancedFilters({
                         onTagsChange(newTags)
                       }}
                       className={`
-                        px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
+                        px-3 py-1.5 rounded-[999px] text-xs font-medium transition-all duration-200
                         ${selectedTags.includes(tag)
-                          ? 'bg-accent text-white'
-                          : 'bg-bg text-text border border-border hover:border-accent'
+                          ? 'bg-[var(--surface)] text-[var(--foreground)]'
+                          : 'bg-[var(--bg)] text-[var(--text)] border border-[var(--border)] hover:bg-[var(--hover)] hover:border-[var(--border-strong)]'
                         }
                       `}
                     >
@@ -243,7 +243,7 @@ export function EnhancedFilters({
                     start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                     end: new Date().toISOString().split('T')[0]
                   })}
-                  className="px-3 py-2 text-xs bg-bg border border-border rounded-lg hover:border-accent transition-colors"
+                  className="px-3 py-2 text-xs bg-[var(--bg)] border border-[var(--border)] rounded-[12px] hover:bg-[var(--hover)] hover:border-[var(--border-strong)] transition-all duration-200"
                 >
                   Last 7 days
                 </button>
@@ -252,7 +252,7 @@ export function EnhancedFilters({
                     start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                     end: new Date().toISOString().split('T')[0]
                   })}
-                  className="px-3 py-2 text-xs bg-bg border border-border rounded-lg hover:border-accent transition-colors"
+                  className="px-3 py-2 text-xs bg-[var(--bg)] border border-[var(--border)] rounded-[12px] hover:bg-[var(--hover)] hover:border-[var(--border-strong)] transition-all duration-200"
                 >
                   Last 30 days
                 </button>
@@ -261,7 +261,7 @@ export function EnhancedFilters({
                     start: new Date().toISOString().split('T')[0],
                     end: new Date().toISOString().split('T')[0]
                   })}
-                  className="px-3 py-2 text-xs bg-bg border border-border rounded-lg hover:border-accent transition-colors"
+                  className="px-3 py-2 text-xs bg-[var(--bg)] border border-[var(--border)] rounded-[12px] hover:bg-[var(--hover)] hover:border-[var(--border-strong)] transition-all duration-200"
                 >
                   Today
                 </button>
@@ -270,7 +270,7 @@ export function EnhancedFilters({
                     start: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                     end: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
                   })}
-                  className="px-3 py-2 text-xs bg-bg border border-border rounded-lg hover:border-accent transition-colors"
+                  className="px-3 py-2 text-xs bg-[var(--bg)] border border-[var(--border)] rounded-[12px] hover:bg-[var(--hover)] hover:border-[var(--border-strong)] transition-all duration-200"
                 >
                   Yesterday
                 </button>
