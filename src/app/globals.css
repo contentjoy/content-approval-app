@@ -38,6 +38,10 @@
   --border-thin: 0.25px;
   --border-normal: 0.5px;
   --border-thick: 1px;
+  
+  /* Geometry + radii */
+  --radius: 12px;
+  --radius-pill: 999px;
 
   /* Spacing + fonts */
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;

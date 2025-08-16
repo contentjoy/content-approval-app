@@ -84,7 +84,7 @@ export function EnhancedFilters({
             placeholder="Search captions, content, or hashtags..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="block w-full pl-16 pr-4 py-2.5 border border-[var(--border)] rounded-[999px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm placeholder:text-[var(--muted-text)] h-11 leading-[44px] transition-all duration-200"
+            className="block w-full pl-16 pr-4 py-2.5 border border-[var(--border)] rounded-[999px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm placeholder:text-[var(--muted-text)] h-11 leading-[44px] transition-all duration-200 hover:bg-[var(--hover)]"
           />
           {searchQuery && (
             <button
