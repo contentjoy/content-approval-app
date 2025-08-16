@@ -229,16 +229,132 @@ export default function OnboardingPage() {
     setIsSubmitting(true)
 
     try {
-      // First, fetch the gym data to get email and gym name
-      const { data: gymData, error: gymError } = await supabase
-        .from('gyms')
-        .select('"Gym Name", "Email"')
-        .eq('id', gymId)
-        .single()
+      // 🚨 CRITICAL FIX: Proper gym ID resolution and validation
+      console.log('🔍 ONBOARDING SUBMISSION DEBUG:')
+      console.log('🔍 - Current gymId:', gymId)
+      console.log('🔍 - Current gymSlug:', gymSlug)
+      console.log('🔍 - Form data validation:', {
+        firstName: !!formData.firstName,
+        lastName: !!formData.lastName,
+        phone: !!formData.phone,
+        website: !!formData.website,
+        city: !!formData.city,
+        address: !!formData.address,
+        brandColor: !!formData.brandColor,
+        brandStyle: !!formData.brandStyle,
+        audience: !!formData.audience,
+        services: !!formData.services,
+        results: !!formData.results,
+        googleMapUrl: !!formData.googleMapUrl,
+        instagramUrl: !!formData.instagramUrl,
+        cta: !!formData.cta,
+        testimonial: !!formData.testimonial
+      })
 
-      if (gymError) {
-        console.error('Failed to fetch gym data:', gymError)
-        throw new Error('Failed to fetch gym data')
+      // 🚨 CRITICAL FIX: Resolve gym ID from slug to prevent data corruption
+      let resolvedGymId = gymId
+      let resolvedGymData: any = null
+      
+      // First, try to get gym by slug to ensure we have the correct gym
+      const { data: slugGymData, error: slugError } = await supabase
+        .from('gyms')
+        .select('id, "Gym Name", "Email", "Status"')
+        .eq('slug', gymSlug)
+        .single()
+      
+      if (slugError) {
+        console.error('❌ Failed to fetch gym by slug:', slugError)
+        console.error('❌ Slug being searched:', gymSlug)
+        
+        // Fallback: try to get gym by ID
+        const { data: idGymData, error: idError } = await supabase
+          .from('gyms')
+          .select('id, "Gym Name", "Email", "Status", slug')
+          .eq('id', gymId)
+          .single()
+        
+        if (idError) {
+          console.error('❌ Failed to fetch gym by ID:', idError)
+          console.error('❌ ID being searched:', gymId)
+          throw new Error(`Failed to fetch gym data. Slug: ${gymSlug}, ID: ${gymId}`)
+        }
+        
+        resolvedGymId = idGymData.id
+        resolvedGymData = idGymData
+        
+        // Check if slug matches
+        if (idGymData.slug !== gymSlug) {
+          console.error('❌ SLUG MISMATCH DETECTED:')
+          console.error('❌ - URL slug:', gymSlug)
+          console.error('❌ - Database slug:', idGymData.slug)
+          console.error('❌ - This could cause data corruption!')
+          toast.error('Warning: Gym slug mismatch detected. Please contact support.')
+        }
+      } else {
+        resolvedGymId = slugGymData.id
+        resolvedGymData = slugGymData
+        
+        // Check if ID matches
+        if (slugGymData.id !== gymId) {
+          console.error('❌ GYM ID MISMATCH DETECTED:')
+          console.error('❌ - Current gymId:', gymId)
+          console.error('❌ - Resolved gymId:', slugGymData.id)
+          console.error('❌ - This could cause data corruption!')
+          toast.error('Warning: Gym ID mismatch detected. Please contact support.')
+        }
+      }
+      
+      console.log('✅ Gym data resolved successfully:')
+      console.log('✅ - Resolved gymId:', resolvedGymId)
+      console.log('✅ - Resolved gym name:', resolvedGymData['Gym Name'])
+      console.log('✅ - Resolved gym email:', resolvedGymData['Email'])
+      console.log('✅ - Resolved gym status:', resolvedGymData['Status'])
+      
+      // 🚨 CRITICAL FIX: Validate gym data integrity
+      if (!resolvedGymData['Gym Name'] || !resolvedGymData['Email']) {
+        console.error('❌ INVALID GYM DATA:')
+        console.error('❌ - Gym Name:', resolvedGymData['Gym Name'])
+        console.error('❌ - Gym Email:', resolvedGymData['Email'])
+        throw new Error('Invalid gym data: missing gym name or email')
+      }
+      
+      // 🚨 CRITICAL FIX: Check if this gym is already onboarded
+      if (resolvedGymData['Status'] === 'active') {
+        console.warn('⚠️ Gym already onboarded:', resolvedGymData['Gym Name'])
+        toast.error('This gym has already completed onboarding')
+      }
+      
+      // 🚨 CRITICAL FIX: Validate form data consistency
+      console.log('🔍 FORM DATA VALIDATION:')
+      console.log('🔍 - Form business name:', `${formData.firstName} ${formData.lastName}`)
+      console.log('🔍 - Database gym name:', resolvedGymData['Gym Name'])
+      console.log('🔍 - Form website:', formData.website)
+      console.log('🔍 - Form city:', formData.city)
+      
+      // Check for potential data corruption indicators
+      const businessNameFromForm = `${formData.firstName} ${formData.lastName}`.toLowerCase()
+      const gymNameFromDB = resolvedGymData['Gym Name'].toLowerCase()
+      
+      if (!businessNameFromForm.includes(gymNameFromDB) && !gymNameFromDB.includes(businessNameFromForm)) {
+        console.warn('⚠️ POTENTIAL DATA CORRUPTION DETECTED:')
+        console.warn('⚠️ - Form business name:', businessNameFromForm)
+        console.warn('⚠️ - Database gym name:', gymNameFromDB)
+        console.warn('⚠️ - These should be related!')
+        
+        // Show warning to user
+        toast.error('Warning: Business name mismatch detected. Please verify your information.')
+      }
+      
+      // 🚨 CRITICAL FIX: Session isolation - ensure we're working with the correct gym
+      if (resolvedGymId !== gymId) {
+        console.error('❌ SESSION ISOLATION FAILURE:')
+        console.error('❌ - Session gymId:', gymId)
+        console.error('❌ - Resolved gymId:', resolvedGymId)
+        console.error('❌ - This indicates a session state issue!')
+        
+        // Update the session state
+        setGymId(resolvedGymId)
+        console.log('✅ Session gymId updated to:', resolvedGymId)
       }
 
       // Update gym record with onboarding data
@@ -264,7 +380,7 @@ export default function OnboardingPage() {
           'Black Logo URL': formData.blackLogoUrl,
           'Status': 'active'
         })
-        .eq('id', gymId)
+        .eq('id', resolvedGymId)
 
       if (updateError) throw updateError
 
@@ -358,7 +474,7 @@ export default function OnboardingPage() {
                 'White Logo URL': whiteLogoUrl,
                 'Black Logo URL': blackLogoUrl
               })
-              .eq('id', gymId)
+              .eq('id', resolvedGymId)
 
             if (logoUpdateError) {
               console.warn('⚠️ Failed to update logo URLs in database:', logoUpdateError)
@@ -386,9 +502,9 @@ export default function OnboardingPage() {
       // Send data to onboarding webhook with gym name and email
       const webhookData = {
         // Gym identification
-        gym_id: gymId,
-        gym_name: gymData['Gym Name'],
-        gym_email: gymData['Email'],
+        gym_id: resolvedGymId,
+        gym_name: resolvedGymData['Gym Name'],
+        gym_email: resolvedGymData['Email'],
         
         // Onboarding form data
         business_details: {
@@ -445,6 +561,61 @@ export default function OnboardingPage() {
         totalPayloadKeys: Object.keys(webhookData).length
       })
       
+      // 🚨 CRITICAL FIX: Enhanced webhook data validation
+      console.log('🔍 WEBHOOK DATA INTEGRITY CHECK:')
+      console.log('🔍 - Gym ID consistency:', webhookData.gym_id === resolvedGymId)
+      console.log('🔍 - Gym name consistency:', webhookData.gym_name === resolvedGymData['Gym Name'])
+      console.log('🔍 - Gym email consistency:', webhookData.gym_email === resolvedGymData['Email'])
+      console.log('🔍 - Form data consistency:', {
+        businessName: `${webhookData.business_details.first_name} ${webhookData.business_details.last_name}`,
+        website: webhookData.business_details.website,
+        city: webhookData.business_details.city
+      })
+      
+      // 🚨 CRITICAL FIX: Data integrity validation
+      const dataIntegrityChecks = [
+        webhookData.gym_id === resolvedGymId,
+        webhookData.gym_name === resolvedGymData['Gym Name'],
+        webhookData.gym_email === resolvedGymData['Email'],
+        webhookData.gym_slug === gymSlug,
+        webhookData.business_details.first_name === formData.firstName,
+        webhookData.business_details.last_name === formData.lastName,
+        webhookData.business_details.website === formData.website,
+        webhookData.business_details.city === formData.city
+      ]
+      
+      const failedChecks = dataIntegrityChecks.filter(check => !check).length
+      if (failedChecks > 0) {
+        console.error('❌ DATA INTEGRITY CHECK FAILED:')
+        console.error('❌ - Failed checks:', failedChecks)
+        console.error('❌ - Total checks:', dataIntegrityChecks.length)
+        console.error('❌ - This indicates data corruption!')
+        
+        toast.error(`Data integrity check failed (${failedChecks} errors). Please contact support.`)
+        throw new Error(`Data integrity check failed: ${failedChecks} validation errors`)
+      }
+      
+      console.log('✅ All data integrity checks passed')
+      
+      // Add data integrity hash for verification
+      const dataIntegrityHash = btoa(JSON.stringify({
+        gym_id: webhookData.gym_id,
+        gym_name: webhookData.gym_name,
+        gym_email: webhookData.gym_email,
+        timestamp: webhookData.submitted_at
+      }))
+      
+      const webhookDataWithIntegrity = {
+        ...webhookData,
+        data_integrity: {
+          hash: dataIntegrityHash,
+          checksum: dataIntegrityChecks.every(check => check),
+          validation_timestamp: new Date().toISOString()
+        }
+      }
+      
+      console.log('🔐 Data integrity hash generated:', dataIntegrityHash)
+      
       try {
         const webhookResponse = await fetch('/api/onboarding-webhook', {
           method: 'POST',
@@ -452,7 +623,7 @@ export default function OnboardingPage() {
             'Content-Type': 'application/json',
             'User-Agent': 'ContentJoy-Onboarding/2.0'
           },
-          body: JSON.stringify(webhookData)
+          body: JSON.stringify(webhookDataWithIntegrity)
         })
 
         if (!webhookResponse.ok) {
@@ -471,7 +642,7 @@ export default function OnboardingPage() {
               'Content-Type': 'application/json',
               'User-Agent': 'ContentJoy-Onboarding-Fallback/2.0'
             },
-            body: JSON.stringify(webhookData)
+            body: JSON.stringify(webhookDataWithIntegrity)
           })
           
           if (!fallbackResponse.ok) {
@@ -500,11 +671,11 @@ export default function OnboardingPage() {
       try {
         setCreatingProfile(true)
         console.log('🔑 Attempting to create Ayrshare profile for gym:', gymSlug)
-        console.log('🔑 Gym ID:', gymId)
-        console.log('🔑 Gym Data:', gymData)
+        console.log('🔑 Gym ID:', resolvedGymId)
+        console.log('🔑 Gym Data:', resolvedGymData)
         
         // Use gym slug as the profile name, fallback to gym name if needed
-        const profileName = gymSlug || gymData['Gym Name'] || 'gym'
+        const profileName = gymSlug || resolvedGymData['Gym Name'] || 'gym'
         console.log('🔑 Using profile name:', profileName)
         
         console.log('🔑 Making API call to /api/ayrshare/create-profile...')
@@ -539,7 +710,7 @@ export default function OnboardingPage() {
         
         // Save profile key to the profile_key column in gyms table
         console.log('💾 Saving profile key to database...')
-        const save = await updateGymProfileKey(gymId, profileKey)
+        const save = await updateGymProfileKey(resolvedGymId, profileKey)
         if (!save.success) {
           console.error('❌ Failed to save profile key to database:', save.error)
           throw new Error(`Failed to save profile key: ${save.error}`)
