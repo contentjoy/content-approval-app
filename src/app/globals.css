@@ -34,10 +34,10 @@
   --modal-surface: #F2F2F2;
   --modal-border: #E3E3E3;
   
-  /* Border thicknesses - reduced by half */
-  --border-thin: 0.5px;
-  --border-normal: 1px;
-  --border-thick: 1.5px;
+  /* Border thicknesses - much thinner */
+  --border-thin: 0.25px;
+  --border-normal: 0.5px;
+  --border-thick: 1px;
 
   /* Spacing + fonts */
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
@@ -775,17 +775,4 @@ p { font-size: var(--fs-base); line-height: 1.7; }
 @keyframes progressShimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
-}
-
-/* Border utilities with thinner borders */
-.border-thin {
-  border-width: var(--border-thin);
-}
-
-.border-normal {
-  border-width: var(--border-normal);
-}
-
-.border-thick {
-  border-width: var(--border-thick);
 }

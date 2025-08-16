@@ -84,7 +84,7 @@ export function EnhancedFilters({
             placeholder="Search captions, content, or hashtags..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="block w-full pl-16 pr-4 py-2.5 border border-[var(--border)] border-thin rounded-[999px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm placeholder:text-[var(--muted-text)] h-11 leading-[44px] transition-all duration-200"
+            className="block w-full pl-16 pr-4 py-2.5 border border-[var(--border)] rounded-[999px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm placeholder:text-[var(--muted-text)] h-11 leading-[44px] transition-all duration-200"
           />
           {searchQuery && (
             <button
@@ -102,7 +102,7 @@ export function EnhancedFilters({
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowAdvanced(!showAdvanced)}
           className={`
-            flex items-center space-x-2 px-4 py-2.5 rounded-[999px] border border-thin font-medium transition-all duration-200 h-11 text-sm
+            flex items-center space-x-2 px-4 py-2.5 rounded-[999px] border font-medium transition-all duration-200 h-11 text-sm
             ${showAdvanced || hasActiveFilters
               ? 'bg-[var(--surface)] text-[var(--foreground)] border-[var(--border)]'
               : 'bg-[var(--navbar)] text-[var(--text)] border-[var(--border)] hover:bg-[var(--hover)] hover:border-[var(--border-strong)]'
@@ -143,7 +143,7 @@ export function EnhancedFilters({
             animate={{ opacity: 1, height: 'auto', y: 0 }}
             exit={{ opacity: 0, height: 0, y: -10 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="bg-[var(--surface)] border border-[var(--border)] border-thin rounded-[12px] p-6 space-y-6"
+            className="bg-[var(--surface)] border border-[var(--border)] rounded-[12px] p-6 space-y-6"
           >
             {/* Date Range Filter */}
             <div>
@@ -161,7 +161,7 @@ export function EnhancedFilters({
                       start: e.target.value, 
                       end: dateRange?.end || e.target.value 
                     })}
-                    className="w-full px-3 py-2 border border-[var(--border)] border-thin rounded-[12px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm transition-all duration-200 hover:bg-[var(--hover)]"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-[12px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm transition-all duration-200 hover:bg-[var(--hover)]"
                   />
                 </div>
                 <div>
@@ -173,7 +173,7 @@ export function EnhancedFilters({
                       start: dateRange?.start || e.target.value, 
                       end: e.target.value 
                     })}
-                    className="w-full px-3 py-2 border border-[var(--border)] border-thin rounded-[12px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm transition-all duration-200 hover:bg-[var(--hover)]"
+                    className="w-full px-3 py-2 border border-[var(--border)] rounded-[12px] focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent text-sm transition-all duration-200 hover:bg-[var(--hover)]"
                   />
                 </div>
               </div>
@@ -211,7 +211,7 @@ export function EnhancedFilters({
                         px-3 py-1.5 rounded-[999px] text-xs font-medium transition-all duration-200
                         ${selectedTags.includes(tag)
                           ? 'bg-[var(--surface)] text-[var(--foreground)]'
-                          : 'text-[var(--text)] border border-[var(--border)] border-thin hover:bg-[var(--hover)]'
+                          : 'text-[var(--text)] border border-[var(--border)] hover:bg-[var(--hover)]'
                         }
                       `}
                     >
@@ -243,7 +243,7 @@ export function EnhancedFilters({
                     start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                     end: new Date().toISOString().split('T')[0]
                   })}
-                  className="px-3 py-2 text-xs border border-[var(--border)] border-thin rounded-[12px] hover:bg-[var(--hover)] transition-all duration-200"
+                  className="px-3 py-2 text-xs border border-[var(--border)] rounded-[12px] hover:bg-[var(--hover)] transition-all duration-200"
                 >
                   Last 7 days
                 </button>
@@ -252,7 +252,7 @@ export function EnhancedFilters({
                     start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                     end: new Date().toISOString().split('T')[0]
                   })}
-                  className="px-3 py-2 text-xs border border-[var(--border)] border-thin rounded-[12px] hover:bg-[var(--hover)] transition-all duration-200"
+                  className="px-3 py-2 text-xs border border-[var(--border)] rounded-[12px] hover:bg-[var(--hover)] transition-all duration-200"
                 >
                   Last 30 days
                 </button>
@@ -261,7 +261,7 @@ export function EnhancedFilters({
                     start: new Date().toISOString().split('T')[0],
                     end: new Date().toISOString().split('T')[0]
                   })}
-                  className="px-3 py-2 text-xs border border-[var(--border)] border-thin rounded-[12px] hover:bg-[var(--hover)] transition-all duration-200"
+                  className="px-3 py-2 text-xs border border-[var(--border)] rounded-[12px] hover:bg-[var(--hover)] transition-all duration-200"
                 >
                   Today
                 </button>
@@ -270,7 +270,7 @@ export function EnhancedFilters({
                     start: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                     end: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
                   })}
-                  className="px-3 py-2 text-xs border border-[var(--border)] border-thin rounded-[12px] hover:bg-[var(--hover)] transition-all duration-200"
+                  className="px-3 py-2 text-xs border border-[var(--border)] rounded-[12px] hover:bg-[var(--hover)] transition-all duration-200"
                 >
                   Yesterday
                 </button>
