@@ -163,7 +163,7 @@ export function PostCard({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -6 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-48 bg-[var(--modal-surface)] rounded-[24px] border border-[var(--border)] shadow-xl z-[99999]"
+                  className="absolute right-0 mt-2 w-48 bg-[var(--modal-bg)] rounded-[24px] border border-[var(--border)] shadow-xl z-[99999]"
                 >
                   <button onClick={handleShare} className="w-full flex items-center px-4 py-3 text-sm text-[var(--text)] hover:bg-[var(--modal-surface)] transition-all duration-200 rounded-[12px]">
                     <svg className="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
