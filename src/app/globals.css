@@ -34,10 +34,10 @@
   --modal-surface: #F2F2F2;
   --modal-border: #E3E3E3;
   
-  /* Border thicknesses - much thinner */
-  --border-thin: 0.25px;
-  --border-normal: 0.5px;
-  --border-thick: 1px;
+  /* Border thicknesses - ultra thin */
+  --border-thin: 0.125px;
+  --border-normal: 0.25px;
+  --border-thick: 0.5px;
   
   /* Geometry + radii */
   --radius: 12px;
