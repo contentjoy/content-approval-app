@@ -60,7 +60,6 @@ export async function POST(request: NextRequest) {
         "White Logo URL",
         "Black Logo URL",
         "Status",
-        slug,
         created_at,
         updated_at
       `)
@@ -134,7 +133,7 @@ export async function POST(request: NextRequest) {
           
           // Metadata
           submitted_at: gym.created_at || new Date().toISOString(),
-          gym_slug: gym.slug || 'unknown-slug',
+          gym_identifier: gym.id, // Use ID instead of slug
           
           // Recovery metadata
           recovery_metadata: {

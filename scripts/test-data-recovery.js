@@ -9,28 +9,23 @@
  * Usage:
  * 1. First, test with dry run: node scripts/test-data-recovery.js
  * 2. Then, run actual recovery: node scripts/test-data-recovery.js --live
+ * 
+ * Note: Requires Node.js 18+ for built-in fetch support
  */
-
-const fetch = require('node-fetch');
-
-const BASE_URL = process.env.BASE_URL || 'https://content-approval-app-inky.vercel.app';
-const WEBHOOK_URL = process.env.ONBOARDING_WEBHOOK_URL || 
-                   process.env.ONBOARDING_TEST_WEBHOOK || 
-                   'https://contentjoy.app.n8n.cloud/webhook-test/156ef9a5-0ae7-4e65-acc1-a27aa533d90a';
 
 async function testDataRecovery() {
   const isLive = process.argv.includes('--live');
   
   console.log('🚀 Testing Data Recovery Endpoint');
-  console.log('🌐 Base URL:', BASE_URL);
-  console.log('📡 Webhook URL:', WEBHOOK_URL);
+  console.log('🌐 Base URL:', 'https://content-approval-app-inky.vercel.app');
+  console.log('📡 Webhook URL:', 'https://contentjoy.app.n8n.cloud/webhook-test/156ef9a5-0ae7-4e65-acc1-a27aa533d90a');
   console.log('🔧 Mode:', isLive ? 'LIVE RECOVERY' : 'DRY RUN');
   console.log('');
   
   try {
     // Test configuration
     const config = {
-      webhookUrl: WEBHOOK_URL,
+      webhookUrl: 'https://contentjoy.app.n8n.cloud/webhook-test/156ef9a5-0ae7-4e65-acc1-a27aa533d90a',
       dryRun: !isLive, // Dry run unless --live flag is passed
       limit: 10, // Start with small batch for testing
       offset: 0
@@ -40,7 +35,7 @@ async function testDataRecovery() {
     console.log('📊 Config:', JSON.stringify(config, null, 2));
     console.log('');
     
-    const response = await fetch(`${BASE_URL}/api/data-recovery`, {
+    const response = await fetch('https://content-approval-app-inky.vercel.app/api/data-recovery', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -102,6 +97,7 @@ async function testDataRecovery() {
   } catch (error) {
     console.error('❌ Test failed:', error.message);
     console.error('💡 Make sure the app is running and accessible');
+    console.error('💡 Check that you have Node.js 18+ for fetch support');
   }
 }
 
