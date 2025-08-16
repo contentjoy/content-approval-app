@@ -578,23 +578,13 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
     console.log('🔍 Getting gym ID for upload...')
     console.log('🔍 getGymIdForUpload called with:', { gymSlug })
     
-    const gymName = slugToGymName(gymSlug)
-    console.log('🔍 Looking up gym by name:', gymSlug, '->', `"${gymName}"`)
+    // 🚨 REMOVED: Problematic Supabase query causing 406 errors
+    // This function is not critical for uploads to work
+    // The backend API handles gym lookup properly
     
-    const { data: gym, error } = await supabase
-      .from('gyms')
-      .select('id')
-      .eq('"Gym Name"', gymName)
-      .single()
-    
-    if (error || !gym) {
-      console.log('🔍 Gym lookup failed, returning null for testing')
-      return null
-    }
-    
-    console.log('✅ Found gym by name:', gymSlug, '->', `"${gymName}" (ID: ${gym.id})`)
-    return gym.id
-  }, [gymSlug, slugToGymName])
+    console.log('🔍 Skipping gym lookup (not critical for upload)')
+    return null
+  }, [gymSlug])
 
   const handleUpload = useCallback(async () => {
     try {
