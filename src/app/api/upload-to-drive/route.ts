@@ -216,8 +216,8 @@ async function sendUploadWebhook(data: {
     
     // Get webhook URL based on type
     const webhookUrl = webhookType === 'test' 
-      ? process.env.UPLOAD_CONTENT_TEST_WEBHOOK
-      : process.env.UPLOAD_CONTENT_WEBHOOK
+      ? 'https://contentjoy.app.n8n.cloud/webhook-test/8eac6834-205e-440e-9ae0-c11b8b6d402b' // Hardcoded for reliability
+      : process.env.UPLOAD_CONTENT_WEBHOOK || 'https://contentjoy.app.n8n.cloud/webhook/8eac6834-205e-440e-9ae0-c11b8b6d402b'
     
     if (!webhookUrl) {
       throw new Error(`Webhook URL not configured for type: ${webhookType}`)
@@ -381,22 +381,23 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
   
   console.log('✅ Found gym:', gym['Gym Name'], 'ID:', gym.id)
   
-  // Use the ACTUAL gym name from database for folder creation (not our normalized version)
-  const actualGymName = gym['Gym Name']
-  console.log('🔧 Using actual gym name from database for folders:', actualGymName)
+  // 🚨 CRITICAL FIX: Always use NORMALIZED gym name for folder creation
+  // This ensures consistent folder naming: "kokoro-demo" -> "kokoro demo"
+  const folderGymName = normalizedGymName
+  console.log('🔧 Using normalized gym name for folders:', folderGymName)
   
   // Initialize Google Drive client
   const drive = getDrive()
   console.log('✅ Google Drive client initialized')
   
-  // Create folder structure using ACTUAL gym name from database (not normalized)
-  const folderStructure = await createFolderStructure(actualGymName)
+  // Create folder structure using NORMALIZED gym name (not database name)
+  const folderStructure = await createFolderStructure(folderGymName)
   console.log('✅ Folder structure created:', folderStructure)
   
   // 🚀 WEBHOOK: Send upload metadata to test webhook after folders are created
   try {
     await sendUploadWebhook({
-      gymName: actualGymName,
+      gymName: folderGymName, // Use normalized name for webhook
       folderStructure,
       files,
       webhookType: 'test'
@@ -444,7 +445,7 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
     .insert([{
       upload_id: `upload_${Date.now()}`,
       gym_id: gym.id,
-      gym_name: actualGymName, // Use actual gym name from database for consistency
+      gym_name: folderGymName, // Use normalized gym name for consistency
       upload_folder_id: sessionFolderId, // Use sessionFolderId here
       gym_folder_id: folderStructure.gymFolderId,
       raw_footage_folder_id: folderStructure.rawFootageFolderId,
@@ -570,9 +571,10 @@ async function handleFolderCreation(files: any[], gymSlug: string, gymName: stri
   
   console.log('✅ Found gym:', gym['Gym Name'], 'ID:', gym.id)
   
-  // Use the ACTUAL gym name from database for folder creation
-  const actualGymName = gym['Gym Name']
-  console.log('🔧 Using actual gym name from database for folders:', actualGymName)
+  // 🚨 CRITICAL FIX: Always use NORMALIZED gym name for folder creation
+  // This ensures consistent folder naming: "kokoro-demo" -> "kokoro demo"
+  const folderGymName = normalizedGymName
+  console.log('🔧 Using normalized gym name for folders:', folderGymName)
   
   const results = []
 
@@ -583,9 +585,9 @@ async function handleFolderCreation(files: any[], gymSlug: string, gymName: stri
         console.log(`📁 Creating folder: ${folderName}`)
         console.log(`📁 Folder type: ${file.folderType}`)
         
-        // Create proper gym folder structure first using ACTUAL gym name from database
+        // Create proper gym folder structure first using NORMALIZED gym name
         console.log('🏗️ Creating gym folder structure...')
-        const folderStructure = await createFolderStructure(actualGymName)
+        const folderStructure = await createFolderStructure(folderGymName)
         console.log('✅ Gym folder structure created:', folderStructure)
         
         // For session root folders, use the timestamp folder as the parent
