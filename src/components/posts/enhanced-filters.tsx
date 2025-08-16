@@ -143,7 +143,7 @@ export function EnhancedFilters({
             animate={{ opacity: 1, height: 'auto', y: 0 }}
             exit={{ opacity: 0, height: 0, y: -10 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="bg-[var(--modal-surface)] border border-[var(--border)] rounded-[12px] p-6 space-y-6"
+            className="bg-[var(--surface)] border border-[var(--border)] rounded-[12px] p-6 space-y-6"
           >
             {/* Date Range Filter */}
             <div>
