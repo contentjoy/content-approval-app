@@ -24,7 +24,7 @@
   /* Light theme (updated per spec) */
   --bg: #F8F7F7;
   --bg-elev-1: #ffffff;
-  --surface: #252628;
+  --surface: #FCFCFC;
   --text: #1D1C1B;
   --muted-text: #646363;
   --border: #E8E8E8;
@@ -86,7 +86,7 @@
 [data-theme="dark"] {
   --bg: #161618;
   --bg-elev-1: #1a1a1c;
-  --surface: #F8F7F7;
+  --surface: #252628;
   --text: #F9F8F6;
   --muted-text: #B5B5B5;
   --border: #29292B;
