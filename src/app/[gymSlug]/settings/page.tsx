@@ -38,7 +38,7 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sidebar */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm border p-4">
+          <div className="bg-[var(--surface)] rounded-lg shadow-sm border p-4">
             <h2 className="font-semibold text-gray-900 mb-4">Settings</h2>
             <nav className="space-y-2">
               {tabs.map((tab) => (
@@ -61,7 +61,7 @@ export default function SettingsPage() {
 
         {/* Content */}
         <div className="lg:col-span-3">
-          <div className="bg-white rounded-lg shadow-sm border">
+          <div className="bg-[var(--surface)] rounded-lg shadow-sm border">
             {activeTab === 'general' && <GeneralSettings />}
             {activeTab === 'team' && <TeamSettings />}
             {activeTab === 'notifications' && <NotificationSettings />}

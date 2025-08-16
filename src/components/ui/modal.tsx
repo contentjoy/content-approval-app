@@ -55,7 +55,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-foreground/20 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-foreground/20 backdrop-blur-sm"
           onClick={handleBackdropClick}
         >
           <motion.div
@@ -64,7 +64,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`w-full h-full sm:h-auto ${sizeClasses[size]} sm:max-h-[90vh] bg-[var(--modal-bg)] border border-[var(--modal-border)] rounded-none sm:rounded-[12px] overflow-hidden shadow-xl`}
+            className={`w-full h-full sm:h-auto ${sizeClasses[size]} sm:max-h-[90vh] bg-[var(--modal-bg)] border border-[var(--modal-border)] rounded-none sm:rounded-[24px] overflow-hidden shadow-xl`}
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"

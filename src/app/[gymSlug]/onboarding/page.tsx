@@ -1014,7 +1014,7 @@ function LogoUploader({
           <img 
             src={selectedFile ? URL.createObjectURL(selectedFile) : currentUrl} 
             alt={`${logoType} logo`} 
-            className="w-16 h-16 rounded-lg object-contain border border-card-border bg-white" 
+            className="w-16 h-16 rounded-lg object-contain border border-card-border bg-[var(--background)]" 
           />
           <div className="flex-1">
             <span className="text-sm text-text-secondary block">

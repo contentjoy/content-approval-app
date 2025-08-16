@@ -94,7 +94,7 @@ export function PopoutMenu({ isOpen, onClose, placement = 'desktop', onAccountSe
             className={
               placement === 'desktop'
                 ? 'absolute top-12 right-0 w-64 bg-[var(--modal-bg)] border border-[var(--modal-border)] rounded-[24px] p-4 z-[60]'
-                : 'fixed top-[3.25rem] inset-x-0 w-full h-[calc(100vh-3.25rem)] bg-[var(--modal-bg)] rounded-t-none p-4 z-[60] overflow-y-auto'
+                : 'fixed top-[3.25rem] left-3 right-3 bottom-3 bg-[var(--modal-bg)] rounded-[24px] p-4 z-[60] overflow-y-auto'
             }
           >
             {content}
