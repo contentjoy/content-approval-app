@@ -47,10 +47,19 @@ export function RegenerateModal({ isOpen, onClose, post, onSuccess }: Regenerate
           className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-bg text-text placeholder:text-muted-text resize min-h-[8rem] max-h-[50vh]"
         />
         <div className="flex justify-end space-x-3">
-          <BrandedButton variant="outline" onClick={onClose}>Cancel</BrandedButton>
-          <BrandedButton onClick={handleSubmit} disabled={isLoading || !feedback.trim()}>
+          <button 
+            onClick={onClose}
+            className="px-4 py-2 bg-transparent border border-[#FCFCFC] dark:border-[#111113] text-[#FCFCFC] dark:text-[#111113] rounded-lg hover:bg-[#FCFCFC] dark:hover:bg-[#111113] hover:text-[#111113] dark:hover:text-[#FCFCFC] transition-all duration-200 font-medium"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={handleSubmit} 
+            disabled={isLoading || !feedback.trim()}
+            className="px-4 py-2 bg-[#FCFCFC] dark:bg-[#111113] text-[#111113] dark:text-[#FCFCFC] rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
+          >
             {isLoading ? 'Sending…' : 'Regenerate'}
-          </BrandedButton>
+          </button>
         </div>
       </div>
     </Modal>

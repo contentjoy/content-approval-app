@@ -207,20 +207,20 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
           >
             Cancel
           </button>
-          <BrandedButton
+          <button
             type="submit"
             disabled={isLoading}
-            className="h-10 px-6 py-2 rounded-[999px] bg-[var(--surface)] text-[var(--foreground)] border border-[var(--modal-border)] transition-all duration-200 hover:bg-[var(--hover)] disabled:opacity-50"
+            className="h-10 px-6 py-2 rounded-[999px] bg-[#FCFCFC] dark:bg-[#111113] text-[#111113] dark:text-[#FCFCFC] border border-[var(--modal-border)] transition-all duration-200 hover:opacity-90 disabled:opacity-50"
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#111113] dark:border-[#FCFCFC]"></div>
                 <span>Disapproving...</span>
               </div>
             ) : (
               'Disapprove Content'
             )}
-          </BrandedButton>
+          </button>
         </div>
       </form>
     </Modal>

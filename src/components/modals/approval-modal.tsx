@@ -228,27 +228,28 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
 
         {/* Actions */}
         <div className="flex items-center justify-end space-x-3 pt-4 border-t border-border">
-          <BrandedButton
+          <button
             type="button"
-            variant="outline"
             onClick={onClose}
             disabled={isLoading}
+            className="h-10 px-6 py-2 rounded-[999px] bg-transparent border border-[#FCFCFC] dark:border-[#111113] text-[#FCFCFC] dark:text-[#111113] transition-all duration-200 hover:bg-[#FCFCFC] dark:hover:bg-[#111113] hover:text-[#111113] dark:hover:text-[#FCFCFC] disabled:opacity-50"
           >
             Cancel
-          </BrandedButton>
-          <BrandedButton
+          </button>
+          <button
             type="submit"
             disabled={isLoading}
+            className="h-10 px-6 py-2 rounded-[999px] bg-[#FCFCFC] dark:bg-[#111113] text-[#111113] dark:text-[#FCFCFC] transition-all duration-200 hover:opacity-90 disabled:opacity-50"
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#111113] dark:border-[#FCFCFC]"></div>
                 <span>Approving...</span>
               </div>
             ) : (
               'Approve Content'
             )}
-          </BrandedButton>
+          </button>
         </div>
       </form>
     </Modal>

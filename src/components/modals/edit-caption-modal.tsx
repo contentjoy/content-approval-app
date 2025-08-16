@@ -82,25 +82,6 @@ export function EditCaptionModal({ isOpen, onClose, post, onSuccess }: EditCapti
       size="md"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Post Preview */}
-        <div className="bg-[var(--surface)] rounded-lg p-4 border border-border">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-              <span className="text-accent font-semibold">
-                {post['Asset Type']?.toLowerCase() === 'video' ? '🎥' : '📷'}
-              </span>
-            </div>
-            <div>
-              <h3 className="font-medium text-foreground">
-                {post['Content Type'] || 'Social Media Post'}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {post['Asset Type'] || 'Image'} • {post['Carousel Group'] ? `Carousel slide ${post['Carousel Order']}` : 'Single'}
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Caption */}
         <div>
           <label htmlFor="caption" className="block text-sm font-medium text-foreground mb-2">
@@ -110,7 +91,7 @@ export function EditCaptionModal({ isOpen, onClose, post, onSuccess }: EditCapti
             id="caption"
             rows={Math.min(18, Math.max(10, Math.ceil((watchedCaption?.length || 0) / 90)))}
             {...register('caption')}
-            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-bg text-text placeholder:text-muted-text resize min-h-[10rem] max-h-[60vh]"
+            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-[var(--modal-surface)] text-text placeholder:text-muted-text resize min-h-[10rem] max-h-[60vh]"
             placeholder="Write your post caption here..."
           />
           {errors.caption && (
@@ -147,27 +128,28 @@ export function EditCaptionModal({ isOpen, onClose, post, onSuccess }: EditCapti
 
         {/* Actions */}
         <div className="flex items-center justify-end space-x-3 pt-4 border-t">
-          <BrandedButton
+          <button
             type="button"
-            variant="outline"
             onClick={onClose}
             disabled={isLoading}
+            className="px-4 py-2 bg-transparent border border-[#FCFCFC] dark:border-[#111113] text-[#FCFCFC] dark:text-[#111113] rounded-lg hover:bg-[#FCFCFC] dark:hover:bg-[#111113] hover:text-[#111113] dark:hover:text-[#FCFCFC] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
           >
             Cancel
-          </BrandedButton>
-          <BrandedButton
+          </button>
+          <button
             type="submit"
             disabled={isLoading || watchedCaption.length === 0 || watchedCaption.length > 2200}
+            className="px-4 py-2 bg-[#FCFCFC] dark:bg-[#111113] text-[#111113] dark:text-[#FCFCFC] rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#111113] dark:border-[#FCFCFC]"></div>
                 <span>Saving...</span>
               </div>
             ) : (
               'Save Caption'
             )}
-          </BrandedButton>
+          </button>
         </div>
       </form>
     </Modal>

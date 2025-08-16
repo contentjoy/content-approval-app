@@ -72,7 +72,7 @@ export function CommentsModal({ isOpen, onClose, post, onSuccess }: CommentsModa
             <button 
               onClick={handleAdd} 
               disabled={isLoading || !input.trim()}
-              className="px-4 py-2 bg-[var(--primary)] text-[var(--primary-foreground)] rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
+              className="px-4 py-2 bg-[#FCFCFC] dark:bg-[#111113] text-[#111113] dark:text-[#FCFCFC] rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
             >
               {isLoading ? 'Adding...' : 'Add Comment'}
             </button>
