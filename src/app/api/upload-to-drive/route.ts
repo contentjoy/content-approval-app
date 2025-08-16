@@ -237,7 +237,11 @@ async function sendUploadWebhook(data: {
       ? process.env.UPLOAD_CONTENT_WEBHOOK 
       : 'https://hooks.zapier.com/hooks/catch/4486785/u6jju7v/'
     
-    console.log('📡 Webhook URL determined:', webhookUrl)
+    // 🚨 FALLBACK: If Zapier webhook fails, try alternative
+    const fallbackWebhookUrl = process.env.UPLOAD_CONTENT_FALLBACK_WEBHOOK || null
+    
+    console.log('📡 Primary webhook URL:', webhookUrl)
+    console.log('📡 Fallback webhook URL:', fallbackWebhookUrl || 'Not configured')
     
     if (!webhookUrl) {
       throw new Error(`Webhook URL not configured for type: ${webhookType}`)
@@ -277,28 +281,87 @@ async function sendUploadWebhook(data: {
     
     console.log('📡 ABOUT TO MAKE FETCH REQUEST...')
     
-    // Send webhook
-    const response = await fetch(webhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(webhookPayload),
-    })
-    
-    console.log('📡 FETCH RESPONSE RECEIVED:', response.status, response.statusText)
-    
-    if (!response.ok) {
-      const responseText = await response.text()
-      console.error('📡 Webhook response error:', responseText)
-      throw new Error(`Webhook failed with status: ${response.status} - ${responseText}`)
+    // 🚨 HEALTH CHECK: Test webhook endpoint before sending payload
+    try {
+      console.log('📡 Testing webhook endpoint health...')
+      const healthResponse = await fetch(webhookUrl, {
+        method: 'HEAD',
+        headers: {
+          'User-Agent': 'ContentApprovalApp/1.0'
+        }
+      })
+      console.log('📡 Health check response:', healthResponse.status, healthResponse.statusText)
+    } catch (healthError) {
+      console.warn('📡 Health check failed (non-blocking):', healthError)
+      console.warn('📡 This suggests the webhook endpoint may be unreachable')
     }
     
-    const responseData = await response.text()
-    console.log('📡 Webhook response data:', responseData)
-    console.log('✅ Webhook sent successfully')
+    // 🚨 ENHANCED WEBHOOK: Add retry logic and better error handling
+    let webhookSuccess = false
+    let webhookAttempts = 0
+    const maxWebhookAttempts = 3
     
-    return { success: true, response: responseData }
+    while (!webhookSuccess && webhookAttempts < maxWebhookAttempts) {
+      webhookAttempts++
+      console.log(`📡 Webhook attempt ${webhookAttempts}/${maxWebhookAttempts} to: ${webhookUrl}`)
+      
+      try {
+        // Send webhook with timeout
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+        
+        const response = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'ContentApprovalApp/1.0',
+            'Accept': 'application/json, text/plain, */*'
+          },
+          body: JSON.stringify(webhookPayload),
+          signal: controller.signal
+        })
+        
+        clearTimeout(timeoutId)
+        
+        console.log(`📡 Webhook attempt ${webhookAttempts} response:`, response.status, response.statusText)
+        console.log(`📡 Response headers:`, Object.fromEntries(response.headers.entries()))
+        
+        if (!response.ok) {
+          const responseText = await response.text()
+          console.error(`📡 Webhook attempt ${webhookAttempts} failed:`, response.status, responseText)
+          
+          if (webhookAttempts < maxWebhookAttempts) {
+            console.log(`📡 Retrying webhook in 2 seconds...`)
+            await new Promise(resolve => setTimeout(resolve, 2000))
+            continue
+          } else {
+            throw new Error(`Webhook failed after ${maxWebhookAttempts} attempts. Last status: ${response.status} - ${responseText}`)
+          }
+        }
+        
+        const responseData = await response.text()
+        console.log(`📡 Webhook attempt ${webhookAttempts} response data:`, responseData)
+        console.log('✅ Webhook sent successfully')
+        
+        webhookSuccess = true
+        return { success: true, response: responseData, attempts: webhookAttempts }
+        
+      } catch (error) {
+        console.error(`📡 Webhook attempt ${webhookAttempts} error:`, error)
+        
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.error('📡 Webhook request timed out after 30 seconds')
+        }
+        
+        if (webhookAttempts < maxWebhookAttempts) {
+          console.log(`📡 Retrying webhook in 2 seconds...`)
+          await new Promise(resolve => setTimeout(resolve, 2000))
+        } else {
+          console.error('📡 All webhook attempts failed')
+          throw error
+        }
+      }
+    }
     
   } catch (error) {
     console.error('❌ Webhook error:', error)
