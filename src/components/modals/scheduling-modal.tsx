@@ -190,7 +190,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
         </div>
 
         {/* Date and Time Selection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <label htmlFor="startDate" className="block text-sm font-medium text-foreground mb-2">
               Start Date <span className="text-destructive">*</span>
