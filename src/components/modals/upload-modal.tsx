@@ -808,6 +808,20 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           // PHASE 2: File Upload Progress (10-100%)
           updateProgress(10, 'Starting file uploads...')
           
+          // 🚨 FIXED: Proper progress tracking system
+          let totalProgress = 10
+          let completedFiles = 0
+          const totalFiles = allFiles.length
+          
+          // Progress calculation helper
+          const updateFileProgress = (fileIndex: number, additionalProgress: number = 0) => {
+            const baseProgress = 10 + (fileIndex / totalFiles) * 80 // 10-90% for files
+            const finalProgress = Math.min(baseProgress + additionalProgress, 90)
+            totalProgress = finalProgress
+            updateProgress(finalProgress, `Uploading files... (${completedFiles}/${totalFiles})`)
+            console.log(`📊 Progress update: ${finalProgress.toFixed(1)}% (${completedFiles}/${totalFiles} files)`)
+          }
+          
           // Now upload all files to the appropriate folders based on their type
           for (let i = 0; i < allFiles.length; i++) {
             const file = allFiles[i]
@@ -820,13 +834,12 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 await new Promise(resolve => setTimeout(resolve, 500)) // 500ms delay on mobile
               }
               
-              // Update progress for this file
-              const fileProgress = Math.round(((i + 1) / allFiles.length) * 90) + 10
-              updateProgress(fileProgress, `Uploading ${file.name}...`)
+              // Update progress for this file (no more jumping!)
+              updateFileProgress(i)
               
               // Show progress toast for important milestones
               if (i === 0 || i === Math.floor(allFiles.length / 2) || i === allFiles.length - 1) {
-                toast.success(`Uploading ${file.name}... (${fileProgress}%)`, {
+                toast.success(`Uploading ${file.name}... (${Math.round(totalProgress)}%)`, {
                   duration: 2000,
                   icon: '📤'
                 })
@@ -910,9 +923,9 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                     await Promise.all(batchPromises)
                     console.log(`✅ Batch ${Math.floor(batchStart / maxConcurrent) + 1} completed: chunks ${batchStart + 1}-${Math.min(batchStart + maxConcurrent, chunks.length)}`)
                     
-                    // Update progress
-                    const batchProgress = Math.round(((i + batchStart + batch.length) / (allFiles.length + chunks.length - 1)) * 80) + 10
-                    updateProgress(batchProgress, `Uploading ${file.name} chunks...`)
+                    // 🚨 FIXED: Proper chunk progress calculation
+                    const chunkProgress = (batchStart + maxConcurrent) / chunks.length * 10 // 0-10% additional progress for chunks
+                    updateFileProgress(i, chunkProgress)
                     
                     // 🚨 MOBILE OPTIMIZATION: Add delay between batches on mobile
                     if (isMobile) {
@@ -940,7 +953,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 }
                 
                 const reconstructResult = await reconstructResponse.json()
-                console.log(`✅ File reconstruction completed for ${file.name}:`, reconstructResult)
+                console.log(`✅ File reconstructed successfully: ${file.name}`)
                 
                 uploadResults.push({
                   name: file.name,
@@ -948,6 +961,11 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                   fileId: reconstructResult.fileId || 'streaming-reconstructed',
                   slot: slotName // Add slot information
                 })
+                
+                // 🚨 FIXED: Update progress when chunked file completes
+                completedFiles++
+                updateFileProgress(i + 1) // Move to next file progress
+                console.log(`✅ Chunked file ${file.name} completed. Progress: ${completedFiles}/${totalFiles} files`)
                 
               } else {
                 // Small files use regular upload to the specific slot folder
@@ -983,6 +1001,12 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                   success: true,
                   fileId: result.results[0]?.fileId || 'unknown'
                 })
+                
+                // 🚨 FIXED: Update progress when file completes
+                completedFiles++
+                updateFileProgress(i + 1) // Move to next file progress
+                console.log(`✅ File ${file.name} completed. Progress: ${completedFiles}/${totalFiles} files`)
+                
               }
               
             } catch (error) {
@@ -1001,7 +1025,13 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             }
           }
           
-          // Upload completed
+          // 🚨 FIXED: Upload completed with proper progress
+          console.log(`🎉 All files processed. Final progress update to 100%`)
+          updateProgress(100, 'Upload completed!')
+          
+          // Small delay to show 100% completion
+          await new Promise(resolve => setTimeout(resolve, 500))
+          
           setUploadProgress(100)
           setIsUploading(false)
           setUploadingFiles([])
