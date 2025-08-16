@@ -185,8 +185,13 @@ async function sendUploadWebhook(data: {
   files: any[]
   webhookType: 'test' | 'production'
 }) {
+  console.log('📡 sendUploadWebhook FUNCTION CALLED!')
+  console.log('📡 Function parameters:', JSON.stringify(data, null, 2))
+  
   try {
     const { gymName, folderStructure, files, webhookType } = data
+    
+    console.log('📡 Processing webhook data...')
     
     // Count files by category
     const fileCounts = {
@@ -214,10 +219,14 @@ async function sendUploadWebhook(data: {
       }
     })
     
+    console.log('📡 File counts calculated:', fileCounts)
+    
     // Get webhook URL based on type
     const webhookUrl = webhookType === 'test' 
       ? 'https://contentjoy.app.n8n.cloud/webhook-test/8eac6834-205e-440e-9ae0-c11b8b6d402b' // Hardcoded for reliability
       : process.env.UPLOAD_CONTENT_WEBHOOK || 'https://contentjoy.app.n8n.cloud/webhook/8eac6834-205e-440e-9ae0-c11b8b6d402b'
+    
+    console.log('📡 Webhook URL determined:', webhookUrl)
     
     if (!webhookUrl) {
       throw new Error(`Webhook URL not configured for type: ${webhookType}`)
@@ -255,6 +264,8 @@ async function sendUploadWebhook(data: {
     console.log('📡 Sending webhook to:', webhookUrl)
     console.log('📡 Webhook payload:', JSON.stringify(webhookPayload, null, 2))
     
+    console.log('📡 ABOUT TO MAKE FETCH REQUEST...')
+    
     // Send webhook
     const response = await fetch(webhookUrl, {
       method: 'POST',
@@ -264,11 +275,19 @@ async function sendUploadWebhook(data: {
       body: JSON.stringify(webhookPayload),
     })
     
+    console.log('📡 FETCH RESPONSE RECEIVED:', response.status, response.statusText)
+    
     if (!response.ok) {
-      throw new Error(`Webhook failed with status: ${response.status}`)
+      const responseText = await response.text()
+      console.error('📡 Webhook response error:', responseText)
+      throw new Error(`Webhook failed with status: ${response.status} - ${responseText}`)
     }
     
+    const responseData = await response.text()
+    console.log('📡 Webhook response data:', responseData)
     console.log('✅ Webhook sent successfully')
+    
+    return { success: true, response: responseData }
     
   } catch (error) {
     console.error('❌ Webhook error:', error)
@@ -395,18 +414,28 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
   console.log('✅ Folder structure created:', folderStructure)
   
   // 🚀 WEBHOOK: Send upload metadata to test webhook after folders are created
+  console.log('🚀 ABOUT TO CALL WEBHOOK - Debug info:')
+  console.log('🚀 - gymName:', folderGymName)
+  console.log('🚀 - files count:', files.length)
+  console.log('🚀 - folderStructure keys:', Object.keys(folderStructure))
+  console.log('🚀 - webhookType: test')
+  
   try {
-    await sendUploadWebhook({
+    console.log('🚀 CALLING sendUploadWebhook function...')
+    const webhookResult = await sendUploadWebhook({
       gymName: folderGymName, // Use normalized name for webhook
       folderStructure,
       files,
       webhookType: 'test'
     })
-    console.log('✅ Upload webhook sent successfully')
+    console.log('✅ Upload webhook sent successfully, result:', webhookResult)
   } catch (webhookError) {
     console.error('⚠️ Webhook failed (non-blocking):', webhookError)
+    console.error('⚠️ Webhook error stack:', webhookError instanceof Error ? webhookError.stack : 'No stack')
     // Don't fail the upload if webhook fails
   }
+  
+  console.log('🚀 WEBHOOK CALL COMPLETED - continuing with upload...')
   
   // Upload files
   const uploadResults = []
