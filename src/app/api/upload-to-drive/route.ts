@@ -196,26 +196,103 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
     willUse: normalizedGymName 
   })
   
-  // Get gym ID from database using normalized name
-  const { data: gym, error: gymError } = await supabase
+  // 🚨 ROBUST GYM LOOKUP: Try multiple strategies to find the gym
+  let gym = null
+  let gymError = null
+  
+  // Strategy 1: Try normalized name first (most common case)
+  console.log('🔍 Strategy 1: Looking up gym by normalized name:', normalizedGymName)
+  let result = await supabase
     .from('gyms')
-    .select('id')
+    .select('id, "Gym Name"')
     .eq('"Gym Name"', normalizedGymName)
     .single()
   
-  if (gymError || !gym) {
-    console.error('❌ Gym lookup failed:', gymError)
-    return NextResponse.json({ error: 'Gym not found' }, { status: 404 })
+  if (result.data && !result.error) {
+    gym = result.data
+    console.log('✅ Found gym by normalized name:', normalizedGymName, 'ID:', gym.id)
+  } else {
+    console.log('⚠️ Strategy 1 failed, trying Strategy 2...')
+    
+    // Strategy 2: Try original gymName (fallback)
+    console.log('🔍 Strategy 2: Looking up gym by original name:', gymName)
+    result = await supabase
+      .from('gyms')
+      .select('id, "Gym Name"')
+      .eq('"Gym Name"', gymName)
+      .single()
+    
+    if (result.data && !result.error) {
+      gym = result.data
+      console.log('✅ Found gym by original name:', gymName, 'ID:', gym.id)
+    } else {
+      console.log('⚠️ Strategy 2 failed, trying Strategy 3...')
+      
+      // Strategy 3: Try case-insensitive search with ILIKE
+      console.log('🔍 Strategy 3: Case-insensitive search for:', normalizedGymName)
+      result = await supabase
+        .from('gyms')
+        .select('id, "Gym Name"')
+        .ilike('"Gym Name"', `%${normalizedGymName}%`)
+        .limit(1)
+        .single()
+      
+      if (result.data && !result.error) {
+        gym = result.data
+        console.log('✅ Found gym by case-insensitive search:', gym['Gym Name'], 'ID:', gym.id)
+      } else {
+        console.log('⚠️ Strategy 3 failed, trying Strategy 4...')
+        
+        // Strategy 4: Try searching by slug (gymSlug)
+        console.log('🔍 Strategy 4: Searching by slug:', gymSlug)
+        result = await supabase
+          .from('gyms')
+          .select('id, "Gym Name"')
+          .ilike('"Gym Name"', `%${gymSlug}%`)
+          .limit(1)
+          .single()
+        
+        if (result.data && !result.error) {
+          gym = result.data
+          console.log('✅ Found gym by slug search:', gym['Gym Name'], 'ID:', gym.id)
+        } else {
+          // All strategies failed
+          gymError = result.error || new Error('Gym not found with any lookup strategy')
+          console.error('❌ All gym lookup strategies failed:', {
+            normalizedName: normalizedGymName,
+            originalName: gymName,
+            slug: gymSlug,
+            lastError: result.error
+          })
+        }
+      }
+    }
   }
   
-  console.log('✅ Found gym:', normalizedGymName, 'ID:', gym.id)
+  if (gymError || !gym) {
+    console.error('❌ Gym lookup failed after all strategies:', gymError)
+    return NextResponse.json({ 
+      error: 'Gym not found. Tried multiple lookup strategies but no match found.',
+      details: {
+        normalizedName: normalizedGymName,
+        originalName: gymName,
+        slug: gymSlug
+      }
+    }, { status: 404 })
+  }
+  
+  console.log('✅ Found gym:', gym['Gym Name'], 'ID:', gym.id)
+  
+  // Use the ACTUAL gym name from database for folder creation (not our normalized version)
+  const actualGymName = gym['Gym Name']
+  console.log('🔧 Using actual gym name from database for folders:', actualGymName)
   
   // Initialize Google Drive client
   const drive = getDrive()
   console.log('✅ Google Drive client initialized')
   
-  // Create folder structure using NORMALIZED gym name
-  const folderStructure = await createFolderStructure(normalizedGymName)
+  // Create folder structure using ACTUAL gym name from database (not normalized)
+  const folderStructure = await createFolderStructure(actualGymName)
   console.log('✅ Folder structure created:', folderStructure)
   
   // Upload files
@@ -255,7 +332,7 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
     .insert([{
       upload_id: `upload_${Date.now()}`,
       gym_id: gym.id,
-      gym_name: normalizedGymName, // Use normalized name for consistency
+      gym_name: actualGymName, // Use actual gym name from database for consistency
       upload_folder_id: sessionFolderId, // Use sessionFolderId here
       gym_folder_id: folderStructure.gymFolderId,
       raw_footage_folder_id: folderStructure.rawFootageFolderId,
@@ -294,6 +371,97 @@ async function handleFolderCreation(files: any[], gymSlug: string, gymName: stri
     willUse: normalizedGymName 
   })
   
+  // 🚨 ROBUST GYM LOOKUP: Try multiple strategies to find the gym
+  let gym = null
+  let gymError = null
+  
+  // Strategy 1: Try normalized name first (most common case)
+  console.log('🔍 Strategy 1: Looking up gym by normalized name:', normalizedGymName)
+  let result = await supabase
+    .from('gyms')
+    .select('id, "Gym Name"')
+    .eq('"Gym Name"', normalizedGymName)
+    .single()
+  
+  if (result.data && !result.error) {
+    gym = result.data
+    console.log('✅ Found gym by normalized name:', normalizedGymName, 'ID:', gym.id)
+  } else {
+    console.log('⚠️ Strategy 1 failed, trying Strategy 2...')
+    
+    // Strategy 2: Try original gymName (fallback)
+    console.log('🔍 Strategy 2: Looking up gym by original name:', gymName)
+    result = await supabase
+      .from('gyms')
+      .select('id, "Gym Name"')
+      .eq('"Gym Name"', gymName)
+      .single()
+    
+    if (result.data && !result.error) {
+      gym = result.data
+      console.log('✅ Found gym by original name:', gymName, 'ID:', gym.id)
+    } else {
+      console.log('⚠️ Strategy 2 failed, trying Strategy 3...')
+      
+      // Strategy 3: Try case-insensitive search with ILIKE
+      console.log('🔍 Strategy 3: Case-insensitive search for:', normalizedGymName)
+      result = await supabase
+        .from('gyms')
+        .select('id, "Gym Name"')
+        .ilike('"Gym Name"', `%${normalizedGymName}%`)
+        .limit(1)
+        .single()
+      
+      if (result.data && !result.error) {
+        gym = result.data
+        console.log('✅ Found gym by case-insensitive search:', gym['Gym Name'], 'ID:', gym.id)
+      } else {
+        console.log('⚠️ Strategy 2 failed, trying Strategy 4...')
+        
+        // Strategy 4: Try searching by slug (gymSlug)
+        console.log('🔍 Strategy 4: Searching by slug:', gymSlug)
+        result = await supabase
+          .from('gyms')
+          .select('id, "Gym Name"')
+          .ilike('"Gym Name"', `%${gymSlug}%`)
+          .limit(1)
+          .single()
+        
+        if (result.data && !result.error) {
+          gym = result.data
+          console.log('✅ Found gym by slug search:', gym['Gym Name'], 'ID:', gym.id)
+        } else {
+          // All strategies failed
+          gymError = result.error || new Error('Gym not found with any lookup strategy')
+          console.error('❌ All gym lookup strategies failed:', {
+            normalizedName: normalizedGymName,
+            originalName: gymName,
+            slug: gymSlug,
+            lastError: result.error
+          })
+        }
+      }
+    }
+  }
+  
+  if (gymError || !gym) {
+    console.error('❌ Gym lookup failed after all strategies:', gymError)
+    return NextResponse.json({ 
+      error: 'Gym not found. Tried multiple lookup strategies but no match found.',
+      details: {
+        normalizedName: normalizedGymName,
+        originalName: gymName,
+        slug: gymSlug
+      }
+    }, { status: 404 })
+  }
+  
+  console.log('✅ Found gym:', gym['Gym Name'], 'ID:', gym.id)
+  
+  // Use the ACTUAL gym name from database for folder creation
+  const actualGymName = gym['Gym Name']
+  console.log('🔧 Using actual gym name from database for folders:', actualGymName)
+  
   const results = []
 
   for (const file of files) {
@@ -303,9 +471,9 @@ async function handleFolderCreation(files: any[], gymSlug: string, gymName: stri
         console.log(`📁 Creating folder: ${folderName}`)
         console.log(`📁 Folder type: ${file.folderType}`)
         
-        // Create proper gym folder structure first using NORMALIZED gym name
+        // Create proper gym folder structure first using ACTUAL gym name from database
         console.log('🏗️ Creating gym folder structure...')
-        const folderStructure = await createFolderStructure(normalizedGymName)
+        const folderStructure = await createFolderStructure(actualGymName)
         console.log('✅ Gym folder structure created:', folderStructure)
         
         // For session root folders, use the timestamp folder as the parent
