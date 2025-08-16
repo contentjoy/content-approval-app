@@ -426,7 +426,7 @@ export default function GymPage() {
                   className={`
                     flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200
                     ${isBulkMode
-                      ? 'bg-accent text-background'
+                      ? 'bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)]'
                       : 'bg-bg-elev-1 text-text hover:bg-bg'
                     }
                   `}

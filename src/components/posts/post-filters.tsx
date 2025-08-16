@@ -76,7 +76,7 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
               <span>{filter.label}</span>
               <span className={`px-2 py-0.5 rounded-[999px] text-xs ${
                 isActive 
-                  ? 'bg-[var(--bg)] text-[var(--text)]' 
+                  ? 'text-[var(--text)]' 
                   : 'bg-[var(--surface)] text-[var(--foreground)]'
               }`}>
                 {count}
@@ -95,7 +95,7 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
           <span>Posts: {filters.find(f => f.key === activeFilter)?.label}</span>
         </button>
         {open && (
-          <div className="absolute z-20 mt-2 w-56 bg-[var(--modal-surface)] rounded-[12px] border border-[var(--border)] shadow-xl">
+          <div className="absolute z-20 mt-2 w-56 bg-[var(--surface)] rounded-[12px] border border-[var(--border)] shadow-xl">
             {filters.map((filter) => {
               const count = getFilterCount(filter.key)
               return (
