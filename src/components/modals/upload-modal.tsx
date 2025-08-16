@@ -48,9 +48,15 @@ const SLOT_CONFIG = {
 
 // Function to determine slot name based on which Uppy instance the file came from
 function determineSlotName(file: any, uppyInstances: Record<string, any>): string {
+  console.log(`🔍 DEBUG: Determining slot for file: ${file.name}`)
+  console.log(`🔍 DEBUG: File type: ${file.type}`)
+  console.log(`🔍 DEBUG: Available Uppy instances:`, Object.keys(uppyInstances))
+  
   // Find which Uppy instance this file belongs to
   for (const [slotName, uppy] of Object.entries(uppyInstances)) {
     const files = uppy.getFiles()
+    console.log(`🔍 DEBUG: Checking ${slotName} instance, has ${files.length} files`)
+    
     if (files.some((f: any) => f.id === file.id)) {
       console.log(`🎯 File ${file.name} belongs to slot: ${slotName}`)
       return slotName
@@ -59,14 +65,19 @@ function determineSlotName(file: any, uppyInstances: Record<string, any>): strin
   
   // Fallback logic if we can't determine the slot
   console.warn(`⚠️ Could not determine slot for ${file.name}, using file type fallback`)
+  console.warn(`⚠️ This suggests a routing issue - file should have been assigned to a specific Uppy instance`)
+  
   const isImage = file.type.startsWith('image/');
   const isVideo = file.type.startsWith('video/');
   
   if (isImage) {
+    console.log(`🖼️ File ${file.name} detected as image, defaulting to Photos`)
     return 'Photos';
   } else if (isVideo) {
+    console.log(`🎬 File ${file.name} detected as video, defaulting to Videos`)
     return 'Videos';
   } else {
+    console.log(`❓ File ${file.name} has unknown type, defaulting to Photos`)
     return 'Photos';
   }
 }
@@ -619,17 +630,59 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
       
       // Get files from ALL Uppy instances, not just the active one
       const allFiles: any[] = []
-      Object.values(uppyInstances).forEach(uppy => {
+      const fileCounts: Record<string, number> = {}
+      
+      Object.entries(uppyInstances).forEach(([slotName, uppy]) => {
         const files = uppy.getFiles()
         allFiles.push(...files)
+        fileCounts[slotName] = files.length
+        console.log(`📊 ${slotName}: ${files.length} files`)
       })
+      
+      console.log(`📊 Total file counts by category:`, fileCounts)
+      console.log(`📁 Total files to upload: ${allFiles.length}`)
       
       if (allFiles.length === 0) {
         toast.error('Please select files to upload')
         return
       }
       
+      // 🚨 VALIDATION: Check for potential routing issues
+      const hasMultipleCategories = Object.values(fileCounts).filter(count => count > 0).length > 1
+      if (hasMultipleCategories) {
+        console.log(`✅ Multiple content categories detected - routing should work properly`)
+      } else {
+        console.log(`⚠️ Single content category detected - ensure files are in correct slots`)
+      }
+      
+      // 🚨 VALIDATION: Check for mixed file types in wrong categories
+      Object.entries(uppyInstances).forEach(([slotName, uppy]) => {
+        const files = uppy.getFiles()
+        files.forEach(file => {
+          const isImage = file.type.startsWith('image/')
+          const isVideo = file.type.startsWith('video/')
+          
+          // Check if file type matches slot category
+          if (slotName === 'Photos' && !isImage) {
+            console.warn(`⚠️ ROUTING ISSUE: Non-image file "${file.name}" found in Photos slot`)
+          } else if (slotName === 'Videos' && !isVideo) {
+            console.warn(`⚠️ ROUTING ISSUE: Non-video file "${file.name}" found in Videos slot`)
+          } else if (slotName === 'Facility Photos' && !isImage) {
+            console.warn(`⚠️ ROUTING ISSUE: Non-image file "${file.name}" found in Facility Photos slot`)
+          } else if (slotName === 'Facility Videos' && !isVideo) {
+            console.warn(`⚠️ ROUTING ISSUE: Non-video file "${file.name}" found in Facility Videos slot`)
+          } else {
+            console.log(`✅ File "${file.name}" correctly categorized in ${slotName}`)
+          }
+        })
+      })
+      
       console.log(`📁 Starting upload of ${allFiles.length} files from all content types...`)
+      
+      // 🚨 MOBILE OPTIMIZATION: Limit concurrent uploads on mobile to prevent crashes
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      const maxConcurrentUploads = isMobile ? 2 : 5 // Reduce concurrent uploads on mobile
+      console.log(`📱 Mobile detected: ${isMobile}, max concurrent uploads: ${maxConcurrentUploads}`)
       
       // Set loading state and show immediate feedback
       setIsUploading(true)
@@ -761,6 +814,12 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
             try {
               console.log(`📤 Uploading ${file.name} to appropriate folder...`)
               
+              // 🚨 MOBILE OPTIMIZATION: Add delays between files to prevent browser crashes
+              if (isMobile && i > 0) {
+                console.log(`📱 Mobile: Adding delay between files to prevent crashes...`)
+                await new Promise(resolve => setTimeout(resolve, 500)) // 500ms delay on mobile
+              }
+              
               // Update progress for this file
               const fileProgress = Math.round(((i + 1) / allFiles.length) * 90) + 10
               updateProgress(fileProgress, `Uploading ${file.name}...`)
@@ -784,13 +843,16 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               console.log(`📁 Uploading ${file.name} to ${slotName} folder (${targetFolderId})`)
               console.log(`🔍 Debug: sessionFolderId=${sessionFolderId}, targetFolderId=${targetFolderId}`)
               
+              // 🚨 MOBILE OPTIMIZATION: Reduce chunk size on mobile to prevent memory issues
+              const chunkSize = isMobile ? 1 * 1024 * 1024 : 2 * 1024 * 1024 // 1MB on mobile, 2MB on desktop
+              
               // For large files (>5MB), use chunked upload
               if (file.size > 5 * 1024 * 1024) {
                 console.log(`📦 Large file detected (${(file.size / (1024 * 1024)).toFixed(1)}MB), using streaming chunked upload...`)
                 console.log(`📦 Streaming upload will use targetFolderId (slot folder): ${targetFolderId}`)
+                console.log(`📦 Chunk size: ${(chunkSize / (1024 * 1024)).toFixed(1)}MB (${isMobile ? 'mobile optimized' : 'desktop'})`)
                 
-                // Split large files into 2MB chunks for faster uploads
-                const chunkSize = 2 * 1024 * 1024 // 2MB chunks for 1.5-2x speed improvement
+                // Split large files into chunks for faster uploads
                 const chunks: Buffer[] = []
                 const buffer = Buffer.from(await file.data.arrayBuffer())
                 
@@ -804,8 +866,10 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 const sessionId = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
                 console.log(`🆔 Created upload session: ${sessionId}`)
                 
-                // Upload chunks individually
-                const maxConcurrent = 3 // Upload 3 chunks at a time
+                // 🚨 MOBILE OPTIMIZATION: Reduce concurrent chunk uploads on mobile
+                const maxConcurrent = isMobile ? 2 : 3 // Upload 2 chunks at a time on mobile, 3 on desktop
+                console.log(`📱 Mobile: ${isMobile}, max concurrent chunks: ${maxConcurrent}`)
+                
                 for (let batchStart = 0; batchStart < chunks.length; batchStart += maxConcurrent) {
                   const batch = chunks.slice(batchStart, batchStart + maxConcurrent)
                   const batchPromises = batch.map(async (chunk, batchIndex) => {
@@ -849,6 +913,11 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                     // Update progress
                     const batchProgress = Math.round(((i + batchStart + batch.length) / (allFiles.length + chunks.length - 1)) * 80) + 10
                     updateProgress(batchProgress, `Uploading ${file.name} chunks...`)
+                    
+                    // 🚨 MOBILE OPTIMIZATION: Add delay between batches on mobile
+                    if (isMobile) {
+                      await new Promise(resolve => setTimeout(resolve, 300)) // 300ms delay between batches on mobile
+                    }
                     
                   } catch (error) {
                     console.error(`❌ Batch ${Math.floor(batchStart / maxConcurrent) + 1} failed:`, error)
