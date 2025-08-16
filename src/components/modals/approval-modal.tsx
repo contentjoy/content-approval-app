@@ -232,18 +232,18 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="h-10 px-6 py-2 rounded-[999px] bg-transparent border border-[#FCFCFC] dark:border-[#111113] text-[#FCFCFC] dark:text-[#111113] transition-all duration-200 hover:bg-[#FCFCFC] dark:hover:bg-[#111113] hover:text-[#111113] dark:hover:text-[#FCFCFC] disabled:opacity-50"
+            className="h-12 px-6 py-3 rounded-[999px] bg-transparent border border-[var(--border)] text-[var(--text)] transition-all duration-200 hover:bg-[var(--modal-surface)] disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="h-10 px-6 py-2 rounded-[999px] bg-[#FCFCFC] dark:bg-[#111113] text-[#111113] dark:text-[#FCFCFC] transition-all duration-200 hover:opacity-90 disabled:opacity-50"
+            className="h-12 px-6 py-3 rounded-[999px] bg-[#111113] dark:bg-[#FCFCFC] text-[#FCFCFC] dark:text-[#111113] transition-all duration-200 hover:opacity-90 disabled:opacity-50"
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#111113] dark:border-[#FCFCFC]"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#FCFCFC] dark:border-[#111113]"></div>
                 <span>Approving...</span>
               </div>
             ) : (

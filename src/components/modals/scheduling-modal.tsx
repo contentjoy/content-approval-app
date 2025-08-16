@@ -247,18 +247,18 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="h-10 px-6 py-2 rounded-[999px] border border-[var(--modal-border)] text-[var(--text)] bg-transparent transition-all duration-200 hover:bg-[var(--hover)] hover:border-[var(--modal-border)] disabled:opacity-50"
+            className="h-12 px-6 py-3 rounded-[999px] border border-[var(--border)] text-[var(--text)] bg-transparent transition-all duration-200 hover:bg-[var(--modal-surface)] disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="h-10 px-6 py-2 rounded-[999px] bg-[#FCFCFC] dark:bg-[#111113] text-[#111113] dark:text-[#FCFCFC] border border-[var(--modal-border)] transition-all duration-200 hover:opacity-90 disabled:opacity-50"
+            className="h-12 px-6 py-3 rounded-[999px] bg-[#111113] dark:bg-[#FCFCFC] text-[#FCFCFC] dark:text-[#111113] border border-[var(--modal-border)] transition-all duration-200 hover:opacity-90 disabled:opacity-50"
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#111113] dark:border-[#FCFCFC]"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#FCFCFC] dark:border-[#111113]"></div>
                 <span>Scheduling...</span>
               </div>
             ) : (

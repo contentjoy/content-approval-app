@@ -46,17 +46,18 @@ export function RegenerateModal({ isOpen, onClose, post, onSuccess }: Regenerate
           placeholder="e.g., Use bold white headline over the first frame, add subtle drop shadow, keep text under 12 words."
           className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-bg text-text placeholder:text-muted-text resize min-h-[8rem] max-h-[50vh]"
         />
-        <div className="flex justify-end space-x-3">
-          <button 
+        {/* Actions */}
+        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-border">
+          <button
             onClick={onClose}
-            className="px-4 py-2 bg-transparent border border-[#FCFCFC] dark:border-[#111113] text-[#FCFCFC] dark:text-[#111113] rounded-lg hover:bg-[#FCFCFC] dark:hover:bg-[#111113] hover:text-[#111113] dark:hover:text-[#FCFCFC] transition-all duration-200 font-medium"
+            className="h-12 px-6 py-3 rounded-[999px] bg-transparent border border-[var(--border)] text-[var(--text)] transition-all duration-200 hover:bg-[var(--modal-surface)]"
           >
             Cancel
           </button>
-          <button 
-            onClick={handleSubmit} 
+          <button
+            onClick={handleSubmit}
             disabled={isLoading || !feedback.trim()}
-            className="px-4 py-2 bg-[#FCFCFC] dark:bg-[#111113] text-[#111113] dark:text-[#FCFCFC] rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
+            className="h-12 px-6 py-3 rounded-[999px] bg-[#111113] dark:bg-[#FCFCFC] text-[#FCFCFC] dark:text-[#111113] transition-all duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? 'Sending…' : 'Regenerate'}
           </button>
