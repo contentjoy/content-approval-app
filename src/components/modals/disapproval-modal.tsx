@@ -130,20 +130,20 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
 
         {/* Feedback */}
         <div>
-          <label htmlFor="feedback" className="block text-sm font-medium text-foreground mb-2">
+          <label htmlFor="feedback" className="block text-sm font-medium text-[var(--text)] mb-2">
             Feedback <span className="text-destructive">*</span>
           </label>
           <textarea
             id="feedback"
             rows={12}
             {...register('feedback')}
-            className="w-full px-3 py-2 border border-[var(--border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--muted-text)] resize min-h-[10rem] max-h-[60vh] transition-all duration-200"
+            className="w-full px-3 py-2 border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--muted-text)] resize min-h-[10rem] max-h-[60vh] transition-all duration-200"
             placeholder="Please provide specific feedback on why this content is being disapproved..."
           />
           {errors.feedback && (
             <p className="mt-1 text-sm text-destructive">{errors.feedback.message}</p>
           )}
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-[var(--muted-text)]">
             {watchedFeedback.length} characters
           </p>
         </div>
@@ -151,7 +151,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
         {/* Carousel Options */}
         {isCarousel && (
           <div>
-            <label className="block text-sm font-medium text-foreground mb-3">
+            <label className="block text-sm font-medium text-[var(--text)] mb-3">
               Carousel Action:
             </label>
             <div className="space-y-3">
@@ -187,7 +187,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
         )}
 
         {/* Summary */}
-        <div className="border border-[var(--border)] rounded-[12px] p-4">
+        <div className="border border-[var(--modal-border)] rounded-[12px] p-4">
           <h4 className="font-medium text-[var(--text)] mb-2">Summary</h4>
           <p className="text-sm text-[var(--muted-text)]">
             {isCarousel && watchedCarouselAction === 'all' 
@@ -198,19 +198,19 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end space-x-3 pt-4 border-t">
+        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-[var(--modal-border)]">
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="h-10 px-6 py-2 rounded-[999px] border border-[var(--border)] text-[var(--text)] bg-transparent transition-all duration-200 hover:bg-[var(--hover)] hover:border-[var(--border-strong)] disabled:opacity-50"
+            className="h-10 px-6 py-2 rounded-[999px] border border-[var(--modal-border)] text-[var(--text)] bg-transparent transition-all duration-200 hover:bg-[var(--hover)] hover:border-[var(--modal-border)] disabled:opacity-50"
           >
             Cancel
           </button>
           <BrandedButton
             type="submit"
             disabled={isLoading}
-            className="h-10 px-6 py-2 rounded-[999px] bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)] transition-all duration-200 hover:bg-[var(--hover)] disabled:opacity-50"
+            className="h-10 px-6 py-2 rounded-[999px] bg-[var(--surface)] text-[var(--foreground)] border border-[var(--modal-border)] transition-all duration-200 hover:bg-[var(--hover)] disabled:opacity-50"
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">

@@ -31,6 +31,7 @@
   --border-strong: #E8E8E8;
   --hover: #EEEDED;
   --modal-surface: #FCFCFC;
+  --modal-border: #46484C;
 
   /* Geometry + radii */
   --radius: 12px; /* Updated to 12px for cards */
@@ -92,6 +93,7 @@
   --border-strong: #29292B;
   --hover: #28282A;
   --modal-surface: #3E3F41;
+  --modal-border: #46484C;
   
   /* Update legacy mappings for dark mode */
   --background: var(--bg);
@@ -101,9 +103,9 @@
   --navbar: var(--bg);
   --sidebar: var(--bg);
   --card-bg: var(--surface);
-  --card-border: var(--border);
+  --card-border: var(--modal-border);
   --pill-bg: var(--surface);
-  --pill-border: var(--border);
+  --pill-border: var(--modal-border);
 }
 
 /* Reusable profile icon styling */

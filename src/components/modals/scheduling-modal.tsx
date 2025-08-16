@@ -133,7 +133,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Posts Ready Info */}
-        <div className="bg-[var(--surface)] rounded-[12px] p-4 border border-[var(--border)]">
+        <div className="bg-[var(--surface)] rounded-[12px] p-4 border border-[var(--modal-border)]">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-[var(--hover)] rounded-lg flex items-center justify-center">
               <CheckCircle className="w-5 h-5 text-[var(--text)]" />
@@ -155,7 +155,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
             Scheduling Frequency:
           </label>
           <div className="space-y-3">
-            <label className="flex items-center space-x-3 p-4 border border-[var(--border)] rounded-[12px] hover:bg-[var(--hover)] cursor-pointer transition-all duration-200">
+            <label className="flex items-center space-x-3 p-4 border border-[var(--modal-border)] rounded-[12px] hover:bg-[var(--hover)] cursor-pointer transition-all duration-200">
               <input
                 type="radio"
                 value="daily"
@@ -169,7 +169,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
                 </div>
               </div>
             </label>
-            <label className="flex items-center space-x-3 p-4 border border-[var(--border)] rounded-[12px] hover:bg-[var(--hover)] cursor-pointer transition-all duration-200">
+            <label className="flex items-center space-x-3 p-4 border border-[var(--modal-border)] rounded-[12px] hover:bg-[var(--hover)] cursor-pointer transition-all duration-200">
               <input
                 type="radio"
                 value="every-other-day"
@@ -200,7 +200,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
               id="startDate"
               {...register('startDate')}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent transition-all duration-200"
+              className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent transition-all duration-200"
             />
             {errors.startDate && (
               <p className="mt-1 text-sm text-destructive">{errors.startDate.message}</p>
@@ -215,7 +215,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
               type="time"
               id="startTime"
               {...register('startTime')}
-              className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent transition-all duration-200"
+              className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent transition-all duration-200"
             />
             {errors.startTime && (
               <p className="mt-1 text-sm text-destructive">{errors.startTime.message}</p>
@@ -225,7 +225,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
 
         {/* Timeline Preview */}
         {watchedStartDate && (
-          <div className="bg-[var(--surface)] rounded-[12px] p-4 border border-[var(--border)]">
+          <div className="bg-[var(--surface)] rounded-[12px] p-4 border border-[var(--modal-border)]">
             <h4 className="font-medium text-[var(--text)] mb-2">Scheduling Timeline</h4>
             <div className="space-y-2 text-sm text-[var(--muted-text)]">
               <p><strong>Start Date:</strong> {new Date(watchedStartDate).toLocaleDateString('en-US', { 
@@ -242,19 +242,19 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
         )}
 
         {/* Actions */}
-        <div className="flex items-center justify-end space-x-3 pt-4 border-t">
+        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-[var(--modal-border)]">
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="h-10 px-6 py-2 rounded-[999px] border border-[var(--border)] text-[var(--text)] bg-transparent transition-all duration-200 hover:bg-[var(--hover)] hover:border-[var(--border-strong)] disabled:opacity-50"
+            className="h-10 px-6 py-2 rounded-[999px] border border-[var(--modal-border)] text-[var(--text)] bg-transparent transition-all duration-200 hover:bg-[var(--hover)] hover:border-[var(--modal-border)] disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="h-10 px-6 py-2 rounded-[999px] bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)] transition-all duration-200 hover:bg-[var(--hover)] disabled:opacity-50"
+            className="h-10 px-6 py-2 rounded-[999px] bg-[var(--surface)] text-[var(--foreground)] border border-[var(--modal-border)] transition-all duration-200 hover:bg-[var(--hover)] disabled:opacity-50"
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">
