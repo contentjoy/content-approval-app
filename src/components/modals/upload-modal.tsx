@@ -444,7 +444,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
     SLOT_NAMES.forEach(slotName => {
       instances[slotName] = new Uppy({
         restrictions: {
-          maxFileSize: 50 * 1024 * 1024, // 50MB
+          maxFileSize: 25 * 1024 * 1024 * 1024, // 25GB - dramatically increased for large videos
           allowedFileTypes: SLOT_CONFIG[slotName].allowedTypes,
           maxNumberOfFiles: SLOT_CONFIG[slotName].maxFiles, // Use SLOT_CONFIG values
           minNumberOfFiles: 1
@@ -1226,7 +1226,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               
               {/* File Info */}
               <div className="text-xs sm:text-sm text-muted-foreground text-center">
-                Accepted file types: {SLOT_CONFIG[activeSlot]?.allowedTypes.join(', ')}. Maximum size: 50MB.
+                Accepted file types: {SLOT_CONFIG[activeSlot]?.allowedTypes.join(', ')}. Maximum size: 25GB.
               </div>
             </div>
           </div>
