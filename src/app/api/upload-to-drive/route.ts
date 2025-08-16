@@ -137,11 +137,13 @@ async function createFolderStructure(gymName: string) {
     // Initialize Google Drive client
     const drive = getDrive();
     
-    // 🚨 CRITICAL FIX: Create ONE folder per day and REUSE if exists
-    const today = new Date();
-    const dateString = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+    // 🚨 FIXED: Create unique folder per day with proper date handling
+    const now = new Date();
+    const dateString = now.toISOString().split('T')[0]; // YYYY-MM-DD format
     const uploadLabel = `${gymName} ${dateString}`;
     
+    console.log(`📅 Current server time: ${now.toISOString()}`);
+    console.log(`📅 Date string: ${dateString}`);
     console.log(`📅 Looking for existing timestamp folder: "${uploadLabel}"`)
     
     // Step 1: Create or find gym folder inside the "Clients" folder
@@ -170,6 +172,7 @@ async function createFolderStructure(gymName: string) {
     }
     
     console.log(`✅ Folder structure complete - will reuse existing folders to prevent duplicates`)
+    console.log(`✅ IMPORTANT: Each day gets a unique folder, multiple uploads on same day reuse the folder`)
     
     return {
       gymFolderId,
