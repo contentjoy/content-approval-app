@@ -479,23 +479,38 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
       gym_folder_id: folderStructure.gymFolderId,
       raw_footage_folder_id: folderStructure.rawFootageFolderId,
       final_footage_folder_id: folderStructure.finalFootageFolderId,
-      status: 'completed',
-      files_uploaded: uploadResults.filter(r => r.success).length,
-      total_files: files.length
+      status: 'completed'
     }])
   
   if (dbError) {
     console.error('⚠️ Failed to store upload record:', dbError)
+    // Don't fail the entire upload if DB record fails, but log it
+  } else {
+    console.log('✅ Upload record stored successfully in database')
   }
   
   const successCount = uploadResults.filter(r => r.success).length
+  const failedCount = files.length - successCount
+  
   console.log(`🎉 Upload completed: ${successCount}/${files.length} files successful`)
+  if (failedCount > 0) {
+    console.warn(`⚠️ ${failedCount} files failed to upload`)
+    // Log failed uploads for debugging
+    uploadResults.filter(r => !r.success).forEach((result, index) => {
+      console.error(`❌ Failed file ${index + 1}:`, result.error || 'Unknown error')
+    })
+  }
   
   return NextResponse.json({
     success: true,
     message: `Uploaded ${successCount}/${files.length} files successfully`,
     folderStructure,
-    results: uploadResults
+    results: uploadResults,
+    summary: {
+      total: files.length,
+      successful: successCount,
+      failed: failedCount
+    }
   })
 }
 
