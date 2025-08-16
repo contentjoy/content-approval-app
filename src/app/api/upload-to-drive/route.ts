@@ -98,15 +98,24 @@ export async function POST(request: NextRequest) {
 }
 
 function determineSlotName(file: any): string {
+  // Check if the file has slot information from the frontend
+  if (file.slot) {
+    console.log(`🎯 File ${file.name} has explicit slot: ${file.slot}`)
+    return file.slot
+  }
+  
+  // Fallback logic for files without slot information
   const isImage = file.type.startsWith('image/');
   const isVideo = file.type.startsWith('video/');
   
   if (isImage) {
+    console.log(`🖼️ File ${file.name} detected as image, defaulting to Photos`)
     return 'Photos';
   } else if (isVideo) {
+    console.log(`🎬 File ${file.name} detected as video, defaulting to Videos`)
     return 'Videos';
   } else {
-    // Default to Photos for unknown types
+    console.log(`❓ File ${file.name} has unknown type, defaulting to Photos`)
     return 'Photos';
   }
 }
@@ -222,9 +231,9 @@ async function sendUploadWebhook(data: {
     console.log('📡 File counts calculated:', fileCounts)
     
     // Get webhook URL based on type
-    const webhookUrl = webhookType === 'test' 
-      ? 'https://contentjoy.app.n8n.cloud/webhook-test/8eac6834-205e-440e-9ae0-c11b8b6d402b' // Hardcoded for reliability
-      : process.env.UPLOAD_CONTENT_WEBHOOK || 'https://contentjoy.app.n8n.cloud/webhook/8eac6834-205e-440e-9ae0-c11b8b6d402b'
+    const webhookUrl = process.env.UPLOAD_CONTENT_WEBHOOK 
+      ? process.env.UPLOAD_CONTENT_WEBHOOK 
+      : 'https://hooks.zapier.com/hooks/catch/4486785/u6jju7v/'
     
     console.log('📡 Webhook URL determined:', webhookUrl)
     
@@ -478,8 +487,7 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
       upload_folder_id: sessionFolderId, // Use sessionFolderId here
       gym_folder_id: folderStructure.gymFolderId,
       raw_footage_folder_id: folderStructure.rawFootageFolderId,
-      final_footage_folder_id: folderStructure.finalFootageFolderId,
-      status: 'completed'
+      final_footage_folder_id: folderStructure.finalFootageFolderId
     }])
   
   if (dbError) {

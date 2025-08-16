@@ -46,8 +46,19 @@ const SLOT_CONFIG = {
   'Facility Videos': { icon: Camera, maxFiles: 20, allowedTypes: ['.mp4', '.mov', '.avi', '.mkv', '.webm'] }
 }
 
-// Function to determine slot name based on file type
-function determineSlotName(file: any): string {
+// Function to determine slot name based on which Uppy instance the file came from
+function determineSlotName(file: any, uppyInstances: Record<string, any>): string {
+  // Find which Uppy instance this file belongs to
+  for (const [slotName, uppy] of Object.entries(uppyInstances)) {
+    const files = uppy.getFiles()
+    if (files.some((f: any) => f.id === file.id)) {
+      console.log(`🎯 File ${file.name} belongs to slot: ${slotName}`)
+      return slotName
+    }
+  }
+  
+  // Fallback logic if we can't determine the slot
+  console.warn(`⚠️ Could not determine slot for ${file.name}, using file type fallback`)
   const isImage = file.type.startsWith('image/');
   const isVideo = file.type.startsWith('video/');
   
@@ -56,7 +67,6 @@ function determineSlotName(file: any): string {
   } else if (isVideo) {
     return 'Videos';
   } else {
-    // Default to Photos for unknown types
     return 'Photos';
   }
 }
@@ -764,7 +774,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               }
               
               // Determine which folder to use based on file type and slot
-              const slotName = determineSlotName(file)
+              const slotName = determineSlotName(file, uppyInstances)
               const targetFolderId = folderStructure.rawSlotFolders[slotName]
               
               if (!targetFolderId) {
@@ -866,7 +876,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                 uploadResults.push({
                   name: file.name,
                   success: true,
-                  fileId: reconstructResult.fileId || 'streaming-reconstructed'
+                  fileId: reconstructResult.fileId || 'streaming-reconstructed',
+                  slot: slotName // Add slot information
                 })
                 
               } else {
@@ -875,7 +886,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                   name: file.name,
                   type: file.type,
                   size: file.size,
-                  data: await file.data.arrayBuffer().then((buffer: ArrayBuffer) => Buffer.from(buffer).toString('base64'))
+                  data: await file.data.arrayBuffer().then((buffer: ArrayBuffer) => Buffer.from(buffer).toString('base64')),
+                  slot: slotName // Add slot information to the file data
                 }]
 
                 const response = await fetch('/api/upload-to-drive', {
