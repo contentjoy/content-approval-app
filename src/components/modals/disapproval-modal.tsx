@@ -137,7 +137,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
             id="feedback"
             rows={12}
             {...register('feedback')}
-            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-bg text-text placeholder:text-muted-text resize min-h-[10rem] max-h-[60vh]"
+            className="w-full px-3 py-2 border border-[var(--border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--muted-text)] resize min-h-[10rem] max-h-[60vh] transition-all duration-200"
             placeholder="Please provide specific feedback on why this content is being disapproved..."
           />
           {errors.feedback && (
@@ -160,11 +160,11 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
                   type="radio"
                   value="current"
                   {...register('carouselAction')}
-                  className="text-accent focus:ring-accent"
+                  className="text-[var(--surface)] focus:ring-[var(--surface)]"
                 />
                 <div>
-                  <div className="font-medium text-foreground">Disapprove current slide</div>
-                  <div className="text-sm text-muted-foreground">Only disapprove this slide ({post['Carousel Order']} of {carouselPosts.length})</div>
+                  <div className="font-medium text-[var(--text)]">Disapprove current slide</div>
+                  <div className="text-sm text-[var(--muted-text)]">Only disapprove this slide ({post['Carousel Order']} of {carouselPosts.length})</div>
                 </div>
               </label>
               <label className="flex items-center space-x-3">
@@ -172,11 +172,11 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
                   type="radio"
                   value="all"
                   {...register('carouselAction')}
-                  className="text-accent focus:ring-accent"
+                  className="text-[var(--surface)] focus:ring-[var(--surface)]"
                 />
                 <div>
-                  <div className="font-medium text-foreground">Disapprove all slides</div>
-                  <div className="text-sm text-muted-foreground">Disapprove all {carouselPosts.length} slides in this carousel</div>
+                  <div className="font-medium text-[var(--text)]">Disapprove all slides</div>
+                  <div className="text-sm text-[var(--muted-text)]">Disapprove all {carouselPosts.length} slides in this carousel</div>
                 </div>
               </label>
             </div>
@@ -187,9 +187,9 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
         )}
 
         {/* Summary */}
-        <div className="bg-destructive/10 rounded-lg p-4 border border-destructive/20">
-          <h4 className="font-medium text-destructive mb-2">Summary</h4>
-          <p className="text-sm text-destructive">
+        <div className="border border-[var(--border)] rounded-[12px] p-4">
+          <h4 className="font-medium text-[var(--text)] mb-2">Summary</h4>
+          <p className="text-sm text-[var(--muted-text)]">
             {isCarousel && watchedCarouselAction === 'all' 
               ? `Disapprove all ${carouselPosts.length} carousel slides with feedback`
               : `Disapprove ${isCarousel ? 'current slide' : 'post'} with feedback`
@@ -203,14 +203,14 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="h-10 px-4 rounded-md border border-border text-text bg-transparent transition-colors hover:bg-hover disabled:opacity-50"
+            className="h-10 px-6 py-2 rounded-[999px] border border-[var(--border)] text-[var(--text)] bg-transparent transition-all duration-200 hover:bg-[var(--hover)] hover:border-[var(--border-strong)] disabled:opacity-50"
           >
             Cancel
           </button>
           <BrandedButton
             type="submit"
             disabled={isLoading}
-            className="bg-destructive hover:bg-destructive/90 text-background"
+            className="h-10 px-6 py-2 rounded-[999px] bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)] transition-all duration-200 hover:bg-[var(--hover)] disabled:opacity-50"
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">

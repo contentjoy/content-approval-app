@@ -27,12 +27,11 @@ export function CompactProgress({ approved, total, goal, className = '' }: Compa
     <div className={`flex items-center space-x-3 ${className}`}>
       {/* Progress Bar */}
       <div className="flex items-center space-x-2">
-        <div className="w-16 h-2 bg-[var(--surface)] rounded-md overflow-hidden border border-border">
+        <div className="w-16 h-2 bg-[var(--hover)] rounded-md overflow-hidden border border-[var(--border)]">
           <div 
-            className={`h-full ${getProgressColor()} rounded-md transition-all duration-300`}
+            className={`h-full bg-[var(--surface)] rounded-md transition-all duration-300`}
             style={{
-              width: `${progress}%`,
-              backgroundColor: primaryColor && progress > 0 ? `var(--accent)` : undefined
+              width: `${progress}%`
             }}
           />
         </div>

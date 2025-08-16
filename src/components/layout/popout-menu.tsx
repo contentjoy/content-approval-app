@@ -39,8 +39,8 @@ export function PopoutMenu({ isOpen, onClose, placement = 'desktop', onAccountSe
       {placement === 'mobile' && (
         <div className="mb-3">
           <div className="flex items-center space-x-2">
-            <div className="flex-1 h-2 bg-[var(--surface)] rounded-md overflow-hidden border border-border">
-              <div className="h-full bg-accent rounded-md" style={{ width: `${progressPct}%` }} />
+            <div className="flex-1 h-2 bg-[var(--surface)] rounded-md overflow-hidden border border-[var(--border)]">
+              <div className="h-full bg-[var(--text)] rounded-md" style={{ width: `${progressPct}%` }} />
             </div>
             <span className="text-xs text-muted-text min-w-[2.5rem]">{approvedProgress}/{goal}</span>
           </div>

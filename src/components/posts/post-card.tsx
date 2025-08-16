@@ -209,7 +209,7 @@ export function PostCard({
                   />
                   <div className={`
                     w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200
-                    ${isSelected ? 'bg-accent border-accent' : 'bg-black/40 border-white/80 text-white'}
+                    ${isSelected ? 'bg-[var(--surface)] border-[var(--surface)]' : 'bg-black/40 border-white/80 text-white'}
                   `}>
                     {isSelected && (
                       <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -224,7 +224,7 @@ export function PostCard({
 
           {/* Asset Type Badge - hover */}
           <div className="absolute top-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-bg-elev-1 text-text border border-border`}>
+            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)]`}>
               <span className="mr-1.5">{badge.icon}</span>
               {post['Carousel Group'] ? 'Carousel' : (post['Asset Type'] || 'Post')}
             </span>
@@ -243,14 +243,14 @@ export function PostCard({
         {/* Action Icons */}
         <div className="px-4 mt-3 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <button onClick={handleApproveToggle} className={`transition-colors ${isApproved ? 'text-accent' : 'text-gray-500 hover:text-accent'}`} aria-label="Approve">
-              <Heart className={`w-6 h-6 ${isApproved ? 'fill-current' : ''}`} />
+            <button onClick={handleApproveToggle} className={`transition-colors ${isApproved ? 'text-[var(--surface)]' : 'text-gray-500 hover:text-[var(--surface)]'}`} aria-label="Approve">
+              <Heart className={`w-5 h-5 ${isApproved ? 'fill-current' : ''}`} />
             </button>
             <button onClick={handleDisapprove} className="text-gray-500 hover:text-destructive transition-colors" aria-label="Disapprove">
               <XIcon className="w-6 h-6" />
             </button>
-            <button onClick={handleComments} className="text-gray-500 hover:text-accent transition-colors" aria-label="Comments">
-              <MessageCircle className="w-6 h-6" />
+            <button onClick={handleComments} className="text-gray-500 hover:text-[var(--surface)] transition-colors" aria-label="Comments">
+              <MessageCircle className="w-5 h-5" />
             </button>
           </div>
           <button
@@ -260,9 +260,9 @@ export function PostCard({
               const fileName = `${(post['Post Caption'] || 'post').slice(0, 24).replace(/\s+/g, '-')}.${(post['Asset Type'] || '').toLowerCase() === 'video' ? 'mp4' : 'jpg'}`
               await downloadMedia(assetUrl, fileName)
             }}
-            className={`text-gray-500 hover:text-accent transition-colors ${isDownloading ? 'opacity-50' : ''}`}
-            aria-label="Download"
             disabled={isDownloading}
+            className={`text-gray-500 hover:text-[var(--surface)] transition-colors ${isDownloading ? 'opacity-50' : ''}`}
+            aria-label="Download"
           >
             <Download className="w-6 h-6" />
           </button>

@@ -132,17 +132,17 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
       size="lg"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Approved Posts Summary */}
-        <div className="bg-accent/10 rounded-lg p-4 border border-accent/20">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-5 h-5 text-accent" />
+        {/* Posts Ready Info */}
+        <div className="bg-[var(--surface)] rounded-[12px] p-4 border border-[var(--border)]">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-[var(--hover)] rounded-lg flex items-center justify-center">
+              <CheckCircle className="w-5 h-5 text-[var(--text)]" />
             </div>
             <div>
-              <h3 className="font-medium text-accent text-sm">
+              <h3 className="font-medium text-[var(--text)] text-sm">
                 {approvedPosts.length} Posts Ready to Schedule
               </h3>
-              <p className="text-xs text-accent opacity-80">
+              <p className="text-xs text-[var(--muted-text)] opacity-80">
                 All posts have been approved and are ready for scheduling
               </p>
             </div>
@@ -155,30 +155,30 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
             Scheduling Frequency:
           </label>
           <div className="space-y-3">
-            <label className="flex items-center space-x-3 p-4 border border-border rounded-lg hover:bg-hover cursor-pointer transition-colors">
+            <label className="flex items-center space-x-3 p-4 border border-[var(--border)] rounded-[12px] hover:bg-[var(--hover)] cursor-pointer transition-all duration-200">
               <input
                 type="radio"
                 value="daily"
                 {...register('frequency')}
-                className="text-accent focus:ring-accent"
+                className="text-[var(--surface)] focus:ring-[var(--surface)]"
               />
               <div className="flex-1">
-                <div className="font-medium text-foreground">One post per day</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="font-medium text-[var(--text)]">One post per day</div>
+                <div className="text-sm text-[var(--muted-text)]">
                   Duration: {approvedPosts.length} days
                 </div>
               </div>
             </label>
-            <label className="flex items-center space-x-3 p-4 border border-border rounded-lg hover:bg-hover cursor-pointer transition-colors">
+            <label className="flex items-center space-x-3 p-4 border border-[var(--border)] rounded-[12px] hover:bg-[var(--hover)] cursor-pointer transition-all duration-200">
               <input
                 type="radio"
                 value="every-other-day"
                 {...register('frequency')}
-                className="text-accent focus:ring-accent"
+                className="text-[var(--surface)] focus:ring-[var(--surface)]"
               />
               <div className="flex-1">
-                <div className="font-medium text-foreground">Every other day</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="font-medium text-[var(--text)]">Every other day</div>
+                <div className="text-sm text-[var(--muted-text)]">
                   Duration: {approvedPosts.length * 2} days
                 </div>
               </div>
@@ -200,7 +200,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
               id="startDate"
               {...register('startDate')}
               min={new Date().toISOString().split('T')[0]}
-              className="w-full px-3 py-2 bg-[var(--surface)] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+              className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent transition-all duration-200"
             />
             {errors.startDate && (
               <p className="mt-1 text-sm text-destructive">{errors.startDate.message}</p>
@@ -215,7 +215,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
               type="time"
               id="startTime"
               {...register('startTime')}
-              className="w-full px-3 py-2 bg-[var(--surface)] border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+              className="w-full px-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent transition-all duration-200"
             />
             {errors.startTime && (
               <p className="mt-1 text-sm text-destructive">{errors.startTime.message}</p>
@@ -225,9 +225,9 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
 
         {/* Timeline Preview */}
         {watchedStartDate && (
-          <div className="bg-bg-elev-1 rounded-lg p-4 border border-border">
-            <h4 className="font-medium text-text mb-2">Scheduling Timeline</h4>
-            <div className="space-y-2 text-sm text-muted-text">
+          <div className="bg-[var(--surface)] rounded-[12px] p-4 border border-[var(--border)]">
+            <h4 className="font-medium text-[var(--text)] mb-2">Scheduling Timeline</h4>
+            <div className="space-y-2 text-sm text-[var(--muted-text)]">
               <p><strong>Start Date:</strong> {new Date(watchedStartDate).toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -247,13 +247,14 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="h-10 px-4 rounded-md border border-border text-text bg-transparent transition-colors hover:bg-hover disabled:opacity-50"
+            className="h-10 px-6 py-2 rounded-[999px] border border-[var(--border)] text-[var(--text)] bg-transparent transition-all duration-200 hover:bg-[var(--hover)] hover:border-[var(--border-strong)] disabled:opacity-50"
           >
             Cancel
           </button>
-          <BrandedButton
+          <button
             type="submit"
             disabled={isLoading}
+            className="h-10 px-6 py-2 rounded-[999px] bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)] transition-all duration-200 hover:bg-[var(--hover)] disabled:opacity-50"
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">
@@ -263,7 +264,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
             ) : (
               'Schedule Posts'
             )}
-          </BrandedButton>
+          </button>
         </div>
       </form>
     </Modal>
