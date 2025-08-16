@@ -142,7 +142,7 @@ export function PostCard({
         transition={{ duration: 0.3, ease: 'easeOut' }}
         whileHover={{ y: -2, scale: 1.02 }}
         className={`group ${className}`}
-        style={{ backgroundColor: 'var(--card-bg)', borderRadius: '12px', border: '1px solid var(--card-border)' }}
+        style={{ backgroundColor: 'var(--card-bg)', borderRadius: '24px', border: '1px solid var(--card-border)' }}
       >
         {/* Top Section */}
         <div className="flex items-center justify-between p-4">
@@ -163,7 +163,7 @@ export function PostCard({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -6 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-48 bg-[var(--modal-surface)] rounded-[12px] border border-[var(--border)] shadow-xl z-[99999]"
+                  className="absolute right-0 mt-2 w-48 bg-[var(--modal-surface)] rounded-[24px] border border-[var(--border)] shadow-xl z-[99999]"
                 >
                   <button onClick={handleShare} className="w-full flex items-center px-4 py-3 text-sm text-[var(--text)] hover:bg-[var(--hover)] transition-all duration-200">
                     <svg className="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
@@ -224,7 +224,7 @@ export function PostCard({
 
           {/* Asset Type Badge - hover */}
           <div className="absolute top-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)]`}>
+            <span className={`inline-flex items-center px-3 py-1.5 rounded-[24px] text-xs font-semibold bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)]`}>
               <span className="mr-1.5">{badge.icon}</span>
               {post['Carousel Group'] ? 'Carousel' : (post['Asset Type'] || 'Post')}
             </span>
@@ -233,7 +233,7 @@ export function PostCard({
           {/* Carousel Indicator */}
           {post['Carousel Group'] && post['Carousel Order'] && (
             <div className="absolute bottom-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-background text-foreground border border-border">
+              <span className="inline-flex items-center px-3 py-1.5 rounded-[24px] text-xs font-semibold bg-background text-foreground border border-border">
                 {post['Carousel Order']} of {post['Carousel Group']}
               </span>
             </div>
@@ -283,7 +283,7 @@ export function PostCard({
               {post['Post Caption'].length > 150 && (
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-accent text-xs font-semibold mt-1 hover:underline transition-colors"
+                  className="text-text text-xs font-semibold mt-1 hover:underline transition-colors"
                 >
                   {isExpanded ? 'Show less' : 'Read more'}
                 </button>
