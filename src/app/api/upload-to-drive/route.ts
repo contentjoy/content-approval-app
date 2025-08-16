@@ -178,6 +178,104 @@ async function createFolderStructure(gymName: string) {
   }
 }
 
+// 🚀 WEBHOOK: Send upload metadata to webhook
+async function sendUploadWebhook(data: {
+  gymName: string
+  folderStructure: any
+  files: any[]
+  webhookType: 'test' | 'production'
+}) {
+  try {
+    const { gymName, folderStructure, files, webhookType } = data
+    
+    // Count files by category
+    const fileCounts = {
+      photos: 0,
+      videos: 0,
+      facilityPhotos: 0,
+      facilityVideos: 0
+    }
+    
+    files.forEach(file => {
+      const slotName = determineSlotName(file)
+      switch (slotName) {
+        case 'Photos':
+          fileCounts.photos++
+          break
+        case 'Videos':
+          fileCounts.videos++
+          break
+        case 'Facility Photos':
+          fileCounts.facilityPhotos++
+          break
+        case 'Facility Videos':
+          fileCounts.facilityVideos++
+          break
+      }
+    })
+    
+    // Get webhook URL based on type
+    const webhookUrl = webhookType === 'test' 
+      ? process.env.UPLOAD_CONTENT_TEST_WEBHOOK
+      : process.env.UPLOAD_CONTENT_WEBHOOK
+    
+    if (!webhookUrl) {
+      throw new Error(`Webhook URL not configured for type: ${webhookType}`)
+    }
+    
+    // Prepare webhook payload
+    const webhookPayload = {
+      timestamp: new Date().toISOString(),
+      event: 'upload_started',
+      gymName: gymName,
+      totalFiles: files.length,
+      fileCounts: {
+        photos: fileCounts.photos,
+        videos: fileCounts.videos,
+        facilityPhotos: fileCounts.facilityPhotos,
+        facilityVideos: fileCounts.facilityVideos
+      },
+      folderStructure: {
+        gymFolderId: folderStructure.gymFolderId,
+        timestampFolderId: folderStructure.timestampFolderId,
+        rawFootageFolderId: folderStructure.rawFootageFolderId,
+        finalFootageFolderId: folderStructure.finalFootageFolderId,
+        rawSlotFolders: folderStructure.rawSlotFolders,
+        finalSlotFolders: folderStructure.finalSlotFolders
+      },
+      // Note: Direct Drive links require additional API calls, 
+      // but you can construct them in N8N using the folder IDs
+      driveLinks: {
+        note: 'Use folder IDs to construct Drive links in N8N',
+        gymFolderId: folderStructure.gymFolderId,
+        rawFootageFolderId: folderStructure.rawFootageFolderId
+      }
+    }
+    
+    console.log('📡 Sending webhook to:', webhookUrl)
+    console.log('📡 Webhook payload:', JSON.stringify(webhookPayload, null, 2))
+    
+    // Send webhook
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(webhookPayload),
+    })
+    
+    if (!response.ok) {
+      throw new Error(`Webhook failed with status: ${response.status}`)
+    }
+    
+    console.log('✅ Webhook sent successfully')
+    
+  } catch (error) {
+    console.error('❌ Webhook error:', error)
+    throw error
+  }
+}
+
 // Handle regular uploads
 async function handleRegularUpload(files: any[], gymSlug: string, gymName: string, sessionFolderId: string, maxUploadSize: number) {
   console.log('🚀 Starting regular Google Drive upload for gym:', gymName)
@@ -294,6 +392,20 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
   // Create folder structure using ACTUAL gym name from database (not normalized)
   const folderStructure = await createFolderStructure(actualGymName)
   console.log('✅ Folder structure created:', folderStructure)
+  
+  // 🚀 WEBHOOK: Send upload metadata to test webhook after folders are created
+  try {
+    await sendUploadWebhook({
+      gymName: actualGymName,
+      folderStructure,
+      files,
+      webhookType: 'test'
+    })
+    console.log('✅ Upload webhook sent successfully')
+  } catch (webhookError) {
+    console.error('⚠️ Webhook failed (non-blocking):', webhookError)
+    // Don't fail the upload if webhook fails
+  }
   
   // Upload files
   const uploadResults = []
