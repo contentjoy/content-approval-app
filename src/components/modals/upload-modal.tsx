@@ -1008,13 +1008,13 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                       onClick={() => setActiveSlot(slotName as SlotName)}
                       className={`w-full p-3 sm:p-4 lg:p-5 rounded-xl border-2 transition-all duration-300 text-left hover:scale-[1.02] ${
                         isActive 
-                          ? 'border-primary bg-primary/10 shadow-xl' 
-                          : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                          ? 'border-[var(--modal-border)] bg-[var(--modal-surface)] shadow-xl' 
+                          : 'border-border hover:border-[var(--modal-border)] hover:bg-muted/50'
                       }`}
                     >
                       <div className="flex items-center space-x-3 sm:space-x-4">
                         <Icon className={`w-6 h-6 sm:w-7 sm:h-7 ${
-                          isActive ? 'text-primary' : 'text-muted-foreground'
+                          isActive ? 'text-[var(--text)]' : 'text-muted-foreground'
                         }`} />
                         <div className="flex-1 min-w-0">
                           <div className={`font-semibold text-base sm:text-lg ${
@@ -1046,7 +1046,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               </div>
               
               {/* Upload Zone - Responsive sizing */}
-              <div className="border-2 border-dashed border-muted-foreground/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 xl:p-10 text-center hover:border-primary/50 transition-colors">
+              <div className="border-2 border-dashed border-muted-foreground/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 xl:p-10 text-center hover:border-[var(--modal-border)] transition-colors">
                 {/* Custom CSS to override Uppy Dashboard styling */}
                 <style jsx>{`
                   .uppy-Dashboard-inner {
@@ -1057,28 +1057,28 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                     border: none !important;
                   }
                   .uppy-Dashboard-AddFiles-title {
-                    color: hsl(var(--foreground)) !important;
+                    color: var(--text) !important;
                     background: transparent !important;
                   }
                   .uppy-Dashboard-AddFiles-list {
                     background: transparent !important;
                   }
                   .uppy-Dashboard-AddFiles-item {
-                    background: hsl(var(--muted)) !important;
-                    border: 1px solid hsl(var(--border)) !important;
-                    color: hsl(var(--foreground)) !important;
+                    background: var(--modal-surface) !important;
+                    border: 1px solid var(--modal-border) !important;
+                    color: var(--text) !important;
                   }
                   .uppy-Dashboard-AddFiles-itemName {
-                    color: hsl(var(--foreground)) !important;
+                    color: var(--text) !important;
                   }
                   .uppy-Dashboard-AddFiles-itemSize {
-                    color: hsl(var(--muted-foreground)) !important;
+                    color: var(--muted-text) !important;
                   }
                   .uppy-Dashboard-AddFiles-itemRemove {
-                    color: hsl(var(--muted-foreground)) !important;
+                    color: var(--muted-text) !important;
                   }
                   .uppy-Dashboard-AddFiles-itemRemove:hover {
-                    color: hsl(var(--foreground)) !important;
+                    color: var(--text) !important;
                   }
                 `}</style>
                 

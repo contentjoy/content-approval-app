@@ -30,8 +30,9 @@
   --border: #E8E8E8;
   --border-strong: #E8E8E8;
   --hover: #EEEDED;
-  --modal-surface: #FCFCFC;
-  --modal-border: #46484C;
+  --modal-bg: #FCFCFC;
+  --modal-surface: #F2F2F2;
+  --modal-border: #E3E3E3;
 
   /* Geometry + radii */
   --radius: 12px; /* Updated to 12px for cards */
@@ -92,8 +93,9 @@
   --border: #46484C;
   --border-strong: #46484C;
   --hover: #28282A;
-  --modal-surface: #3E3F41;
-  --modal-border: #46484C;
+  --modal-bg: #3E3F41;
+  --modal-surface: #4D4E50;
+  --modal-border: #515253;
   
   /* Update legacy mappings for dark mode */
   --background: var(--bg);
@@ -449,7 +451,7 @@ p { font-size: var(--fs-base); line-height: 1.7; }
   
   .input-base {
     @apply flex h-10 w-full rounded-xl border border-border px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
-    background-color: var(--modal-surface);
+    background-color: var(--modal-bg);
   }
   
   .badge {

@@ -47,24 +47,24 @@ export function PopoutMenu({ isOpen, onClose, placement = 'desktop', onAccountSe
         </div>
       )}
       <div className="text-[var(--muted-text)] mb-2">{user?.gymName || 'User'}</div>
-      <button onClick={() => { onClose(); onAccountSettings?.() }} className="flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition">
+      <button onClick={() => { onClose(); onAccountSettings?.() }} className="flex items-center p-2 rounded-[12px] hover:bg-[var(--modal-surface)] transition">
         <Settings className="h-4 w-4 text-[var(--muted-text)] mr-2" />
         Account Settings
       </button>
-      <button className="flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition">
+      <button className="flex items-center p-2 rounded-[12px] hover:bg-[var(--modal-surface)] transition">
         <Users className="h-4 w-4 text-[var(--muted-text)] mr-2" />
         Create Team
       </button>
-      <div className="border-t border-[var(--border)] my-2" />
-      <button onClick={toggleTheme} className="flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition">
+      <div className="border-t border-[var(--modal-border)] my-2" />
+      <button onClick={toggleTheme} className="flex items-center p-2 rounded-[12px] hover:bg-[var(--modal-surface)] transition">
         {theme === 'dark' ? <Sun className="h-4 w-4 text-[var(--muted-text)] mr-2" /> : <Moon className="h-4 w-4 text-[var(--muted-text)] mr-2" />}
         {theme === 'dark' ? 'Dark mode' : 'Light mode'}
       </button>
-      <button id="schedule-content" className="flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition" onClick={() => { onClose(); openModal('schedule', null, [], approvedPosts || []) }}>
+      <button id="schedule-content" className="flex items-center p-2 rounded-[12px] hover:bg-[var(--modal-surface)] transition" onClick={() => { onClose(); openModal('schedule', null, [], approvedPosts || []) }}>
         <CalendarIcon className="h-4 w-4 text-[var(--muted-text)] mr-2" />
         Schedule Content
       </button>
-      <button onClick={logout} className="flex items-center p-2 rounded-md hover:bg-[var(--border)]/20 transition">
+      <button onClick={logout} className="flex items-center p-2 rounded-[12px] hover:bg-[var(--modal-surface)] transition">
         <LogOut className="h-4 w-4 mr-2" />
         Log Out
       </button>
