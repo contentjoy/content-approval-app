@@ -431,40 +431,68 @@ export default function OnboardingPage() {
         gym_slug: gymSlug
       }
 
-      // Send to production onboarding webhook
-      const webhookUrl = process.env.ONBOARDING_WEBHOOK_URL || 
-                        process.env.ONBOARDING_TEST_WEBHOOK || 
-                        'https://contentjoy.app.n8n.cloud/webhook-test/156ef9a5-0ae7-4e65-acc1-a27aa533d90a'
+      // 🚨 CRITICAL FIX: Use dedicated onboarding webhook endpoint
+      console.log('🚀 Sending onboarding data to dedicated webhook endpoint')
+      console.log('📊 Webhook data structure:', {
+        gym_id: webhookData.gym_id,
+        gym_name: webhookData.gym_name,
+        hasBusinessDetails: !!webhookData.business_details,
+        hasBrandIdentity: !!webhookData.brand_identity,
+        hasAudienceServices: !!webhookData.audience_services,
+        hasLinksSocials: !!webhookData.links_socials,
+        hasMarketingContent: !!webhookData.marketing_content,
+        hasMedia: !!webhookData.media,
+        totalPayloadKeys: Object.keys(webhookData).length
+      })
       
       try {
-        console.log('🚀 Sending onboarding data to PRODUCTION webhook:', webhookData)
-        console.log('🌐 Production webhook URL:', webhookUrl)
-        
-        const webhookResponse = await fetch(webhookUrl, {
+        const webhookResponse = await fetch('/api/onboarding-webhook', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'User-Agent': 'ContentJoy-Onboarding/1.0'
+            'User-Agent': 'ContentJoy-Onboarding/2.0'
           },
           body: JSON.stringify(webhookData)
         })
 
         if (!webhookResponse.ok) {
           const responseText = await webhookResponse.text()
-          console.warn('⚠️ Webhook request failed:', webhookResponse.status, webhookResponse.statusText)
-          console.warn('📝 Response text:', responseText)
+          console.error('❌ Onboarding webhook failed:', webhookResponse.status, responseText)
           
-          // If it's a 404, the webhook might not be configured for POST
-          if (webhookResponse.status === 404) {
-            console.warn('🔍 Webhook returned 404 - endpoint might not be configured for POST requests')
-            console.warn('💡 Try checking your n8n webhook configuration')
+          // Try direct N8N webhook as fallback
+          console.log('🔄 Trying direct N8N webhook as fallback...')
+          const fallbackUrl = process.env.ONBOARDING_WEBHOOK_URL || 
+                            process.env.ONBOARDING_TEST_WEBHOOK || 
+                            'https://contentjoy.app.n8n.cloud/webhook-test/156ef9a5-0ae7-4e65-acc1-a27aa533d90a'
+          
+          const fallbackResponse = await fetch(fallbackUrl, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'User-Agent': 'ContentJoy-Onboarding-Fallback/2.0'
+            },
+            body: JSON.stringify(webhookData)
+          })
+          
+          if (!fallbackResponse.ok) {
+            const fallbackText = await fallbackResponse.text()
+            console.error('❌ Fallback webhook also failed:', fallbackResponse.status, fallbackText)
+            toast.error('Warning: Onboarding data may not have been sent to automation system')
+          } else {
+            console.log('✅ Fallback webhook succeeded')
           }
         } else {
-          console.log('✅ Webhook data sent successfully')
-          console.log('📊 Response status:', webhookResponse.status)
+          const webhookResult = await webhookResponse.json()
+          console.log('✅ Onboarding webhook succeeded:', webhookResult)
+          
+          if (webhookResult.data_completeness < 100) {
+            console.warn('⚠️ Incomplete onboarding data detected:', webhookResult.data_completeness + '%')
+            toast.error('Some onboarding data may be incomplete')
+          }
         }
       } catch (webhookError) {
         console.error('❌ Webhook error:', webhookError)
+        toast.error('Failed to send onboarding data to automation system')
         // Don't fail the onboarding if webhook fails
       }
 
