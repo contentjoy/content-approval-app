@@ -39,13 +39,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing gym information' }, { status: 400 })
     }
 
-    console.log('🎨 Processing logo upload for gym:', gymName)
+    // 🚨 CRITICAL FIX: Convert gymSlug to proper gym name (same as upload content)
+    // This prevents duplicate client folders: "my-fitness-guide" vs "my fitness guide"
+    const normalizedGymName = gymSlug.replace(/-/g, ' ')
+    console.log('🎨 Normalized gym name for folder creation:', { 
+      original: gymName, 
+      normalized: normalizedGymName,
+      willUse: normalizedGymName 
+    })
     
-    // Get gym ID from database
+    console.log('🎨 Processing logo upload for gym:', normalizedGymName)
+    
+    // Get gym ID from database using normalized name
     const { data: gym, error: gymError } = await supabase
       .from('gyms')
       .select('id')
-      .eq('"Gym Name"', gymName)
+      .eq('"Gym Name"', normalizedGymName)
       .single()
     
     if (gymError || !gym) {
@@ -53,14 +62,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Gym not found' }, { status: 404 })
     }
 
-    console.log('✅ Found gym:', gymName, 'ID:', gym.id)
+    console.log('✅ Found gym:', normalizedGymName, 'ID:', gym.id)
     
     // Initialize Google Drive client
     const drive = getDrive()
     console.log('✅ Google Drive client initialized')
     
-    // Create logo folder structure
-    const folderStructure = await createLogoFolderStructure(drive, gymName)
+    // Create logo folder structure using NORMALIZED gym name
+    const folderStructure = await createLogoFolderStructure(drive, normalizedGymName)
     console.log('✅ Logo folder structure created:', folderStructure)
     
     // Upload logo files

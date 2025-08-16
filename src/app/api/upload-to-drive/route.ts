@@ -129,16 +129,18 @@ async function createFolderStructure(gymName: string) {
     // Initialize Google Drive client
     const drive = getDrive();
     
-    // Create ONE folder per day instead of per session to prevent folder explosion
+    // 🚨 CRITICAL FIX: Create ONE folder per day and REUSE if exists
     const today = new Date();
     const dateString = today.toISOString().split('T')[0]; // YYYY-MM-DD format
     const uploadLabel = `${gymName} ${dateString}`;
+    
+    console.log(`📅 Looking for existing timestamp folder: "${uploadLabel}"`)
     
     // Step 1: Create or find gym folder inside the "Clients" folder
     const gymFolderId = await ensureFolder(drive, gymName, clientsFolderId);
     console.log('🏋️ Gym folder:', gymFolderId);
     
-    // Step 2: Create or find today's folder (reuse if exists)
+    // Step 2: Create or find today's folder (REUSE if exists to prevent duplicates)
     const timestampFolderId = await ensureFolder(drive, uploadLabel, gymFolderId);
     console.log('📅 Today\'s folder (reused if exists):', timestampFolderId);
     
@@ -158,6 +160,8 @@ async function createFolderStructure(gymName: string) {
       finalSlotFolders[slot] = await ensureFolder(drive, slot, finalFootageFolderId);
       console.log(`📁 ${slot} folders created/reused`);
     }
+    
+    console.log(`✅ Folder structure complete - will reuse existing folders to prevent duplicates`)
     
     return {
       gymFolderId,
@@ -183,11 +187,20 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
     return NextResponse.json({ error: 'Missing gym information' }, { status: 400 })
   }
   
-  // Get gym ID from database
+  // 🚨 CRITICAL FIX: Normalize gym name to prevent duplicate client folders
+  // This ensures consistency with logo uploads: "my-fitness-guide" -> "my fitness guide"
+  const normalizedGymName = gymSlug.replace(/-/g, ' ')
+  console.log('🔧 Gym name normalization:', { 
+    original: gymName, 
+    normalized: normalizedGymName,
+    willUse: normalizedGymName 
+  })
+  
+  // Get gym ID from database using normalized name
   const { data: gym, error: gymError } = await supabase
     .from('gyms')
     .select('id')
-    .eq('"Gym Name"', gymName)
+    .eq('"Gym Name"', normalizedGymName)
     .single()
   
   if (gymError || !gym) {
@@ -195,14 +208,14 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
     return NextResponse.json({ error: 'Gym not found' }, { status: 404 })
   }
   
-  console.log('✅ Found gym:', gymName, 'ID:', gym.id)
+  console.log('✅ Found gym:', normalizedGymName, 'ID:', gym.id)
   
   // Initialize Google Drive client
   const drive = getDrive()
   console.log('✅ Google Drive client initialized')
   
-  // Create folder structure
-  const folderStructure = await createFolderStructure(gymName)
+  // Create folder structure using NORMALIZED gym name
+  const folderStructure = await createFolderStructure(normalizedGymName)
   console.log('✅ Folder structure created:', folderStructure)
   
   // Upload files
@@ -242,7 +255,7 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
     .insert([{
       upload_id: `upload_${Date.now()}`,
       gym_id: gym.id,
-      gym_name: gymName,
+      gym_name: normalizedGymName, // Use normalized name for consistency
       upload_folder_id: sessionFolderId, // Use sessionFolderId here
       gym_folder_id: folderStructure.gymFolderId,
       raw_footage_folder_id: folderStructure.rawFootageFolderId,
@@ -272,6 +285,15 @@ async function handleFolderCreation(files: any[], gymSlug: string, gymName: stri
   console.log('📁 Processing folder creation...')
   console.log('📁 Gym slug:', gymSlug)
   console.log('📁 Gym name:', gymName)
+  
+  // 🚨 CRITICAL FIX: Normalize gym name to prevent duplicate client folders
+  const normalizedGymName = gymSlug.replace(/-/g, ' ')
+  console.log('🔧 Gym name normalization for folder creation:', { 
+    original: gymName, 
+    normalized: normalizedGymName,
+    willUse: normalizedGymName 
+  })
+  
   const results = []
 
   for (const file of files) {
@@ -281,9 +303,9 @@ async function handleFolderCreation(files: any[], gymSlug: string, gymName: stri
         console.log(`📁 Creating folder: ${folderName}`)
         console.log(`📁 Folder type: ${file.folderType}`)
         
-        // Create proper gym folder structure first
+        // Create proper gym folder structure first using NORMALIZED gym name
         console.log('🏗️ Creating gym folder structure...')
-        const folderStructure = await createFolderStructure(gymName)
+        const folderStructure = await createFolderStructure(normalizedGymName)
         console.log('✅ Gym folder structure created:', folderStructure)
         
         // For session root folders, use the timestamp folder as the parent
