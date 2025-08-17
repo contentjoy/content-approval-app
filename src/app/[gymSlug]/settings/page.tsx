@@ -1,9 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useBranding } from '@/contexts/branding-context'
 import { BrandedButton } from '@/components/ui/branded-button'
 import { Logo } from '@/components/ui/logo'
+import { useParams } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+import { useToast } from '@/components/ui/toast'
 
 type TabType = 'general' | 'team' | 'notifications' | 'integrations'
 
@@ -65,7 +68,7 @@ export default function SettingsPage() {
             {activeTab === 'general' && <GeneralSettings />}
             {activeTab === 'team' && <TeamSettings />}
             {activeTab === 'notifications' && <NotificationSettings />}
-            {activeTab === 'integrations' && <IntegrationSettings />}
+            {activeTab === 'integrations' && <AyrshareIntegrationSettings />}
           </div>
         </div>
       </div>
@@ -350,49 +353,262 @@ function NotificationSettings() {
   )
 }
 
-function IntegrationSettings() {
-  const [integrations] = useState([
-    { id: 'instagram', name: 'Instagram', connected: true, icon: '📷' },
-    { id: 'facebook', name: 'Facebook', connected: false, icon: '📘' },
-    { id: 'twitter', name: 'Twitter', connected: false, icon: '🐦' },
-    { id: 'tiktok', name: 'TikTok', connected: false, icon: '🎵' },
-    { id: 'linkedin', name: 'LinkedIn', connected: false, icon: '💼' }
-  ])
+function AyrshareIntegrationSettings() {
+  const { showToast } = useToast()
+  const { gymSlug } = useParams()
+  const [isLoading, setIsLoading] = useState(false)
+  const [gymId, setGymId] = useState<string | null>(null)
+  const [profileKey, setProfileKey] = useState<string | null>(null)
+  const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([])
+  const [error, setError] = useState<string | null>(null)
+
+  // Load gym data on component mount
+  useEffect(() => {
+    const loadGymData = async () => {
+      if (!gymSlug) return
+      
+      try {
+        const { data: gym, error } = await supabase
+          .from('gyms')
+          .select('id, profile_key, ayrshare_profiles')
+          .ilike('"Gym Name"', gymSlug.toString().replace(/-/g, ' '))
+          .single()
+
+        if (error) throw error
+        
+        setGymId(gym.id)
+        setProfileKey(gym.profile_key)
+        
+        // Extract connected platforms from ayrshare_profiles
+        if (gym.ayrshare_profiles) {
+          const platforms = Object.keys(gym.ayrshare_profiles).filter(
+            platform => gym.ayrshare_profiles[platform]?.profile_key
+          )
+          setConnectedPlatforms(platforms)
+        }
+      } catch (err) {
+        console.error('Failed to load gym data:', err)
+        setError('Failed to load gym data')
+      }
+    }
+
+    loadGymData()
+  }, [gymSlug])
+
+  const handleConnectPlatform = async (platform: string) => {
+    if (!gymId) {
+      showToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Gym ID not found. Please refresh the page.',
+      })
+      return
+    }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      // Open Ayrshare auth popup
+      const authUrl = `https://app.ayrshare.com/auth/url?platform=${platform}&redirect=${encodeURIComponent(`${window.location.origin}/api/ayrshare/callback`)}&state=${gymId}-${platform}`
+      
+      const popup = window.open(authUrl, 'ayrshare-auth', 'width=600,height=700,scrollbars=yes,resizable=yes')
+      
+      if (!popup) {
+        throw new Error('Popup blocked. Please allow popups for this site.')
+      }
+
+      // Listen for auth success/failure
+      const messageHandler = (event: MessageEvent) => {
+        if (event.data?.type === 'AYRSHARE_AUTH_SUCCESS') {
+          if (event.data.platform === platform) {
+            setConnectedPlatforms(prev => [...prev, platform])
+            showToast({
+              type: 'success',
+              title: `${platform} Connected!`,
+              message: `Your ${platform} account has been successfully connected.`,
+            })
+            popup.close()
+            window.removeEventListener('message', messageHandler)
+          }
+        } else if (event.data?.type === 'AYRSHARE_AUTH_ERROR') {
+          setError(event.data.error || 'Authentication failed')
+          showToast({
+            type: 'error',
+            title: 'Connection Failed',
+            message: event.data.error || 'Failed to connect to Ayrshare.',
+          })
+          popup.close()
+          window.removeEventListener('message', messageHandler)
+        }
+      }
+
+      window.addEventListener('message', messageHandler)
+
+      // Cleanup if popup is closed manually
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed)
+          window.removeEventListener('message', messageHandler)
+        }
+      }, 1000)
+
+    } catch (err) {
+      console.error('Failed to connect platform:', err)
+      setError(err instanceof Error ? err.message : 'Failed to connect platform')
+      showToast({
+        type: 'error',
+        title: 'Connection Failed',
+        message: err instanceof Error ? err.message : 'Failed to connect platform',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSyncProfiles = async () => {
+    if (!gymId || !profileKey) {
+      showToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Missing gym ID or profile key. Please refresh the page.',
+      })
+      return
+    }
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/ayrshare/sync-profiles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gymId, profileKey }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to sync profiles')
+      }
+
+      const data = await response.json()
+      showToast({
+        type: 'success',
+        title: 'Profiles Synced!',
+        message: 'Your social media profiles have been successfully synced.',
+      })
+
+      // Refresh connected platforms
+      if (data.profiles) {
+        const platforms = Object.keys(data.profiles).filter(
+          platform => data.profiles[platform]?.profile_key
+        )
+        setConnectedPlatforms(platforms)
+      }
+
+    } catch (err) {
+      console.error('Failed to sync profiles:', err)
+      setError(err instanceof Error ? err.message : 'Failed to sync profiles')
+      showToast({
+        type: 'error',
+        title: 'Sync Failed',
+        message: err instanceof Error ? err.message : 'Failed to sync profiles',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const platforms = [
+    { id: 'instagram', name: 'Instagram', icon: '📷', color: '#E4405F' },
+    { id: 'facebook', name: 'Facebook', icon: '📘', color: '#1877F2' },
+    { id: 'twitter', name: 'Twitter', icon: '🐦', color: '#1DA1F2' },
+    { id: 'tiktok', name: 'TikTok', icon: '🎵', color: '#000000' },
+    { id: 'linkedin', name: 'LinkedIn', icon: '💼', color: '#0A66C2' },
+  ]
 
   return (
     <div className="p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Social Media Integrations</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">Ayrshare Integration</h2>
       
-      <div className="space-y-4">
-        {integrations.map((integration) => (
-          <div key={integration.id} className="flex items-center justify-between p-4 border rounded-lg">
-            <div className="flex items-center space-x-4">
-              <span className="text-2xl">{integration.icon}</span>
-              <div>
-                <div className="font-medium text-gray-900">{integration.name}</div>
-                <div className="text-sm text-gray-500">
-                  {integration.connected ? 'Connected' : 'Not connected'}
-                </div>
-              </div>
-            </div>
-            <BrandedButton
-              variant={integration.connected ? 'outline' : 'default'}
-              size="sm"
-            >
-              {integration.connected ? 'Disconnect' : 'Connect'}
-            </BrandedButton>
+      {/* Connection Status */}
+      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <h3 className="font-medium text-gray-900 mb-2">Connection Status</h3>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <div className={`w-3 h-3 rounded-full ${profileKey ? 'bg-green-500' : 'bg-red-500'}`} />
+            <span className="text-sm text-gray-600">
+              {profileKey ? 'Ayrshare Profile Connected' : 'No Ayrshare Profile'}
+            </span>
           </div>
-        ))}
+          {profileKey && (
+            <span className="text-xs text-gray-500 font-mono bg-gray-200 px-2 py-1 rounded">
+              {profileKey}
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-        <h3 className="font-medium text-gray-900 mb-2">API Keys</h3>
-        <p className="text-sm text-gray-600 mb-4">
-          Manage your API keys for third-party integrations.
+      {/* Platform Connections */}
+      <div className="space-y-4 mb-6">
+        <h3 className="font-medium text-gray-900">Social Media Platforms</h3>
+        {platforms.map((platform) => {
+          const isConnected = connectedPlatforms.includes(platform.id)
+          return (
+            <div key={platform.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center space-x-4">
+                <span className="text-2xl">{platform.icon}</span>
+                <div>
+                  <div className="font-medium text-gray-900">{platform.name}</div>
+                  <div className="text-sm text-gray-500">
+                    {isConnected ? 'Connected' : 'Not connected'}
+                  </div>
+                </div>
+              </div>
+              <BrandedButton
+                onClick={() => handleConnectPlatform(platform.id)}
+                disabled={isLoading || !profileKey}
+                variant={isConnected ? 'outline' : 'default'}
+                size="sm"
+              >
+                {isLoading ? 'Connecting...' : isConnected ? 'Reconnect' : 'Connect'}
+              </BrandedButton>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Sync Button */}
+      {profileKey && connectedPlatforms.length > 0 && (
+        <div className="mb-6">
+          <BrandedButton
+            onClick={handleSyncProfiles}
+            disabled={isLoading}
+            className="w-full"
+          >
+            {isLoading ? 'Syncing...' : 'Sync Social Media Profiles'}
+          </BrandedButton>
+        </div>
+      )}
+
+      {/* Error Display */}
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-700 text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* Help Text */}
+      <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+        <h3 className="font-medium text-blue-900 mb-2">How it works</h3>
+        <p className="text-sm text-blue-700 mb-2">
+          Connect your social media accounts to Ayrshare to automatically sync content and manage your social media presence.
         </p>
-        <BrandedButton variant="outline" size="sm">
-          Manage API Keys
-        </BrandedButton>
+        <ul className="text-sm text-blue-700 space-y-1">
+          <li>• Connect individual platforms (Instagram, Facebook, Twitter, etc.)</li>
+          <li>• Sync your profiles to get the latest connection status</li>
+          <li>• Manage all your social media accounts in one place</li>
+        </ul>
       </div>
     </div>
   )

@@ -67,15 +67,31 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
     const root = document.documentElement
     
     if (data.primaryColor) {
+      // Validate hex color format
+      const hexColor = data.primaryColor.trim()
+      if (!/^#[0-9A-Fa-f]{6}$/.test(hexColor)) {
+        console.warn('Invalid hex color format:', hexColor, 'using default color')
+        data.primaryColor = '#6B7280' // fallback to default
+      }
+      
       // Set the primary color CSS variable
       root.style.setProperty('--primary-color', data.primaryColor)
       root.style.setProperty('--primary', data.primaryColor)
       
       // Convert hex to RGB for CSS custom properties
       const hex = data.primaryColor.replace('#', '')
-      const r = parseInt(hex.substr(0, 2), 16)
-      const g = parseInt(hex.substr(2, 2), 16)
-      const b = parseInt(hex.substr(4, 2), 16)
+      const r = parseInt(hex.substring(0, 2), 16)
+      const g = parseInt(hex.substring(2, 4), 16)
+      const b = parseInt(hex.substring(4, 6), 16)
+      
+      // Validate RGB values
+      if (isNaN(r) || isNaN(g) || isNaN(b)) {
+        console.warn('Invalid RGB values from hex:', hex, 'using default color')
+        data.primaryColor = '#6B7280' // fallback to default
+        root.style.setProperty('--primary-color', data.primaryColor)
+        root.style.setProperty('--primary', data.primaryColor)
+        return
+      }
       
       // Set legacy brand colors for compatibility
       root.style.setProperty('--brand-primary', data.primaryColor)
@@ -105,9 +121,9 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
       const defaultColor = isDark ? '#6B7280' : '#D1D5DB'
       const rgb = defaultColor.replace('#','')
-      const r = parseInt(rgb.substr(0,2),16)
-      const g = parseInt(rgb.substr(2,2),16)
-      const b = parseInt(rgb.substr(4,2),16)
+      const r = parseInt(rgb.substring(0,2),16)
+      const g = parseInt(rgb.substring(2,2),16)
+      const b = parseInt(rgb.substring(4,2),16)
       root.style.setProperty('--primary-color', defaultColor)
       root.style.setProperty('--brand-primary', defaultColor)
       root.style.setProperty('--primary', defaultColor)
@@ -118,7 +134,14 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
 
     // Set gym primary color CSS variable
     if (data.gymPrimaryColor) {
-      root.style.setProperty('--gym-primary-color', data.gymPrimaryColor)
+      // Validate gym primary color format
+      const gymHexColor = data.gymPrimaryColor.trim()
+      if (!/^#[0-9A-Fa-f]{6}$/.test(gymHexColor)) {
+        console.warn('Invalid gym hex color format:', gymHexColor, 'using primary color')
+        root.style.setProperty('--gym-primary-color', 'var(--primary-color)')
+      } else {
+        root.style.setProperty('--gym-primary-color', data.gymPrimaryColor)
+      }
     } else {
       root.style.setProperty('--gym-primary-color', 'var(--primary-color)')
     }

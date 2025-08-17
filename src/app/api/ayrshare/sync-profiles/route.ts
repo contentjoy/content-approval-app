@@ -9,14 +9,38 @@ interface Body {
 export async function POST(req: NextRequest) {
   try {
     const { gymId, profileKey }: Body = await req.json()
-    if (!gymId || !profileKey) {
-      return NextResponse.json({ error: 'gymId and profileKey are required' }, { status: 400 })
+    
+    console.log('🔍 sync-profiles called with:', { gymId, profileKey })
+    
+    if (!gymId) {
+      console.error('❌ Missing gymId in request body')
+      return NextResponse.json({ error: 'gymId is required' }, { status: 400 })
+    }
+    
+    if (!profileKey) {
+      console.error('❌ Missing profileKey in request body')
+      return NextResponse.json({ error: 'profileKey is required' }, { status: 400 })
     }
 
     const apiKey = process.env.AYRSHARE_API_KEY
     if (!apiKey) {
+      console.error('❌ AYRSHARE_API_KEY not configured')
       return NextResponse.json({ error: 'AYRSHARE_API_KEY not configured' }, { status: 500 })
     }
+
+    // First, verify the gym exists and get its current data
+    const { data: gym, error: gymError } = await supabase
+      .from('gyms')
+      .select('id, "Gym Name", ayrshare_profiles')
+      .eq('id', gymId)
+      .single()
+
+    if (gymError) {
+      console.error('❌ Failed to fetch gym:', gymError)
+      return NextResponse.json({ error: 'Failed to load gym', details: gymError }, { status: 500 })
+    }
+
+    console.log('✅ Found gym:', { id: gym.id, name: gym['Gym Name'] })
 
     // Try to get a summary of connected social accounts for this profile.
     // Ayrshare typically uses the X-Profile-Key header to scope requests.
@@ -37,8 +61,27 @@ export async function POST(req: NextRequest) {
       'https://api.ayrshare.com/api/user',
       'https://api.ayrshare.com/api/profiles/user',
     ]
+    
     for (const url of candidates) {
-      try { data = await tryFetch(url); break } catch { /* try next */ }
+      try { 
+        console.log(`🔍 Trying Ayrshare endpoint: ${url}`)
+        data = await tryFetch(url)
+        console.log('✅ Successfully fetched data from:', url)
+        break 
+      } catch (err) { 
+        console.log(`❌ Failed to fetch from ${url}:`, err)
+        // try next 
+      }
+    }
+
+    if (!data) {
+      console.warn('⚠️ No data received from any Ayrshare endpoint')
+      // Return current profiles if no new data
+      return NextResponse.json({ 
+        success: true, 
+        profiles: gym.ayrshare_profiles || {},
+        message: 'No new data from Ayrshare, returning current profiles'
+      })
     }
 
     // Parse common shapes into a normalized map of { platform: true }
@@ -58,42 +101,46 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    console.log('🔍 Parsed linked platforms:', linked)
+
     // Merge into ayrshare_profiles
-    const { data: gym, error: fetchError } = await supabase
-      .from('gyms')
-      .select('ayrshare_profiles')
-      .eq('id', gymId)
-      .single()
-
-    if (fetchError) {
-      console.error('sync-profiles fetch error:', fetchError)
-      return NextResponse.json({ error: 'Failed to load gym' }, { status: 500 })
-    }
-
-    const profiles: Record<string, any> = gym?.ayrshare_profiles || {}
+    const currentProfiles: Record<string, any> = gym?.ayrshare_profiles || {}
+    const updatedProfiles = { ...currentProfiles }
+    
     for (const [platform, isLinked] of Object.entries(linked)) {
       if (!isLinked) continue
-      profiles[platform] = {
-        ...(profiles[platform] || {}),
-        profile_key: profiles[platform]?.profile_key ?? profileKey,
-        connected_at: profiles[platform]?.connected_at ?? new Date().toISOString(),
+      
+      updatedProfiles[platform] = {
+        ...(updatedProfiles[platform] || {}),
+        profile_key: updatedProfiles[platform]?.profile_key ?? profileKey,
+        connected_at: updatedProfiles[platform]?.connected_at ?? new Date().toISOString(),
+        last_synced: new Date().toISOString(),
       }
     }
 
+    console.log('📝 Updating gym with profiles:', updatedProfiles)
+
     const { error: updateError } = await supabase
       .from('gyms')
-      .update({ ayrshare_profiles: profiles })
+      .update({ ayrshare_profiles: updatedProfiles })
       .eq('id', gymId)
 
     if (updateError) {
-      console.error('sync-profiles update error:', updateError)
-      return NextResponse.json({ error: 'Failed to save profiles' }, { status: 500 })
+      console.error('❌ sync-profiles update error:', updateError)
+      return NextResponse.json({ error: 'Failed to save profiles', details: updateError }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, profiles, source: data })
+    console.log('✅ Successfully updated gym profiles')
+
+    return NextResponse.json({ 
+      success: true, 
+      profiles: updatedProfiles, 
+      source: data,
+      message: 'Profiles synced successfully'
+    })
   } catch (e) {
-    console.error('sync-profiles route error:', e)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    console.error('❌ sync-profiles route error:', e)
+    return NextResponse.json({ error: 'Internal Server Error', details: e }, { status: 500 })
   }
 }
 
