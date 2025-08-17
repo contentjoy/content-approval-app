@@ -5,7 +5,7 @@ import { useBranding } from '@/contexts/branding-context'
 import { BrandedButton } from '@/components/ui/branded-button'
 import { Logo } from '@/components/ui/logo'
 import { useParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { getGymBySlug } from '@/lib/database'
 import { useToast } from '@/components/ui/toast'
 
 type TabType = 'general' | 'team' | 'notifications' | 'integrations'
@@ -377,31 +377,29 @@ function AyrshareIntegrationSettings() {
         const gymName = gymSlug.toString().replace(/-/g, ' ')
         console.log('🔍 Looking for gym with name:', gymName)
         
-        const { data: gym, error } = await supabase
-          .from('gyms')
-          .select('id, profile_key, ayrshare_profiles')
-          .ilike('"Gym Name"', gymName)
-          .single()
+        const gym = await getGymBySlug(gymSlug.toString())
 
-        if (error) {
-          console.error('❌ Supabase error:', error)
-          throw error
-        }
-        
-        console.log('✅ Found gym:', { id: gym.id, name: gymName, profileKey: gym.profile_key })
-        
-        setGymId(gym.id)
-        setProfileKey(gym.profile_key)
-        
-        // Extract connected platforms from ayrshare_profiles
-        if (gym.ayrshare_profiles) {
-          const platforms = Object.keys(gym.ayrshare_profiles).filter(
-            platform => gym.ayrshare_profiles[platform]?.profile_key
-          )
-          console.log('🔗 Connected platforms:', platforms)
-          setConnectedPlatforms(platforms)
+        if (gym) {
+          console.log('✅ Found gym:', { id: gym.id, name: gym['Gym Name'] })
+          setGymId(gym.id)
+          
+          // Note: profile_key is not a property of Gym, it's stored in ayrshare_profiles
+          // We'll need to get it from the database or set it to null for now
+          setProfileKey(null) // TODO: Get profile_key from database if needed
+          
+          // Extract connected platforms from ayrshare_profiles
+          if (gym.ayrshare_profiles) {
+            const platforms = Object.keys(gym.ayrshare_profiles).filter(
+              platform => gym.ayrshare_profiles![platform as keyof typeof gym.ayrshare_profiles]?.profile_key
+            )
+            console.log('🔗 Connected platforms:', platforms)
+            setConnectedPlatforms(platforms)
+          } else {
+            console.log('ℹ️ No ayrshare_profiles found')
+          }
         } else {
-          console.log('ℹ️ No ayrshare_profiles found')
+          console.log('ℹ️ Gym not found with slug:', gymSlug)
+          setError('Gym not found. Please ensure the gym slug is correct.')
         }
       } catch (err) {
         console.error('❌ Failed to load gym data:', err)
@@ -488,12 +486,50 @@ function AyrshareIntegrationSettings() {
     }
   }
 
+  // Get profile key from database
+  const getProfileKey = async (): Promise<string | null> => {
+    if (!gymId) return null
+    
+    try {
+      // Query the database directly to get profile_key
+      const { data, error } = await fetch(`/api/gym-profile?gymId=${gymId}`).then(res => res.json())
+      
+      if (error) {
+        console.error('❌ Failed to get profile key:', error)
+        return null
+      }
+      
+      return data?.profile_key || null
+    } catch (err) {
+      console.error('❌ Error getting profile key:', err)
+      return null
+    }
+  }
+
   const handleSyncProfiles = async () => {
-    if (!gymId || !profileKey) {
+    if (!gymId) {
       showToast({
         type: 'error',
         title: 'Error',
-        message: 'Missing gym ID or profile key. Please refresh the page.',
+        message: 'Gym ID not found. Please refresh the page.',
+      })
+      return
+    }
+
+    // Get profile key if we don't have it
+    let currentProfileKey = profileKey
+    if (!currentProfileKey) {
+      currentProfileKey = await getProfileKey()
+      if (currentProfileKey) {
+        setProfileKey(currentProfileKey)
+      }
+    }
+
+    if (!currentProfileKey) {
+      showToast({
+        type: 'error',
+        title: 'Error',
+        message: 'No profile key found. Please connect to Ayrshare first.',
       })
       return
     }
@@ -505,7 +541,7 @@ function AyrshareIntegrationSettings() {
       const response = await fetch('/api/ayrshare/sync-profiles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gymId, profileKey }),
+        body: JSON.stringify({ gymId, profileKey: currentProfileKey }),
       })
 
       if (!response.ok) {
@@ -548,27 +584,19 @@ function AyrshareIntegrationSettings() {
     try {
       console.log('🔍 Loading existing connected accounts for gym:', gymId)
       
-      const { data: gym, error } = await supabase
-        .from('gyms')
-        .select('ayrshare_profiles, social_accounts')
-        .eq('id', gymId)
-        .single()
-
-      if (error) {
-        console.error('❌ Failed to load existing accounts:', error)
-        return
-      }
-
-      if (gym.ayrshare_profiles) {
+      // Re-fetch the gym data to get the latest ayrshare_profiles
+      const gym = await getGymBySlug(gymSlug?.toString() || '')
+      
+      if (gym && gym.ayrshare_profiles) {
         const platforms = Object.keys(gym.ayrshare_profiles).filter(
-          platform => gym.ayrshare_profiles[platform]?.profile_key
+          platform => gym.ayrshare_profiles![platform as keyof typeof gym.ayrshare_profiles]?.profile_key
         )
         console.log('🔗 Found existing connected platforms:', platforms)
         setConnectedPlatforms(platforms)
       }
 
       // Also check social_accounts for additional connection info
-      if (gym.social_accounts) {
+      if (gym?.social_accounts) {
         console.log('🔗 Social accounts found:', gym.social_accounts)
       }
 
