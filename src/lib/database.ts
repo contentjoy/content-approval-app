@@ -86,8 +86,8 @@ export async function debugGyms(): Promise<void> {
  * Query social_media_posts WHERE "Gym Name" = 'movement society'
  */
 export async function getPostsForGymBySlug(slug: string, status?: string): Promise<SocialMediaPost[]> {
-  // Convert slug format "gym-name" to lowercase "movement society"
-  const gymName = slug.replace(/-/g, ' ').toLowerCase()
+  // Convert slug format "gym-name" to lowercase "gym name"
+  const gymName = slugToGymName(slug)
   
   console.log('🔍 Getting posts for gym name:', gymName)
   console.log('🔍 Raw slug:', slug)
@@ -225,6 +225,33 @@ export async function getPostsForGymBySlug(slug: string, status?: string): Promi
 }
 
 /**
+ * Normalize gym name for consistent storage and lookup
+ * Converts "Gym Name" to lowercase with proper spacing
+ */
+export function normalizeGymName(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+}
+
+/**
+ * Convert gym name to URL slug format
+ * Converts "gym name" to "gym-name"
+ */
+export function gymNameToSlug(name: string): string {
+  return normalizeGymName(name).replace(/\s+/g, '-')
+}
+
+/**
+ * Convert URL slug to gym name format
+ * Converts "gym-name" to "gym name"
+ */
+export function slugToGymName(slug: string): string {
+  return slug.replace(/-/g, ' ').toLowerCase()
+}
+
+/**
  * Get gym by slug - DIRECT APPROACH
  * Query gyms table directly by slug name
  */
@@ -232,11 +259,15 @@ export async function getGymBySlug(slug: string): Promise<Gym | null> {
   console.log('🔍 Looking for gym with slug:', slug)
   
   try {
-    // Query gyms table directly using the slug as the Gym Name
+    // Transform slug format "gym-name" to gym name format "gym name"
+    const gymName = slugToGymName(slug)
+    console.log('🔍 Transformed slug to gym name:', gymName)
+    
+    // Query gyms table using the transformed gym name
     const { data: gym, error: gymError } = await supabase
       .from('gyms')
       .select('*')
-      .eq('"Gym Name"', slug) // Use slug directly since we store it as the gym name
+      .ilike('"Gym Name"', gymName) // Use case-insensitive search
       .single()
 
     if (gymError) {
@@ -259,6 +290,7 @@ export async function getGymBySlug(slug: string): Promise<Gym | null> {
 
     if (!gym) {
       console.error('❌ No gym found with slug:', slug)
+      console.error('🔍 Searched for gym name:', gymName)
       return null
     }
 
