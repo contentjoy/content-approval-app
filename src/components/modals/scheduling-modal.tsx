@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { CheckCircle, Globe } from 'lucide-react'
+import { CheckCircle, Globe, Calendar, Clock, ChevronDown } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 import { BrandedButton } from '@/components/ui/branded-button'
 import { useToast } from '@/components/ui/toast'
@@ -209,9 +209,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-4 w-4 text-[var(--muted-text)]" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                <Calendar className="h-4 w-4 text-[var(--muted-text)]" />
               </div>
               <input
                 type="date"
@@ -232,9 +230,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-4 w-4 text-[var(--muted-text)]" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <Clock className="h-4 w-4 text-[var(--muted-text)]" />
               </div>
               <input
                 type="time"
@@ -268,9 +264,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg className="h-4 w-4 text-[var(--muted-text)]" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 9l-7 7-7-7" />
-                </svg>
+                <ChevronDown className="h-4 w-4 text-[var(--muted-text)]" />
               </div>
             </div>
             {errors.timezone && (
