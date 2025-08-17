@@ -13,7 +13,6 @@ import { useParams } from 'next/navigation'
 import type { SocialMediaPost } from '@/types'
 
 const schedulingSchema = z.object({
-  frequency: z.enum(['daily', 'every-other-day']),
   startDate: z.string().min(1, 'Start date is required'),
   startTime: z.string().min(1, 'Start time is required'),
   timezone: z.string().min(1, 'Timezone is required'),
@@ -68,7 +67,6 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
   } = useForm<SchedulingFormData>({
     resolver: zodResolver(schedulingSchema),
     defaultValues: {
-      frequency: 'daily',
       startDate: new Date().toISOString().split('T')[0],
       startTime: '09:00',
       timezone: getCurrentTimezone(),
@@ -80,17 +78,13 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
     setValue('timezone', getCurrentTimezone())
   }, [setValue])
 
-  const watchedFrequency = watch('frequency')
   const watchedStartDate = watch('startDate')
   const watchedStartTime = watch('startTime')
   const watchedTimezone = watch('timezone')
 
   const getDuration = () => {
-    if (watchedFrequency === 'daily') {
-      return approvedPosts.length
-    } else {
-      return approvedPosts.length * 2
-    }
+    // Default to daily posting
+    return approvedPosts.length
   }
 
   const getEndDate = () => {
@@ -100,11 +94,8 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
     const duration = getDuration()
     const endDate = new Date(startDate)
     
-    if (watchedFrequency === 'daily') {
-      endDate.setDate(startDate.getDate() + duration - 1)
-    } else {
-      endDate.setDate(startDate.getDate() + (duration - 1) * 2)
-    }
+    // Daily posting
+    endDate.setDate(startDate.getDate() + duration - 1)
     
     return endDate.toLocaleDateString('en-US', { 
       weekday: 'long', 
@@ -146,7 +137,6 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
         "Start Date": data.startDate,
         "Timezone": data.timezone,
         // Additional metadata for reference
-        frequency: data.frequency,
         postCount: approvedPosts.length,
         duration: getDuration(),
         endDate: getEndDate()
@@ -197,58 +187,18 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
         {/* Posts Ready Info */}
         <div className="bg-[var(--modal-surface)] rounded-[12px] p-4 border border-[var(--modal-border)]">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-[var(--hover)] rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-[var(--hover)] rounded-lg flex items-center justify-center flex-shrink-0">
               <CheckCircle className="w-5 h-5 text-[var(--text)]" />
             </div>
-            <div>
-              <h3 className="font-medium text-[var(--text)] text-sm">
+            <div className="flex-1">
+              <h3 className="font-medium text-[var(--text)] text-sm leading-tight">
                 {approvedPosts.length} Posts Ready to Schedule
               </h3>
-              <p className="text-xs text-[var(--muted-text)] opacity-80">
+              <p className="text-xs text-[var(--muted-text)] opacity-80 mt-1">
                 All posts have been approved and are ready for scheduling
               </p>
             </div>
           </div>
-        </div>
-
-        {/* Scheduling Options */}
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-3">
-            Scheduling Frequency:
-          </label>
-          <div className="space-y-3">
-            <label className="flex items-center space-x-3 p-4 border border-[var(--modal-border)] rounded-[12px] hover:bg-[var(--hover)] cursor-pointer transition-all duration-200">
-              <input
-                type="radio"
-                value="daily"
-                {...register('frequency')}
-                className="text-[var(--modal-surface)] focus:ring-[var(--modal-surface)]"
-              />
-              <div className="flex-1">
-                <div className="font-medium text-[var(--text)]">One post per day</div>
-                <div className="text-sm text-[var(--muted-text)]">
-                  Duration: {approvedPosts.length} days
-                </div>
-              </div>
-            </label>
-            <label className="flex items-center space-x-3 p-4 border border-[var(--modal-border)] rounded-[12px] hover:bg-[var(--hover)] cursor-pointer transition-all duration-200">
-              <input
-                type="radio"
-                value="every-other-day"
-                {...register('frequency')}
-                className="text-[var(--modal-surface)] focus:ring-[var(--modal-surface)]"
-              />
-              <div className="flex-1">
-                <div className="font-medium text-[var(--text)]">Every other day</div>
-                <div className="text-sm text-[var(--muted-text)]">
-                  Duration: {approvedPosts.length * 2} days
-                </div>
-              </div>
-            </label>
-          </div>
-            {errors.frequency && (
-              <p className="mt-1 text-sm text-destructive">{errors.frequency.message}</p>
-            )}
         </div>
 
         {/* Date, Time, and Timezone Selection */}
@@ -257,13 +207,20 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
             <label htmlFor="startDate" className="block text-sm font-medium text-foreground mb-2">
               Start Date <span className="text-destructive">*</span>
             </label>
-            <input
-              type="date"
-              id="startDate"
-              {...register('startDate')}
-              min={new Date().toISOString().split('T')[0]}
-              className="w-full px-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200"
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-4 w-4 text-[var(--muted-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <input
+                type="date"
+                id="startDate"
+                {...register('startDate')}
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full pl-10 pr-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200"
+              />
+            </div>
             {errors.startDate && (
               <p className="mt-1 text-sm text-destructive">{errors.startDate.message}</p>
             )}
@@ -273,12 +230,19 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
             <label htmlFor="startTime" className="block text-sm font-medium text-foreground mb-2">
               Post Time <span className="text-destructive">*</span>
             </label>
-            <input
-              type="time"
-              id="startTime"
-              {...register('startTime')}
-              className="w-full px-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200"
-            />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-4 w-4 text-[var(--muted-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <input
+                type="time"
+                id="startTime"
+                {...register('startTime')}
+                className="w-full pl-10 pr-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200"
+              />
+            </div>
             {errors.startTime && (
               <p className="mt-1 text-sm text-destructive">{errors.startTime.message}</p>
             )}
@@ -328,7 +292,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
               })}</p>
               <p><strong>Post Time:</strong> {formatTimeForWebhook(watchedStartTime)} {watchedTimezone}</p>
               <p><strong>End Date:</strong> {getEndDate()}</p>
-              <p><strong>Duration:</strong> {getDuration()} {watchedFrequency === 'daily' ? 'days' : 'days (every other day)'}</p>
+              <p><strong>Duration:</strong> {getDuration()} days</p>
               <p><strong>Posts:</strong> {approvedPosts.length} approved posts</p>
             </div>
           </div>

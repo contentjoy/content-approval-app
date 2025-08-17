@@ -108,14 +108,14 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
         {/* Post Preview */}
         <div className="bg-[var(--modal-surface)] rounded-lg p-4 border border-[var(--modal-border)]">
           <div className="flex items-center space-x-3 mb-3">
-            <div className="w-10 h-10 bg-destructive/10 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-destructive/10 rounded-lg flex items-center justify-center flex-shrink-0">
               <XCircle className="w-5 h-5 text-destructive" />
             </div>
-            <div>
-              <h3 className="font-medium text-foreground">
+            <div className="flex-1">
+              <h3 className="font-medium text-foreground leading-tight">
                 {post['Content Type'] || 'Social Media Post'}
               </h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mt-1">
                 {post['Asset Type'] || 'Image'} • {isCarousel ? `Carousel (${carouselPosts.length} slides)` : 'Single'}
               </p>
             </div>
