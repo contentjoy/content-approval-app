@@ -365,16 +365,30 @@ function AyrshareIntegrationSettings() {
   // Load gym data on component mount
   useEffect(() => {
     const loadGymData = async () => {
-      if (!gymSlug) return
+      console.log('🔍 Loading gym data for slug:', gymSlug)
+      
+      if (!gymSlug) {
+        console.log('❌ No gymSlug available')
+        return
+      }
       
       try {
+        // Convert slug to gym name (e.g., "kokoro-demo" -> "kokoro demo")
+        const gymName = gymSlug.toString().replace(/-/g, ' ')
+        console.log('🔍 Looking for gym with name:', gymName)
+        
         const { data: gym, error } = await supabase
           .from('gyms')
           .select('id, profile_key, ayrshare_profiles')
-          .ilike('"Gym Name"', gymSlug.toString().replace(/-/g, ' '))
+          .ilike('"Gym Name"', gymName)
           .single()
 
-        if (error) throw error
+        if (error) {
+          console.error('❌ Supabase error:', error)
+          throw error
+        }
+        
+        console.log('✅ Found gym:', { id: gym.id, name: gymName, profileKey: gym.profile_key })
         
         setGymId(gym.id)
         setProfileKey(gym.profile_key)
@@ -384,16 +398,24 @@ function AyrshareIntegrationSettings() {
           const platforms = Object.keys(gym.ayrshare_profiles).filter(
             platform => gym.ayrshare_profiles[platform]?.profile_key
           )
+          console.log('🔗 Connected platforms:', platforms)
           setConnectedPlatforms(platforms)
+        } else {
+          console.log('ℹ️ No ayrshare_profiles found')
         }
       } catch (err) {
-        console.error('Failed to load gym data:', err)
+        console.error('❌ Failed to load gym data:', err)
         setError('Failed to load gym data')
       }
     }
 
     loadGymData()
   }, [gymSlug])
+
+  // Debug: Log current state
+  useEffect(() => {
+    console.log('🔍 Current state:', { gymSlug, gymId, profileKey, connectedPlatforms })
+  }, [gymSlug, gymId, profileKey, connectedPlatforms])
 
   const handleConnectPlatform = async (platform: string) => {
     if (!gymId) {
@@ -519,6 +541,49 @@ function AyrshareIntegrationSettings() {
     }
   }
 
+  // Load existing connected accounts from database
+  const loadExistingAccounts = async () => {
+    if (!gymId) return
+    
+    try {
+      console.log('🔍 Loading existing connected accounts for gym:', gymId)
+      
+      const { data: gym, error } = await supabase
+        .from('gyms')
+        .select('ayrshare_profiles, social_accounts')
+        .eq('id', gymId)
+        .single()
+
+      if (error) {
+        console.error('❌ Failed to load existing accounts:', error)
+        return
+      }
+
+      if (gym.ayrshare_profiles) {
+        const platforms = Object.keys(gym.ayrshare_profiles).filter(
+          platform => gym.ayrshare_profiles[platform]?.profile_key
+        )
+        console.log('🔗 Found existing connected platforms:', platforms)
+        setConnectedPlatforms(platforms)
+      }
+
+      // Also check social_accounts for additional connection info
+      if (gym.social_accounts) {
+        console.log('🔗 Social accounts found:', gym.social_accounts)
+      }
+
+    } catch (err) {
+      console.error('❌ Error loading existing accounts:', err)
+    }
+  }
+
+  // Load existing accounts when gymId becomes available
+  useEffect(() => {
+    if (gymId) {
+      loadExistingAccounts()
+    }
+  }, [gymId])
+
   const platforms = [
     { id: 'instagram', name: 'Instagram', icon: '📷', color: '#E4405F' },
     { id: 'facebook', name: 'Facebook', icon: '📘', color: '#1877F2' },
@@ -533,7 +598,17 @@ function AyrshareIntegrationSettings() {
       
       {/* Connection Status */}
       <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-        <h3 className="font-medium text-gray-900 mb-2">Connection Status</h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-medium text-gray-900">Connection Status</h3>
+          <BrandedButton
+            onClick={loadExistingAccounts}
+            disabled={!gymId || isLoading}
+            size="sm"
+            variant="outline"
+          >
+            🔄 Refresh
+          </BrandedButton>
+        </div>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <div className={`w-3 h-3 rounded-full ${profileKey ? 'bg-green-500' : 'bg-red-500'}`} />
@@ -547,6 +622,16 @@ function AyrshareIntegrationSettings() {
             </span>
           )}
         </div>
+        {gymId && (
+          <div className="mt-2 text-xs text-gray-500">
+            Gym ID: {gymId}
+          </div>
+        )}
+        {!gymId && (
+          <div className="mt-2 text-xs text-red-500">
+            ⚠️ Gym ID not loaded. Please refresh the page.
+          </div>
+        )}
       </div>
 
       {/* Platform Connections */}
