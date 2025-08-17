@@ -366,6 +366,8 @@ function AyrshareIntegrationSettings() {
   useEffect(() => {
     const loadGymData = async () => {
       console.log('🔍 Loading gym data for slug:', gymSlug)
+      console.log('🔍 gymSlug type:', typeof gymSlug)
+      console.log('🔍 gymSlug value:', gymSlug)
       
       if (!gymSlug) {
         console.log('❌ No gymSlug available')
@@ -377,11 +379,14 @@ function AyrshareIntegrationSettings() {
         const gymName = gymSlug.toString().replace(/-/g, ' ')
         console.log('🔍 Looking for gym with name:', gymName)
         
+        console.log('🔍 Calling getGymBySlug with:', gymSlug.toString())
         const gym = await getGymBySlug(gymSlug.toString())
+        console.log('🔍 getGymBySlug result:', gym)
 
         if (gym) {
           console.log('✅ Found gym:', { id: gym.id, name: gym['Gym Name'] })
-          setGymId(gym.id)
+          console.log('✅ Setting gymId to:', gym.id)
+          setGymId(gym.id) // gym.id is the primary key from the gyms table
           
           // Note: profile_key is not a property of Gym, it's stored in ayrshare_profiles
           // We'll need to get it from the database or set it to null for now
