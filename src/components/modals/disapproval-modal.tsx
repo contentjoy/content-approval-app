@@ -111,7 +111,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
             <div className="w-10 h-10 bg-destructive/10 rounded-lg flex items-center justify-center flex-shrink-0">
               <XCircle className="w-5 h-5 text-destructive" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 flex flex-col justify-center">
               <h3 className="font-medium text-foreground leading-tight">
                 {post['Content Type'] || 'Social Media Post'}
               </h3>

@@ -124,7 +124,7 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
             <div className="w-10 h-10 bg-accent rounded-2xl flex items-center justify-center flex-shrink-0">
               <CheckCircle className="w-5 h-5 text-white" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 flex flex-col justify-center">
               <h3 className="font-medium text-foreground leading-tight">
                 {post['Content Type'] || 'Social Media Post'}
               </h3>
