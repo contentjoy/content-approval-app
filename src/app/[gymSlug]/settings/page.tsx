@@ -356,14 +356,19 @@ function NotificationSettings() {
 function AyrshareIntegrationSettings() {
   const { showToast } = useToast()
   const { gymSlug } = useParams()
-  const [isLoading, setIsLoading] = useState(false)
   const [gymId, setGymId] = useState<string | null>(null)
   const [profileKey, setProfileKey] = useState<string | null>(null)
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isLoadingGymData, setIsLoadingGymData] = useState(true) // New state for gym data loading
 
   // Load gym data on component mount
   useEffect(() => {
+    console.log('🚀 AyrshareIntegrationSettings component mounted')
+    console.log('🚀 Initial gymSlug:', gymSlug)
+    console.log('🚀 Initial gymId state:', gymId)
+    
     const loadGymData = async () => {
       console.log('🔍 Loading gym data for slug:', gymSlug)
       console.log('🔍 gymSlug type:', typeof gymSlug)
@@ -371,6 +376,7 @@ function AyrshareIntegrationSettings() {
       
       if (!gymSlug) {
         console.log('❌ No gymSlug available')
+        setIsLoadingGymData(false)
         return
       }
       
@@ -409,16 +415,22 @@ function AyrshareIntegrationSettings() {
       } catch (err) {
         console.error('❌ Failed to load gym data:', err)
         setError('Failed to load gym data')
+      } finally {
+        setIsLoadingGymData(false)
       }
     }
 
     loadGymData()
   }, [gymSlug])
 
-  // Debug: Log current state
+  // Debug effect to track state changes
   useEffect(() => {
-    console.log('🔍 Current state:', { gymSlug, gymId, profileKey, connectedPlatforms })
-  }, [gymSlug, gymId, profileKey, connectedPlatforms])
+    console.log('🔄 gymId state changed to:', gymId)
+  }, [gymId])
+
+  useEffect(() => {
+    console.log('🔄 profileKey state changed to:', profileKey)
+  }, [profileKey])
 
   const handleConnectPlatform = async (platform: string) => {
     if (!gymId) {
@@ -512,29 +524,26 @@ function AyrshareIntegrationSettings() {
   }
 
   const handleSyncProfiles = async () => {
+    console.log('🔄 handleSyncProfiles called')
+    console.log('🔄 Current gymId state:', gymId)
+    console.log('🔄 Current profileKey state:', profileKey)
+    
     if (!gymId) {
+      console.error('❌ Cannot sync profiles: gymId is undefined')
       showToast({
         type: 'error',
         title: 'Error',
-        message: 'Gym ID not found. Please refresh the page.',
+        message: 'Gym ID not loaded. Please refresh the page.',
       })
       return
     }
-
-    // Get profile key if we don't have it
-    let currentProfileKey = profileKey
-    if (!currentProfileKey) {
-      currentProfileKey = await getProfileKey()
-      if (currentProfileKey) {
-        setProfileKey(currentProfileKey)
-      }
-    }
-
-    if (!currentProfileKey) {
+    
+    if (!profileKey) {
+      console.error('❌ Cannot sync profiles: profileKey is undefined')
       showToast({
         type: 'error',
         title: 'Error',
-        message: 'No profile key found. Please connect to Ayrshare first.',
+        message: 'Profile key not found. Please complete onboarding first.',
       })
       return
     }
@@ -543,39 +552,43 @@ function AyrshareIntegrationSettings() {
     setError(null)
 
     try {
+      console.log('🔄 Calling sync-profiles API with:', { gymId, profileKey })
+      
       const response = await fetch('/api/ayrshare/sync-profiles', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gymId, profileKey: currentProfileKey }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ gymId, profileKey }),
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to sync profiles')
+      const result = await response.json()
+      console.log('🔄 sync-profiles API response:', result)
+
+      if (response.ok) {
+        showToast({
+          type: 'success',
+          title: 'Profiles synced successfully!',
+          message: 'Your social media profiles have been successfully synced.',
+        })
+        // Refresh the connected platforms
+        await loadExistingAccounts()
+      } else {
+        console.error('❌ sync-profiles API error:', result)
+        setError(result.error || 'Failed to sync profiles')
+        showToast({
+          type: 'error',
+          title: 'Sync Failed',
+          message: result.error || 'Failed to sync profiles',
+        })
       }
-
-      const data = await response.json()
-      showToast({
-        type: 'success',
-        title: 'Profiles Synced!',
-        message: 'Your social media profiles have been successfully synced.',
-      })
-
-      // Refresh connected platforms
-      if (data.profiles) {
-        const platforms = Object.keys(data.profiles).filter(
-          platform => data.profiles[platform]?.profile_key
-        )
-        setConnectedPlatforms(platforms)
-      }
-
-    } catch (err) {
-      console.error('Failed to sync profiles:', err)
-      setError(err instanceof Error ? err.message : 'Failed to sync profiles')
+    } catch (error) {
+      console.error('❌ sync-profiles request failed:', error)
+      setError('Network error occurred')
       showToast({
         type: 'error',
         title: 'Sync Failed',
-        message: err instanceof Error ? err.message : 'Failed to sync profiles',
+        message: 'Network error occurred',
       })
     } finally {
       setIsLoading(false)
@@ -635,7 +648,7 @@ function AyrshareIntegrationSettings() {
           <h3 className="font-medium text-gray-900">Connection Status</h3>
           <BrandedButton
             onClick={loadExistingAccounts}
-            disabled={!gymId || isLoading}
+            disabled={!gymId || isLoadingGymData}
             size="sm"
             variant="outline"
           >
@@ -701,7 +714,7 @@ function AyrshareIntegrationSettings() {
         <div className="mb-6">
           <BrandedButton
             onClick={handleSyncProfiles}
-            disabled={isLoading}
+            disabled={isLoading || !gymId}
             className="w-full"
           >
             {isLoading ? 'Syncing...' : 'Sync Social Media Profiles'}
@@ -727,6 +740,18 @@ function AyrshareIntegrationSettings() {
           <li>• Sync your profiles to get the latest connection status</li>
           <li>• Manage all your social media accounts in one place</li>
         </ul>
+      </div>
+
+      {/* Debug Information */}
+      <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border">
+        <h4 className="font-semibold text-sm mb-2">🔍 Debug Info</h4>
+        <div className="text-xs space-y-1">
+          <div>gymSlug: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">{gymSlug || 'undefined'}</code></div>
+          <div>gymId: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">{gymId || 'undefined'}</code></div>
+          <div>profileKey: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">{profileKey ? 'loaded' : 'undefined'}</code></div>
+          <div>Loading Gym Data: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">{isLoadingGymData ? 'true' : 'false'}</code></div>
+          <div>Connected Platforms: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">{connectedPlatforms.length}</code></div>
+        </div>
       </div>
     </div>
   )
