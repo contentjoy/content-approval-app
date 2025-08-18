@@ -1,6 +1,6 @@
 "use client";
 
-import { isToday, startOfDay, parseISO } from "date-fns";
+import { isToday, startOfDay, endOfDay, parseISO } from "date-fns";
 import { motion } from "framer-motion";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -17,15 +17,13 @@ const MAX_VISIBLE_EVENTS = 3;
 export function DayCell({ cell, events }: IProps) {
 	const { day, currentMonth, date } = cell;
 
-	// Get events for this specific day
+	// Get events for this specific day (start time falls within the day)
 	const cellEvents = useMemo(() => {
+		const cellStart = startOfDay(date);
+		const cellEnd = endOfDay(date);
 		return events.filter((event) => {
 			const eventStart = parseISO(event.startDate);
-			const eventEnd = parseISO(event.endDate);
-			const cellDate = startOfDay(date);
-			
-			// Check if event overlaps with this day
-			return eventStart <= cellDate && eventEnd >= cellDate;
+			return eventStart >= cellStart && eventStart <= cellEnd;
 		});
 	}, [date, events]);
 
