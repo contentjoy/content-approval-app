@@ -178,13 +178,23 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ gymId: effectiveGymId, profileKey: pk }),
           })
-          // refresh local state
+          // refresh local state and mark platform as connected if provided
           const { data: g } = await supabase
             .from('gyms')
             .select('ayrshare_profiles')
             .eq('id', effectiveGymId)
             .single()
-          setAyrshareProfiles((g as any)?.ayrshare_profiles || {})
+          const current = (g as any)?.ayrshare_profiles || {}
+          if (platform) {
+            current[platform] = {
+              ...(current[platform] || {}),
+              profile_key: current[platform]?.profile_key ?? pk,
+              connected_at: current[platform]?.connected_at ?? new Date().toISOString(),
+              last_synced: new Date().toISOString(),
+            }
+            await supabase.from('gyms').update({ ayrshare_profiles: current } as any).eq('id', effectiveGymId)
+          }
+          setAyrshareProfiles(current)
         }
       }, 600)
     } catch (e: any) {

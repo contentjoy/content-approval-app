@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { getAdminClient } from '@/lib/supabaseServer'
 
 interface Body {
   gymId?: string
@@ -17,7 +18,8 @@ export async function POST(req: NextRequest) {
     // Fallback: resolve gymId via profile_key if not provided
     if (!gymId && profileKey) {
       try {
-        const { data: matchedGym, error: findError } = await supabase
+        const admin = getAdminClient()
+        const { data: matchedGym, error: findError } = await admin
           .from('gyms')
           .select('id, "Gym Name", ayrshare_profiles')
           .eq('profile_key', profileKey)
@@ -33,6 +35,8 @@ export async function POST(req: NextRequest) {
       console.error('❌ Missing gymId in request body')
       return NextResponse.json({ error: 'gymId is required' }, { status: 400 })
     }
+
+    console.log('🔁 Using gymId for sync:', gymId)
     
     if (!profileKey) {
       console.error('❌ Missing profileKey in request body')
@@ -46,7 +50,8 @@ export async function POST(req: NextRequest) {
     }
 
     // First, verify the gym exists and get its current data
-    const { data: gym, error: gymError } = await supabase
+    const admin = getAdminClient()
+    const { data: gym, error: gymError } = await admin
       .from('gyms')
       .select('id, "Gym Name", ayrshare_profiles')
       .eq('id', gymId)
@@ -77,6 +82,7 @@ export async function POST(req: NextRequest) {
     const candidates = [
       'https://app.ayrshare.com/api/user',
       'https://app.ayrshare.com/api/profiles/user',
+      'https://app.ayrshare.com/api/profiles',
     ]
     
     for (const url of candidates) {
@@ -116,6 +122,17 @@ export async function POST(req: NextRequest) {
       if (Array.isArray(data.accounts)) {
         for (const acc of data.accounts) linked[String(acc.platform)] = Boolean(acc.linked ?? true)
       }
+      // Shape 4: { activeSocialAccounts: ['instagram','facebook'] }
+      if (Array.isArray((data as any).activeSocialAccounts)) {
+        for (const k of (data as any).activeSocialAccounts) linked[String(k)] = true
+      }
+      // Shape 5: Profiles array: [{ platform: 'instagram', connected: true }]
+      if (Array.isArray((data as any).profiles)) {
+        for (const p of (data as any).profiles) {
+          const platform = String(p.platform || p.name || '')
+          if (platform) linked[platform] = Boolean(p.connected ?? p.linked ?? true)
+        }
+      }
     }
 
     console.log('🔍 Parsed linked platforms:', linked)
@@ -123,10 +140,9 @@ export async function POST(req: NextRequest) {
     // Merge into ayrshare_profiles
     const currentProfiles: Record<string, any> = gym?.ayrshare_profiles || {}
     const updatedProfiles = { ...currentProfiles }
-    
+
     for (const [platform, isLinked] of Object.entries(linked)) {
       if (!isLinked) continue
-      
       updatedProfiles[platform] = {
         ...(updatedProfiles[platform] || {}),
         profile_key: updatedProfiles[platform]?.profile_key ?? profileKey,
@@ -135,9 +151,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    if (Object.keys(linked).length === 0) {
+      console.log('ℹ️ No linked platforms reported by Ayrshare. Preserving existing profiles without update.')
+      return NextResponse.json({ 
+        success: true,
+        profiles: currentProfiles,
+        message: 'No linked platforms from Ayrshare; returned current profiles.'
+      })
+    }
+
     console.log('📝 Updating gym with profiles:', updatedProfiles)
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await admin
       .from('gyms')
       .update({ ayrshare_profiles: updatedProfiles })
       .eq('id', gymId)
