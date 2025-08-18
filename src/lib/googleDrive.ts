@@ -104,6 +104,30 @@ export async function ensureFolder(
   }
 }
 
+// Find a file by exact name within a parent folder. Returns the first match or null.
+export async function findFileInFolder(
+  drive: drive_v3.Drive,
+  parentId: string,
+  name: string
+): Promise<{ id: string; name: string; size?: string } | null> {
+  try {
+    // Escape single quotes in the query
+    const escapedName = name.replace(/'/g, "\\'")
+    const q = `name='${escapedName}' and '${parentId}' in parents and trashed=false`;
+    const { data } = await drive.files.list({
+      q,
+      fields: 'files(id,name,size)',
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
+      pageSize: 10
+    });
+    return data.files && data.files.length > 0 ? data.files[0] as any : null
+  } catch (error) {
+    console.error('❌ Error finding file in folder:', error)
+    return null
+  }
+}
+
 export async function ensureGymUploadStructure(drive: drive_v3.Drive, p: {
   driveRootId: string;
   gymName: string;

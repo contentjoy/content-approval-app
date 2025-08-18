@@ -49,6 +49,11 @@ CREATE INDEX idx_upload_slots_upload_id ON upload_slots(upload_id);
 CREATE INDEX idx_files_upload_id ON files(upload_id);
 CREATE INDEX idx_files_slot_name ON files(slot_name);
 
+-- 6a. Enforce uniqueness to prevent duplicates per upload session
+-- A file is considered the same if (upload_id, slot_name, name, size_bytes) match
+ALTER TABLE files
+ADD CONSTRAINT files_unique_per_upload UNIQUE (upload_id, slot_name, name, size_bytes);
+
 -- 6. Enable Row Level Security (RLS) if needed
 -- ALTER TABLE uploads ENABLE ROW LEVEL SECURITY;
 -- ALTER TABLE upload_slots ENABLE ROW LEVEL SECURITY;

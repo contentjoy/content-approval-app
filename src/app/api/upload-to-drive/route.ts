@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { getDrive, ensureFolder } from '@/lib/googleDrive';
+import { getDrive, ensureFolder, findFileInFolder } from '@/lib/googleDrive';
 import { PassThrough } from 'stream';
 
 export const runtime = 'nodejs';
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     
     // Handle JSON for regular uploads
     const body = await request.json()
-    const { files, gymSlug, gymName, sessionFolderId } = body
+    const { files, gymSlug, gymName, sessionFolderId, folderStructure: providedFolderStructure } = body
     
     if (!files || files.length === 0) {
       return NextResponse.json({ error: 'No files provided' }, { status: 400 })
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Regular upload flow (chunked uploads handled via FormData above)
-    return await handleRegularUpload(files, gymSlug, gymName, sessionFolderId, maxSize)
+    return await handleRegularUpload(files, gymSlug, gymName, sessionFolderId, maxSize, providedFolderStructure)
     
   } catch (error) {
     console.error('❌ Upload error:', error)
@@ -379,7 +379,14 @@ async function sendUploadWebhook(data: {
 }
 
 // Handle regular uploads
-async function handleRegularUpload(files: any[], gymSlug: string, gymName: string, sessionFolderId: string, maxUploadSize: number) {
+async function handleRegularUpload(
+  files: any[],
+  gymSlug: string,
+  gymName: string,
+  sessionFolderId: string,
+  maxUploadSize: number,
+  providedFolderStructure?: any
+) {
   console.log('🚀 Starting regular Google Drive upload for gym:', gymName)
   console.log('📁 Files to upload:', files.length)
   
@@ -492,8 +499,10 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
   const drive = getDrive()
   console.log('✅ Google Drive client initialized')
   
-  // Create folder structure using NORMALIZED gym name (not database name)
-  const folderStructure = await createFolderStructure(folderGymName)
+  // Create or reuse folder structure using NORMALIZED gym name
+  const folderStructure = providedFolderStructure && providedFolderStructure.rawSlotFolders
+    ? providedFolderStructure
+    : await createFolderStructure(folderGymName)
   console.log('✅ Folder structure created:', folderStructure)
   
   // 🚀 WEBHOOK: Send upload metadata to test webhook after folders are created
@@ -521,7 +530,7 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
   console.log('🚀 WEBHOOK CALL COMPLETED - continuing with upload...')
   
   // Upload files
-  const uploadResults = []
+  const uploadResults: Array<{ name: string; success: boolean; fileId?: string; slot?: string; deduped?: boolean }> = []
   for (const file of files) {
     try {
       const slotName = determineSlotName(file)
@@ -532,6 +541,21 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
       }
       
       console.log(`📤 Uploading ${file.name} to Google Drive...`)
+
+      // Idempotency: skip if same-name file already exists in target folder with same size
+      try {
+        const existing = await findFileInFolder(getDrive(), targetFolderId, file.name)
+        if (existing) {
+          const sizeMatches = existing.size ? Number(existing.size) === (file.size || 0) : false
+          if (sizeMatches) {
+            console.log(`♻️ Skipping duplicate (name+size match): ${file.name} (${existing.id})`)
+            uploadResults.push({ name: file.name, success: true, fileId: existing.id, slot: slotName, deduped: true })
+            continue
+          }
+        }
+      } catch (e) {
+        console.warn('⚠️ Dedupe check failed (continuing):', e)
+      }
       
       const uploadResult = await uploadFileToDrive(drive, file, targetFolderId, maxUploadSize)
       uploadResults.push({
@@ -545,20 +569,20 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
       console.error(`❌ Failed to process ${file.name}:`, error)
       uploadResults.push({
         name: file.name,
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        success: false
       })
     }
   }
   
   // Store upload record
+  const newUploadId = `upload_${Date.now()}`
   const { error: dbError } = await supabase
     .from('uploads')
     .insert([{
-      upload_id: `upload_${Date.now()}`,
+      upload_id: newUploadId,
       gym_id: gym.id,
       gym_name: folderGymName, // Use normalized gym name for consistency
-      upload_folder_id: sessionFolderId, // Use sessionFolderId here
+      upload_folder_id: sessionFolderId || folderStructure.timestampFolderId,
       gym_folder_id: folderStructure.gymFolderId,
       raw_footage_folder_id: folderStructure.rawFootageFolderId,
       final_footage_folder_id: folderStructure.finalFootageFolderId
@@ -570,6 +594,32 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
   } else {
     console.log('✅ Upload record stored successfully in database')
   }
+
+  // Persist file metadata for successfully uploaded files
+  try {
+    const fileRows = uploadResults
+      .filter(r => r.success && r.fileId)
+      .map(r => ({
+        upload_id: newUploadId,
+        slot_name: r.slot,
+        drive_file_id: r.fileId,
+        name: r.name,
+        size_bytes: (files.find((f: any) => f.name === r.name) || {}).size || null,
+        mime: (files.find((f: any) => f.name === r.name) || {}).type || 'application/octet-stream'
+      }))
+    if (fileRows.length > 0) {
+      const { error: filesInsertError } = await supabase
+        .from('files')
+        .insert(fileRows)
+      if (filesInsertError) {
+        console.warn('⚠️ Failed to persist files metadata:', filesInsertError)
+      } else {
+        console.log(`✅ Persisted ${fileRows.length} file metadata rows`)
+      }
+    }
+  } catch (e) {
+    console.warn('⚠️ Error persisting file metadata (non-blocking):', e)
+  }
   
   const successCount = uploadResults.filter(r => r.success).length
   const failedCount = files.length - successCount
@@ -578,8 +628,8 @@ async function handleRegularUpload(files: any[], gymSlug: string, gymName: strin
   if (failedCount > 0) {
     console.warn(`⚠️ ${failedCount} files failed to upload`)
     // Log failed uploads for debugging
-    uploadResults.filter(r => !r.success).forEach((result, index) => {
-      console.error(`❌ Failed file ${index + 1}:`, result.error || 'Unknown error')
+    uploadResults.filter(r => !r.success).forEach((_, index) => {
+      console.error(`❌ Failed file ${index + 1}`)
     })
   }
   
@@ -753,6 +803,50 @@ async function handleFolderCreation(files: any[], gymSlug: string, gymName: stri
           parentFolderId
         )
         
+        // Create an uploads record for this session folder (one per session)
+        try {
+          const uploadId = `upload_${Date.now()}`
+          const { error: uploadDbError } = await supabase
+            .from('uploads')
+            .insert([{ 
+              upload_id: uploadId,
+              gym_id: gym.id,
+              gym_name: folderGymName,
+              upload_folder_id: sessionFolderId,
+              gym_folder_id: folderStructure.gymFolderId,
+              raw_footage_folder_id: folderStructure.rawFootageFolderId,
+              final_footage_folder_id: folderStructure.finalFootageFolderId
+            }])
+          if (uploadDbError) {
+            console.warn('⚠️ Failed to create uploads record for session folder:', uploadDbError)
+          } else {
+            // Create upload_slots rows mapping slot folders
+            const slotRows = Object.entries(folderStructure.rawSlotFolders).map(([slot, folderId]) => ({
+              upload_id: uploadId,
+              slot_name: slot,
+              drive_folder_id: folderId
+            }))
+            const { error: slotsErr } = await supabase
+              .from('upload_slots')
+              .insert(slotRows)
+            if (slotsErr) {
+              console.warn('⚠️ Failed to create upload_slots rows:', slotsErr)
+            }
+            // Attach uploadId to results for client reuse
+            results.push({
+              name: folderName,
+              success: true,
+              fileId: sessionFolderId,
+              folderStructure: folderStructure,
+              uploadId
+            })
+            console.log(`✅ Upload session created: ${uploadId}`)
+            continue
+          }
+        } catch (e) {
+          console.warn('⚠️ Failed to persist upload session (non-blocking):', e)
+        }
+
         results.push({
           name: folderName,
           success: true,

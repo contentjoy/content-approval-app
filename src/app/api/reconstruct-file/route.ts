@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDrive } from '@/lib/googleDrive'
+import { getDrive, findFileInFolder } from '@/lib/googleDrive'
 import { getSession, getSessionChunks, deleteSession } from '@/lib/chunk-storage'
+import { getAdminClient } from '@/lib/supabaseServer'
 import { PassThrough } from 'stream'
 
 // Upload file to Google Drive (copied from upload-to-drive route)
@@ -146,15 +147,36 @@ export async function POST(request: NextRequest) {
       data: reconstructedFile.toString('base64')
     }
     
+    // Idempotency: check if a file with same name and size already exists in target folder
+    try {
+      const existing = await findFileInFolder(getDrive(), session.target_folder_id, session.original_file_name)
+      const sizeMatches = existing?.size ? Number(existing.size) === reconstructedFile.length : false
+      if (existing && sizeMatches) {
+        console.log(`♻️ Skipping duplicate reconstructed upload (name+size match): ${session.original_file_name} (${existing.id})`)
+        await deleteSession(sessionId)
+        return NextResponse.json({
+          success: true,
+          message: 'Duplicate detected; using existing Drive file',
+          fileId: existing.id,
+          fileName: session.original_file_name,
+          fileSize: reconstructedFile.length,
+          deduped: true
+        })
+      }
+    } catch (e) {
+      console.warn('⚠️ Dedupe check failed for reconstructed file (continuing):', e)
+    }
+
     // Upload to Google Drive
     console.log(`📤 Uploading reconstructed file to Google Drive...`)
     const drive = getDrive()
     
+    // Raise threshold for fallback path to safely handle larger videos
     const uploadResult = await uploadFileToDrive(
       drive,
       fileToUpload,
       session.target_folder_id,
-      100 * 1024 * 1024 // 100MB limit for reconstructed files
+      2 * 1024 * 1024 * 1024 // 2GB limit for reconstructed files
     )
     
     if (!uploadResult.success) {
@@ -165,6 +187,23 @@ export async function POST(request: NextRequest) {
     
     // Clean up the session
     await deleteSession(sessionId)
+
+    // Persist file metadata to DB (if uploads table exists with matching upload_id it will not, so we store minimal metadata)
+    try {
+      const supa = getAdminClient()
+      await supa
+        .from('files')
+        .insert({
+          upload_id: session.session_id, // use session id as a surrogate if no upload session was created
+          slot_name: 'Videos',
+          drive_file_id: uploadResult.fileId,
+          name: session.original_file_name,
+          size_bytes: reconstructedFile.length,
+          mime: session.file_type
+        })
+    } catch (e) {
+      console.warn('⚠️ Failed to persist reconstructed file metadata (non-blocking):', e)
+    }
     console.log(`🧹 Cleaned up session: ${sessionId}`)
     
     return NextResponse.json({

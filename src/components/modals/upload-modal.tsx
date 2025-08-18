@@ -784,6 +784,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           
           const folderStructureResult = await folderStructureResponse.json()
           const sessionFolderId = folderStructureResult.results[0]?.fileId
+          const uploadId = folderStructureResult.results[0]?.uploadId
           
           if (!sessionFolderId) {
             throw new Error('No session folder ID returned')
@@ -798,6 +799,9 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           }
           
           console.log('📁 Using folder structure:', folderStructure)
+          if (uploadId) {
+            console.log('🆔 Using uploadId for session:', uploadId)
+          }
           
           // FOLDER STRUCTURE EXPLANATION:
           // - sessionFolderId: The main upload session folder (e.g., "Upload Session 123")
@@ -859,114 +863,82 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
               // 🚨 MOBILE OPTIMIZATION: Reduce chunk size on mobile to prevent memory issues
               const chunkSize = isMobile ? 1 * 1024 * 1024 : 2 * 1024 * 1024 // 1MB on mobile, 2MB on desktop
               
-              // For large files (>5MB), use chunked upload
+              // For large files (>5MB), use Google Drive Resumable Upload
               if (file.size > 5 * 1024 * 1024) {
-                console.log(`📦 Large file detected (${(file.size / (1024 * 1024)).toFixed(1)}MB), using streaming chunked upload...`)
-                console.log(`📦 Streaming upload will use targetFolderId (slot folder): ${targetFolderId}`)
-                console.log(`📦 Chunk size: ${(chunkSize / (1024 * 1024)).toFixed(1)}MB (${isMobile ? 'mobile optimized' : 'desktop'})`)
+                console.log(`📦 Large file detected (${(file.size / (1024 * 1024)).toFixed(1)}MB), using Drive Resumable Upload...`)
                 
-                // Split large files into chunks for faster uploads
-                const chunks: Buffer[] = []
-                const buffer = Buffer.from(await file.data.arrayBuffer())
-                
-                for (let j = 0; j < buffer.length; j += chunkSize) {
-                  chunks.push(buffer.slice(j, j + chunkSize))
-                }
-                
-                console.log(`📦 Created ${chunks.length} chunks for ${file.name}, uploading individually...`)
-                
-                // Generate unique session ID for this upload
-                const sessionId = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-                console.log(`🆔 Created upload session: ${sessionId}`)
-                
-                // 🚨 MOBILE OPTIMIZATION: Reduce concurrent chunk uploads on mobile
-                const maxConcurrent = isMobile ? 2 : 3 // Upload 2 chunks at a time on mobile, 3 on desktop
-                console.log(`📱 Mobile: ${isMobile}, max concurrent chunks: ${maxConcurrent}`)
-                
-                for (let batchStart = 0; batchStart < chunks.length; batchStart += maxConcurrent) {
-                  const batch = chunks.slice(batchStart, batchStart + maxConcurrent)
-                  const batchPromises = batch.map(async (chunk, batchIndex) => {
-                    const chunkIndex = batchStart + batchIndex
-                    const chunkUint8Array = new Uint8Array(chunk)
-                    const chunkBlob = new Blob([chunkUint8Array], { type: file.type })
-                    
-                    const formData = new FormData()
-                    formData.append('sessionId', sessionId)
-                    formData.append('chunkIndex', chunkIndex.toString())
-                    formData.append('totalChunks', chunks.length.toString())
-                    formData.append('originalFileName', file.name)
-                    formData.append('fileType', file.type)
-                    if (gymSlug) formData.append('gymSlug', gymSlug)
-                    if (authStatus.gymName) formData.append('gymName', authStatus.gymName)
-                    formData.append('targetFolderId', targetFolderId)
-                    formData.append('chunk', chunkBlob, `${file.name}.part${chunkIndex + 1}`)
-                    
-                    console.log(`📦 Uploading chunk ${chunkIndex + 1}/${chunks.length} for ${file.name}...`)
-                    
-                    const response = await fetch('/api/upload-chunk', {
-                      method: 'POST',
-                      body: formData
-                    })
-                    
-                    if (!response.ok) {
-                      const errorData = await response.text()
-                      throw new Error(`Chunk ${chunkIndex + 1} failed: ${response.status} - ${errorData}`)
-                    }
-                    
-                    const result = await response.json()
-                    console.log(`✅ Chunk ${chunkIndex + 1} uploaded: ${result.message}`)
-                    
-                    return result
-                  })
-                  
-                  try {
-                    await Promise.all(batchPromises)
-                    console.log(`✅ Batch ${Math.floor(batchStart / maxConcurrent) + 1} completed: chunks ${batchStart + 1}-${Math.min(batchStart + maxConcurrent, chunks.length)}`)
-                    
-                    // 🚨 FIXED: Proper chunk progress calculation
-                    const chunkProgress = (batchStart + maxConcurrent) / chunks.length * 10 // 0-10% additional progress for chunks
-                    updateFileProgress(i, chunkProgress)
-                    
-                    // 🚨 MOBILE OPTIMIZATION: Add delay between batches on mobile
-                    if (isMobile) {
-                      await new Promise(resolve => setTimeout(resolve, 300)) // 300ms delay between batches on mobile
-                    }
-                    
-                  } catch (error) {
-                    console.error(`❌ Batch ${Math.floor(batchStart / maxConcurrent) + 1} failed:`, error)
-                    throw error
-                  }
-                }
-                
-                console.log(`✅ All chunks uploaded for ${file.name}, reconstructing file...`)
-                
-                // Reconstruct the file
-                const reconstructResponse = await fetch('/api/reconstruct-file', {
+                // Start resumable session
+                const startRes = await fetch('/api/resumable/start', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ sessionId })
+                  body: JSON.stringify({ filename: file.name, mime: file.type, sizeBytes: file.size, parentId: targetFolderId })
                 })
-                
-                if (!reconstructResponse.ok) {
-                  const errorData = await reconstructResponse.text()
-                  throw new Error(`File reconstruction failed: ${reconstructResponse.status} - ${errorData}`)
+                if (!startRes.ok) {
+                  throw new Error(`Failed to start resumable session: ${startRes.status}`)
                 }
-                
-                const reconstructResult = await reconstructResponse.json()
-                console.log(`✅ File reconstructed successfully: ${file.name}`)
-                
-                uploadResults.push({
-                  name: file.name,
-                  success: true,
-                  fileId: reconstructResult.fileId || 'streaming-reconstructed',
-                  slot: slotName // Add slot information
-                })
-                
-                // 🚨 FIXED: Update progress when chunked file completes
+                const startData = await startRes.json()
+                if (startData.deduped && startData.fileId) {
+                  console.log('♻️ Deduped on session start')
+                  uploadResults.push({ name: file.name, success: true, fileId: startData.fileId, slot: slotName })
+                  completedFiles++
+                  updateFileProgress(i + 1)
+                  continue
+                }
+                const uploadUrl = startData.uploadUrl
+                if (!uploadUrl) throw new Error('No resumable upload URL')
+
+                const arrayBuffer = await file.data.arrayBuffer()
+                const fullBuffer = Buffer.from(arrayBuffer)
+                const partSize = isMobile ? 1 * 1024 * 1024 : 8 * 1024 * 1024 // 1MB mobile, 8MB desktop
+                let offset = 0
+                let attempt = 0
+                while (offset < fullBuffer.length) {
+                  const end = Math.min(offset + partSize, fullBuffer.length)
+                  const chunk = fullBuffer.slice(offset, end)
+                  const chunkBase64 = Buffer.from(chunk).toString('base64')
+                  const putRes = await fetch('/api/resumable/put', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uploadUrl, start: offset, end: end - 1, total: fullBuffer.length, chunkBase64, mime: file.type })
+                  })
+                  if (!putRes.ok) {
+                    // simple retry once per chunk
+                    if (attempt < 1) {
+                      attempt++
+                      await new Promise(r => setTimeout(r, 500))
+                      continue
+                    }
+                    const txt = await putRes.text()
+                    throw new Error(`Resumable PUT failed: ${txt}`)
+                  }
+                  const putData = await putRes.json()
+                  if (putData.completed) {
+                    // Persist metadata now that we have fileId
+                    try {
+                      if (uploadId && putData.fileId) {
+                        await fetch('/api/resumable/complete', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ uploadId, slot: slotName, fileId: putData.fileId, name: file.name, sizeBytes: file.size, mime: file.type })
+                        })
+                      }
+                    } catch {}
+                    // done
+                    break
+                  }
+                  offset = end
+                  attempt = 0
+                  // progress within file (allocate up to +10%)
+                  const chunkProgress = (offset / fullBuffer.length) * 10
+                  updateFileProgress(i, chunkProgress)
+                  if (isMobile) await new Promise(r => setTimeout(r, 100))
+                }
+
+                uploadResults.push({ name: file.name, success: true, fileId: undefined, slot: slotName })
                 completedFiles++
-                updateFileProgress(i + 1) // Move to next file progress
-                console.log(`✅ Chunked file ${file.name} completed. Progress: ${completedFiles}/${totalFiles} files`)
-                
+                updateFileProgress(i + 1)
+                console.log(`✅ Resumable upload completed for ${file.name}`)
+
               } else {
                 // Small files use regular upload to the specific slot folder
                 const filesForUpload = [{
@@ -984,7 +956,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                     files: filesForUpload,
                     gymSlug,
                     gymName: authStatus.gymName,
-                    sessionFolderId: targetFolderId // Use the specific slot folder
+                    sessionFolderId: sessionFolderId, // keep session context
+                    folderStructure // provide full structure so server reuses it
                   })
                 })
                 
