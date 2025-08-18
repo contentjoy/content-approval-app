@@ -252,6 +252,60 @@ export function slugToGymName(slug: string): string {
 }
 
 /**
+ * Resolve a gym record by slug or name with robust fallbacks.
+ * Order: gyms.slug == slug → "Gym Name" ILIKE spaced → ILIKE slug → wildcard spaced → wildcard slug
+ */
+export async function resolveGymBySlugOrName(slug: string): Promise<Gym | null> {
+  const spaced = slugToGymName(slug)
+  // 1) Try explicit slug column first
+  try {
+    const { data } = await supabase
+      .from('gyms')
+      .select('*')
+      .eq('slug', slug)
+      .single()
+    if (data) return data as Gym
+  } catch {}
+  // 2) Exact ILIKE against spaced name
+  try {
+    const { data } = await supabase
+      .from('gyms')
+      .select('*')
+      .ilike('"Gym Name"', spaced)
+      .single()
+    if (data) return data as Gym
+  } catch {}
+  // 3) Exact ILIKE against raw hyphenated slug
+  try {
+    const { data } = await supabase
+      .from('gyms')
+      .select('*')
+      .ilike('"Gym Name"', slug)
+      .single()
+    if (data) return data as Gym
+  } catch {}
+  // 4) Wildcard spaced
+  try {
+    const { data } = await supabase
+      .from('gyms')
+      .select('*')
+      .ilike('"Gym Name"', `%${spaced}%`)
+      .single()
+    if (data) return data as Gym
+  } catch {}
+  // 5) Wildcard hyphen
+  try {
+    const { data } = await supabase
+      .from('gyms')
+      .select('*')
+      .ilike('"Gym Name"', `%${slug}%`)
+      .single()
+    if (data) return data as Gym
+  } catch {}
+  return null
+}
+
+/**
  * Get gym by slug - DIRECT APPROACH
  * Query gyms table directly by slug name
  */
@@ -259,43 +313,23 @@ export async function getGymBySlug(slug: string): Promise<Gym | null> {
   console.log('🔍 Looking for gym with slug:', slug)
   
   try {
-    // Transform slug format "gym-name" to gym name format "gym name"
-    const gymName = slugToGymName(slug)
-    console.log('🔍 Transformed slug to gym name:', gymName)
-    
-    // Query gyms table using the transformed gym name
-    const { data: gym, error: gymError } = await supabase
-      .from('gyms')
-      .select('*')
-      .ilike('"Gym Name"', gymName) // Use case-insensitive search
-      .single()
-
-    if (gymError) {
-      console.error('❌ Error fetching gym by slug:', gymError)
-      
-      // Debug: Try to get all gyms to see what exists
+    const gym = await resolveGymBySlugOrName(slug)
+    if (!gym) {
+      console.error('❌ No gym found with slug or name:', slug)
+      // Debug: Try to get a sample of gyms
       const { data: allGyms, error: allError } = await supabase
         .from('gyms')
         .select('id, "Gym Name"')
         .limit(10)
-        
       if (allError) {
         console.error('❌ Error fetching all gyms:', allError)
       } else {
         console.log('🏋️ Available gyms in database:', allGyms?.map(g => ({ id: g.id, name: g['Gym Name'] })))
       }
-      
       return null
     }
-
-    if (!gym) {
-      console.error('❌ No gym found with slug:', slug)
-      console.error('🔍 Searched for gym name:', gymName)
-      return null
-    }
-
     console.log('✅ Found gym by slug:', { id: gym.id, name: gym['Gym Name'] })
-    return gym
+    return gym as Gym
   } catch (error) {
     console.error('❌ Exception in getGymBySlug:', error)
     return null

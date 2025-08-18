@@ -104,7 +104,8 @@ export default function GymLaunchPage() {
         const { data: newGym, error: createError } = await supabase
           .from('gyms')
           .insert({
-            'Gym Name': gymSlug,
+            'Gym Name': gymName.toLowerCase().trim(),
+            slug: gymSlug,
             'Agency': agencyData.id, // Use the agency UUID
             'Email': email,
             'passcode': passcode,
