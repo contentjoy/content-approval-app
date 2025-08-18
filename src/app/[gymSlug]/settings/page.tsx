@@ -394,12 +394,6 @@ function AyrshareIntegrationSettings() {
           console.log('✅ Setting gymId to:', gym.id)
           setGymId(gym.id) // gym.id is the primary key from the gyms table
           
-          // Now load the profile data (profile_key and gym_id) from the same database record
-          console.log('🔄 Loading profile data for gymId:', gym.id)
-          setTimeout(() => {
-            loadExistingAccounts()
-          }, 100) // Small delay to ensure state is set
-          
           // Extract connected platforms from ayrshare_profiles
           if (gym.ayrshare_profiles) {
             const platforms = Object.keys(gym.ayrshare_profiles).filter(
@@ -433,6 +427,14 @@ function AyrshareIntegrationSettings() {
   useEffect(() => {
     console.log('🔄 profileKey state changed to:', profileKey)
   }, [profileKey])
+
+  // Auto-load profile data when gymId is set
+  useEffect(() => {
+    if (gymId && !profileKey) {
+      console.log('🔄 gymId set, auto-loading profile data...')
+      loadExistingAccounts()
+    }
+  }, [gymId, profileKey])
 
   const handleConnectPlatform = async (platform: string) => {
     if (!gymId) {
@@ -546,12 +548,20 @@ function AyrshareIntegrationSettings() {
     
     if (!gymId) {
       console.error('❌ Cannot sync profiles: gymId is undefined')
-      showToast({
-        type: 'error',
-        title: 'Error',
-        message: 'Gym ID not loaded. Please refresh the page.',
-      })
-      return
+      console.log('🔄 Attempting to reload profile data...')
+      
+      // Try to reload the profile data
+      await loadExistingAccounts()
+      
+      // Check again after reload
+      if (!gymId) {
+        showToast({
+          type: 'error',
+          title: 'Error',
+          message: 'Gym ID not loaded. Please refresh the page.',
+        })
+        return
+      }
     }
     
     if (!profileKey) {
