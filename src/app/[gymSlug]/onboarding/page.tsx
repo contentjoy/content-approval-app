@@ -259,7 +259,6 @@ export default function OnboardingPage() {
       // First, resolve by name variants: spaced and hyphenated
       const spaced = gymSlug.replace(/-/g, ' ')
       let slugGymData: any = null
-      let slugError: any = null
       const tryExactSpaced = await supabase.from('gyms').select('id, "Gym Name", "Email", "Status"').ilike('"Gym Name"', spaced).maybeSingle()
       if (tryExactSpaced.data) {
         slugGymData = tryExactSpaced.data
@@ -276,14 +275,14 @@ export default function OnboardingPage() {
         if (tryWildcardHyphen.data) slugGymData = tryWildcardHyphen.data
       }
       
-      if (slugError) {
-        console.error('❌ Failed to fetch gym by slug:', slugError)
+      if (!slugGymData) {
+        console.error('❌ Failed to resolve gym by slug/name variants')
         console.error('❌ Slug being searched:', gymSlug)
         
         // Fallback: try to get gym by ID
         const { data: idGymData, error: idError } = await supabase
           .from('gyms')
-          .select('id, "Gym Name", "Email", "Status", slug')
+          .select('id, "Gym Name", "Email", "Status"')
           .eq('id', gymId)
           .single()
         
@@ -296,14 +295,7 @@ export default function OnboardingPage() {
         resolvedGymId = idGymData.id
         resolvedGymData = idGymData
         
-        // Check if slug matches
-        if (idGymData.slug !== gymSlug) {
-          console.error('❌ SLUG MISMATCH DETECTED:')
-          console.error('❌ - URL slug:', gymSlug)
-          console.error('❌ - Database slug:', idGymData.slug)
-          console.error('❌ - This could cause data corruption!')
-          toast.error('Warning: Gym slug mismatch detected. Please contact support.')
-        }
+        // Note: database has no slug column; skip slug consistency checks
       } else {
         resolvedGymId = slugGymData.id
         resolvedGymData = slugGymData
