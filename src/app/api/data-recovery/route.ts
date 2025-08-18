@@ -22,7 +22,9 @@ export async function POST(request: NextRequest) {
       dryRun = false,
       limit = 100,
       offset = 0,
-      gymIds = []
+      gymIds = [],
+      gymId,
+      gymName
     } = config
     
     console.log('🔧 Recovery Configuration:')
@@ -37,15 +39,27 @@ export async function POST(request: NextRequest) {
     // Fetch all gym records with comprehensive data
     console.log('📥 Fetching gym records from database...')
     
-    let query = supabase.from('gyms').select('*')
-    if (Array.isArray(gymIds) && gymIds.length > 0) {
-      console.log('🎯 Filtering by gymIds:', gymIds)
-      // @ts-ignore - supabase-js type accepts .in
-      query = query.in('id', gymIds)
+    // Normalize filters
+    let ids: string[] = []
+    if (Array.isArray(gymIds)) ids = gymIds.filter(Boolean)
+    if (typeof gymId === 'string' && gymId) ids.push(gymId)
+    
+    let gymsQuery = supabase.from('gyms').select('*')
+    if (ids.length === 1) {
+      console.log('🎯 Filtering by single gym id:', ids[0])
+      gymsQuery = gymsQuery.eq('id', ids[0])
+    } else if (ids.length > 1) {
+      console.log('🎯 Filtering by multiple gym ids:', ids)
+      // @ts-ignore
+      gymsQuery = gymsQuery.in('id', ids)
+    } else if (typeof gymName === 'string' && gymName.trim().length > 0) {
+      const spaced = gymName.trim().toLowerCase()
+      console.log('🎯 Filtering by gym name (ILIKE):', spaced)
+      gymsQuery = gymsQuery.ilike('"Gym Name"', spaced)
     } else {
-      query = query.range(offset, offset + limit - 1).order('created_at', { ascending: true })
+      gymsQuery = gymsQuery.range(offset, offset + limit - 1).order('created_at', { ascending: true })
     }
-    const { data: gyms, error: fetchError } = await query
+    const { data: gyms, error: fetchError } = await gymsQuery
     
     if (fetchError) {
       console.error('❌ Failed to fetch gyms:', fetchError)
@@ -53,8 +67,8 @@ export async function POST(request: NextRequest) {
     }
     
     if (!gyms || gyms.length === 0) {
-      console.log('ℹ️ No gyms found in database')
-      return NextResponse.json({ message: 'No gyms found', count: 0 })
+      console.log('ℹ️ No gyms found with provided filters', { ids, gymName })
+      return NextResponse.json({ message: 'No gyms found', count: 0, filters: { ids, gymName } })
     }
     
     console.log(`✅ Fetched ${gyms.length} gym records`)
