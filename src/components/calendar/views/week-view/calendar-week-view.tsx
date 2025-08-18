@@ -28,8 +28,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
 		const allEvents = [...singleDayEvents, ...multiDayEvents];
 		return allEvents.filter(event => {
 			const eventStart = parseISO(event.startDate);
-			const eventEnd = parseISO(event.endDate);
-			return eventStart <= weekEnd && eventEnd >= weekStart;
+			return eventStart >= weekStart && eventStart <= weekEnd;
 		});
 	}, [singleDayEvents, multiDayEvents, weekStart, weekEnd]);
 
