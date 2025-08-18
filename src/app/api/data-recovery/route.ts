@@ -78,26 +78,68 @@ export async function POST(request: NextRequest) {
       
       try {
         // Resolve all fields with robust aliasing
-        const gymName = read(gym, 'Gym Name', 'gym_name', 'name') || 'Unknown Gym'
-        const email = read(gym, 'Email', 'email') || 'no-email@unknown.com'
-        const firstName = read(gym, 'First name', 'First Name', 'first_name', 'FirstName') || 'Unknown'
-        const lastName = read(gym, 'Last name', 'Last Name', 'last_name', 'LastName') || 'Unknown'
-        const phone = read(gym, 'Phone', 'phone') || 'No phone'
-        const website = read(gym, 'Website', 'website') || 'No website'
-        const city = read(gym, 'City', 'city') || 'Unknown city'
-        const address = read(gym, 'Address', 'City Address', 'address') || 'No address'
-        const primaryColor = read(gym, 'Primary color', 'Primary Color', 'primaryColor') || '#000000'
-        const brandStyle = read(gym, 'Brand Profile', 'Brand Style', 'Brand Choice') || 'Unknown'
-        const targetDemo = read(gym, 'Target Demographic', 'Target demographic') || 'Unknown'
-        const offerings = read(gym, 'Offerings', 'Services Offered') || 'Unknown'
-        const desiredResults = read(gym, 'Clients Desired Result', 'Client Desired Result') || 'Unknown'
-        const googleMapUrl = read(gym, 'Google Map URL', 'Google Maps URL') || 'No Google Maps URL'
-        const instagramUrl = read(gym, 'Instagram URL', 'Instagram', 'IG URL') || 'No Instagram URL'
-        const primaryCta = read(gym, 'Primary offer', 'Primary Offer', 'primaryOffer') || 'No CTA'
-        const testimonial = read(gym, 'Testimonial', 'Client Info') || 'No testimonial'
-        const whiteLogoUrl = read(gym, 'White Logo URL', 'White Logo') || 'No white logo'
-        const blackLogoUrl = read(gym, 'Black Logo URL', 'Black Logo') || 'No black logo'
+        let gymName = read(gym, 'Gym Name', 'gym_name', 'name') || 'Unknown Gym'
+        let email = read(gym, 'Email', 'email') || 'no-email@unknown.com'
+        let firstName = read(gym, 'First name', 'First Name', 'first_name', 'FirstName') || 'Unknown'
+        let lastName = read(gym, 'Last name', 'Last Name', 'last_name', 'LastName') || 'Unknown'
+        let phone = read(gym, 'Phone', 'phone') || 'No phone'
+        let website = read(gym, 'Website', 'website') || 'No website'
+        let city = read(gym, 'City', 'city') || 'Unknown city'
+        let address = read(gym, 'Address', 'City Address', 'address') || 'No address'
+        let primaryColor = read(gym, 'Primary color', 'Primary Color', 'primaryColor') || '#000000'
+        let brandStyle = read(gym, 'Brand Profile', 'Brand Style', 'Brand Choice') || 'Unknown'
+        let targetDemo = read(gym, 'Target Demographic', 'Target demographic') || 'Unknown'
+        let offerings = read(gym, 'Offerings', 'Services Offered') || 'Unknown'
+        let desiredResults = read(gym, 'Clients Desired Result', 'Client Desired Result') || 'Unknown'
+        let googleMapUrl = read(gym, 'Google Map URL', 'Google Maps URL') || 'No Google Maps URL'
+        let instagramUrl = read(gym, 'Instagram URL', 'Instagram', 'IG URL') || 'No Instagram URL'
+        let primaryCta = read(gym, 'Primary offer', 'Primary Offer', 'primaryOffer') || 'No CTA'
+        let testimonial = read(gym, 'Testimonial', 'Client Info') || 'No testimonial'
+        let whiteLogoUrl = read(gym, 'White Logo URL', 'White Logo') || 'No white logo'
+        let blackLogoUrl = read(gym, 'Black Logo URL', 'Black Logo') || 'No black logo'
         const status = read(gym, 'Status', 'status') || 'unknown'
+
+        // Fallback: attempt to load latest onboarding_data snapshot for this gym to backfill
+        const { data: odLatest } = await supabase
+          .from('onboarding_data')
+          .select('*')
+          .eq('gym_id', gym.id)
+          .order('submitted_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (odLatest) {
+          console.log('📦 Using onboarding_data fallback for missing fields')
+          const bd = odLatest.business_details || {}
+          const bi = odLatest.brand_identity || {}
+          const as = odLatest.audience_services || {}
+          const ls = odLatest.links_socials || {}
+          const mc = odLatest.marketing_content || {}
+          const md = odLatest.media || {}
+          // Only fill when we have no value
+          if (!firstName || firstName === 'Unknown') firstName = bd.first_name
+          if (!lastName || lastName === 'Unknown') lastName = bd.last_name
+          if (!phone || phone.startsWith('No')) phone = bd.phone
+          if (!website || website.startsWith('No')) website = bd.website
+          if (!city || city.startsWith('Unknown')) city = bd.city
+          if (!address || address.startsWith('No')) address = bd.address
+
+          if (!primaryColor || primaryColor === '#000000') primaryColor = bi.brand_color
+          if (!brandStyle || brandStyle === 'Unknown') brandStyle = bi.brand_style
+
+          if (!targetDemo || targetDemo === 'Unknown') targetDemo = as.target_audience
+          if (!offerings || offerings === 'Unknown') offerings = as.services
+          if (!desiredResults || desiredResults === 'Unknown') desiredResults = as.desired_results
+
+          if (!googleMapUrl || googleMapUrl.startsWith('No')) googleMapUrl = ls.google_map_url
+          if (!instagramUrl || instagramUrl.startsWith('No')) instagramUrl = ls.instagram_url
+
+          if (!primaryCta || primaryCta.startsWith('No')) primaryCta = mc.primary_cta
+          if (!testimonial || testimonial.startsWith('No')) testimonial = mc.testimonial
+
+          if (!whiteLogoUrl || whiteLogoUrl.startsWith('No')) whiteLogoUrl = md.white_logo_url
+          if (!blackLogoUrl || blackLogoUrl.startsWith('No')) blackLogoUrl = md.black_logo_url
+        }
 
         // Reconstruct onboarding data structure
         const onboardingData = {
@@ -143,7 +185,7 @@ export async function POST(request: NextRequest) {
           },
           
           // Metadata
-          submitted_at: gym.created_at || new Date().toISOString(),
+          submitted_at: gym.created_at || odLatest?.submitted_at || new Date().toISOString(),
           gym_identifier: gym.id, // Use ID instead of slug
           
           // Recovery metadata
