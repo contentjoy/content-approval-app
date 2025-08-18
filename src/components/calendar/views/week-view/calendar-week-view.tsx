@@ -48,8 +48,8 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
 			// Add events to appropriate time slots
 			weekEvents.forEach(event => {
 				const eventStart = parseISO(event.startDate);
-				
-				if (isSameDay(eventStart, day)) {
+				const eventKey = format(eventStart, 'yyyy-MM-dd');
+				if (eventKey === dayKey) {
 					const hour = eventStart.getHours();
 					if (!grouped[dayKey][hour]) {
 						grouped[dayKey][hour] = [];

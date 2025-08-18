@@ -26,8 +26,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
 		
 		return allEvents.filter(event => {
 			const eventStart = parseISO(event.startDate);
-			const eventEnd = parseISO(event.endDate);
-			return eventStart <= dayEnd && eventEnd >= dayStart;
+			return eventStart >= dayStart && eventStart <= dayEnd;
 		}).sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
 	}, [singleDayEvents, multiDayEvents, selectedDate]);
 
