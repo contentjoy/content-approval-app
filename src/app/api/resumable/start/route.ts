@@ -24,12 +24,31 @@ export async function POST(request: NextRequest) {
     }
 
     const auth = getAuth()
-    // Get bearer token via request headers helper for reliability
-    const reqHeaders = await (auth as any).getRequestHeaders?.()
-    const authHeader: string | undefined = reqHeaders?.Authorization || reqHeaders?.authorization
+    // Get bearer token via multiple strategies for robustness
+    let authHeader: string | undefined
+    try {
+      const reqHeaders = await (auth as any).getRequestHeaders?.()
+      authHeader = reqHeaders?.Authorization || reqHeaders?.authorization
+    } catch {}
+    if (!authHeader) {
+      try {
+        const token = await (auth as any).getAccessToken?.()
+        if (typeof token === 'string' && token) {
+          authHeader = `Bearer ${token}`
+        }
+      } catch {}
+    }
+    if (!authHeader) {
+      try {
+        const creds = await (auth as any).authorize?.()
+        if (creds?.access_token) {
+          authHeader = `Bearer ${creds.access_token}`
+        }
+      } catch {}
+    }
     if (!authHeader) {
       console.error('❌ Missing Authorization header from Google auth')
-      return NextResponse.json({ error: 'Failed to obtain Google access token (no Authorization header)' }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to obtain Google access token' }, { status: 500 })
     }
 
     const initRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true', {
