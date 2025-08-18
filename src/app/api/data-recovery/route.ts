@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
         "Google Map URL",
         "Instagram URL",
         "Primary offer",
+        "Testimonial",
         "Client Info",
         "White Logo URL",
         "Black Logo URL",
@@ -123,7 +124,7 @@ export async function POST(request: NextRequest) {
           
           marketing_content: {
             primary_cta: gym['Primary offer'] || 'No CTA',
-            testimonial: gym['Client Info'] || 'No testimonial'
+            testimonial: gym['Testimonial'] || gym['Client Info'] || 'No testimonial'
           },
           
           media: {
@@ -255,7 +256,7 @@ function calculateDataCompleteness(gym: any): number {
     'Gym Name', 'Email', 'First name', 'Last name', 'Phone',
     'Website', 'City', 'Address', 'Primary color', 'Brand Profile',
     'Target Demographic', 'Offerings', 'Clients Desired Result',
-    'Google Map URL', 'Instagram URL', 'Primary offer', 'Client Info'
+    'Google Map URL', 'Instagram URL', 'Primary offer', 'Testimonial'
   ]
   
   let completedFields = 0
