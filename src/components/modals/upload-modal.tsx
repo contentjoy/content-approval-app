@@ -889,7 +889,8 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
 
                 const arrayBuffer = await file.data.arrayBuffer()
                 const fullBuffer = Buffer.from(arrayBuffer)
-                const partSize = isMobile ? 1 * 1024 * 1024 : 8 * 1024 * 1024 // 1MB mobile, 8MB desktop
+                // Keep chunks well under serverless body limits (avoid 413)
+                const partSize = isMobile ? 1 * 1024 * 1024 : 2 * 1024 * 1024 // 1MB mobile, 2MB desktop
                 let offset = 0
                 let attempt = 0
                 while (offset < fullBuffer.length) {
