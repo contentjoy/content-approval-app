@@ -11,6 +11,7 @@ import { useToast } from '@/components/ui/toast'
 import { useBranding } from '@/contexts/branding-context'
 import { useParams } from 'next/navigation'
 import type { SocialMediaPost } from '@/types'
+import { getPostsForGymBySlug } from '@/lib/database'
 
 const schedulingSchema = z.object({
   startDate: z.string().min(1, 'Start date is required'),
@@ -48,6 +49,25 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
   const { gymName } = useBranding()
   const params = useParams()
   const gymSlug = params.gymSlug as string
+  const [postsToSchedule, setPostsToSchedule] = useState<SocialMediaPost[]>(approvedPosts || [])
+
+  // On open, fetch fresh posts and compute authoritative set: Approved + not Scheduled
+  useEffect(() => {
+    if (!isOpen || !gymSlug) return
+    ;(async () => {
+      try {
+        const fresh = await getPostsForGymBySlug(gymSlug)
+        const filtered = fresh.filter(p =>
+          (p['Approval Status']?.toLowerCase() === 'approved') && (!p['Scheduled'] || String(p['Scheduled']).trim() === '')
+        )
+        setPostsToSchedule(filtered)
+      } catch {
+        // Fallback to provided approvedPosts prop filtered locally
+        const fallback = (approvedPosts || []).filter(p => !p['Scheduled'] || String(p['Scheduled']).trim() === '')
+        setPostsToSchedule(fallback)
+      }
+    })()
+  }, [isOpen, gymSlug])
 
   // Get current timezone as default
   const getCurrentTimezone = () => {
@@ -84,7 +104,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
 
   const getDuration = () => {
     // Default to daily posting
-    return approvedPosts.length
+    return postsToSchedule.length
   }
 
   const getEndDate = () => {
@@ -137,7 +157,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
         "Start Date": data.startDate,
         "Timezone": data.timezone,
         // Additional metadata for reference
-        postCount: approvedPosts.length,
+        postCount: postsToSchedule.length,
         duration: getDuration(),
         endDate: getEndDate()
       }
@@ -159,7 +179,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
       showToast({
         type: 'success',
         title: 'Posts scheduled!',
-        message: `Scheduled ${approvedPosts.length} posts to start on ${new Date(data.startDate).toLocaleDateString()} at ${formatTimeForWebhook(data.startTime)} ${data.timezone}`
+        message: `Scheduled ${postsToSchedule.length} posts to start on ${new Date(data.startDate).toLocaleDateString()} at ${formatTimeForWebhook(data.startTime)} ${data.timezone}`
       })
       
       onSuccess?.()
@@ -192,7 +212,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
             </div>
             <div className="flex-1 flex flex-col justify-center">
               <h3 className="font-medium text-[var(--text)] text-sm leading-tight">
-                {approvedPosts.length} Posts Ready to Schedule
+                {postsToSchedule.length} Posts Ready to Schedule
               </h3>
               <p className="text-xs text-[var(--muted-text)] opacity-80 mt-1">
                 All posts have been approved and are ready for scheduling
@@ -287,7 +307,7 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
               <p><strong>Post Time:</strong> {formatTimeForWebhook(watchedStartTime)} {watchedTimezone}</p>
               <p><strong>End Date:</strong> {getEndDate()}</p>
               <p><strong>Duration:</strong> {getDuration()} days</p>
-              <p><strong>Posts:</strong> {approvedPosts.length} approved posts</p>
+              <p><strong>Posts:</strong> {postsToSchedule.length} approved posts</p>
             </div>
           </div>
         )}
