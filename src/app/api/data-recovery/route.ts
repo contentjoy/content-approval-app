@@ -50,7 +50,6 @@ export async function POST(request: NextRequest) {
       gymsQuery = gymsQuery.eq('id', ids[0])
     } else if (ids.length > 1) {
       console.log('🎯 Filtering by multiple gym ids:', ids)
-      // @ts-ignore
       gymsQuery = gymsQuery.in('id', ids)
     } else if (typeof gymName === 'string' && gymName.trim().length > 0) {
       const spaced = gymName.trim().toLowerCase()
@@ -92,8 +91,8 @@ export async function POST(request: NextRequest) {
       
       try {
         // Resolve all fields with robust aliasing
-        let gymName = read(gym, 'Gym Name', 'gym_name', 'name') || 'Unknown Gym'
-        let email = read(gym, 'Email', 'email') || 'no-email@unknown.com'
+        const gymName = read(gym, 'Gym Name', 'gym_name', 'name') || 'Unknown Gym'
+        const email = read(gym, 'Email', 'email') || 'no-email@unknown.com'
         let firstName = read(gym, 'First name', 'First Name', 'first_name', 'FirstName') || 'Unknown'
         let lastName = read(gym, 'Last name', 'Last Name', 'last_name', 'LastName') || 'Unknown'
         let phone = read(gym, 'Phone', 'phone') || 'No phone'
