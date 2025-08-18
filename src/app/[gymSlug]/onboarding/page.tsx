@@ -256,11 +256,25 @@ export default function OnboardingPage() {
       let resolvedGymData: any = null
       
       // First, try to get gym by slug to ensure we have the correct gym
-      const { data: slugGymData, error: slugError } = await supabase
-        .from('gyms')
-        .select('id, "Gym Name", "Email", "Status"')
-        .eq('slug', gymSlug)
-        .single()
+      // First, resolve by name variants: spaced and hyphenated
+      const spaced = gymSlug.replace(/-/g, ' ')
+      let slugGymData: any = null
+      let slugError: any = null
+      const tryExactSpaced = await supabase.from('gyms').select('id, "Gym Name", "Email", "Status"').ilike('"Gym Name"', spaced).maybeSingle()
+      if (tryExactSpaced.data) {
+        slugGymData = tryExactSpaced.data
+      } else {
+        const tryExactHyphen = await supabase.from('gyms').select('id, "Gym Name", "Email", "Status"').ilike('"Gym Name"', gymSlug).maybeSingle()
+        if (tryExactHyphen.data) slugGymData = tryExactHyphen.data
+      }
+      if (!slugGymData) {
+        const tryWildcardSpaced = await supabase.from('gyms').select('id, "Gym Name", "Email", "Status"').ilike('"Gym Name"', `%${spaced}%`).maybeSingle()
+        if (tryWildcardSpaced.data) slugGymData = tryWildcardSpaced.data
+      }
+      if (!slugGymData) {
+        const tryWildcardHyphen = await supabase.from('gyms').select('id, "Gym Name", "Email", "Status"').ilike('"Gym Name"', `%${gymSlug}%`).maybeSingle()
+        if (tryWildcardHyphen.data) slugGymData = tryWildcardHyphen.data
+      }
       
       if (slugError) {
         console.error('❌ Failed to fetch gym by slug:', slugError)

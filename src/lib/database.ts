@@ -257,14 +257,14 @@ export function slugToGymName(slug: string): string {
  */
 export async function resolveGymBySlugOrName(slug: string): Promise<Gym | null> {
   const spaced = slugToGymName(slug)
-  // 1) Try explicit slug column first
+  // 1) Try explicit slug column first (some DBs may not have this; ignore errors)
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('gyms')
       .select('*')
       .eq('slug', slug)
       .single()
-    if (data) return data as Gym
+    if (!error && data) return data as Gym
   } catch {}
   // 2) Exact ILIKE against spaced name
   try {

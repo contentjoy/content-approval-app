@@ -105,7 +105,6 @@ export default function GymLaunchPage() {
           .from('gyms')
           .insert({
             'Gym Name': gymName.toLowerCase().trim(),
-            slug: gymSlug,
             'Agency': agencyData.id, // Use the agency UUID
             'Email': email,
             'passcode': passcode,
