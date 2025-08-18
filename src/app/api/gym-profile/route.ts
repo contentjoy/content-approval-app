@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       profile_key: gym.profile_key,
-      ayrshare_profiles: gym.ayrshare_profiles
+      ayrshare_profiles: gym.ayrshare_profiles,
+      gym_id: gymId  // Return the gym_id so frontend can use it
     })
 
   } catch (error) {

@@ -394,9 +394,11 @@ function AyrshareIntegrationSettings() {
           console.log('✅ Setting gymId to:', gym.id)
           setGymId(gym.id) // gym.id is the primary key from the gyms table
           
-          // Note: profile_key is not a property of Gym, it's stored in ayrshare_profiles
-          // We'll need to get it from the database or set it to null for now
-          setProfileKey(null) // TODO: Get profile_key from database if needed
+          // Now load the profile data (profile_key and gym_id) from the same database record
+          console.log('🔄 Loading profile data for gymId:', gym.id)
+          setTimeout(() => {
+            loadExistingAccounts()
+          }, 100) // Small delay to ensure state is set
           
           // Extract connected platforms from ayrshare_profiles
           if (gym.ayrshare_profiles) {
@@ -503,23 +505,37 @@ function AyrshareIntegrationSettings() {
     }
   }
 
-  // Get profile key from database
-  const getProfileKey = async (): Promise<string | null> => {
-    if (!gymId) return null
-    
+  // Get profile key and gym ID from database
+  const getProfileKey = async (): Promise<{ profileKey: string | null; gymId: string | null }> => {
+    if (!gymId) {
+      console.log('❌ getProfileKey: No gymId available')
+      return { profileKey: null, gymId: null }
+    }
+
     try {
-      // Query the database directly to get profile_key
-      const { data, error } = await fetch(`/api/gym-profile?gymId=${gymId}`).then(res => res.json())
+      console.log('🔍 getProfileKey: Fetching profile for gymId:', gymId)
       
-      if (error) {
-        console.error('❌ Failed to get profile key:', error)
-        return null
+      const response = await fetch(`/api/gym-profile?gymId=${gymId}`)
+      const data = await response.json()
+      
+      console.log('🔍 getProfileKey: API response:', data)
+      
+      if (data.success) {
+        console.log('✅ getProfileKey: Successfully got profile data:', { 
+          profileKey: data.profile_key, 
+          gymId: data.gym_id || gymId 
+        })
+        return { 
+          profileKey: data.profile_key, 
+          gymId: data.gym_id || gymId 
+        }
+      } else {
+        console.error('❌ getProfileKey: API error:', data.error)
+        return { profileKey: null, gymId: null }
       }
-      
-      return data?.profile_key || null
-    } catch (err) {
-      console.error('❌ Error getting profile key:', err)
-      return null
+    } catch (error) {
+      console.error('❌ getProfileKey: Request failed:', error)
+      return { profileKey: null, gymId: null }
     }
   }
 
@@ -597,29 +613,43 @@ function AyrshareIntegrationSettings() {
 
   // Load existing connected accounts from database
   const loadExistingAccounts = async () => {
-    if (!gymId) return
+    console.log('🔄 loadExistingAccounts called')
+    console.log('🔄 Current gymId state:', gymId)
     
+    if (!gymId) {
+      console.log('❌ loadExistingAccounts: No gymId available')
+      return
+    }
+
     try {
-      console.log('🔍 Loading existing connected accounts for gym:', gymId)
+      console.log('🔄 Getting profile data for gymId:', gymId)
+      const { profileKey: newProfileKey, gymId: newGymId } = await getProfileKey()
       
-      // Re-fetch the gym data to get the latest ayrshare_profiles
+      console.log('🔄 Profile data result:', { newProfileKey, newGymId })
+      
+      // Update both profileKey and gymId from the same database record
+      if (newProfileKey) {
+        console.log('✅ Setting profileKey to:', newProfileKey)
+        setProfileKey(newProfileKey)
+      }
+      
+      if (newGymId) {
+        console.log('✅ Setting gymId to:', newGymId)
+        setGymId(newGymId)
+      }
+      
+      // Now fetch the gym data to get ayrshare_profiles
       const gym = await getGymBySlug(gymSlug?.toString() || '')
-      
       if (gym && gym.ayrshare_profiles) {
         const platforms = Object.keys(gym.ayrshare_profiles).filter(
           platform => gym.ayrshare_profiles![platform as keyof typeof gym.ayrshare_profiles]?.profile_key
         )
-        console.log('🔗 Found existing connected platforms:', platforms)
+        console.log('🔗 Connected platforms:', platforms)
         setConnectedPlatforms(platforms)
       }
-
-      // Also check social_accounts for additional connection info
-      if (gym?.social_accounts) {
-        console.log('🔗 Social accounts found:', gym.social_accounts)
-      }
-
-    } catch (err) {
-      console.error('❌ Error loading existing accounts:', err)
+      
+    } catch (error) {
+      console.error('❌ loadExistingAccounts failed:', error)
     }
   }
 
