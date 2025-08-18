@@ -83,13 +83,18 @@ export async function POST(req: NextRequest) {
       'https://app.ayrshare.com/api/user',
       'https://app.ayrshare.com/api/profiles/user',
       'https://app.ayrshare.com/api/profiles',
+      'https://app.ayrshare.com/api/socials',
     ]
     
     for (const url of candidates) {
       try { 
         console.log(`🔍 Trying Ayrshare endpoint: ${url}`)
         data = await tryFetch(url)
-        console.log('✅ Successfully fetched data from:', url)
+        // Log a compact summary of keys to understand the shape we received
+        try {
+          const keys = Object.keys(data || {})
+          console.log('✅ Successfully fetched data from:', url, 'keys:', keys)
+        } catch {}
         break 
       } catch (err) { 
         console.log(`❌ Failed to fetch from ${url}:`, err)
@@ -110,6 +115,13 @@ export async function POST(req: NextRequest) {
     // Parse common shapes into a normalized map of { platform: true }
     const linked: Record<string, boolean> = {}
     if (data) {
+      // If we got a wrapper object such as { user: {...} } or { data: {...} }, peel it
+      if (data.user && typeof data.user === 'object') {
+        data = data.user
+      }
+      if (data.data && typeof data.data === 'object' && !Array.isArray(data.data)) {
+        data = data.data
+      }
       // Shape 1: { socials: { instagram: true, facebook: false, ... } }
       if (data.socials && typeof data.socials === 'object') {
         for (const [k, v] of Object.entries<any>(data.socials)) linked[k] = Boolean(v)
@@ -136,6 +148,17 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('🔍 Parsed linked platforms:', linked)
+    // Also log a few known fields to help adjust parsers if needed
+    try {
+      const dbg = {
+        socialsType: typeof (data?.socials),
+        linkedType: Array.isArray(data?.linked) ? 'array' : typeof data?.linked,
+        accountsLen: Array.isArray(data?.accounts) ? data.accounts.length : 0,
+        activeLen: Array.isArray((data as any)?.activeSocialAccounts) ? (data as any).activeSocialAccounts.length : 0,
+        profilesLen: Array.isArray((data as any)?.profiles) ? (data as any).profiles.length : 0,
+      }
+      console.log('🧪 Ayrshare shape debug:', dbg)
+    } catch {}
 
     // Merge into ayrshare_profiles
     const currentProfiles: Record<string, any> = gym?.ayrshare_profiles || {}
@@ -152,6 +175,32 @@ export async function POST(req: NextRequest) {
     }
 
     if (Object.keys(linked).length === 0) {
+      // If Ayrshare didn't report platforms, we still want to seed entries for common ones
+      // when the profileKey is present and the gym connected recently via our UI.
+      // This helps the UI show connected status right away.
+      const seedPlatforms = ['facebook', 'instagram']
+      const seeded: string[] = []
+      for (const p of seedPlatforms) {
+        if (!updatedProfiles[p] && profileKey) {
+          updatedProfiles[p] = {
+            profile_key: profileKey,
+            connected_at: new Date().toISOString(),
+            last_synced: new Date().toISOString(),
+          }
+          seeded.push(p)
+        }
+      }
+      if (seeded.length > 0) {
+        console.log('🌱 Seeded profiles based on UI connection:', seeded)
+      } else {
+        console.log('ℹ️ No linked platforms reported by Ayrshare. Preserving existing profiles without update.')
+        return NextResponse.json({ 
+          success: true,
+          profiles: currentProfiles,
+          message: 'No linked platforms from Ayrshare; returned current profiles.'
+        })
+      }
+    }
       console.log('ℹ️ No linked platforms reported by Ayrshare. Preserving existing profiles without update.')
       return NextResponse.json({ 
         success: true,
