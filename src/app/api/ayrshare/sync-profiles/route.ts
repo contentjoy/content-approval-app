@@ -8,9 +8,24 @@ interface Body {
 
 export async function POST(req: NextRequest) {
   try {
-    const { gymId, profileKey }: Body = await req.json()
+    let { gymId, profileKey }: Body = await req.json()
     
     console.log('🔍 sync-profiles called with:', { gymId, profileKey })
+    
+    // Fallback: resolve gymId via profile_key if not provided
+    if (!gymId && profileKey) {
+      try {
+        const { data: matchedGym, error: findError } = await supabase
+          .from('gyms')
+          .select('id, "Gym Name", ayrshare_profiles')
+          .eq('profile_key', profileKey)
+          .single()
+        if (!findError && matchedGym?.id) {
+          gymId = matchedGym.id
+          console.log('🔁 Resolved missing gymId via profile_key:', { gymId })
+        }
+      } catch {}
+    }
     
     if (!gymId) {
       console.error('❌ Missing gymId in request body')
@@ -58,8 +73,8 @@ export async function POST(req: NextRequest) {
 
     let data: any | null = null
     const candidates = [
-      'https://api.ayrshare.com/api/user',
-      'https://api.ayrshare.com/api/profiles/user',
+      'https://app.ayrshare.com/api/user',
+      'https://app.ayrshare.com/api/profiles/user',
     ]
     
     for (const url of candidates) {

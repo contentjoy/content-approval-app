@@ -142,6 +142,8 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
   async function openAyrshareManage(platform?: string) {
     try {
       let pk = profileKey
+      const effectiveGymId = resolvedGymId || gymId
+      if (!effectiveGymId) throw new Error('Missing gym ID')
       if (!pk) {
         if (!resolvedGymName) throw new Error('Missing gym name to create profile')
         const createRes = await fetch('/api/ayrshare/create-profile', {
@@ -151,13 +153,12 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
         if (!createRes.ok) throw new Error(createData.error || 'Failed to create Ayrshare profile')
         pk = createData.profileKey
         setProfileKey(pk)
-        const id = resolvedGymId || gymId
-        if (id) await supabase.from('gyms').update({ profile_key: pk } as any).eq('id', id)
+        if (effectiveGymId) await supabase.from('gyms').update({ profile_key: pk } as any).eq('id', effectiveGymId)
       }
       const res = await fetch('/api/ayrshare/generate-jwt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profileKey: pk, gymId: resolvedGymId || gymId, platform }),
+        body: JSON.stringify({ profileKey: pk, gymId: effectiveGymId, platform }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to generate URL')
@@ -175,13 +176,13 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
           await fetch('/api/ayrshare/sync-profiles', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ gymId, profileKey }),
+            body: JSON.stringify({ gymId: effectiveGymId, profileKey: pk }),
           })
           // refresh local state
           const { data: g } = await supabase
             .from('gyms')
             .select('ayrshare_profiles')
-            .eq('id', gymId)
+            .eq('id', effectiveGymId)
             .single()
           setAyrshareProfiles((g as any)?.ayrshare_profiles || {})
         }

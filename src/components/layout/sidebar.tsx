@@ -183,7 +183,8 @@ export function Sidebar() {
       <SettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
-        gymId={user?.gymId || ''}
+        gymId={user?.gymId || undefined}
+        gymSlug={gymSlug}
         initial={{ email: undefined, primaryColor: primaryColor || undefined }}
       />
     </motion.aside>
