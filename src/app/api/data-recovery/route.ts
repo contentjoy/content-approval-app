@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
                    'https://contentjoy.app.n8n.cloud/webhook-test/156ef9a5-0ae7-4e65-acc1-a27aa533d90a',
       dryRun = false,
       limit = 100,
-      offset = 0
+      offset = 0,
+      gymIds = []
     } = config
     
     console.log('🔧 Recovery Configuration:')
@@ -36,11 +37,15 @@ export async function POST(request: NextRequest) {
     // Fetch all gym records with comprehensive data
     console.log('📥 Fetching gym records from database...')
     
-    const { data: gyms, error: fetchError } = await supabase
-      .from('gyms')
-      .select('*')
-      .range(offset, offset + limit - 1)
-      .order('created_at', { ascending: true })
+    let query = supabase.from('gyms').select('*')
+    if (Array.isArray(gymIds) && gymIds.length > 0) {
+      console.log('🎯 Filtering by gymIds:', gymIds)
+      // @ts-ignore - supabase-js type accepts .in
+      query = query.in('id', gymIds)
+    } else {
+      query = query.range(offset, offset + limit - 1).order('created_at', { ascending: true })
+    }
+    const { data: gyms, error: fetchError } = await query
     
     if (fetchError) {
       console.error('❌ Failed to fetch gyms:', fetchError)
