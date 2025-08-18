@@ -38,32 +38,7 @@ export async function POST(request: NextRequest) {
     
     const { data: gyms, error: fetchError } = await supabase
       .from('gyms')
-      .select(`
-        id,
-        "Gym Name",
-        "Email",
-        "First name",
-        "Last name",
-        "Phone",
-        "Website",
-        "City",
-        "Address",
-        "Primary color",
-        "Brand Profile",
-        "Target Demographic",
-        "Offerings",
-        "Clients Desired Result",
-        "Google Map URL",
-        "Instagram URL",
-        "Primary offer",
-        "Testimonial",
-        "Client Info",
-        "White Logo URL",
-        "Black Logo URL",
-        "Status",
-        created_at,
-        updated_at
-      `)
+      .select('*')
       .range(offset, offset + limit - 1)
       .order('created_at', { ascending: true })
     
@@ -84,52 +59,82 @@ export async function POST(request: NextRequest) {
     let successCount = 0
     let errorCount = 0
     
+    // Helper to safely read fields with multiple possible aliases
+    const read = (row: any, ...aliases: string[]): any => {
+      for (const key of aliases) {
+        if (row?.[key] != null && String(row[key]).trim() !== '') return row[key]
+      }
+      return undefined
+    }
+
     for (let i = 0; i < gyms.length; i++) {
       const gym = gyms[i]
       console.log(`\n🔄 Processing gym ${i + 1}/${gyms.length}: ${gym['Gym Name'] || 'Unknown'}`)
       
       try {
+        // Resolve all fields with robust aliasing
+        const gymName = read(gym, 'Gym Name', 'gym_name', 'name') || 'Unknown Gym'
+        const email = read(gym, 'Email', 'email') || 'no-email@unknown.com'
+        const firstName = read(gym, 'First name', 'First Name', 'first_name', 'FirstName') || 'Unknown'
+        const lastName = read(gym, 'Last name', 'Last Name', 'last_name', 'LastName') || 'Unknown'
+        const phone = read(gym, 'Phone', 'phone') || 'No phone'
+        const website = read(gym, 'Website', 'website') || 'No website'
+        const city = read(gym, 'City', 'city') || 'Unknown city'
+        const address = read(gym, 'Address', 'City Address', 'address') || 'No address'
+        const primaryColor = read(gym, 'Primary color', 'Primary Color', 'primaryColor') || '#000000'
+        const brandStyle = read(gym, 'Brand Profile', 'Brand Style', 'Brand Choice') || 'Unknown'
+        const targetDemo = read(gym, 'Target Demographic', 'Target demographic') || 'Unknown'
+        const offerings = read(gym, 'Offerings', 'Services Offered') || 'Unknown'
+        const desiredResults = read(gym, 'Clients Desired Result', 'Client Desired Result') || 'Unknown'
+        const googleMapUrl = read(gym, 'Google Map URL', 'Google Maps URL') || 'No Google Maps URL'
+        const instagramUrl = read(gym, 'Instagram URL', 'Instagram', 'IG URL') || 'No Instagram URL'
+        const primaryCta = read(gym, 'Primary offer', 'Primary Offer', 'primaryOffer') || 'No CTA'
+        const testimonial = read(gym, 'Testimonial', 'Client Info') || 'No testimonial'
+        const whiteLogoUrl = read(gym, 'White Logo URL', 'White Logo') || 'No white logo'
+        const blackLogoUrl = read(gym, 'Black Logo URL', 'Black Logo') || 'No black logo'
+        const status = read(gym, 'Status', 'status') || 'unknown'
+
         // Reconstruct onboarding data structure
         const onboardingData = {
           // Gym identification
           gym_id: gym.id,
-          gym_name: gym['Gym Name'] || 'Unknown Gym',
-          gym_email: gym['Email'] || 'no-email@unknown.com',
+          gym_name: gymName,
+          gym_email: email,
           
           // Onboarding form data (reconstructed from database)
           business_details: {
-            first_name: gym['First name'] || 'Unknown',
-            last_name: gym['Last name'] || 'Unknown',
-            phone: gym['Phone'] || 'No phone',
-            website: gym['Website'] || 'No website',
-            city: gym['City'] || 'Unknown city',
-            address: gym['Address'] || 'No address'
+            first_name: firstName,
+            last_name: lastName,
+            phone,
+            website,
+            city,
+            address
           },
           
           brand_identity: {
-            brand_color: gym['Primary color'] || '#000000',
-            brand_style: gym['Brand Profile'] || 'Unknown'
+            brand_color: primaryColor,
+            brand_style: brandStyle
           },
           
           audience_services: {
-            target_audience: gym['Target Demographic'] || 'Unknown',
-            services: gym['Offerings'] || 'Unknown',
-            desired_results: gym['Clients Desired Result'] || 'Unknown'
+            target_audience: targetDemo,
+            services: offerings,
+            desired_results: desiredResults
           },
           
           links_socials: {
-            google_map_url: gym['Google Map URL'] || 'No Google Maps URL',
-            instagram_url: gym['Instagram URL'] || 'No Instagram URL'
+            google_map_url: googleMapUrl,
+            instagram_url: instagramUrl
           },
           
           marketing_content: {
-            primary_cta: gym['Primary offer'] || 'No CTA',
-            testimonial: gym['Testimonial'] || gym['Client Info'] || 'No testimonial'
+            primary_cta: primaryCta,
+            testimonial
           },
           
           media: {
-            white_logo_url: gym['White Logo URL'] || 'No white logo',
-            black_logo_url: gym['Black Logo URL'] || 'No black logo'
+            white_logo_url: whiteLogoUrl,
+            black_logo_url: blackLogoUrl
           },
           
           // Metadata
@@ -140,7 +145,7 @@ export async function POST(request: NextRequest) {
           recovery_metadata: {
             recovered_at: new Date().toISOString(),
             source: 'data-recovery-endpoint',
-            original_status: gym['Status'] || 'unknown',
+            original_status: status,
             data_completeness: calculateDataCompleteness(gym),
             recovery_note: 'Data recovered from existing gym records to reactivate N8N flows'
           }
