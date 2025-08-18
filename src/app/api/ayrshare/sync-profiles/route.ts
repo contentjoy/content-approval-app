@@ -8,7 +8,9 @@ interface Body {
 
 export async function POST(req: NextRequest) {
   try {
-    let { gymId, profileKey }: Body = await req.json()
+    const body: Body = await req.json()
+    let { gymId } = body
+    const { profileKey } = body
     
     console.log('🔍 sync-profiles called with:', { gymId, profileKey })
     
