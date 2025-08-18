@@ -201,13 +201,6 @@ export async function POST(req: NextRequest) {
         })
       }
     }
-      console.log('ℹ️ No linked platforms reported by Ayrshare. Preserving existing profiles without update.')
-      return NextResponse.json({ 
-        success: true,
-        profiles: currentProfiles,
-        message: 'No linked platforms from Ayrshare; returned current profiles.'
-      })
-    }
 
     console.log('📝 Updating gym with profiles:', updatedProfiles)
 
