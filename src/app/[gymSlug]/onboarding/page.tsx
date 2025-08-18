@@ -381,7 +381,7 @@ export default function OnboardingPage() {
           'Google Map URL': formData.googleMapUrl,
           'Instagram URL': formData.instagramUrl,
           'Primary offer': formData.cta,
-          'Client Info': formData.testimonial,
+          'Testimonial': formData.testimonial,
           'White Logo URL': formData.whiteLogoUrl,
           'Black Logo URL': formData.blackLogoUrl,
           'Status': 'active'
