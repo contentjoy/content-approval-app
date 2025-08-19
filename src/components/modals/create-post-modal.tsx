@@ -139,7 +139,11 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
           timezone: data.timezone
         })
       })
-      if (!r.ok) throw new Error(await r.text())
+      if (!r.ok) {
+        const t = await r.text()
+        console.error('❌ create-post failed:', t)
+        throw new Error(t || 'Create failed')
+      }
 
       showToast({ type: 'success', title: 'Scheduled', message: 'Post scheduled successfully' })
       onSuccess?.()

@@ -1,3 +1,6 @@
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 import { NextRequest, NextResponse } from 'next/server'
 import ayrshareService from '@/lib/ayrshare'
 import { supabase } from '@/lib/supabase'
@@ -22,6 +25,16 @@ export async function POST(req: NextRequest) {
       gym = data
     }
     const profileKey = gym?.profile_key || undefined
+    console.log('🔐 Ayrshare env check:', {
+      hasApiKey: !!process.env.AYRSHARE_API_KEY,
+      apiKeyLen: process.env.AYRSHARE_API_KEY ? String(process.env.AYRSHARE_API_KEY).length : 0,
+      hasProfileKey: !!profileKey,
+      gymId: gym?.id,
+      gymName: gym?.['Gym Name']
+    })
+    if (!process.env.AYRSHARE_API_KEY) {
+      return NextResponse.json({ error: 'AYRSHARE_API_KEY missing in env' }, { status: 500 })
+    }
 
     // Build Ayrshare payload
     const payload: any = { post, platforms, mediaUrls }
