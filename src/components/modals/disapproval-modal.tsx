@@ -131,14 +131,14 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
         {/* Feedback */}
         <div>
           <label htmlFor="feedback" className="block text-sm font-medium text-[var(--text)] mb-2">
-            Feedback <span className="text-destructive">*</span>
+            Feedback <span className="text-[var(--muted-text)]">(optional)</span>
           </label>
           <textarea
             id="feedback"
             rows={12}
             {...register('feedback')}
             className="w-full px-3 py-2 border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent bg-[var(--modal-surface)] text-[var(--text)] placeholder:text-[var(--muted-text)] resize min-h-[10rem] max-h-[60vh] transition-all duration-200"
-            placeholder="Please provide specific feedback on why this content is being disapproved..."
+            placeholder="Optionally provide feedback on why this content is being disapproved..."
           />
           {errors.feedback && (
             <p className="mt-1 text-sm text-destructive">{errors.feedback.message}</p>
@@ -191,8 +191,8 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
           <h4 className="font-medium text-[var(--text)] mb-2">Summary</h4>
           <p className="text-sm text-[var(--muted-text)]">
             {isCarousel && watchedCarouselAction === 'all' 
-              ? `Disapprove all ${carouselPosts.length} carousel slides with feedback`
-              : `Disapprove ${isCarousel ? 'current slide' : 'post'} with feedback`
+              ? `Disapprove all ${carouselPosts.length} carousel slides`
+              : `Disapprove ${isCarousel ? 'current slide' : 'post'}`
             }
           </p>
         </div>
@@ -209,7 +209,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
           </button>
           <button
             type="submit"
-            disabled={isLoading || !watchedFeedback.trim()}
+            disabled={isLoading}
             className="h-12 px-6 py-3 rounded-[999px] bg-[#111113] dark:bg-[#FCFCFC] text-[#FCFCFC] dark:text-[#111113] border border-[var(--modal-border)] transition-all duration-200 hover:opacity-90 disabled:opacity-50"
           >
             {isLoading ? (
@@ -218,7 +218,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
                 <span>Submitting...</span>
               </div>
             ) : (
-              'Submit Feedback'
+              'Disapprove'
             )}
           </button>
         </div>
