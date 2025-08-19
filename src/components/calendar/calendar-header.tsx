@@ -134,14 +134,14 @@ export function CalendarHeader() {
 
 				{/* View selection - Dropdown on mobile, buttons on desktop */}
 				<div className="hidden sm:flex items-center gap-1">
-					{(Object.keys(VIEW_ICONS) as TCalendarView[]).map((viewType) => {
+					{(Object.keys(VIEW_ICONS) as Array<"month" | "year" | "agenda">).map((viewType) => {
 						const Icon = VIEW_ICONS[viewType];
 						return (
 							<Button
 								key={viewType}
-								variant={view === viewType ? "default" : "outline"}
+								variant={view === (viewType as TCalendarView) ? "default" : "outline"}
 								size="sm"
-								onClick={() => setView(viewType)}
+								onClick={() => setView(viewType as TCalendarView)}
 								className="h-8 px-2 sm:px-3 text-xs sm:text-sm capitalize flex-shrink-0"
 							>
 								<Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
@@ -184,7 +184,7 @@ export function CalendarHeader() {
 										`}
 									>
 										{renderViewIcon(viewType)}
-										{VIEW_LABELS[viewType]}
+										{VIEW_LABELS[viewType as keyof typeof VIEW_LABELS]}
 									</button>
 								);
 							})}
