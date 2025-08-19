@@ -157,7 +157,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
         {/* Media + Caption (responsive) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
           {/* Media (1/3 on desktop) */}
-          <div className="bg-[var(--modal-surface)] rounded-[16px] p-4 border border-[var(--modal-border)] md:col-span-1 md:min-h-[460px] flex">
+          <div className="bg-[var(--modal-surface)] rounded-[16px] p-4 border border-[var(--modal-border)] md:col-span-1 md:min-h-[460px] flex flex-col">
             <label className="block text-sm font-medium text-foreground mb-2">Media</label>
             <div className="w-full aspect-[4/5] md:h-full rounded-[16px] border border-[var(--modal-border)] bg-[var(--bg)] flex items-center justify-center overflow-hidden">
               {files.length === 0 ? (
@@ -238,14 +238,14 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
             </div>
             {errors.timezone && <p className="mt-1 text-sm text-destructive">{errors.timezone.message}</p>}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-full">
             <div className="min-w-0">
               <label className="block text-sm font-medium text-foreground mb-2">Date <span className="text-destructive">*</span></label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Calendar className="h-4 w-4 text-[var(--muted-text)]" />
                 </div>
-                <input type="date" {...register('date')} className="w-full pl-10 pr-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200" />
+                <input type="date" {...register('date')} className="w-full pl-10 pr-3 py-4 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 font-normal box-border" />
               </div>
               {errors.date && <p className="mt-1 text-sm text-destructive">{errors.date.message}</p>}
             </div>
@@ -255,7 +255,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Clock className="h-4 w-4 text-[var(--muted-text)]" />
                 </div>
-                <input type="time" {...register('time')} className="w-full pl-10 pr-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200" />
+                <input type="time" {...register('time')} className="w-full pl-10 pr-3 py-4 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 font-normal box-border" />
               </div>
               {errors.time && <p className="mt-1 text-sm text-destructive">{errors.time.message}</p>}
             </div>
