@@ -8,6 +8,7 @@ import { Modal } from '@/components/ui/modal'
 import { useToast } from '@/components/ui/toast'
 import { Calendar, Clock, Globe, ChevronDown, Image as ImageIcon, Video as VideoIcon } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/auth-context'
 
 const schema = z.object({
   caption: z.string().optional(),
@@ -34,6 +35,7 @@ function zonedWallTimeToUTC(y: number, m: number, d: number, H: number, M: numbe
 
 export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolean; onClose: () => void; onSuccess?: () => void }) {
   const { showToast } = useToast()
+  const { user } = useAuth()
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -78,14 +80,28 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
       const scheduleDateISO = utcDate.toISOString().replace('.000Z','Z')
       const scheduleDB = `${data.date} ${data.time}:00`
 
-      // TODO: upload files first via existing upload flow; for now assume mediaUrls empty or provided
+      // Upload selected files to Supabase Storage bucket 'post-media' and get public URLs
       const mediaUrls: string[] = []
+      if (files.length > 0) {
+        const bucket = 'post-media'
+        for (const f of files) {
+          const safeName = f.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+          const path = `${user?.gymId || 'unknown'}/${Date.now()}_${safeName}`
+          const { error: upErr } = await supabase.storage.from(bucket).upload(path, f, { contentType: f.type })
+          if (upErr) throw new Error(`Upload failed: ${upErr.message}`)
+          const { data: pub } = supabase.storage.from(bucket).getPublicUrl(path)
+          if (pub?.publicUrl) mediaUrls.push(pub.publicUrl)
+        }
+      }
       // TODO: Integrate Drive upload flow; for now skip upload and rely on links when available
 
       // Call backend to create Ayrshare post (new endpoint could be added later). For now, perform direct call here.
       const r = await fetch('/api/ayrshare/create-post', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(user?.gymId ? { 'x-gym-id': user.gymId } : {})
+        },
         body: JSON.stringify({
           post: data.caption,
           platforms: data.platforms,
