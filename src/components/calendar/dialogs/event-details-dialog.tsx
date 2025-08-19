@@ -63,7 +63,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
 	        .select('*')
 	        .eq('Carousel Group', event.carouselGroup)
 	        .eq('"Approval Status"', 'Approved')
-	        .or(`gym_id.eq.${post.gym_id || ''},"Gym Name".eq.${(event.gymName || '').toLowerCase()}`)
+	        .eq('"Gym Name"', (typeof window !== 'undefined' ? window.location.pathname.split('/')[1].replace(/-/g, ' ').toLowerCase() : (event.gymName || '').toLowerCase()))
 	        .order('Carousel Order', { ascending: true })
 	      if (error) throw error
 	      if (!active) return
