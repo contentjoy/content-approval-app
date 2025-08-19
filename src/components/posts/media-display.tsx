@@ -18,11 +18,15 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
   const [isVideo, setIsVideo] = useState(false)
+  const [assetUrl, setAssetUrl] = useState<string>('')
 
+  // Normalize and detect
   useEffect(() => {
+    const rawUrl = String(post['Asset URL'] || '').trim()
+    const normalized = rawUrl.startsWith('@') ? rawUrl.substring(1).trim() : rawUrl
+    setAssetUrl(normalized)
     const assetType = post['Asset Type']?.toLowerCase()
-    const assetUrl = (post['Asset URL'] || '').toLowerCase().trim()
-    const looksLikeVideo = /\.(mp4|mov|m4v|webm|ogg)(\?|#|$)/.test(assetUrl)
+    const looksLikeVideo = /\.(mp4|mov|m4v|webm|ogg)(\?|#|$)/i.test(normalized)
     setIsVideo(assetType === 'video' || looksLikeVideo)
     setHasError(false)
     setIsLoading(true)
@@ -69,11 +73,11 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
   }
 
   // Handle video with 9:16 aspect ratio
-  if (isVideo && post['Asset URL']) {
+  if (isVideo && assetUrl) {
     return (
       <VideoPlayer
-        src={post['Asset URL']}
-        poster={post['Asset URL'] + '#t=0.1'}
+        src={assetUrl}
+        poster={undefined}
         aspect="9/16"
         className={className}
         onLoaded={() => setIsLoading(false)}
@@ -83,7 +87,7 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
   }
 
   // Handle image with 4:5 aspect ratio
-  if (post['Asset URL']) {
+  if (assetUrl) {
     return (
       <div className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: '4/5' }}>
         <AnimatePresence>
@@ -109,7 +113,7 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
           </div>
         ) : (
           <Image
-            src={post['Asset URL']}
+            src={assetUrl}
             alt={post['Post Caption'] || 'Post content'}
             fill
             className="object-cover"

@@ -19,6 +19,7 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
   const [hasError, setHasError] = useState(false)
   const [isReady, setIsReady] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
 
   // Reset state when src changes
   useEffect(() => {
@@ -105,8 +106,24 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
   const handleVideoError = useCallback(() => {
     console.log('🎥 Video error detected in VideoPlayer')
     setIsLoading(false)
-    setHasError(true)
-    onError?.()
+    // Retry up to 3 times with backoff
+    setRetryCount((prev) => {
+      const next = prev + 1
+      if (next <= 3) {
+        setTimeout(() => {
+          const v = videoRef.current
+          if (!v) return
+          try {
+            v.load()
+            v.play().catch(() => {})
+          } catch {}
+        }, next * 500)
+        return next
+      }
+      setHasError(true)
+      onError?.()
+      return next
+    })
   }, [onError])
 
   // Handle video element events
@@ -258,7 +275,7 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
         onPause={handlePause}
         onEnded={handlePause}
       >
-        <source src={src} />
+        <source src={src} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
     </div>
