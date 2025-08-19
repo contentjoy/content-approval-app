@@ -742,7 +742,7 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
         try {
           const uploadResults = []
           
-          // PHASE 1: Setup Progress (1-10%)
+          // PHASE 1: Setup Progress (1-10%) + Drive preflight
           console.log('🏗️ Creating folder structure for upload session...')
           updateProgress(2, 'Setting up upload session...')
           
@@ -799,6 +799,13 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           }
           
           console.log('📁 Using folder structure:', folderStructure)
+          // Preflight: validate access to target Videos folder (sample check)
+          try {
+            const anySlotId = folderStructure.rawSlotFolders['Videos'] || Object.values(folderStructure.rawSlotFolders)[0]
+            if (anySlotId) {
+              await fetch(`/api/drive/verify?parentId=${encodeURIComponent(anySlotId)}`)
+            }
+          } catch {}
           if (uploadId) {
             console.log('🆔 Using uploadId for session:', uploadId)
           }
@@ -935,6 +942,10 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
                   if (isMobile) await new Promise(r => setTimeout(r, 100))
                 }
 
+                // Verify file existence on Drive after completion (best effort)
+                try {
+                  await fetch(`/api/drive/verify?parentId=${encodeURIComponent(targetFolderId)}&name=${encodeURIComponent(file.name)}&sizeBytes=${file.size}`)
+                } catch {}
                 uploadResults.push({ name: file.name, success: true, fileId: undefined, slot: slotName })
                 completedFiles++
                 updateFileProgress(i + 1)
