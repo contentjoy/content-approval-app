@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import { ToastProvider } from "@/components/ui/toast";
 import { ModalContainer } from "@/components/modals/modal-container";
 import { UploadProvider } from "@/contexts/upload-context";
+import { FabCreatePost } from "@/components/ui/fab-create-post";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,6 +60,7 @@ export default function RootLayout({
                   <main className="flex-1">
                     {children}
                   </main>
+                  <FabCreatePost />
                   <ModalContainer />
                 </UploadProvider>
               </BrandingProvider>

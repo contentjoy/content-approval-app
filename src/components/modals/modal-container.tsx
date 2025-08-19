@@ -11,6 +11,7 @@ import { RegenerateModal } from './regenerate-modal'
 import { FeedbackModal } from './feedback-modal'
 import { UploadModal } from './upload-modal'
 import { FloatingUploadProgress } from './upload-modal'
+import { CreatePostModal } from './create-post-modal'
 
 export function ModalContainer() {
   const { isOpen, modalType, post, carouselPosts, approvedPosts, bulkPosts, closeModal } = useModalStore() as any
@@ -92,6 +93,14 @@ export function ModalContainer() {
                 <UploadModal 
                   isOpen={isOpen} 
                   onClose={closeModal} 
+                  onSuccess={handleSuccess}
+                />
+              )
+            case 'create-post':
+              return (
+                <CreatePostModal
+                  isOpen={isOpen}
+                  onClose={closeModal}
                   onSuccess={handleSuccess}
                 />
               )

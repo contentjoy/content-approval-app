@@ -86,6 +86,10 @@
   --brand-primary-rgb: 22, 22, 24;
   --brand-primary-light: var(--accent-soft);
   --brand-primary-dark: var(--accent-strong);
+
+  /* FAB colors (light) */
+  --fab-bg: #111113;
+  --fab-fg: #FCFCFC;
 }
 
 /* Dark theme */
@@ -113,6 +117,10 @@
   --card-border: var(--modal-border);
   --pill-bg: var(--surface);
   --pill-border: var(--modal-border);
+
+  /* FAB colors (dark) */
+  --fab-bg: #FCFCFC;
+  --fab-fg: #111113;
 }
 
 /* Reusable profile icon styling */

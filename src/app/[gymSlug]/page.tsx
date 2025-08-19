@@ -7,6 +7,7 @@ import { getPostsForGymBySlug } from '@/lib/database'
 
 
 import { PostCard, BulkActionsToolbar, EnhancedFilters } from '@/components/posts/index'
+import { FabCreatePost } from '@/components/ui/fab-create-post'
 import { PostFilters, type FilterType } from '@/components/posts/post-filters'
 //
 import { useModalStore } from '@/hooks/use-modal-store'
@@ -537,6 +538,8 @@ export default function GymPage() {
         onDeselectAll={handleDeselectAll}
         totalPosts={filteredPosts.length}
       />
+      {/* Global Create Post FAB - hide while bulk toolbar active */}
+      <FabCreatePost hidden={selectedPostsArray.length > 0 || isBulkMode} />
     </div>
   )
 }
