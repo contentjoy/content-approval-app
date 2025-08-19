@@ -19,7 +19,7 @@ import { MediaDisplay } from "@/components/posts/media-display";
 import { CarouselDisplay } from "@/components/posts/carousel-display";
 import type { SocialMediaPost } from "@/types";
 import { supabase } from "@/lib/supabase";
-import { EditScheduleModal } from "./edit-schedule-modal";
+import { EditScheduleModal } from "@/components/modals/edit-schedule-modal";
 
 interface IProps {
 	event: IEvent;
@@ -54,6 +54,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
 
 	// Load carousel posts if this event is part of a carousel
 	const [carouselPosts, setCarouselPosts] = useState<SocialMediaPost[] | null>(null)
+	const [isEditOpen, setIsEditOpen] = useState(false)
 	useEffect(() => {
 	  let active = true
 	  async function load() {
@@ -218,18 +219,12 @@ export function EventDetailsDialog({ event, children }: IProps) {
 					<DialogClose asChild>
 						<Button variant="outline">Close</Button>
 					</DialogClose>
-					{/* Edit Schedule Modal Trigger */}
 					<EditScheduleModal
-						isOpen={false as any}
-						onClose={() => {}}
+						isOpen={isEditOpen}
+						onClose={() => setIsEditOpen(false)}
 						post={post}
 					/>
-					<Button variant="outline" onClick={() => {
-						// Open a separate inline modal by dispatching a global event the ModalContainer can handle in future
-						// For now, reuse the EditScheduleModal route-based approach
-						const ev = new CustomEvent('open-edit-schedule', { detail: { post } })
-						window.dispatchEvent(ev)
-					}}>Edit Schedule</Button>
+					<Button variant="outline" onClick={() => setIsEditOpen(true)}>Edit Schedule</Button>
 				</div>
 			</DialogContent>
 		</Dialog>
