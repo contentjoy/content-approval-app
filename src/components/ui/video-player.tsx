@@ -20,6 +20,7 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
   const [isReady, setIsReady] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
+  const [isVisibleStable, setIsVisibleStable] = useState(false)
 
   // Reset state when src changes
   useEffect(() => {
@@ -41,8 +42,8 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
         })
       },
       {
-        rootMargin: '50px', // Start loading when within 50px of viewport
-        threshold: 0.1
+        rootMargin: '150px', // Begin earlier to avoid last-second loads
+        threshold: 0.25
       }
     )
 
@@ -50,19 +51,26 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
     return () => observer.disconnect()
   }, [])
 
-  // Only load video when visible
+  // Debounce visibility to avoid flicker during fast scrolling
   useEffect(() => {
-    if (!isVisible) {
-      setIsLoading(false)
-      setIsReady(false)
-      return
+    let timer: any
+    if (isVisible) {
+      timer = setTimeout(() => setIsVisibleStable(true), 150)
+    } else {
+      setIsVisibleStable(false)
     }
+    return () => timer && clearTimeout(timer)
+  }, [isVisible])
+
+  // Only load video when stably visible
+  useEffect(() => {
+    if (!isVisibleStable) return
 
     // Reset loading state when becoming visible
     if (!isReady && !hasError) {
       setIsLoading(true)
     }
-  }, [isVisible, isReady, hasError])
+  }, [isVisibleStable, isReady, hasError])
 
   const handlePlay = useCallback(async () => {
     try {
@@ -164,12 +172,12 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
 
     const handleAbort = () => {
       console.log('🎥 Video load aborted')
-      handleVideoError()
+      // Do not treat as fatal; will retry via user interaction or visibility
     }
 
     const handleStalled = () => {
-      console.log('🎥 Video stalled')
-      handleVideoError()
+      console.log('🎥 Video stalled (non-fatal)')
+      // Non-fatal; allow buffer to resume
     }
 
     const handleSuspend = () => {
@@ -201,22 +209,22 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
     }
   }, [handleVideoReady, handleVideoError, isReady])
 
-  // Reset loading state if it gets stuck
+  // Reset loading state if it gets stuck (tolerant)
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (isLoading && !hasError && isVisible) {
+      if (isLoading && !hasError && isVisibleStable) {
         console.warn('Video loading timeout, resetting state')
         setIsLoading(false)
         setIsReady(true)
       }
-    }, 10000) // 10 second timeout
+    }, 15000) // 15 second timeout
 
     return () => clearTimeout(timeout)
-  }, [isLoading, hasError, isVisible])
+  }, [isLoading, hasError, isVisibleStable])
 
-  // Network error detection - check if video actually loaded after a delay
+  // Network error detection - check if video actually loaded after a delay (more tolerant)
   useEffect(() => {
-    if (!isVisible || hasError || isReady) return
+    if (!isVisibleStable || hasError || isReady) return
 
     const networkTimeout = setTimeout(() => {
       const video = videoRef.current
@@ -224,10 +232,10 @@ export function VideoPlayer({ src, poster, className = '', aspect = '4/5', onErr
         console.log('🎥 Video network timeout - readyState is 0, treating as error')
         handleVideoError()
       }
-    }, 5000) // 5 second network timeout
+    }, 12000) // 12 second network timeout
 
     return () => clearTimeout(networkTimeout)
-  }, [isVisible, hasError, isReady, handleVideoError])
+  }, [isVisibleStable, hasError, isReady, handleVideoError])
 
   return (
     <div ref={containerRef} className={`relative w-full bg-bg-elev-1 ${className}`} style={{ aspectRatio: aspect }}>
