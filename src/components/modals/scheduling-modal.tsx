@@ -57,14 +57,43 @@ export function SchedulingModal({ isOpen, onClose, approvedPosts, onSuccess }: S
     ;(async () => {
       try {
         const fresh = await getPostsForGymBySlug(gymSlug)
-        const filtered = fresh.filter(p =>
+        const approved = fresh.filter(p =>
           (p['Approval Status']?.toLowerCase() === 'approved') && (!p['Scheduled'] || String(p['Scheduled']).trim() === '')
         )
-        setPostsToSchedule(filtered)
+        // Group carousels: keep the first slide per group; include singles
+        const seen = new Set<string>()
+        const grouped: SocialMediaPost[] = []
+        approved.forEach(p => {
+          const group = p['Carousel Group']
+          if (group) {
+            if (!seen.has(String(group))) {
+              seen.add(String(group))
+              grouped.push(p)
+            }
+          } else {
+            grouped.push(p)
+          }
+        })
+        setPostsToSchedule(grouped)
       } catch {
         // Fallback to provided approvedPosts prop filtered locally
-        const fallback = (approvedPosts || []).filter(p => !p['Scheduled'] || String(p['Scheduled']).trim() === '')
-        setPostsToSchedule(fallback)
+        const fallbackApproved = (approvedPosts || []).filter(p =>
+          (p['Approval Status']?.toLowerCase() === 'approved') && (!p['Scheduled'] || String(p['Scheduled']).trim() === '')
+        )
+        const seen2 = new Set<string>()
+        const grouped2: SocialMediaPost[] = []
+        fallbackApproved.forEach(p => {
+          const group = p['Carousel Group']
+          if (group) {
+            if (!seen2.has(String(group))) {
+              seen2.add(String(group))
+              grouped2.push(p)
+            }
+          } else {
+            grouped2.push(p)
+          }
+        })
+        setPostsToSchedule(grouped2)
       }
     })()
   }, [isOpen, gymSlug])
