@@ -58,9 +58,28 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
   }
 
   const handleVideoError = async () => {
-    console.log('🎥 Video failed to load (non-destructive):', post.id)
+    console.log('🎥 Video failed to load, deleting post:', post.id)
     setIsLoading(false)
     setHasError(true)
+    if (post?.id) {
+      try {
+        const response = await fetch('/api/posts/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ postId: post.id })
+        })
+        
+        if (response.ok) {
+          console.log('✅ Post deleted successfully, dispatching refresh event')
+          // Dispatch event to refresh parent lists
+          window.dispatchEvent(new CustomEvent('post-deleted', { detail: { id: post.id } }))
+        } else {
+          console.error('❌ Failed to delete post:', response.status)
+        }
+      } catch (error) {
+        console.error('❌ Error deleting post:', error)
+      }
+    }
   }
 
   // If it's a carousel, use the CarouselDisplay component (4:5)
