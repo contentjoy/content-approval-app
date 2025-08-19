@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -49,27 +49,42 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
 
   const [platformOptions, setPlatformOptions] = useState<{ id: string; label: string }[]>([])
   const [files, setFiles] = useState<File[]>([])
+  const [previewUrls, setPreviewUrls] = useState<string[]>([])
 
   useEffect(() => {
     if (!isOpen) return
     ;(async () => {
       try {
-        // Get profile platforms from gym via API
-        const res = await fetch('/api/gym-profile')
+        // Get profile platforms from gym via API (needs gymId)
+        const qs = user?.gymId ? `?gymId=${encodeURIComponent(user.gymId)}` : ''
+        const res = await fetch(`/api/gym-profile${qs}`)
         if (res.ok) {
           const data = await res.json()
           const profiles = data.ayrshare_profiles || {}
           const opts = Object.keys(profiles).map(k => ({ id: k, label: k.charAt(0).toUpperCase() + k.slice(1) }))
           setPlatformOptions(opts)
+        } else {
+          setPlatformOptions([])
         }
-      } catch {}
+      } catch {
+        setPlatformOptions([])
+      }
     })()
-  }, [isOpen])
+  }, [isOpen, user?.gymId])
 
   const onSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const chosen = Array.from(e.target.files || [])
     if (chosen.length) setFiles(chosen)
   }
+
+  // Build object URLs for previews and clean up
+  useEffect(() => {
+    const urls = files.map(f => URL.createObjectURL(f))
+    setPreviewUrls(urls)
+    return () => {
+      urls.forEach(u => URL.revokeObjectURL(u))
+    }
+  }, [files])
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -128,7 +143,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
         {/* Media */}
         <div className="bg-[var(--modal-surface)] rounded-[16px] p-4 border border-[var(--modal-border)]">
           <label className="block text-sm font-medium text-foreground mb-2">Media</label>
-          <div className="w-full aspect-[4/5] rounded-[16px] border border-[var(--modal-border)] bg-[var(--bg)] flex items-center justify-center overflow-hidden">
+          <div className="w-full md:w-1/3 aspect-[4/5] rounded-[16px] border border-[var(--modal-border)] bg-[var(--bg)] flex items-center justify-center overflow-hidden">
             {files.length === 0 ? (
               <label className="w-full h-full flex items-center justify-center cursor-pointer">
                 <input type="file" multiple accept="image/*,video/*" onChange={onSelectFiles} className="hidden" />
@@ -138,15 +153,25 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
                 </div>
               </label>
             ) : (
-              <div className="w-full h-full grid grid-cols-3 gap-1 p-1">
-                {files.slice(0, 9).map((f, i) => (
-                  <div key={i} className="relative w-full aspect-[4/5] bg-black/5 rounded-md overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center text-xs text-[var(--muted-text)] px-1 break-words">
-                      {f.name}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <button type="button" className="w-full h-full" onClick={() => {
+                // reopen picker
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.multiple = true
+                input.accept = 'image/*,video/*'
+                input.onchange = (ev: any) => onSelectFiles(ev as any)
+                input.click()
+              }}>
+                {(() => {
+                  const first = files[0]
+                  const url = previewUrls[0]
+                  if (!first || !url) return null
+                  if (first.type.startsWith('image/')) {
+                    return <img src={url} alt="preview" className="w-full h-full object-cover" />
+                  }
+                  return <video src={url} className="w-full h-full object-cover" controls muted playsInline />
+                })()}
+              </button>
             )}
           </div>
         </div>
@@ -160,14 +185,18 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
         {/* Platforms */}
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">Platforms</label>
-          <div className="flex flex-wrap gap-2">
-            {platformOptions.map(opt => (
-              <label key={opt.id} className="inline-flex items-center gap-2 px-3 py-2 border border-[var(--modal-border)] rounded-[999px] cursor-pointer text-sm">
-                <input type="checkbox" value={opt.id} {...register('platforms')} className="accent-current" />
-                <span>{opt.label}</span>
-              </label>
-            ))}
-          </div>
+          {platformOptions.length === 0 ? (
+            <p className="text-sm text-[var(--muted-text)]">No connected platforms found. Connect via Settings.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {platformOptions.map(opt => (
+                <label key={opt.id} className="inline-flex items-center gap-2 px-3 py-2 border border-[var(--modal-border)] rounded-[999px] cursor-pointer text-sm">
+                  <input type="checkbox" value={opt.id} {...register('platforms')} className="accent-current" />
+                  <span>{opt.label}</span>
+                </label>
+              ))}
+            </div>
+          )}
           {errors.platforms && <p className="mt-1 text-sm text-destructive">{errors.platforms.message as any}</p>}
         </div>
 
@@ -215,7 +244,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-[var(--modal-border)]">
+        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-[var(--modal-border)] pb-4">
           <button type="button" onClick={onClose} className="h-12 px-6 py-3 rounded-[999px] border border-[var(--border)] text-[var(--text)] bg-transparent transition-all duration-200 hover:bg-[var(--modal-surface)]">Cancel</button>
           <button type="submit" className="h-12 px-6 py-3 rounded-[999px] bg-[#111113] dark:bg-[#FCFCFC] text-[#FCFCFC] dark:text-[#111113] border border-[var(--modal-border)] transition-all duration-200 hover:opacity-90">Schedule Post</button>
         </div>
