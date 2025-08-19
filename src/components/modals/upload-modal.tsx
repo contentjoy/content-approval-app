@@ -1024,6 +1024,17 @@ export function UploadModal({ isOpen, onClose, onSuccess }: UploadModalProps) {
           // Complete upload in context
           completeUpload()
           
+          // Post-upload: finalize manifest and verify totals
+          try {
+            if (uploadId) {
+              await fetch('/api/finalize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ uploadId, folderStructure })
+              })
+            }
+          } catch {}
+
           // Show completion message
           const successCount = uploadResults.filter(r => r.success).length
           if (successCount > 0) {

@@ -10,6 +10,7 @@
     "generate-passcodes": "node scripts/generate-passcodes.js"
   },
   "dependencies": {
+    "@sentry/nextjs": "^8.26.0",
     "@fullcalendar/daygrid": "^6.1.19",
     "@fullcalendar/interaction": "^6.1.19",
     "@fullcalendar/react": "^6.1.19",
