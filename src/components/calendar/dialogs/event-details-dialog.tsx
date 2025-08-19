@@ -19,6 +19,7 @@ import { MediaDisplay } from "@/components/posts/media-display";
 import { CarouselDisplay } from "@/components/posts/carousel-display";
 import type { SocialMediaPost } from "@/types";
 import { supabase } from "@/lib/supabase";
+import { EditScheduleModal } from "./edit-schedule-modal";
 
 interface IProps {
 	event: IEvent;
@@ -217,10 +218,18 @@ export function EventDetailsDialog({ event, children }: IProps) {
 					<DialogClose asChild>
 						<Button variant="outline">Close</Button>
 					</DialogClose>
-					{/* TODO: Add edit functionality */}
-					<Button variant="outline" disabled>
-						Edit Schedule
-					</Button>
+					{/* Edit Schedule Modal Trigger */}
+					<EditScheduleModal
+						isOpen={false as any}
+						onClose={() => {}}
+						post={post}
+					/>
+					<Button variant="outline" onClick={() => {
+						// Open a separate inline modal by dispatching a global event the ModalContainer can handle in future
+						// For now, reuse the EditScheduleModal route-based approach
+						const ev = new CustomEvent('open-edit-schedule', { detail: { post } })
+						window.dispatchEvent(ev)
+					}}>Edit Schedule</Button>
 				</div>
 			</DialogContent>
 		</Dialog>
