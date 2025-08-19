@@ -26,6 +26,7 @@ export default function GymPage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
   const [isLoadingPosts, setIsLoadingPosts] = useState(true)
   const [gymError, setGymError] = useState<string | null>(null)
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
   
   // Enhanced UX State
   const [searchQuery, setSearchQuery] = useState('')
@@ -67,6 +68,35 @@ export default function GymPage() {
       }
     })()
   }, [gymSlug])
+
+  // Clean up posts without media URL by deleting them, then remove from view smoothly
+  useEffect(() => {
+    if (!posts || posts.length === 0) return
+    const candidates = posts.filter(p => (!p['Asset URL'] || String(p['Asset URL']).trim() === '') && p.id && !deletedIds.has(p.id as string))
+    if (candidates.length === 0) return
+    candidates.forEach((p, idx) => {
+      const postId = p.id as string
+      // Stagger deletions for smoother UI updates
+      setTimeout(async () => {
+        try {
+          const res = await fetch('/api/posts/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ postId })
+          })
+          if (res.ok) {
+            setDeletedIds(prev => new Set(prev).add(postId))
+            // Remove locally for instant UX
+            setPosts(prev => prev.filter(pp => pp.id !== postId))
+            setFilteredPosts(prev => prev.filter(pp => pp.id !== postId))
+            try {
+              window.dispatchEvent(new CustomEvent('post-deleted', { detail: { id: postId } }))
+            } catch {}
+          }
+        } catch {}
+      }, idx * 100)
+    })
+  }, [posts, deletedIds])
 
   // Remove posts immediately when media deletion event fires
   useEffect(() => {
