@@ -238,24 +238,24 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
             </div>
             {errors.timezone && <p className="mt-1 text-sm text-destructive">{errors.timezone.message}</p>}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="min-w-0">
               <label className="block text-sm font-medium text-foreground mb-2">Date <span className="text-destructive">*</span></label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Calendar className="h-4 w-4 text-[var(--muted-text)]" />
                 </div>
-                <input type="date" {...register('date')} className="w-full pl-10 pr-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 font-semibold" />
+                <input type="date" {...register('date')} className="w-full pl-10 pr-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200" />
               </div>
               {errors.date && <p className="mt-1 text-sm text-destructive">{errors.date.message}</p>}
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm font-medium text-foreground mb-2">Time <span className="text-destructive">*</span></label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Clock className="h-4 w-4 text-[var(--muted-text)]" />
                 </div>
-                <input type="time" {...register('time')} className="w-full pl-10 pr-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 font-semibold" />
+                <input type="time" {...register('time')} className="w-full pl-10 pr-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200" />
               </div>
               {errors.time && <p className="mt-1 text-sm text-destructive">{errors.time.message}</p>}
             </div>
