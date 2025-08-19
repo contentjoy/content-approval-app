@@ -115,7 +115,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
         const bucket = 'post-media'
         for (const f of files) {
           const safeName = f.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-          const path = `${user?.gymId || 'unknown'}/${Date.now()}_${safeName}`
+          const folder = user?.gymId || (typeof window !== 'undefined' ? (window.location.pathname.split('/')[1] || 'unknown') : 'unknown')
+          const path = `${folder}/${Date.now()}_${safeName}`
           const { error: upErr } = await supabase.storage.from(bucket).upload(path, f, { contentType: f.type })
           if (upErr) throw new Error(`Upload failed: ${upErr.message}`)
           const { data: pub } = supabase.storage.from(bucket).getPublicUrl(path)

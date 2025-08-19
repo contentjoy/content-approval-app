@@ -37,7 +37,18 @@ export async function POST(req: NextRequest) {
     }
 
     // Build Ayrshare payload
-    const payload: any = { post, platforms, mediaUrls }
+    // Verify media URLs are publicly reachable (HEAD)
+    const verifiedUrls: string[] = []
+    for (const u of mediaUrls) {
+      try {
+        const head = await fetch(u, { method: 'HEAD' })
+        if (head.ok) verifiedUrls.push(u)
+        else console.warn('⚠️ Media URL HEAD failed:', u, head.status)
+      } catch (e) {
+        console.warn('⚠️ Media URL HEAD error:', u, e)
+      }
+    }
+    const payload: any = { post, platforms, mediaUrls: verifiedUrls }
     if (scheduleDate) payload.scheduleDate = scheduleDate
     if (title) payload.title = title
     // Include idempotency for safety
@@ -48,7 +59,8 @@ export async function POST(req: NextRequest) {
       hasProfileKey: !!profileKey,
       postLen: String(post || '').length,
       platforms,
-      mediaCount: mediaUrls.length,
+      mediaCount: verifiedUrls.length,
+      mediaUrls: verifiedUrls,
       scheduleDate,
       title: title ? true : false
     })
