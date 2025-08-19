@@ -69,9 +69,21 @@ export function PostCard({
   const handleApproveToggle = async () => {
     try {
       if (!isApproved) {
-        await updatePostApproval(post.id, 'Approved')
-        window.dispatchEvent(new CustomEvent('post-updated', { detail: { type: 'approved', id: post.id } }))
-        showToast({ type: 'success', title: 'Approved', message: 'Post approved' })
+        if (post['Carousel Group']) {
+          // Approve ALL slides for carousels
+          const event = new CustomEvent('post-updated', { detail: { type: 'approved-group', group: post['Carousel Group'] } })
+          window.dispatchEvent(event)
+          await fetch('/api/posts/approve-carousel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ group: post['Carousel Group'] })
+          })
+          showToast({ type: 'success', title: 'Carousel approved', message: 'All slides approved' })
+        } else {
+          await updatePostApproval(post.id, 'Approved')
+          window.dispatchEvent(new CustomEvent('post-updated', { detail: { type: 'approved', id: post.id } }))
+          showToast({ type: 'success', title: 'Approved', message: 'Post approved' })
+        }
       } else {
         await updatePostApproval(post.id, 'Pending')
         window.dispatchEvent(new CustomEvent('post-updated', { detail: { type: 'pending', id: post.id } }))
