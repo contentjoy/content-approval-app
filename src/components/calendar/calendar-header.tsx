@@ -8,20 +8,20 @@ import type { TCalendarView } from "./types";
 import { useState } from "react";
 
 const VIEW_ICONS = {
-	day: CalendarIcon,
-	week: CalendarDays,
+	// day: CalendarIcon,
+	// week: CalendarDays,
 	month: Grid3X3,
 	year: CalendarDays,
 	agenda: List,
-};
+} as const;
 
 const VIEW_LABELS = {
-	day: "Day",
-	week: "Week", 
+	// day: "Day",
+	// week: "Week", 
 	month: "Month",
 	year: "Year",
 	agenda: "Agenda",
-};
+} as const;
 
 export function CalendarHeader() {
 	const { selectedDate, setSelectedDate, view, setView, agendaModeGroupBy, setAgendaModeGroupBy } = useCalendar();

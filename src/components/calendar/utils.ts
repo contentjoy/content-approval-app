@@ -95,8 +95,33 @@ export function convertPostToEvent(post: ScheduledPostSummary, gymName: string):
 }
 
 export function convertPostsToEvents(posts: ScheduledPostSummary[], gymName: string): IEvent[] {
-	return posts
-		.filter(post => post.Scheduled) // Only include scheduled posts
-		.map(post => convertPostToEvent(post, gymName))
-		.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+	// Build single events and group carousels so one event represents the whole set
+	const singles: ScheduledPostSummary[] = []
+	const groups: Record<string, ScheduledPostSummary[]> = {}
+
+	posts.forEach(p => {
+		if (!p.Scheduled) return
+		const group = p["Carousel Group"]
+		if (group) {
+			const key = String(group)
+			if (!groups[key]) groups[key] = []
+			groups[key].push(p)
+		} else {
+			singles.push(p)
+		}
+	})
+
+	const carouselEvents: IEvent[] = Object.values(groups).map(arr => {
+		const sorted = arr.slice().sort((a, b) => new Date(a.Scheduled || '').getTime() - new Date(b.Scheduled || '').getTime())
+		const anchor = sorted[0]
+		const ev = convertPostToEvent(anchor, gymName)
+		// Mark as carousel to pick appropriate color/icon downstream
+		(ev as any).assetType = 'carousel'
+		return ev
+	})
+
+	const singleEvents = singles.map(p => convertPostToEvent(p, gymName))
+
+	return [...singleEvents, ...carouselEvents]
+		.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
 }

@@ -40,18 +40,7 @@ export function CalendarBody() {
 						multiDayEvents={multiDayEvents}
 					/>
 				)}
-				{view === "week" && (
-					<CalendarWeekView
-						singleDayEvents={singleDayEvents}
-						multiDayEvents={multiDayEvents}
-					/>
-				)}
-				{view === "day" && (
-					<CalendarDayView
-						singleDayEvents={singleDayEvents}
-						multiDayEvents={multiDayEvents}
-					/>
-				)}
+				{/* Hide week and day views for now */}
 				{view === "year" && (
 					<CalendarYearView
 						singleDayEvents={singleDayEvents}
