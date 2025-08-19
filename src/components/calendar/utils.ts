@@ -111,7 +111,7 @@ export function convertPostsToEvents(posts: ScheduledPostSummary[], gymName: str
 		}
 	})
 
-	const carouselEvents: IEvent[] = Object.values(groups).map(arr => {
+	const carouselEvents: IEvent[] = (Object.values(groups) as ScheduledPostSummary[][]).map((arr: ScheduledPostSummary[]) => {
 		const sorted = arr.slice().sort((a, b) => new Date(a.Scheduled || '').getTime() - new Date(b.Scheduled || '').getTime())
 		const anchor = sorted[0]
 		const ev = convertPostToEvent(anchor, gymName)
