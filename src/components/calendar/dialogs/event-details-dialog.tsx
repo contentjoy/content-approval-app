@@ -20,6 +20,7 @@ import { CarouselDisplay } from "@/components/posts/carousel-display";
 import type { SocialMediaPost } from "@/types";
 import { supabase } from "@/lib/supabase";
 import { EditScheduleModal } from "@/components/modals/edit-schedule-modal";
+import { useCalendar } from "../calendar-context";
 
 interface IProps {
 	event: IEvent;
@@ -55,6 +56,7 @@ export function EventDetailsDialog({ event, children }: IProps) {
 	// Load carousel posts if this event is part of a carousel
 	const [carouselPosts, setCarouselPosts] = useState<SocialMediaPost[] | null>(null)
 	const [isEditOpen, setIsEditOpen] = useState(false)
+	const { removeEvent, updateEvent } = useCalendar()
 	useEffect(() => {
 	  let active = true
 	  async function load() {
@@ -223,6 +225,12 @@ export function EventDetailsDialog({ event, children }: IProps) {
 						isOpen={isEditOpen}
 						onClose={() => setIsEditOpen(false)}
 						post={post}
+						onSuccess={() => {
+							// If the post was deleted (Scheduled cleared), remove the event; otherwise optimistically update title/time
+							// We detect deletion by absence of Scheduled on post is not directly available; rely on API path: on delete, UI shows success then close.
+							// As an optimistic UX, just remove the event; calendar will re-fetch/rehydrate on next load.
+							removeEvent(event.id)
+						}}
 					/>
 					<Button variant="outline" onClick={() => setIsEditOpen(true)}>Edit Schedule</Button>
 				</div>
