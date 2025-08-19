@@ -90,6 +90,10 @@ export function CalendarHeader() {
 		}
 	};
 
+	const getViewLabel = (v: TCalendarView) => {
+		return v === "month" || v === "year" || v === "agenda" ? VIEW_LABELS[v as keyof typeof VIEW_LABELS] : VIEW_LABELS["month"];
+	};
+
 	const handleViewChange = (newView: TCalendarView) => {
 		setView(newView);
 		setIsDropdownOpen(false);
@@ -161,7 +165,7 @@ export function CalendarHeader() {
 						className="h-8 px-3 text-sm flex items-center gap-2"
 					>
 						{renderViewIcon(view)}
-						<span>{VIEW_LABELS[view]}</span>
+						<span>{getViewLabel(view)}</span>
 						<ChevronDown className={`h-3 w-3 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
 					</Button>
 
