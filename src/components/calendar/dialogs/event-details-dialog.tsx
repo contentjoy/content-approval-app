@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { Calendar, Clock, Text, Image, Video, Grid3X3, ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
@@ -17,6 +18,7 @@ import type { IEvent } from "../interfaces";
 import { MediaDisplay } from "@/components/posts/media-display";
 import { CarouselDisplay } from "@/components/posts/carousel-display";
 import type { SocialMediaPost } from "@/types";
+import { supabase } from "@/lib/supabase";
 
 interface IProps {
 	event: IEvent;
@@ -48,9 +50,32 @@ export function EventDetailsDialog({ event, children }: IProps) {
 	
 	// Convert event to post for media display
 	const post = convertEventToPost(event);
-	
-	// Get carousel posts if this is part of a carousel
-	const carouselPosts = event.carouselGroup ? [post] : []; // TODO: Get actual carousel posts
+
+	// Load carousel posts if this event is part of a carousel
+	const [carouselPosts, setCarouselPosts] = useState<SocialMediaPost[] | null>(null)
+	useEffect(() => {
+	  let active = true
+	  async function load() {
+	    if (!event.carouselGroup) { setCarouselPosts(null); return }
+	    try {
+	      const { data, error } = await supabase
+	        .from('social_media_posts')
+	        .select('*')
+	        .eq('Carousel Group', event.carouselGroup)
+	        .eq('"Approval Status"', 'Approved')
+	        .order('Carousel Order', { ascending: true })
+	      if (error) throw error
+	      if (!active) return
+	      const slides = (data as any[] || []) as SocialMediaPost[]
+	      setCarouselPosts(slides.length ? slides : [post])
+	    } catch {
+	      if (!active) return
+	      setCarouselPosts([post])
+	    }
+	  }
+	  load()
+	  return () => { active = false }
+	}, [event.carouselGroup])
 
 	return (
 		<Dialog>
@@ -86,9 +111,9 @@ export function EventDetailsDialog({ event, children }: IProps) {
 								
 								<div className="relative w-full max-w-sm mx-auto">
 									{event.carouselGroup ? (
-										<CarouselDisplay 
-											post={post} 
-											carouselPosts={carouselPosts}
+										<CarouselDisplay
+											post={(carouselPosts && carouselPosts[0]) || post}
+											carouselPosts={carouselPosts || [post]}
 											className="rounded-lg overflow-hidden"
 										/>
 									) : (
