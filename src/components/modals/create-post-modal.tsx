@@ -80,6 +80,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
 
       // TODO: upload files first via existing upload flow; for now assume mediaUrls empty or provided
       const mediaUrls: string[] = []
+      // TODO: Integrate Drive upload flow; for now skip upload and rely on links when available
 
       // Call backend to create Ayrshare post (new endpoint could be added later). For now, perform direct call here.
       const r = await fetch('/api/ayrshare/create-post', {
