@@ -44,10 +44,11 @@ export async function POST(req: NextRequest) {
       'Content Type': 'post',
       'Scheduled': scheduleDate ? scheduleDate.replace('T', ' ').replace('Z', '') : null,
       ayrshare_postId: createRes.id,
+      ayrshare_refId: createRes.refId || null,
     }
     await supabase.from('social_media_posts').insert(insertData as any)
 
-    return NextResponse.json({ id: createRes.id })
+    return NextResponse.json({ id: createRes.id, refId: createRes.refId })
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || 'Create failed' }, { status: 500 })
   }

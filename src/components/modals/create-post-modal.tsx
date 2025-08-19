@@ -126,12 +126,29 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
     <Modal isOpen={isOpen} onClose={onClose} title="Create Post" size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Media */}
-        <div className="bg-[var(--modal-surface)] rounded-[12px] p-4 border border-[var(--modal-border)]">
-          <label className="block text-sm font-medium text-foreground mb-2">Media (Photo / Video / Carousel)</label>
-          <input type="file" multiple accept="image/*,video/*" onChange={onSelectFiles} className="w-full px-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px]" />
-          {files.length > 0 && (
-            <div className="text-xs text-[var(--muted-text)] mt-2">{files.length} file(s) selected</div>
-          )}
+        <div className="bg-[var(--modal-surface)] rounded-[16px] p-4 border border-[var(--modal-border)]">
+          <label className="block text-sm font-medium text-foreground mb-2">Media</label>
+          <div className="w-full aspect-[4/5] rounded-[16px] border border-[var(--modal-border)] bg-[var(--bg)] flex items-center justify-center overflow-hidden">
+            {files.length === 0 ? (
+              <label className="w-full h-full flex items-center justify-center cursor-pointer">
+                <input type="file" multiple accept="image/*,video/*" onChange={onSelectFiles} className="hidden" />
+                <div className="text-center text-[var(--muted-text)]">
+                  <div className="text-sm mb-1">Tap to upload photo or video</div>
+                  <div className="text-xs">Recommended 4:5 or 9:16</div>
+                </div>
+              </label>
+            ) : (
+              <div className="w-full h-full grid grid-cols-3 gap-1 p-1">
+                {files.slice(0, 9).map((f, i) => (
+                  <div key={i} className="relative w-full aspect-[4/5] bg-black/5 rounded-md overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center text-xs text-[var(--muted-text)] px-1 break-words">
+                      {f.name}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Caption */}
@@ -173,25 +190,27 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
             </div>
             {errors.timezone && <p className="mt-1 text-sm text-destructive">{errors.timezone.message}</p>}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Date <span className="text-destructive">*</span></label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Calendar className="h-4 w-4 text-[var(--muted-text)]" />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Date <span className="text-destructive">*</span></label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Calendar className="h-4 w-4 text-[var(--muted-text)]" />
+                </div>
+                <input type="date" {...register('date')} className="w-full pl-10 pr-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 font-semibold" />
               </div>
-              <input type="date" {...register('date')} className="w-full pl-10 pr-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200" />
+              {errors.date && <p className="mt-1 text-sm text-destructive">{errors.date.message}</p>}
             </div>
-            {errors.date && <p className="mt-1 text-sm text-destructive">{errors.date.message}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Time <span className="text-destructive">*</span></label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Clock className="h-4 w-4 text-[var(--muted-text)]" />
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Time <span className="text-destructive">*</span></label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Clock className="h-4 w-4 text-[var(--muted-text)]" />
+                </div>
+                <input type="time" {...register('time')} className="w-full pl-10 pr-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 font-semibold" />
               </div>
-              <input type="time" {...register('time')} className="w-full pl-10 pr-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200" />
+              {errors.time && <p className="mt-1 text-sm text-destructive">{errors.time.message}</p>}
             </div>
-            {errors.time && <p className="mt-1 text-sm text-destructive">{errors.time.message}</p>}
           </div>
         </div>
 
