@@ -132,7 +132,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(user?.gymId ? { 'x-gym-id': user.gymId } : {})
+          ...(user?.gymId ? { 'x-gym-id': user.gymId } : {}),
+          ...(typeof window !== 'undefined' ? { 'x-gym-slug': (window.location.pathname.split('/')[1] || '') } : {})
         },
         body: JSON.stringify({
           post: data.caption,

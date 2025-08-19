@@ -12,18 +12,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'post and platforms required' }, { status: 400 })
     }
 
-    // Resolve gym via current session (assumes middleware/session available) or best-effort by header 'x-gym-id'
+    // Resolve gym via headers: prefer x-gym-id, else x-gym-slug; do NOT fallback to arbitrary gym
     const gymId = req.headers.get('x-gym-id') || undefined
+    const gymSlug = req.headers.get('x-gym-slug') || undefined
     let gym: any = null
     if (gymId) {
       const { data } = await supabase.from('gyms').select('id, "Gym Name", profile_key').eq('id', gymId).single()
       gym = data
-    }
-    if (!gym) {
-      // Fallback: Get the first gym row (for environments lacking auth); this should be replaced by proper auth context
-      const { data } = await supabase.from('gyms').select('id, "Gym Name", profile_key').limit(1).single()
+    } else if (gymSlug) {
+      const name = gymSlug.replace(/-/g, ' ').toLowerCase()
+      const { data } = await supabase.from('gyms').select('id, "Gym Name", profile_key').eq('Gym Name', name).single()
       gym = data
     }
+    if (!gym) return NextResponse.json({ error: 'Gym not found' }, { status: 400 })
     const profileKey = gym?.profile_key || undefined
     console.log('🔐 Ayrshare env check:', {
       hasApiKey: !!process.env.AYRSHARE_API_KEY,
