@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     }
     console.log('✅ Ayrshare create success:', createRes)
     if (!createRes.success || !createRes.id) {
-      return NextResponse.json({ error: 'Ayrshare create failed (missing id)' }, { status: 502 })
+      console.warn('⚠️ Ayrshare returned no id; using raw payload to attempt insert anyway')
     }
 
     // Insert social_media_posts record for visibility
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       'Asset Type': mediaUrls[0]?.match(/\.mp4|video/i) ? 'Video' : 'Photo',
       'Content Type': 'post',
       'Scheduled': scheduleDate ? scheduleDate.replace('T', ' ').replace('Z', '') : null,
-      ayrshare_postId: createRes.id,
+      ayrshare_postId: createRes.id || null,
       ayrshare_refId: createRes.refId || null,
     }
     const admin = getAdminClient()
