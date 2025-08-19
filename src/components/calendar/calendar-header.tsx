@@ -96,7 +96,8 @@ export function CalendarHeader() {
 	};
 
 	const renderViewIcon = (viewType: TCalendarView) => {
-		const Icon = VIEW_ICONS[viewType];
+		if (viewType !== "month" && viewType !== "year" && viewType !== "agenda") return null;
+		const Icon = (VIEW_ICONS as any)[viewType];
 		return Icon ? <Icon className="h-4 w-4" /> : null;
 	};
 
