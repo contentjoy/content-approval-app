@@ -16,9 +16,20 @@ export async function POST(req: NextRequest) {
     if (fetchErr || !postRow) return NextResponse.json({ error: fetchErr?.message || 'Post not found' }, { status: 404 })
 
     // Delete from Ayrshare if requested
+    // Resolve gym profile_key for Ayrshare scoping
+    let profileKey: string | undefined
+    if (postRow.gym_id) {
+      const { data: gym, error: gymErr } = await supabase
+        .from('gyms')
+        .select('profile_key')
+        .eq('id', postRow.gym_id)
+        .single()
+      if (!gymErr) profileKey = (gym as any)?.profile_key || undefined
+    }
+
     if (action === 'delete') {
       if (postRow.ayrshare_postId) {
-        await ayrshareService.deletePost(postRow.ayrshare_postId)
+        await ayrshareService.deletePost(postRow.ayrshare_postId, profileKey)
       }
       // Clear scheduled timestamp locally
       await supabase.from('social_media_posts').update({ Scheduled: null }).eq('id', postId)
@@ -44,7 +55,7 @@ export async function POST(req: NextRequest) {
       if (scheduledDate) payload.scheduleDate = scheduledDate
       // Some integrations may need timezone; include if provided
       if (timezone) payload.timezone = timezone
-      await ayrshareService.updatePost(postRow.ayrshare_postId, payload)
+      await ayrshareService.updatePost(postRow.ayrshare_postId, payload, profileKey)
     }
 
     return NextResponse.json({ ok: true })

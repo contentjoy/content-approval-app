@@ -1,6 +1,7 @@
 import type { AyrshareProfile, AyrsharePostData } from '@/types'
 
-const AYRSHARE_API_URL = 'https://app.ayrshare.com/api'
+// Use public API hostname per docs
+const AYRSHARE_API_URL = 'https://api.ayrshare.com/api'
 
 class AyrshareService {
   private apiKey: string
@@ -12,7 +13,7 @@ class AyrshareService {
     }
   }
 
-  private async makeRequest(endpoint: string, options: RequestInit = {}) {
+  private async makeRequest(endpoint: string, options: RequestInit = {}, profileKey?: string) {
     const url = `${AYRSHARE_API_URL}${endpoint}`
     
     const response = await fetch(url, {
@@ -20,6 +21,7 @@ class AyrshareService {
       headers: {
         'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json',
+        ...(profileKey ? { 'Profile-Key': profileKey } : {}),
         ...options.headers,
       },
     })
@@ -44,7 +46,7 @@ class AyrshareService {
   }
 
   // Post content to social media platforms
-  async createPost(postData: AyrsharePostData): Promise<{ success: boolean; id?: string; errors?: unknown }> {
+  async createPost(postData: AyrsharePostData, profileKey?: string): Promise<{ success: boolean; id?: string; errors?: unknown }> {
     try {
       const payload = {
         post: postData.post,
@@ -64,7 +66,7 @@ class AyrshareService {
       const data = await this.makeRequest('/post', {
         method: 'POST',
         body: JSON.stringify(payload),
-      })
+      }, profileKey)
 
       return {
         success: true,
@@ -122,11 +124,13 @@ class AyrshareService {
   }
 
   // Delete a scheduled post
-  async deletePost(postId: string): Promise<boolean> {
+  async deletePost(postId: string, profileKey?: string): Promise<boolean> {
     try {
-      await this.makeRequest(`/delete/${postId}`, {
+      // Docs: DELETE /api/post with body { id }
+      await this.makeRequest(`/post`, {
         method: 'DELETE',
-      })
+        body: JSON.stringify({ id: postId })
+      }, profileKey)
       return true
     } catch (error) {
       console.error('Failed to delete post:', error)
@@ -135,12 +139,14 @@ class AyrshareService {
   }
 
   // Update a scheduled post
-  async updatePost(postId: string, updates: Partial<AyrsharePostData>): Promise<boolean> {
+  async updatePost(postId: string, updates: Partial<AyrsharePostData>, profileKey?: string): Promise<boolean> {
     try {
-      await this.makeRequest(`/update/${postId}`, {
+      // Docs pattern: PUT /api/post with body including id and fields to update
+      const payload: Record<string, any> = { id: postId, ...updates }
+      await this.makeRequest(`/post`, {
         method: 'PUT',
-        body: JSON.stringify(updates),
-      })
+        body: JSON.stringify(payload),
+      }, profileKey)
       return true
     } catch (error) {
       console.error('Failed to update post:', error)
