@@ -155,11 +155,11 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
     <Modal isOpen={isOpen} onClose={onClose} title="Create Post" size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Media + Caption (responsive) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
           {/* Media (1/3 on desktop) */}
-          <div className="bg-[var(--modal-surface)] rounded-[16px] p-4 border border-[var(--modal-border)] md:col-span-1">
+          <div className="bg-[var(--modal-surface)] rounded-[16px] p-4 border border-[var(--modal-border)] md:col-span-1 md:min-h-[460px] flex">
             <label className="block text-sm font-medium text-foreground mb-2">Media</label>
-            <div className="w-full aspect-[4/5] rounded-[16px] border border-[var(--modal-border)] bg-[var(--bg)] flex items-center justify-center overflow-hidden">
+            <div className="w-full aspect-[4/5] md:h-full rounded-[16px] border border-[var(--modal-border)] bg-[var(--bg)] flex items-center justify-center overflow-hidden">
               {files.length === 0 ? (
                 <label className="w-full h-full flex items-center justify-center cursor-pointer">
                   <input type="file" multiple accept="image/*,video/*" onChange={onSelectFiles} className="hidden" />
@@ -191,13 +191,12 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
             </div>
           </div>
           {/* Caption (2/3 on desktop) */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-foreground mb-2">Caption</label>
+          <div className="md:col-span-2 md:min-h-[460px] flex">
             <textarea
               rows={10}
               placeholder="Write your caption here..."
               {...register('caption')}
-              className="w-full px-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200"
+              className="w-full px-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 resize-none md:h-full"
             />
           </div>
         </div>
