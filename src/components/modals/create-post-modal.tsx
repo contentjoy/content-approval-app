@@ -42,7 +42,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
       caption: '',
       date: new Date().toISOString().split('T')[0],
       time: '09:00',
-      timezone: (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone } catch { return 'UTC' } })(),
+      timezone: (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone } catch { return '' } })(),
       platforms: []
     }
   })
@@ -73,6 +73,18 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
       }
     })()
   }, [isOpen, user?.gymId])
+
+  // Ensure timezone has a valid default from options
+  useEffect(() => {
+    if (!isOpen) return
+    try {
+      const tzCandidate = Intl.DateTimeFormat().resolvedOptions().timeZone
+      const exists = TIMEZONE_OPTIONS.some(o => o.value === tzCandidate)
+      setValue('timezone', exists ? tzCandidate : TIMEZONE_OPTIONS[0].value)
+    } catch {
+      setValue('timezone', TIMEZONE_OPTIONS[0].value)
+    }
+  }, [isOpen, setValue])
 
   const onSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const chosen = Array.from(e.target.files || [])
@@ -142,46 +154,52 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Create Post" size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Media */}
-        <div className="bg-[var(--modal-surface)] rounded-[16px] p-4 border border-[var(--modal-border)]">
-          <label className="block text-sm font-medium text-foreground mb-2">Media</label>
-          <div className="w-full md:w-1/3 aspect-[4/5] rounded-[16px] border border-[var(--modal-border)] bg-[var(--bg)] flex items-center justify-center overflow-hidden">
-            {files.length === 0 ? (
-              <label className="w-full h-full flex items-center justify-center cursor-pointer">
-                <input type="file" multiple accept="image/*,video/*" onChange={onSelectFiles} className="hidden" />
-                <div className="text-center text-[var(--muted-text)]">
-                  <div className="text-sm mb-1">Tap to upload photo or video</div>
-                  <div className="text-xs">Recommended 4:5 or 9:16</div>
-                </div>
-              </label>
-            ) : (
-              <button type="button" className="w-full h-full" onClick={() => {
-                // reopen picker
-                const input = document.createElement('input')
-                input.type = 'file'
-                input.multiple = true
-                input.accept = 'image/*,video/*'
-                input.onchange = (ev: any) => onSelectFiles(ev as any)
-                input.click()
-              }}>
-                {(() => {
-                  const first = files[0]
-                  const url = previewUrls[0]
-                  if (!first || !url) return null
-                  if (first.type.startsWith('image/')) {
-                    return <img src={url} alt="preview" className="w-full h-full object-cover" />
-                  }
-                  return <video src={url} className="w-full h-full object-cover" controls muted playsInline />
-                })()}
-              </button>
-            )}
+        {/* Media + Caption (responsive) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Media (1/3 on desktop) */}
+          <div className="bg-[var(--modal-surface)] rounded-[16px] p-4 border border-[var(--modal-border)] md:col-span-1">
+            <label className="block text-sm font-medium text-foreground mb-2">Media</label>
+            <div className="w-full aspect-[4/5] rounded-[16px] border border-[var(--modal-border)] bg-[var(--bg)] flex items-center justify-center overflow-hidden">
+              {files.length === 0 ? (
+                <label className="w-full h-full flex items-center justify-center cursor-pointer">
+                  <input type="file" multiple accept="image/*,video/*" onChange={onSelectFiles} className="hidden" />
+                  <div className="text-center text-[var(--muted-text)]">
+                    <div className="text-sm mb-1">Tap to upload photo or video</div>
+                    <div className="text-xs">Recommended 4:5 or 9:16</div>
+                  </div>
+                </label>
+              ) : (
+                <button type="button" className="w-full h-full" onClick={() => {
+                  const input = document.createElement('input')
+                  input.type = 'file'
+                  input.multiple = true
+                  input.accept = 'image/*,video/*'
+                  input.onchange = (ev: any) => onSelectFiles(ev as any)
+                  input.click()
+                }}>
+                  {(() => {
+                    const first = files[0]
+                    const url = previewUrls[0]
+                    if (!first || !url) return null
+                    if (first.type.startsWith('image/')) {
+                      return <img src={url} alt="preview" className="w-full h-full object-cover" />
+                    }
+                    return <video src={url} className="w-full h-full object-cover" controls muted playsInline />
+                  })()}
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-
-        {/* Caption */}
-        <div className="grid grid-cols-1 gap-2">
-          <label className="block text-sm font-medium text-foreground">Caption</label>
-          <textarea rows={6} {...register('caption')} className="w-full px-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200" />
+          {/* Caption (2/3 on desktop) */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-foreground mb-2">Caption</label>
+            <textarea
+              rows={10}
+              placeholder="Write your caption here..."
+              {...register('caption')}
+              className="w-full px-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200"
+            />
+          </div>
         </div>
 
         {/* Platforms */}
