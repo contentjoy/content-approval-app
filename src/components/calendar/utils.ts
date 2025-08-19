@@ -111,14 +111,14 @@ export function convertPostsToEvents(posts: ScheduledPostSummary[], gymName: str
 		}
 	})
 
-	const carouselEvents: IEvent[] = (Object.values(groups) as ScheduledPostSummary[][]).map((arr: ScheduledPostSummary[]) => {
-		const sorted = arr.slice().sort((a, b) => new Date(a.Scheduled || '').getTime() - new Date(b.Scheduled || '').getTime())
-		const anchor = sorted[0]
-		const ev = convertPostToEvent(anchor, gymName)
-		// Mark as carousel to pick appropriate color/icon downstream
-		(ev as any).assetType = 'carousel'
-		return ev
-	})
+	const carouselEvents: IEvent[] = []
+	for (const arr of (Object.values(groups) as ScheduledPostSummary[][])) {
+		const sorted: ScheduledPostSummary[] = arr.slice().sort((a, b) => new Date(a.Scheduled || '').getTime() - new Date(b.Scheduled || '').getTime())
+		const anchor: ScheduledPostSummary = sorted[0]
+		const ev: IEvent = convertPostToEvent(anchor, gymName)
+		;(ev as any).assetType = 'carousel'
+		carouselEvents.push(ev)
+	}
 
 	const singleEvents = singles.map(p => convertPostToEvent(p, gymName))
 
