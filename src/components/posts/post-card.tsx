@@ -255,7 +255,11 @@ export function PostCard({
         {/* Action Icons */}
         <div className="px-4 mt-3 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <button onClick={handleApproveToggle} className={`transition-colors ${isApproved ? 'text-[var(--surface)]' : 'text-gray-500 hover:text-[var(--surface)]'}`} aria-label="Approve">
+            <button
+              onClick={handleApproveToggle}
+              className={`transition-colors ${isApproved ? 'text-[#ff3041]' : 'text-gray-500 hover:text-[#ff3041]'}`}
+              aria-label="Approve"
+            >
               <Heart className={`w-5 h-5 ${isApproved ? 'fill-current' : ''}`} />
             </button>
             <button onClick={handleDisapprove} className="text-gray-500 hover:text-destructive transition-colors" aria-label="Disapprove">
