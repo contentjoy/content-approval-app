@@ -11,7 +11,8 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/auth-context'
 
 const schema = z.object({
-  caption: z.string().optional(),
+  caption: z.string().min(1, 'Caption is required'),
+  title: z.string().min(1, 'Title is required'),
   timezone: z.string().min(1),
   date: z.string().min(1),
   time: z.string().min(1),
@@ -40,6 +41,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
     resolver: zodResolver(schema),
     defaultValues: {
       caption: '',
+      title: '',
       date: new Date().toISOString().split('T')[0],
       time: '09:00',
       timezone: (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone } catch { return '' } })(),
@@ -134,6 +136,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
         },
         body: JSON.stringify({
           post: data.caption,
+          title: data.title,
           platforms: data.platforms,
           mediaUrls,
           scheduleDate: scheduleDateISO,
@@ -196,12 +199,18 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
             </div>
           </div>
           {/* Caption (2/3 on desktop) */}
-          <div className="md:col-span-2 md:min-h-[460px] flex">
+          <div className="md:col-span-2 md:min-h-[460px] flex flex-col gap-3">
+            <input
+              type="text"
+              placeholder="Title"
+              {...register('title')}
+              className="w-full px-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200"
+            />
             <textarea
               rows={10}
               placeholder="Write your caption here..."
               {...register('caption')}
-              className="w-full px-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 resize-none md:h-full"
+              className="w-full px-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 resize-none md:flex-1"
             />
           </div>
         </div>
