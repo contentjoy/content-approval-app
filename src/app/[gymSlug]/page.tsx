@@ -170,26 +170,23 @@ export default function GymPage() {
   useEffect(() => {
     let filtered = displayPosts
 
-    // 1. First apply status/type filter
+    // 1. First apply status/type filter (show all by default)
     switch (activeFilter) {
       case 'photos':
         filtered = filtered.filter(post => 
-          (post['Asset Type']?.toLowerCase() === 'photo' || !post['Asset Type']) && 
-          !post['Carousel Group'] &&
-          post['Approval Status']?.toLowerCase() === 'pending'
+          (post['Asset Type']?.toLowerCase() === 'photo' || !post['Asset Type']) &&
+          !post['Carousel Group']
         )
         break
       case 'videos':
         filtered = filtered.filter(post => 
           post['Asset Type']?.toLowerCase() === 'video' &&
-          !post['Carousel Group'] &&
-          post['Approval Status']?.toLowerCase() === 'pending'
+          !post['Carousel Group']
         )
         break
       case 'carousels':
         filtered = filtered.filter(post => 
-          post['Carousel Group'] &&
-          post['Approval Status']?.toLowerCase() === 'pending'
+          post['Carousel Group']
         )
         break
       case 'approved':
@@ -202,7 +199,8 @@ export default function GymPage() {
         )
         break
       default:
-        filtered = filtered.filter(post => post['Approval Status']?.toLowerCase() === 'pending')
+        // 'all' shows everything
+        filtered = filtered
     }
 
     // 2. Apply search filter
