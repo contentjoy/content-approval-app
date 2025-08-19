@@ -149,8 +149,11 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
         console.error('❌ create-post failed:', t)
         throw new Error(t || 'Create failed')
       }
+      const result = await r.json()
+      // Broadcast for calendar refresh
+      try { window.dispatchEvent(new CustomEvent('post-updated', { detail: { type: 'scheduled', id: result?.id } })) } catch {}
 
-      showToast({ type: 'success', title: 'Scheduled', message: 'Post scheduled successfully' })
+      showToast({ type: 'success', title: 'Success', message: 'Post scheduled successfully' })
       onSuccess?.()
       onClose()
     } catch (e) {
