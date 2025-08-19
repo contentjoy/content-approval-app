@@ -5,19 +5,36 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const gymId = searchParams.get('gymId')
+    const gymSlug = searchParams.get('gymSlug')
     
-    if (!gymId) {
-      return NextResponse.json({ error: 'gymId is required' }, { status: 400 })
+    if (!gymId && !gymSlug) {
+      return NextResponse.json({ error: 'gymId or gymSlug is required' }, { status: 400 })
     }
 
-    console.log('🔍 Getting profile for gym:', gymId)
+    console.log('🔍 Getting profile for gym:', gymId || gymSlug)
 
     // Query the gyms table to get profile_key and ayrshare_profiles
-    const { data: gym, error } = await supabase
-      .from('gyms')
-      .select('profile_key, ayrshare_profiles')
-      .eq('id', gymId)
-      .single()
+    let gym: any = null
+    let error: any = null
+    if (gymId) {
+      const r = await supabase
+        .from('gyms')
+        .select('id, "Gym Name", profile_key, ayrshare_profiles')
+        .eq('id', gymId)
+        .single()
+      gym = r.data
+      error = r.error
+    } else if (gymSlug) {
+      // Convert slug to name: kokoro-demo -> kokoro demo (lowercase to match stored format)
+      const gymName = gymSlug.replace(/-/g, ' ').toLowerCase()
+      const r = await supabase
+        .from('gyms')
+        .select('id, "Gym Name", profile_key, ayrshare_profiles')
+        .eq('Gym Name', gymName)
+        .single()
+      gym = r.data
+      error = r.error
+    }
 
     if (error) {
       console.error('❌ Failed to fetch gym profile:', error)
@@ -34,7 +51,7 @@ export async function GET(request: NextRequest) {
       success: true, 
       profile_key: gym.profile_key,
       ayrshare_profiles: gym.ayrshare_profiles,
-      gym_id: gymId  // Return the gym_id so frontend can use it
+      gym_id: gym?.id || gymId
     })
 
   } catch (error) {

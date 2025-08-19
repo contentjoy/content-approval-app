@@ -56,7 +56,9 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
     ;(async () => {
       try {
         // Get profile platforms from gym via API (needs gymId)
-        const qs = user?.gymId ? `?gymId=${encodeURIComponent(user.gymId)}` : ''
+        const qs = user?.gymId
+          ? `?gymId=${encodeURIComponent(user.gymId)}`
+          : (typeof window !== 'undefined' ? `?gymSlug=${encodeURIComponent(window.location.pathname.split('/')[1] || '')}` : '')
         const res = await fetch(`/api/gym-profile${qs}`)
         if (res.ok) {
           const data = await res.json()
