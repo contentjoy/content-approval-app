@@ -13,7 +13,7 @@ class AyrshareService {
     }
   }
 
-  private async makeRequest(endpoint: string, options: RequestInit = {}, profileKey?: string) {
+  private async makeRequest(endpoint: string, options: RequestInit = {}, profileKey?: string, idempotencyKey?: string) {
     const url = `${AYRSHARE_API_URL}${endpoint}`
     
     const response = await fetch(url, {
@@ -22,6 +22,7 @@ class AyrshareService {
         'Authorization': `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json',
         ...(profileKey ? { 'Profile-Key': profileKey } : {}),
+        ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
         ...options.headers,
       },
     })
@@ -54,6 +55,7 @@ class AyrshareService {
         mediaUrls: postData.mediaUrls || [],
         scheduleDate: postData.scheduleDate,
         profiles: postData.profiles || [],
+        title: postData.title,
       }
 
       // Remove undefined values
@@ -66,7 +68,7 @@ class AyrshareService {
       const data = await this.makeRequest('/post', {
         method: 'POST',
         body: JSON.stringify(payload),
-      }, profileKey)
+      }, profileKey, postData.idempotencyKey)
 
       return {
         success: true,

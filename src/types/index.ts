@@ -101,6 +101,8 @@ export interface AyrsharePostData {
   mediaUrls?: string[]
   scheduleDate?: string
   profiles?: string[]
+  title?: string
+  idempotencyKey?: string
 }
 
 // Database types for Supabase

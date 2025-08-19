@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 
 export async function POST(req: NextRequest) {
   try {
-    const { post, platforms, mediaUrls = [], scheduleDate, timezone } = await req.json()
+    const { post, platforms, mediaUrls = [], scheduleDate, timezone, title } = await req.json()
     if (!post || !Array.isArray(platforms) || platforms.length === 0) {
       return NextResponse.json({ error: 'post and platforms required' }, { status: 400 })
     }
@@ -26,8 +26,19 @@ export async function POST(req: NextRequest) {
     // Build Ayrshare payload
     const payload: any = { post, platforms, mediaUrls }
     if (scheduleDate) payload.scheduleDate = scheduleDate
+    if (title) payload.title = title
+    // Include idempotency for safety
+    payload.idempotencyKey = `${gym?.id || 'unknown'}:${Date.now()}:${Math.random().toString(36).slice(2)}`
 
     // Call Ayrshare
+    console.log('🟢 Ayrshare create payload preview:', {
+      hasProfileKey: !!profileKey,
+      postLen: String(post || '').length,
+      platforms,
+      mediaCount: mediaUrls.length,
+      scheduleDate,
+      title: title ? true : false
+    })
     const createRes = await ayrshareService.createPost(payload, profileKey)
     if (!createRes.success || !createRes.id) {
       return NextResponse.json({ error: 'Ayrshare create failed' }, { status: 502 })
@@ -46,10 +57,14 @@ export async function POST(req: NextRequest) {
       ayrshare_postId: createRes.id,
       ayrshare_refId: createRes.refId || null,
     }
-    await supabase.from('social_media_posts').insert(insertData as any)
+    const { error: insErr } = await supabase.from('social_media_posts').insert(insertData as any)
+    if (insErr) {
+      console.error('❌ Failed to insert social_media_posts:', insErr)
+    }
 
     return NextResponse.json({ id: createRes.id, refId: createRes.refId })
   } catch (e: any) {
+    console.error('❌ create-post API error:', e?.message || e)
     return NextResponse.json({ error: e?.message || 'Create failed' }, { status: 500 })
   }
 }
