@@ -29,6 +29,12 @@ class AyrshareService {
 
     if (!response.ok) {
       const error = await response.text()
+      console.error('❌ Ayrshare request failed', {
+        endpoint,
+        status: response.status,
+        statusText: response.statusText,
+        body: (() => { try { return JSON.parse((options as any)?.body || '{}') } catch { return String((options as any)?.body || '').slice(0,200) } })()
+      })
       throw new Error(`Ayrshare API error: ${response.status} - ${error}`)
     }
 
@@ -49,13 +55,16 @@ class AyrshareService {
   // Post content to social media platforms
   async createPost(postData: AyrsharePostData, profileKey?: string): Promise<{ success: boolean; id?: string; refId?: string; errors?: unknown }> {
     try {
-      const payload = {
+      const payload: Record<string, any> = {
         post: postData.post,
         platforms: postData.platforms,
         mediaUrls: postData.mediaUrls || [],
         scheduleDate: postData.scheduleDate,
-        profiles: postData.profiles || [],
+        // only include profiles if provided and non-empty
         title: postData.title,
+      }
+      if (postData.profiles && postData.profiles.length > 0) {
+        payload.profiles = postData.profiles
       }
 
       // Remove undefined values

@@ -39,7 +39,13 @@ export async function POST(req: NextRequest) {
       scheduleDate,
       title: title ? true : false
     })
-    const createRes = await ayrshareService.createPost(payload, profileKey)
+    let createRes
+    try {
+      createRes = await ayrshareService.createPost(payload, profileKey)
+    } catch (err: any) {
+      console.error('❌ Ayrshare create failed:', err?.message || err)
+      return NextResponse.json({ error: 'Ayrshare create failed', detail: err?.message || String(err) }, { status: 502 })
+    }
     if (!createRes.success || !createRes.id) {
       return NextResponse.json({ error: 'Ayrshare create failed' }, { status: 502 })
     }
