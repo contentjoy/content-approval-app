@@ -59,7 +59,7 @@ export function GymsTable({ gyms, isLoading }: GymsTableProps) {
                   </AvatarFallback>
                 </Avatar>
                 <Link
-                  href={\`/\${gym.gymSlug}\`}
+                  href={`/${gym.gymSlug}`}
                   className="font-medium hover:underline"
                 >
                   {gym.gymName}
@@ -101,7 +101,7 @@ export function GymsTable({ gyms, isLoading }: GymsTableProps) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
                     <Link
-                      href={\`/\${gym.gymSlug}\`}
+                      href={`/${gym.gymSlug}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -109,12 +109,12 @@ export function GymsTable({ gyms, isLoading }: GymsTableProps) {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href={\`/\${gym.gymSlug}/posts\`}>
+                    <Link href={`/${gym.gymSlug}/posts`}>
                       View posts
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href={\`/\${gym.gymSlug}/settings#socials\`}>
+                    <Link href={`/${gym.gymSlug}/settings#socials`}>
                       Reconnect socials
                     </Link>
                   </DropdownMenuItem>
@@ -144,7 +144,7 @@ function GymsTableSkeleton() {
             key={i}
             className="h-16 border-b last:border-0 animate-pulse"
             style={{
-              animationDelay: \`\${i * 100}ms\`,
+              animationDelay: `${i * 100}ms`,
               opacity: 1 - i * 0.1,
             }}
           />
