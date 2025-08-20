@@ -41,11 +41,30 @@ export async function GET(
 
     // Get agency details
     console.log('🔍 Fetching agency details for slug:', slug)
-    const { data: agency, error: agencyError } = await supabase
+    console.log('🔍 Supabase client:', !!supabase)
+    
+    // Test query to see what's in the agencies table
+    console.log('🔍 Testing agencies table access...')
+    const { data: testAgencies, error: testError } = await supabase
+      .from('agencies')
+      .select('*')
+      .limit(5)
+    
+    console.log('🔍 Test agencies query result:', { testAgencies, testError })
+    console.log('🔍 Test agencies data:', testAgencies)
+    
+    const agencyQuery = supabase
       .from('agencies')
       .select('id, "Partner name", "Primary Color", logo')
       .eq('slug', slug)
-      .single()
+    
+    console.log('🔍 Agency query:', agencyQuery)
+    
+    const { data: agency, error: agencyError } = await agencyQuery.single()
+
+    console.log('🔍 Agency query result:', { agency, agencyError })
+    console.log('🔍 Agency data:', agency)
+    console.log('🔍 Agency error:', agencyError)
 
     if (agencyError || !agency) {
       console.log('❌ Agency not found:', agencyError)
