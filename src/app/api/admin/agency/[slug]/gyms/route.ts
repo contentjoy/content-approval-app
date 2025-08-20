@@ -22,9 +22,10 @@ function parseSocials(ayrshareProfiles: any) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const { slug } = await params
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const perPage = parseInt(searchParams.get('perPage') || '25')
@@ -40,7 +41,7 @@ export async function GET(
     const { data: agency, error: agencyError } = await supabase
       .from('agencies')
       .select('id, "Partner name", "Primary Color", logo')
-      .eq('slug', params.slug)
+      .eq('slug', slug)
       .single()
 
     if (agencyError || !agency) {
