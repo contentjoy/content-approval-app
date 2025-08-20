@@ -95,18 +95,22 @@ export async function GET(request: NextRequest) {
         post['Approval Status'] === 'Approved'
       ).length
 
-      const deliveredMTD = mtdPosts.filter((post: any) => 
-        post['Approval Status'] === 'Approved' && post.published_at
-      ).length
+      // Delivered = total posts created this month
+      const deliveredMTD = mtdPosts.length
 
-      const uploadsMTD = mtdPosts.length
+      // Posts that have a scheduled publish time
       const scheduledMTD = mtdPosts.filter((post: any) => 
         post.scheduled_time && !post.published_at
       ).length
 
-      // Calculate approval rate
-      const approvalRatePct = uploadsMTD > 0 
-        ? (approvedMTD / uploadsMTD) * 100 
+      // Posts that have been published
+      const uploadsMTD = mtdPosts.filter((post: any) => 
+        post.published_at
+      ).length
+
+      // Calculate approval rate based on total delivered posts
+      const approvalRatePct = deliveredMTD > 0 
+        ? (approvedMTD / deliveredMTD) * 100 
         : 0
 
       // Format social connections
