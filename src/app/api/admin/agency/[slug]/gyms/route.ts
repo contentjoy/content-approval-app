@@ -32,19 +32,25 @@ export async function GET(
       .limit(5)
     
     console.log('🔍 Test agencies query result:', { testAgencies, testError })
-    console.log('🔍 Test agencies data:', testAgencies)
+    console.log('🔍 Test agencies data:', JSON.stringify(testAgencies, null, 2))
+
+    // Log all agency slugs to see what's available
+    const { data: allAgencies } = await supabase
+      .from('agencies')
+      .select('slug')
+    console.log('🔍 All agency slugs:', allAgencies?.map(a => a.slug))
     
     const agencyQuery = supabase
       .from('agencies')
-      .select('id, "Partner name", "Primary Color", logo')
-      .eq('slug', slug)
+      .select('id, "Partner name", "Primary Color", logo, slug')  // Added slug to see what we get
+      .ilike('slug', slug)  // Case-insensitive match
     
     console.log('🔍 Agency query:', agencyQuery)
     
     const { data: agency, error: agencyError } = await agencyQuery.single()
 
     console.log('🔍 Agency query result:', { agency, agencyError })
-    console.log('🔍 Agency data:', agency)
+    console.log('🔍 Agency data:', JSON.stringify(agency, null, 2))
     console.log('🔍 Agency error:', agencyError)
 
     if (agencyError || !agency) {

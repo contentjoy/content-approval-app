@@ -27,6 +27,8 @@ export default function AdminPage() {
   const { showToast } = useToast()
 
   useEffect(() => {
+    let isMounted = true
+
     async function loadData() {
       try {
         console.log('🔍 Fetching data for slug:', slug)
@@ -45,18 +47,27 @@ export default function AdminPage() {
         
         const result = await response.json()
         console.log('✅ API Response:', result)
-        setData(result)
+        
+        if (isMounted) {
+          setData(result)
+          setIsLoading(false)
+        }
       } catch (error) {
         console.error('❌ Load data error:', error)
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-        showToast({ type: 'error', title: 'Error', message: `Failed to load agency data: ${errorMessage}` })
-      } finally {
-        setIsLoading(false)
+        if (isMounted) {
+          showToast({ type: 'error', title: 'Error', message: `Failed to load agency data: ${errorMessage}` })
+          setIsLoading(false)
+        }
       }
     }
 
     loadData()
-  }, [slug, showToast])
+
+    return () => {
+      isMounted = false
+    }
+  }, [slug]) // Removed showToast from deps
 
   if (isLoading) {
     return <div>Loading...</div>
