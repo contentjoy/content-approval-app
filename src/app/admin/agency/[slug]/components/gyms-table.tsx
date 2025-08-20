@@ -49,83 +49,84 @@ export function GymsTable({ gyms, isLoading }: GymsTableProps) {
             <TableHead className="w-[50px]"></TableHead>
           </TableRow>
         </TableHeader>
-      <TableBody>
-        {gyms.map((gym) => (
-          <TableRow key={gym.gymId}>
-            <TableCell className="min-w-[200px]">
-              <div className="flex items-center gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>
-                    {gym.gymName.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <Link
-                  href={`/${gym.gymSlug}`}
-                  className="font-medium hover:underline text-foreground"
-                >
-                  {gym.gymName}
-                </Link>
-              </div>
-            </TableCell>
-            <TableCell className="min-w-[120px] whitespace-nowrap">
-              {format(new Date(gym.createdAt), 'MMM d, yyyy')}
-            </TableCell>
-            <TableCell className="min-w-[200px]">
-              <SocialBadges socials={gym.socials} />
-            </TableCell>
-            <TableCell className="text-right min-w-[100px]">{gym.approvedMTD}</TableCell>
-            <TableCell className="text-right min-w-[100px]">{gym.deliveredMTD}</TableCell>
-            <TableCell className="min-w-[180px]">
-              <div className="flex items-center gap-2">
-                <Progress
-                  value={gym.approvalRatePct}
-                  className="h-2 w-[100px]"
-                />
-                <span className="text-sm text-muted-foreground w-[40px]">
-                  {Math.round(gym.approvalRatePct)}%
-                </span>
-              </div>
-            </TableCell>
-            <TableCell className="text-right min-w-[100px]">{gym.uploadsMTD}</TableCell>
-            <TableCell className="text-right min-w-[100px]">{gym.scheduledMTD}</TableCell>
-            <TableCell>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="h-8 w-8 p-0"
+        <TableBody>
+          {gyms.map((gym) => (
+            <TableRow key={gym.gymId}>
+              <TableCell className="min-w-[200px]">
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>
+                      {gym.gymName.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <Link
+                    href={`/${gym.gymSlug}`}
+                    className="font-medium hover:underline text-foreground"
                   >
-                    <span className="sr-only">Open menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href={`/${gym.gymSlug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    {gym.gymName}
+                  </Link>
+                </div>
+              </TableCell>
+              <TableCell className="min-w-[120px] whitespace-nowrap">
+                {format(new Date(gym.createdAt), 'MMM d, yyyy')}
+              </TableCell>
+              <TableCell className="min-w-[200px]">
+                <SocialBadges socials={gym.socials} />
+              </TableCell>
+              <TableCell className="text-right min-w-[100px]">{gym.approvedMTD}</TableCell>
+              <TableCell className="text-right min-w-[100px]">{gym.deliveredMTD}</TableCell>
+              <TableCell className="min-w-[180px]">
+                <div className="flex items-center gap-2">
+                  <Progress
+                    value={gym.approvalRatePct}
+                    className="h-2 w-[100px]"
+                  />
+                  <span className="text-sm text-muted-foreground w-[40px]">
+                    {Math.round(gym.approvalRatePct)}%
+                  </span>
+                </div>
+              </TableCell>
+              <TableCell className="text-right min-w-[100px]">{gym.uploadsMTD}</TableCell>
+              <TableCell className="text-right min-w-[100px]">{gym.scheduledMTD}</TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="h-8 w-8 p-0"
                     >
-                      Open portal
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href={`/${gym.gymSlug}/posts`}>
-                      View posts
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href={`/${gym.gymSlug}/settings#socials`}>
-                      Reconnect socials
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/${gym.gymSlug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Open portal
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/${gym.gymSlug}/posts`}>
+                        View posts
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/${gym.gymSlug}/settings#socials`}>
+                        Reconnect socials
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   )
 }
 
