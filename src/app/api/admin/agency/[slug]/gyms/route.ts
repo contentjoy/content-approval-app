@@ -24,8 +24,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  console.log('🔍 API Route Hit: /api/admin/agency/[slug]/gyms')
   try {
     const { slug } = await params
+    console.log('📝 Slug:', slug)
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const perPage = parseInt(searchParams.get('perPage') || '25')
@@ -35,7 +37,10 @@ export async function GET(
     const showLowApproval = searchParams.get('showLowApproval') === 'true'
     const showZeroDelivered = searchParams.get('showZeroDelivered') === 'true'
 
+    console.log('🔍 Search params:', { page, perPage, search, platform, showMissingSocials, showLowApproval, showZeroDelivered })
+
     // Get agency details
+    console.log('🔍 Fetching agency details for slug:', slug)
     const { data: agency, error: agencyError } = await supabase
       .from('agencies')
       .select('id, "Partner name", "Primary Color", logo')
@@ -43,8 +48,11 @@ export async function GET(
       .single()
 
     if (agencyError || !agency) {
+      console.log('❌ Agency not found:', agencyError)
       return NextResponse.json({ error: 'Agency not found' }, { status: 404 })
     }
+
+    console.log('✅ Agency found:', agency.id)
 
     // Build gyms query
     let query = supabase
