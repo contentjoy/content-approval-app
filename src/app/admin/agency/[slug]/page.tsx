@@ -1,16 +1,15 @@
 'use client'
 
-import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { AgencyAdminResponse, FilterState } from '@/types/agency'
+import { useParams } from 'next/navigation'
+import { useToast } from '@/components/ui/toast'
+import { AgencyBrand, GymRow, FilterState } from '@/types/agency'
 import { Filters } from './components/filters'
 import { GymsTable } from './components/gyms-table'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useToast } from '@/components/ui/toast'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowUpRight } from 'lucide-react'
+import Link from 'next/link'
 
 const DEFAULT_FILTERS: FilterState = {
   search: '',
@@ -20,104 +19,129 @@ const DEFAULT_FILTERS: FilterState = {
   showZeroDelivered: false
 }
 
-export default function AgencyAdminPage() {
+export default function AdminPage() {
   const { slug } = useParams()
-  const [data, setData] = useState<AgencyAdminResponse | null>(null)
+  const [data, setData] = useState<{ branding: AgencyBrand; gyms: GymRow[] } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
-  const { toast } = useToast()
+  const { showToast } = useToast()
 
   useEffect(() => {
     async function loadData() {
       try {
-        setIsLoading(true)
-        const searchParams = new URLSearchParams()
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== '') {
-            searchParams.append(key, value.toString())
-          }
-        })
-
-        const response = await fetch(
-          `/api/admin/agency/${slug}/gyms?${searchParams.toString()}`
-        )
-        
+        const response = await fetch(`/api/admin/agency/${slug}/gyms`)
         if (!response.ok) {
           throw new Error('Failed to load data')
         }
-
-        const json = await response.json()
-        setData(json)
+        const result = await response.json()
+        setData(result)
       } catch (error) {
-        toast({
-          type: 'error',
-          title: 'Error',
-          description: 'Failed to load agency data'
-        })
+        showToast({ type: 'error', title: 'Error', message: 'Failed to load agency data' })
       } finally {
         setIsLoading(false)
       }
     }
 
     loadData()
-  }, [slug, filters, toast])
+  }, [slug, showToast])
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (!data) {
+    return <div>No data available</div>
+  }
+
+  const { branding, gyms } = data
 
   return (
-    <div className="container py-8 space-y-8">
+    <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        {data?.branding.logoUrl && (
-          <Link href={`/admin/agency/${slug}`}>
-            <Image
-              src={data.branding.logoUrl}
-              alt={data.branding.agencyName}
-              width={150}
-              height={40}
-              className="h-10 w-auto object-contain"
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          {branding.logoUrl && (
+            <img 
+              src={branding.logoUrl} 
+              alt={branding.agencyName}
+              className="h-12 w-12 rounded-lg object-cover"
             />
-          </Link>
-        )}
-        <div>
-          <h1 className="text-2xl font-semibold">
-            {data?.branding.agencyName || 'Loading...'}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {data?.gyms.length} active gyms
-          </p>
+          )}
+          <div>
+            <h1 className="text-3xl font-bold">{branding.agencyName}</h1>
+            <p className="text-muted-foreground">Admin Dashboard</p>
+          </div>
+        </div>
+        
+        {/* Onboarding Button */}
+        <div className="flex items-center gap-2">
+          <Button
+            asChild
+            variant="outline"
+            className="gap-2"
+          >
+            <Link
+              href={`/onboarding/${slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Onboarding Form
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </div>
       </div>
 
-      {/* Filters */}
-      <Card className="p-4">
-        <Filters
-          filters={filters}
-          onChange={setFilters}
-        />
-      </Card>
-
-      {/* Onboarding Button */}
-      <div className="flex items-center gap-2">
-        <Button
-          asChild
-          variant="outline"
-          className="gap-2"
-        >
-          <Link
-            href={`/onboarding/${slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Onboarding Form
-            <ArrowUpRight className="h-4 w-4" />
-          </Link>
-        </Button>
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Gyms</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{gyms.length}</div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Delivered MTD</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {gyms.reduce((sum, gym) => sum + gym.deliveredMTD, 0)}
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Approved MTD</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {gyms.reduce((sum, gym) => sum + gym.approvedMTD, 0)}
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg Approval Rate</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {Math.round(gyms.reduce((sum, gym) => sum + gym.approvalRatePct, 0) / gyms.length)}%
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Table */}
-      <GymsTable
-        gyms={data?.gyms || []}
-        isLoading={isLoading}
-      />
+      {/* Filters */}
+      <Filters filters={filters} onChange={setFilters} />
+
+      {/* Gyms Table */}
+      <GymsTable gyms={gyms} isLoading={isLoading} />
     </div>
   )
 }

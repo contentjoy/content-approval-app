@@ -72,7 +72,11 @@ export async function GET(
     }
 
     // Get total count before pagination
-    const { count } = await query.count()
+    const { count: totalCount } = await supabase
+      .from('gyms')
+      .select('*', { count: 'exact', head: true })
+      .eq('Agency', agency.id)
+      .eq('Status', 'Active')
 
     // Apply pagination
     query = query
@@ -91,7 +95,12 @@ export async function GET(
       gymName: gym['Gym Name'],
       gymSlug: gym.slug,
       createdAt: gym.created_at,
-      socials: parseSocials(gym.ayrshare_profiles),
+      socials: parseSocials(gym.ayrshare_profiles).filter(Boolean) as {
+        platform: 'facebook' | 'instagram' | 'tiktok' | 'youtube'
+        connected_at?: string
+        profile_key?: string
+        platform_username?: string
+      }[],
       deliveredMTD: gym.v_gym_monthly_stats?.[0]?.delivered_mtd || 0,
       approvedMTD: gym.v_gym_monthly_stats?.[0]?.approved_mtd || 0,
       approvalRatePct: gym.v_gym_monthly_stats?.[0]?.approval_rate_pct || 0,
@@ -126,7 +135,7 @@ export async function GET(
       },
       gyms: transformedGyms,
       pagination: {
-        total: count,
+        total: totalCount || 0,
         page,
         perPage
       }
