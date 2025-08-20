@@ -29,14 +29,27 @@ export default function AdminPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const response = await fetch(`/api/admin/agency/${slug}/gyms`)
+        console.log('🔍 Fetching data for slug:', slug)
+        const apiUrl = `/api/admin/agency/${slug}/gyms`
+        console.log('🔍 API URL:', apiUrl)
+        
+        const response = await fetch(apiUrl)
+        console.log('🔍 Response status:', response.status)
+        console.log('🔍 Response ok:', response.ok)
+        
         if (!response.ok) {
-          throw new Error('Failed to load data')
+          const errorText = await response.text()
+          console.error('❌ API Error:', response.status, errorText)
+          throw new Error(`API Error: ${response.status} - ${errorText}`)
         }
+        
         const result = await response.json()
+        console.log('✅ API Response:', result)
         setData(result)
       } catch (error) {
-        showToast({ type: 'error', title: 'Error', message: 'Failed to load agency data' })
+        console.error('❌ Load data error:', error)
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        showToast({ type: 'error', title: 'Error', message: `Failed to load agency data: ${errorMessage}` })
       } finally {
         setIsLoading(false)
       }
