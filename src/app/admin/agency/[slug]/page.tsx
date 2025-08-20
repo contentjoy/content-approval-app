@@ -39,7 +39,7 @@ export default function AgencyAdminPage() {
         })
 
         const response = await fetch(
-          \`/api/admin/agency/\${slug}/gyms?\${searchParams.toString()}\`
+          `/api/admin/agency/${slug}/gyms?${searchParams.toString()}`
         )
         
         if (!response.ok) {
@@ -67,7 +67,7 @@ export default function AgencyAdminPage() {
       {/* Header */}
       <div className="flex items-center gap-4">
         {data?.branding.logoUrl && (
-          <Link href={\`/admin/agency/\${slug}\`}>
+          <Link href={`/admin/agency/${slug}`}>
             <Image
               src={data.branding.logoUrl}
               alt={data.branding.agencyName}
@@ -103,7 +103,7 @@ export default function AgencyAdminPage() {
           className="gap-2"
         >
           <Link
-            href={\`/\${slug}\`}
+            href={`/onboarding/${slug}`}
             target="_blank"
             rel="noopener noreferrer"
           >
