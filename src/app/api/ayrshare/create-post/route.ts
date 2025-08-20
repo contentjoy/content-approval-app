@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       'Gym Name': gym?.['Gym Name'] || '',
       'Asset URL': mediaUrls[0] || '',
       'Post Caption': post,
-      'Approval Status': 'Pending',
+      'Approval Status': 'Approved',
       'Asset Type': mediaUrls[0]?.match(/\.mp4|video/i) ? 'Video' : 'Photo',
       'Content Type': 'post',
       'Scheduled': scheduleDate ? scheduleDate.replace('T', ' ').replace('Z', '') : null,
