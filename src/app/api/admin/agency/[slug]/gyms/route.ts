@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
-type Params = {
-  params: {
-    slug: string
-  }
-}
-
 export async function GET(
   request: NextRequest,
-  context: Params
+  { params }: { params: { slug: string } }
 ) {
   console.log('🔍 API Route Hit: /api/admin/agency/[slug]/gyms')
   try {
-    const { slug } = context.params
+    const { slug } = params
     console.log('📝 Slug:', slug)
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
