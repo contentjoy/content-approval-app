@@ -3,11 +3,11 @@ import { supabase } from '@/lib/supabase'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: { slug: string } }
 ) {
   console.log('🔍 API Route Hit: /api/admin/agency/[slug]/gyms')
   try {
-    const { slug } = await params
+    const { slug } = params
     console.log('📝 Slug:', slug)
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
@@ -24,28 +24,21 @@ export async function GET(
     console.log('🔍 Fetching agency details for slug:', slug)
     console.log('🔍 Supabase client:', !!supabase)
     
-    // Test query to see what's in the agencies table
-    console.log('🔍 Testing agencies table access...')
-    const { data: testAgencies, error: testError } = await supabase
+    // First, let's see what's in the agencies table
+    const { data: allAgencies, error: listError } = await supabase
       .from('agencies')
       .select('*')
-      .limit(5)
     
-    console.log('🔍 Test agencies query result:', { testAgencies, testError })
-    console.log('🔍 Test agencies data:', JSON.stringify(testAgencies, null, 2))
-
-    // Log all agency slugs to see what's available
-    const { data: allAgencies } = await supabase
-      .from('agencies')
-      .select('slug')
-    console.log('🔍 All agency slugs:', allAgencies?.map(a => a.slug))
+    console.log('🔍 All agencies:', JSON.stringify(allAgencies, null, 2))
+    console.log('🔍 List error:', listError)
     
+    // Now try to find our specific agency
     const agencyQuery = supabase
       .from('agencies')
-      .select('id, "Partner name", "Primary Color", logo, slug')  // Added slug to see what we get
-      .ilike('slug', slug)  // Case-insensitive match
+      .select('id, "Partner name", "Primary Color", logo, slug')
+      .eq('slug', slug.toLowerCase()) // Ensure lowercase comparison
     
-    console.log('🔍 Agency query:', agencyQuery)
+    console.log('🔍 Looking for slug:', slug.toLowerCase())
     
     const { data: agency, error: agencyError } = await agencyQuery.single()
 
