@@ -24,27 +24,14 @@ export async function GET(
     console.log('🔍 Fetching agency details for slug:', slug)
     console.log('🔍 Supabase client:', !!supabase)
     
-    // First, let's see what's in the agencies table
-    const { data: allAgencies, error: listError } = await supabase
+    // Get agency by slug
+    const { data: agency, error: agencyError } = await supabase
       .from('agencies')
-      .select('*')
-    
-    console.log('🔍 All agencies:', JSON.stringify(allAgencies, null, 2))
-    console.log('🔍 List error:', listError)
-    
-    // Now try to find our specific agency
-    const agencyQuery = supabase
-      .from('agencies')
-      .select('id, "Partner name", "Primary Color", logo, slug')
-      .eq('slug', slug.toLowerCase()) // Ensure lowercase comparison
-    
-    console.log('🔍 Looking for slug:', slug.toLowerCase())
-    
-    const { data: agency, error: agencyError } = await agencyQuery.single()
+      .select('id, "Partner name", "Primary Color", logo')
+      .ilike('slug', slug)
+      .single()
 
-    console.log('🔍 Agency query result:', { agency, agencyError })
-    console.log('🔍 Agency data:', JSON.stringify(agency, null, 2))
-    console.log('🔍 Agency error:', agencyError)
+    console.log('🔍 Agency query:', { slug, agency, agencyError })
 
     if (agencyError || !agency) {
       console.log('❌ Agency not found:', agencyError)
