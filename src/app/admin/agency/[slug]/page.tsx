@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import { useToast } from '@/components/ui/toast'
 import { AgencyBrand, GymRow, FilterState } from '@/types/agency'
 import { Filters } from './components/filters'
-import { GymsTable } from './components/gyms-table'
+import { GymsTable } from '@/app/admin/agency/[slug]/components/gyms-table'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowUpRight } from 'lucide-react'
@@ -70,11 +70,49 @@ export default function AdminPage() {
   }, [slug]) // Removed showToast from deps
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return (
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 rounded-lg bg-muted animate-pulse" />
+          <div className="space-y-2">
+            <div className="h-8 w-48 bg-muted animate-pulse rounded" />
+            <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="p-6 rounded-lg border bg-card">
+              <div className="space-y-2">
+                <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <GymsTable gyms={[]} isLoading={true} />
+      </div>
+    )
   }
 
   if (!data) {
-    return <div>No data available</div>
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+          <h2 className="text-2xl font-semibold">No Data Available</h2>
+          <p className="text-muted-foreground">
+            Unable to load agency data. Please try again later or contact support if the issue persists.
+          </p>
+          <Button
+            onClick={() => window.location.reload()}
+            variant="outline"
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   const { branding, gyms } = data
