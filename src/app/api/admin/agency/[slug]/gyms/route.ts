@@ -50,7 +50,7 @@ export async function GET(
     // Build gyms query
     let query = supabase
       .from('gyms')
-      .select(\`
+      .select(`
         id,
         "Gym Name",
         slug,
@@ -63,13 +63,13 @@ export async function GET(
           uploads_mtd,
           scheduled_mtd
         )
-      \`)
+      `)
       .eq('Agency', agency.id)
       .eq('Status', 'Active')
 
     // Apply filters
     if (search) {
-      query = query.ilike('Gym Name', \`%\${search}%\`)
+      query = query.ilike('Gym Name', `%${search}%`)
     }
 
     // Get total count before pagination
