@@ -34,24 +34,25 @@ export function GymsTable({ gyms, isLoading }: GymsTableProps) {
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Gym</TableHead>
-          <TableHead>Created</TableHead>
-          <TableHead>Social Connections</TableHead>
-          <TableHead className="text-right">Approved MTD</TableHead>
-          <TableHead className="text-right">Delivered MTD</TableHead>
-          <TableHead>Approval Rate</TableHead>
-          <TableHead className="text-right">Uploads MTD</TableHead>
-          <TableHead className="text-right">Scheduled MTD</TableHead>
-          <TableHead className="w-[50px]"></TableHead>
-        </TableRow>
-      </TableHeader>
+    <div className="relative w-full overflow-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="min-w-[200px]">Gym</TableHead>
+            <TableHead className="min-w-[120px]">Created</TableHead>
+            <TableHead className="min-w-[200px]">Social Connections</TableHead>
+            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Approved MTD</TableHead>
+            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Delivered MTD</TableHead>
+            <TableHead className="min-w-[180px]">Approval Rate</TableHead>
+            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Uploads MTD</TableHead>
+            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Scheduled MTD</TableHead>
+            <TableHead className="w-[50px]"></TableHead>
+          </TableRow>
+        </TableHeader>
       <TableBody>
         {gyms.map((gym) => (
           <TableRow key={gym.gymId}>
-            <TableCell>
+            <TableCell className="min-w-[200px]">
               <div className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
                   <AvatarFallback>
@@ -60,21 +61,21 @@ export function GymsTable({ gyms, isLoading }: GymsTableProps) {
                 </Avatar>
                 <Link
                   href={`/${gym.gymSlug}`}
-                  className="font-medium hover:underline"
+                  className="font-medium hover:underline text-foreground"
                 >
                   {gym.gymName}
                 </Link>
               </div>
             </TableCell>
-            <TableCell>
+            <TableCell className="min-w-[120px] whitespace-nowrap">
               {format(new Date(gym.createdAt), 'MMM d, yyyy')}
             </TableCell>
-            <TableCell>
+            <TableCell className="min-w-[200px]">
               <SocialBadges socials={gym.socials} />
             </TableCell>
-            <TableCell className="text-right">{gym.approvedMTD}</TableCell>
-            <TableCell className="text-right">{gym.deliveredMTD}</TableCell>
-            <TableCell>
+            <TableCell className="text-right min-w-[100px]">{gym.approvedMTD}</TableCell>
+            <TableCell className="text-right min-w-[100px]">{gym.deliveredMTD}</TableCell>
+            <TableCell className="min-w-[180px]">
               <div className="flex items-center gap-2">
                 <Progress
                   value={gym.approvalRatePct}
@@ -85,8 +86,8 @@ export function GymsTable({ gyms, isLoading }: GymsTableProps) {
                 </span>
               </div>
             </TableCell>
-            <TableCell className="text-right">{gym.uploadsMTD}</TableCell>
-            <TableCell className="text-right">{gym.scheduledMTD}</TableCell>
+            <TableCell className="text-right min-w-[100px]">{gym.uploadsMTD}</TableCell>
+            <TableCell className="text-right min-w-[100px]">{gym.scheduledMTD}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

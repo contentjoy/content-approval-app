@@ -15,10 +15,10 @@ interface SocialBadgesProps {
 }
 
 const PLATFORM_CONFIG = {
-  instagram: { label: 'IG', icon: '📸' },
-  facebook: { label: 'FB', icon: '👤' },
-  tiktok: { label: 'TT', icon: '🎵' },
-  youtube: { label: 'YT', icon: '🎥' }
+  instagram: { label: 'Instagram', variant: 'default' },
+  facebook: { label: 'Facebook', variant: 'secondary' },
+  tiktok: { label: 'TikTok', variant: 'destructive' },
+  youtube: { label: 'YouTube', variant: 'outline' }
 } as const
 
 const ALL_PLATFORMS = Object.keys(PLATFORM_CONFIG) as Platform[]
@@ -32,42 +32,42 @@ export function SocialBadges({ socials }: SocialBadgesProps) {
     return acc
   }, {} as Record<Platform, { connected_at?: string; platform_username?: string }>)
 
-  return (
-    <ScrollArea className="w-[200px]">
-      <div className="flex gap-2">
-        {ALL_PLATFORMS.map((platform) => {
-          const isConnected = platform in connectedPlatforms
-          const config = PLATFORM_CONFIG[platform]
-          const connection = connectedPlatforms[platform]
+  const connectedSocials = ALL_PLATFORMS.filter(platform => platform in connectedPlatforms)
 
-          return (
-            <Tooltip key={platform}>
-              <TooltipTrigger>
-                <Badge
-                  variant={isConnected ? "default" : "outline"}
-                  className={isConnected ? "bg-brand hover:bg-brand/80" : ""}
-                >
-                  {config.icon} {config.label}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent>
-                {isConnected ? (
-                  <div className="text-sm">
-                    <p>{connection.platform_username || platform}</p>
-                    {connection.connected_at && (
-                      <p className="text-xs text-muted-foreground">
-                        Connected {format(new Date(connection.connected_at), 'MMM d, yyyy')}
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-sm">Not connected</p>
-                )}
-              </TooltipContent>
-            </Tooltip>
-          )
-        })}
+  if (connectedSocials.length === 0) {
+    return (
+      <div className="text-sm text-muted-foreground">
+        No social connections
       </div>
-    </ScrollArea>
+    )
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {connectedSocials.map((platform) => {
+        const config = PLATFORM_CONFIG[platform]
+        const connection = connectedPlatforms[platform]
+
+        return (
+          <Tooltip key={platform}>
+            <TooltipTrigger>
+              <Badge variant={config.variant}>
+                {config.label}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="text-sm">
+                <p>{connection.platform_username || platform}</p>
+                {connection.connected_at && (
+                  <p className="text-xs text-muted-foreground">
+                    Connected {format(new Date(connection.connected_at), 'MMM d, yyyy')}
+                  </p>
+                )}
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        )
+      })}
+    </div>
   )
 }
