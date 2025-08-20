@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useParams } from 'next/navigation'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 export default function AdminLayout({
   children
@@ -28,8 +29,10 @@ export default function AdminLayout({
   }, [slug])
 
   return (
-    <div className="min-h-screen bg-background">
-      {children}
-    </div>
+    <TooltipProvider>
+      <div className="min-h-screen bg-background">
+        {children}
+      </div>
+    </TooltipProvider>
   )
 }
