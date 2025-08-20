@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { AgencyAdminResponse, GymRow, Platform } from '@/types/agency'
 
 const PLATFORMS: Platform[] = ['facebook', 'instagram', 'tiktok', 'youtube']
@@ -34,8 +34,6 @@ export async function GET(
     const showMissingSocials = searchParams.get('showMissingSocials') === 'true'
     const showLowApproval = searchParams.get('showLowApproval') === 'true'
     const showZeroDelivered = searchParams.get('showZeroDelivered') === 'true'
-
-    const supabase = createClient()
 
     // Get agency details
     const { data: agency, error: agencyError } = await supabase

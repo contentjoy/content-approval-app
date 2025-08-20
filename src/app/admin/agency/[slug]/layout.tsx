@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { createClient } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { useParams } from 'next/navigation'
 
 export default function AdminLayout({
@@ -13,7 +13,6 @@ export default function AdminLayout({
 
   useEffect(() => {
     async function loadAgencyBranding() {
-      const supabase = createClient()
       const { data: agency } = await supabase
         .from('agencies')
         .select('"Primary Color"')
