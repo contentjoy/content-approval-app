@@ -459,8 +459,28 @@ p { font-size: var(--fs-base); line-height: 1.7; }
   .btn-inline:hover { 
     background: var(--hover); 
     border-color: var(--border-strong);
+    color: var(--text);
   }
   .btn-inline .content { padding: 0 4px; }
+
+  /* Dropdown menu item hover states */
+  .dropdown-item {
+    @apply flex items-center w-full px-2 py-1.5 text-sm transition-colors;
+    color: var(--text);
+  }
+  .dropdown-item:hover {
+    background-color: var(--hover);
+    color: var(--text);
+  }
+
+  /* Button hover states */
+  .button-hover {
+    @apply transition-colors duration-200;
+  }
+  .button-hover:hover {
+    background-color: var(--hover);
+    color: var(--text);
+  }
   
   .input-base {
     @apply flex h-10 w-full rounded-xl border border-border px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;

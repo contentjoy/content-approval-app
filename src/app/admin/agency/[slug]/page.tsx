@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { useToast } from '@/components/ui/toast'
 import { AgencyBrand, GymRow, FilterState } from '@/types/agency'
@@ -29,48 +29,58 @@ export default function AdminPage() {
   const [platform, setPlatform] = useState('all')
   const { showToast } = useToast()
 
+  const loadData = useCallback(async () => {
+    try {
+      console.log('🔍 Fetching data for slug:', slug)
+      const apiUrl = `/api/admin/agency/${slug}/gyms?month=${month}&platform=${platform}`
+      console.log('🔍 API URL:', apiUrl)
+      
+      const response = await fetch(apiUrl)
+      console.log('🔍 Response status:', response.status)
+      console.log('🔍 Response ok:', response.ok)
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ API Error:', response.status, errorText)
+        throw new Error(`API Error: ${response.status} - ${errorText}`)
+      }
+      
+      const result = await response.json()
+      console.log('✅ API Response:', result)
+      
+      setData(result)
+      setIsLoading(false)
+    } catch (error) {
+      console.error('❌ Load data error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      showToast({ type: 'error', title: 'Error', message: `Failed to load agency data: ${errorMessage}` })
+      setIsLoading(false)
+    }
+  }, [slug, month, platform, showToast])
+
   useEffect(() => {
     let isMounted = true
 
-    async function loadData() {
-      try {
-        console.log('🔍 Fetching data for slug:', slug)
-        const apiUrl = `/api/admin/agency/${slug}/gyms?month=${month}&platform=${platform}`
-        console.log('🔍 API URL:', apiUrl)
-        
-        const response = await fetch(apiUrl)
-        console.log('🔍 Response status:', response.status)
-        console.log('🔍 Response ok:', response.ok)
-        
-        if (!response.ok) {
-          const errorText = await response.text()
-          console.error('❌ API Error:', response.status, errorText)
-          throw new Error(`API Error: ${response.status} - ${errorText}`)
-        }
-        
-        const result = await response.json()
-        console.log('✅ API Response:', result)
-        
-        if (isMounted) {
-          setData(result)
-          setIsLoading(false)
-        }
-      } catch (error) {
-        console.error('❌ Load data error:', error)
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-        if (isMounted) {
-          showToast({ type: 'error', title: 'Error', message: `Failed to load agency data: ${errorMessage}` })
-          setIsLoading(false)
-        }
-      }
+    if (isMounted) {
+      loadData()
     }
-
-    loadData()
 
     return () => {
       isMounted = false
     }
-  }, [slug, month, platform, showToast]) // Reload when filters change
+  }, [loadData]) // Reload when filters change
+
+  const handleMonthChange = (newMonth: string) => {
+    setMonth(newMonth)
+    setIsLoading(true)
+    loadData()
+  }
+
+  const handlePlatformChange = (newPlatform: string) => {
+    setPlatform(newPlatform)
+    setIsLoading(true)
+    loadData()
+  }
 
   if (isLoading) {
     return (
@@ -209,8 +219,8 @@ export default function AdminPage() {
         isLoading={isLoading}
         currentMonth={month}
         currentPlatform={platform}
-        onMonthChange={setMonth}
-        onPlatformChange={setPlatform}
+        onMonthChange={handleMonthChange}
+        onPlatformChange={handlePlatformChange}
       />
     </div>
   )
