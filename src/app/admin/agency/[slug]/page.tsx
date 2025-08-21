@@ -182,7 +182,7 @@ export default function AdminPage() {
             />
           )}
           <div>
-            <h1 className="text-3xl font-bold">{branding.agencyName}</h1>
+            <h1 className="text-3xl font-bold text-foreground">{branding.agencyName}</h1>
             <p className="text-muted-foreground">Admin Dashboard</p>
           </div>
         </div>

@@ -40,6 +40,10 @@ export const columns: ColumnDef<GymRow>[] = [
     accessorKey: 'socials',
     header: 'Social Connections',
     cell: ({ row }) => <SocialBadges socials={row.original.socials} />,
+    filterFn: (row, id, filterValue) => {
+      const socials = row.getValue(id) as string[]
+      return filterValue === 'all' || socials.includes(filterValue.toLowerCase())
+    },
   },
   {
     accessorKey: 'deliveredMTD',
