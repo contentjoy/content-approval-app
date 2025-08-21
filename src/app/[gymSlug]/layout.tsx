@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useParams, notFound } from 'next/navigation'
 import { BrandingProvider, useBranding } from '@/contexts/branding-context'
+import { ToastProvider } from '@/contexts/toast-context'
 // import { getGymBySlug } from '@/lib/database' // Temporarily unused
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
@@ -70,23 +71,6 @@ function GymLayoutContent({ children }: GymLayoutProps) {
     notFound()
   }
 
-  // Temporarily skip branding loading to fix UI loading issue
-  // TODO: Fix branding context loading for proper branding
-  // if (isLoading) {
-  //   return (
-  //     <div className="min-h-screen flex flex-col">
-  //       <Header />
-  //       <main className="flex-1 flex items-center justify-center">
-  //         <div className="text-center">
-  //           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--brand-primary)] mx-auto mb-4"></div>
-  //           <p className="text-gray-600">Loading branding...</p>
-  //         </div>
-  //       </main>
-  //       <Footer />
-  //     </div>
-  //   )
-  // }
-
   // Show error state
   if (error) {
     return (
@@ -131,9 +115,11 @@ export default function GymLayout({ children }: GymLayoutProps) {
 
   return (
     <BrandingProvider initialGymSlug={typeof gymSlug === 'string' ? gymSlug : undefined}>
-      <GymLayoutContent>
-        {children}
-      </GymLayoutContent>
+      <ToastProvider>
+        <GymLayoutContent>
+          {children}
+        </GymLayoutContent>
+      </ToastProvider>
     </BrandingProvider>
   )
 }
