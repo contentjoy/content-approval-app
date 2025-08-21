@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
+import { ModeToggle } from '@/components/mode-toggle'
 
 const DEFAULT_FILTERS: FilterState = {
   search: '',
@@ -150,6 +151,7 @@ export default function AdminPage() {
         
         {/* Onboarding Button */}
         <div className="flex items-center gap-2">
+          <ModeToggle />
           <Button
             asChild
             variant="outline"
@@ -159,7 +161,7 @@ export default function AdminPage() {
               href={`/onboarding/${slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="onboarding-button"
+              className="flex items-center gap-2"
             >
               Onboarding Form
               <ArrowUpRight className="h-4 w-4" />
