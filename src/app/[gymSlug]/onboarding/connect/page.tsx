@@ -29,11 +29,11 @@ interface SocialPlatform {
 
 export default function SocialConnectPage() {
   const [platforms, setPlatforms] = useState<SocialPlatform[]>([
-    { id: 'facebook', name: 'Facebook', icon: Facebook, color: 'bg-accent', connected: false },
-    { id: 'instagram', name: 'Instagram', icon: Instagram, color: 'bg-gradient-to-r from-purple-500 to-pink-500', connected: false },
-    { id: 'twitter', name: 'Twitter', icon: Twitter, color: 'bg-accent', connected: false },
-    { id: 'linkedin', name: 'LinkedIn', icon: Linkedin, color: 'bg-accent-strong', connected: false },
-    { id: 'youtube', name: 'YouTube', icon: Youtube, color: 'bg-destructive', connected: false },
+    { id: 'facebook', name: 'Facebook', icon: Facebook, color: 'bg-[#1877F2]', connected: false },
+    { id: 'instagram', name: 'Instagram', icon: Instagram, color: 'bg-gradient-to-r from-[#833AB4] to-[#E1306C]', connected: false },
+    { id: 'twitter', name: 'Twitter', icon: Twitter, color: 'bg-[#1DA1F2]', connected: false },
+    { id: 'linkedin', name: 'LinkedIn', icon: Linkedin, color: 'bg-[#0A66C2]', connected: false },
+    { id: 'youtube', name: 'YouTube', icon: Youtube, color: 'bg-[#FF0000]', connected: false },
   ])
   
   const [error, setError] = useState('')
@@ -254,7 +254,7 @@ export default function SocialConnectPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-2xl"
       >
-        <div className="bg-card-bg border border-card-border rounded-lg p-8">
+        <div className="bg-card border border-border rounded-lg p-8">
           {/* Header */}
           <div className="text-center mb-8">
             <motion.div
@@ -263,22 +263,22 @@ export default function SocialConnectPage() {
               transition={{ delay: 0.2, duration: 0.3 }}
               className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4"
             >
-              <CheckCircle className="w-8 h-8 text-white" />
+              <CheckCircle className="w-8 h-8 text-primary-foreground" />
             </motion.div>
-            <h1 className="text-2xl font-bold text-text mb-2">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
               Connect Your Social Media
             </h1>
-            <p className="text-text-secondary">
+            <p className="text-muted-foreground">
               Connect your social media accounts to enable content publishing and management
             </p>
           </div>
 
           {/* Progress Indicator */}
             {hasConnections && (
-            <div className="mb-6 p-4 bg-accent/10 border border-accent/20 rounded-lg">
+            <div className="mb-6 p-4 bg-primary/10 border border-primary/20 rounded-lg">
               <div className="flex items-center">
-                <CheckCircle className="w-5 h-5 text-accent mr-2" />
-                <span className="text-accent font-medium">
+                <CheckCircle className="w-5 h-5 text-primary mr-2" />
+                <span className="text-primary font-medium">
                   {connectedCount} platform{connectedCount !== 1 ? 's' : ''} connected
                 </span>
               </div>
@@ -311,7 +311,7 @@ export default function SocialConnectPage() {
                   border rounded-lg p-4 transition-all duration-200
                   ${platform.connected
                     ? 'border-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 dark:border-emerald-700'
-                    : 'border-card-border bg-background hover:border-primary'
+                    : 'border-border bg-card hover:border-primary'
                   }
                 `}
               >
@@ -324,8 +324,8 @@ export default function SocialConnectPage() {
                       <platform.icon className="w-6 h-6" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-text">{platform.name}</h3>
-                      <p className="text-sm text-text-secondary">
+                      <h3 className="font-semibold text-foreground">{platform.name}</h3>
+                      <p className="text-sm text-muted-foreground">
                         {platform.connected 
                           ? 'Connected and ready to publish'
                           : 'Connect to enable publishing'
@@ -335,7 +335,7 @@ export default function SocialConnectPage() {
                   </div>
 
                   {platform.connected ? (
-                    <div className="flex items-center text-text">
+                    <div className="flex items-center text-foreground">
                       <CheckCircle className="w-5 h-5 mr-2" />
                       <span className="text-sm font-medium">Connected</span>
                     </div>
@@ -343,7 +343,7 @@ export default function SocialConnectPage() {
                     <button
                       onClick={() => connectPlatform(platform.id)}
                       disabled={isConnecting === platform.id}
-                      className="flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 disabled:opacity-50 transition-all"
+                      className="flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-all"
                     >
                       {isConnecting === platform.id ? (
                         <Loader className="w-4 h-4 animate-spin" />
@@ -361,9 +361,9 @@ export default function SocialConnectPage() {
           </div>
 
           {/* Information Box */}
-            <div className="mb-8 p-4 bg-bg-elev-1 border border-border rounded-lg">
-            <h4 className="font-semibold text-text mb-2">How it works:</h4>
-            <ul className="text-sm text-muted-text space-y-1">
+            <div className="mb-8 p-4 bg-muted border border-border rounded-lg">
+            <h4 className="font-semibold text-foreground mb-2">How it works:</h4>
+            <ul className="text-sm text-muted-foreground space-y-1">
               <li>• Click &quot;Connect&quot; to authorize access to your social media accounts</li>
               <li>• You&apos;ll be redirected to each platform&apos;s secure login page</li>
               <li>• Once connected, you can publish content directly from your dashboard</li>
@@ -375,7 +375,7 @@ export default function SocialConnectPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <button
               onClick={handleSkip}
-              className="flex-1 px-6 py-3 border border-border text-muted-text hover:text-text hover:border-accent rounded-lg transition-colors"
+              className="flex-1 px-6 py-3 border border-border text-muted-foreground hover:text-foreground hover:border-primary rounded-lg transition-colors"
             >
               Skip for Now
             </button>
@@ -383,7 +383,7 @@ export default function SocialConnectPage() {
             <button
               onClick={handleContinue}
               disabled={!hasConnections}
-              className="flex-1 px-6 py-3 bg-accent text-background rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {hasConnections ? 'Continue to Dashboard' : 'Connect at least one platform'}
             </button>
@@ -391,7 +391,7 @@ export default function SocialConnectPage() {
 
           {/* Footer */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-text-secondary">
+            <p className="text-sm text-muted-foreground">
               Your social media credentials are securely stored and encrypted
             </p>
           </div>
@@ -401,9 +401,9 @@ export default function SocialConnectPage() {
       {/* Overlay while connecting */}
       {isConnecting && (
         <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-[var(--surface)] border border-border rounded-lg p-6 max-w-sm text-center shadow-medium">
-            <p className="text-text mb-2 font-semibold">Please click &quot;Close&quot; in the connect window</p>
-            <p className="text-sm text-muted-text">After closing, we’ll update your connected accounts here automatically.</p>
+          <div className="bg-card border border-border rounded-lg p-6 max-w-sm text-center shadow-lg">
+            <p className="text-foreground mb-2 font-semibold">Please click &quot;Close&quot; in the connect window</p>
+            <p className="text-sm text-muted-foreground">After closing, we&apos;ll update your connected accounts here automatically.</p>
           </div>
         </div>
       )}

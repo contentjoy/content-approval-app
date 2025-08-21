@@ -220,10 +220,10 @@ export function PostCard({
                   />
                   <div className={`
                     w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200
-                    ${isSelected ? 'bg-card border-[var(--surface)]' : 'bg-black/40 border-white/80 text-white'}
+                    ${isSelected ? 'bg-primary border-primary-foreground' : 'bg-black/40 border-white/80 text-white'}
                   `}>
                     {isSelected && (
-                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-3 h-3 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     )}
@@ -235,7 +235,7 @@ export function PostCard({
 
           {/* Asset Type Badge - hover */}
           <div className="absolute top-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className={`inline-flex items-center px-3 py-1.5 rounded-[24px] text-xs font-semibold bg-card text-[var(--foreground)] border border-[var(--border)]`}>
+            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-card text-foreground border border-border">
               <span className="mr-1.5">{badge.icon}</span>
               {post['Carousel Group'] ? 'Carousel' : (post['Asset Type'] || 'Post')}
             </span>
@@ -244,7 +244,7 @@ export function PostCard({
           {/* Carousel Indicator */}
           {post['Carousel Group'] && post['Carousel Order'] && (
             <div className="absolute bottom-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <span className="inline-flex items-center px-3 py-1.5 rounded-[24px] text-xs font-semibold bg-background text-foreground border border-border">
+              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-background text-foreground border border-border">
                 {post['Carousel Order']} of {post['Carousel Group']}
               </span>
             </div>
@@ -256,15 +256,15 @@ export function PostCard({
           <div className="flex items-center space-x-4">
             <button
               onClick={handleApproveToggle}
-              className={`transition-colors ${isApproved ? 'text-[#ff3041]' : 'text-gray-500 hover:text-[#ff3041]'}`}
+              className={`transition-colors ${isApproved ? 'text-destructive' : 'text-muted-foreground hover:text-destructive'}`}
               aria-label="Approve"
             >
               <Heart className={`w-5 h-5 ${isApproved ? 'fill-current' : ''}`} />
             </button>
-            <button onClick={handleDisapprove} className="text-gray-500 hover:text-destructive transition-colors" aria-label="Disapprove">
+            <button onClick={handleDisapprove} className="text-muted-foreground hover:text-destructive transition-colors" aria-label="Disapprove">
               <XIcon className="w-6 h-6" />
             </button>
-            <button onClick={handleComments} className="text-gray-500 hover:text-[var(--surface)] transition-colors" aria-label="Comments">
+            <button onClick={handleComments} className="text-muted-foreground hover:text-primary transition-colors" aria-label="Comments">
               <MessageCircle className="w-5 h-5" />
             </button>
           </div>
@@ -276,7 +276,7 @@ export function PostCard({
               await downloadMedia(assetUrl, fileName)
             }}
             disabled={isDownloading}
-            className={`text-gray-500 hover:text-[var(--surface)] transition-colors ${isDownloading ? 'opacity-50' : ''}`}
+            className={`text-muted-foreground hover:text-primary transition-colors ${isDownloading ? 'opacity-50' : ''}`}
             aria-label="Download"
           >
             <Download className="w-6 h-6" />

@@ -66,7 +66,7 @@ export function ProgressBar({ current, total, goal, className = '' }: ProgressBa
             className={`h-full ${getProgressColor()} rounded-full transition-all duration-500 ease-out`}
             style={{
               width: `${progress}%`,
-              backgroundColor: primaryColor && progress > 0 ? `var(--brand-primary)` : undefined
+              backgroundColor: primaryColor && progress > 0 ? `hsl(var(--primary))` : undefined
             }}
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}

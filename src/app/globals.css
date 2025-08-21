@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+:root {
     --radius: 0.625rem;
     --background: oklch(0.985 0 0);
     --foreground: oklch(0.141 0.005 285.823);
@@ -53,11 +53,42 @@
   }
 
   body {
-    font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
     @apply bg-background text-foreground;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
   }
+
+  /* Typography */
+  h1 { @apply text-2xl font-semibold tracking-tight; }
+  h2 { @apply text-xl font-semibold; }
+  h3 { @apply text-lg font-medium; }
+  h4 { @apply text-base font-medium; }
+  p { @apply text-sm leading-6; }
+  small { @apply text-xs; }
+
+  /* Button text */
+  button { @apply text-sm; }
+  .btn-lg { @apply text-base; }
+  .btn-sm { @apply text-xs; }
+
+  /* Form elements */
+  label { @apply text-sm font-medium; }
+  input, textarea, select { @apply text-sm; }
+  .input-help { @apply text-xs text-muted-foreground; }
+
+  /* Navigation */
+  nav { @apply text-sm; }
+  .nav-link { @apply text-sm font-medium; }
+
+  /* Cards and panels */
+  .card-title { @apply text-lg font-semibold; }
+  .card-subtitle { @apply text-sm text-muted-foreground; }
+
+  /* Lists and tables */
+  .table-header { @apply text-xs font-medium text-muted-foreground uppercase tracking-wider; }
+  .table-cell { @apply text-sm; }
+  .list-item { @apply text-sm; }
 }
 
 @layer components {

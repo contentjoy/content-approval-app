@@ -18,7 +18,7 @@ const BrandedButton = React.forwardRef<HTMLButtonElement, BrandedButtonProps>(
     
     const getVariantStyles = () => {
       if (primaryColor && variant === 'default') {
-        return `bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-dark)] focus:ring-[var(--brand-primary)]`
+        return `bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary`
       }
       
       if (primaryColor && variant === 'outline') {
@@ -26,7 +26,7 @@ const BrandedButton = React.forwardRef<HTMLButtonElement, BrandedButtonProps>(
       }
       
       if (primaryColor && variant === 'ghost') {
-        return `hover:bg-[var(--brand-primary)] hover:text-white text-[var(--brand-primary)]`
+        return `hover:bg-primary hover:text-primary-foreground text-primary`
       }
 
       // Default styles if no branding
