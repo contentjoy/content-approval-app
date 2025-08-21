@@ -11,7 +11,7 @@ import { useParams, usePathname } from 'next/navigation'
 import { useModalStore } from '@/hooks/use-modal-store'
 import { motion } from 'framer-motion'
 import { HorizontalNav } from './horizontal-nav'
-import { PopoutMenu } from './popout-menu'
+import { ProfileMenu } from './profile-menu'
 import { useAuth } from '@/contexts/auth-context'
 import SettingsModal from '@/components/modals/settings-modal'
 import { useState } from 'react'
@@ -38,7 +38,7 @@ export function ClientHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-[var(--navbar)]">
+    <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-sm border-b border-border">
       <div className="mx-auto w-full px-3 sm:px-4 md:px-5 lg:px-6 2xl:px-8 py-3 flex items-center justify-between text-foreground">
         {/* Left: Logo + Gym Name */}
         <div className="flex items-center space-x-3">
@@ -63,7 +63,7 @@ export function ClientHeader() {
           
           {/* Upload Content Button - inline standard */}
           <button 
-            className="btn-inline"
+            className="inline-flex items-center space-x-2 px-3 py-2 text-sm font-medium text-foreground hover:text-foreground border border-border rounded-full hover:bg-accent hover:border-primary transition-all duration-200"
             onClick={handleUploadClick}
           >
             <Plus className="w-4 h-4" />
@@ -72,7 +72,7 @@ export function ClientHeader() {
           
           {/* Schedule Posts Button */}
           <button
-            className="btn-inline"
+            className="inline-flex items-center space-x-2 px-3 py-2 text-sm font-medium text-foreground hover:text-foreground border border-border rounded-full hover:bg-accent hover:border-primary transition-all duration-200"
             onClick={() => openModal('schedule', null, [], approvedPosts || [])}
           >
             <Calendar className="w-4 h-4" />
@@ -81,7 +81,7 @@ export function ClientHeader() {
 
           {/* Mobile hamburger (far right) */}
           <button
-            className="md:hidden h-10 w-10 p-2 rounded-md border border-border text-text hover:bg-hover"
+            className="md:hidden h-10 w-10 p-2 rounded-full border border-border text-foreground hover:bg-accent hover:border-primary transition-all duration-200"
             aria-label="Open menu"
             onClick={() => setProfileOpen(v => !v)}
           >
@@ -90,36 +90,19 @@ export function ClientHeader() {
             </motion.div>
           </button>
 
-          {/* Profile avatar (desktop) */}
-          <div className="hidden md:block relative">
-            <button
-              onClick={() => setProfileOpen(v => !v)}
-              aria-label="Open account menu"
-              className="profile-icon profile-icon-md border border-[var(--border)]"
-            >
-              <span className="leading-none">
-                {(user?.gymName || gymName || 'G').charAt(0).toUpperCase()}
-              </span>
-            </button>
-            <div className="absolute right-0">
-              <PopoutMenu
-                isOpen={profileOpen}
-                onClose={() => setProfileOpen(false)}
-                placement="desktop"
-                onAccountSettings={() => setSettingsOpen(true)}
-                approvedProgress={approved}
-                goal={30}
-              />
-            </div>
+          {/* Profile Menu */}
+          <div className="hidden md:block">
+            <ProfileMenu
+              onAccountSettings={() => setSettingsOpen(true)}
+              approvedProgress={approved}
+              goal={30}
+            />
           </div>
         </div>
       </div>
-      {/* Mobile popout */}
+      {/* Mobile Menu */}
       <div className="md:hidden relative">
-        <PopoutMenu
-          isOpen={profileOpen}
-          onClose={() => setProfileOpen(false)}
-          placement="mobile"
+        <ProfileMenu
           onAccountSettings={() => setSettingsOpen(true)}
           approvedProgress={approved}
           goal={30}
