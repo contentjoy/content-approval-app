@@ -70,7 +70,7 @@ export const ModalProvider = () => {
       <SchedulingModal 
         isOpen={isOpen && modalType === 'schedule'} 
         onClose={closeModal}
-        posts={approvedPosts}
+        approvedPosts={approvedPosts}
       />
       <CreatePostModal 
         isOpen={isOpen && modalType === 'create-post'} 
