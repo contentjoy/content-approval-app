@@ -76,10 +76,12 @@ export default function AdminPage() {
     setIsLoading(true)
     try {
       const apiUrl = `/api/admin/agency/${slug}/gyms?month=${newMonth}&platform=${platform}`
-      const response = await fetch(apiUrl)
+      const response = await fetch(apiUrl, { cache: 'no-store' })
       if (!response.ok) throw new Error('Failed to fetch data')
       const result = await response.json()
-      setData(result)
+      if (result.gyms) {
+        setData(result)
+      }
     } catch (error) {
       console.error('Failed to update data:', error)
       showToast({ type: 'error', title: 'Error', message: 'Failed to update data' })
@@ -93,10 +95,12 @@ export default function AdminPage() {
     setIsLoading(true)
     try {
       const apiUrl = `/api/admin/agency/${slug}/gyms?month=${month}&platform=${newPlatform}`
-      const response = await fetch(apiUrl)
+      const response = await fetch(apiUrl, { cache: 'no-store' })
       if (!response.ok) throw new Error('Failed to fetch data')
       const result = await response.json()
-      setData(result)
+      if (result.gyms) {
+        setData(result)
+      }
     } catch (error) {
       console.error('Failed to update data:', error)
       showToast({ type: 'error', title: 'Error', message: 'Failed to update data' })

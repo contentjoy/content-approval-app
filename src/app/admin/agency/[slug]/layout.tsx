@@ -32,13 +32,7 @@ export default function AdminLayout({
   }, [slug])
 
   return (
-          <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem
-        disableTransitionOnChange
-
-      >
+          <div>
         <TooltipProvider>
           <div className="relative min-h-screen bg-background text-foreground antialiased">
             <div className="relative flex min-h-screen flex-col">
