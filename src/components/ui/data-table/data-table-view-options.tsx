@@ -24,7 +24,7 @@ export function DataTableViewOptions<TData>({
           View
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[150px] dropdown-menu-content">
+      <DropdownMenuContent align="end" className="w-[150px]">
         {table
           .getAllColumns()
           .filter(
@@ -35,7 +35,7 @@ export function DataTableViewOptions<TData>({
             return (
               <DropdownMenuCheckboxItem
                 key={column.id}
-                className="capitalize dropdown-menu-item"
+                className="capitalize"
                 checked={column.getIsVisible()}
                 onCheckedChange={(value) => column.toggleVisibility(!!value)}
               >
