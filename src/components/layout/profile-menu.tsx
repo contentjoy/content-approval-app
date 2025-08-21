@@ -31,7 +31,7 @@ export function ProfileMenu({ onAccountSettings, approvedProgress = 0, goal = 30
       <DropdownMenuTrigger asChild>
         <button
           aria-label="Open account menu"
-          className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium border border-border hover:bg-primary/90 transition-colors"
+          className="h-9 w-9 rounded-full bg-foreground text-background flex items-center justify-center text-xs font-medium border border-border hover:bg-foreground/90 transition-colors"
         >
           <span className="leading-none">
             {(user?.gymName || 'G').charAt(0).toUpperCase()}

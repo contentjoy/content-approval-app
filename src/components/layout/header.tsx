@@ -65,7 +65,7 @@ export function Header() {
           
           {/* Upload Content Button */}
           <button 
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-full text-xs font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-foreground text-background hover:bg-foreground/90 h-9 px-3 py-2"
             onClick={handleUploadClick}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -74,16 +74,16 @@ export function Header() {
           
           {/* Schedule Posts Button */}
           <button
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-full text-xs font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-foreground text-background hover:bg-foreground/90 h-9 px-3 py-2"
             onClick={() => openModal('schedule', null, [], approvedPosts || [])}
           >
             <Calendar className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Schedule <span className="text-primary-foreground/80">({approved})</span></span>
+            <span className="hidden sm:inline">Schedule <span className="text-background/80">({approved})</span></span>
           </button>
 
           {/* Mobile hamburger (far right) */}
           <button
-            className="md:hidden h-10 w-10 p-2 rounded-md border border-border text-foreground hover:bg-accent"
+            className="md:hidden h-9 w-9 p-2 rounded-full border border-border text-foreground hover:bg-accent hover:border-primary transition-colors"
             aria-label="Open menu"
             onClick={() => setProfileOpen(v => !v)}
           >

@@ -67,7 +67,7 @@ export function Modal({ isOpen, onClose, children, size = 'md' }: ModalProps) {
             className={cn(
               "w-[calc(100%-12px)] h-auto max-h-[calc(100vh-80px)] mx-1.5 my-4",
               "sm:w-full sm:h-auto sm:mx-0 sm:my-0 sm:max-h-[90vh]",
-              "bg-foreground border border-border rounded-lg overflow-hidden shadow-lg",
+              "bg-background border border-border rounded-lg overflow-hidden shadow-lg",
               sizeClasses[size]
             )}
             role="dialog"

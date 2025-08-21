@@ -60,35 +60,35 @@
   }
 
   /* Typography */
-  h1 { @apply text-2xl font-semibold tracking-tight; }
-  h2 { @apply text-xl font-semibold; }
-  h3 { @apply text-lg font-medium; }
-  h4 { @apply text-base font-medium; }
-  p { @apply text-sm leading-6; }
-  small { @apply text-xs; }
+  h1 { @apply text-xl font-semibold tracking-tight; }
+  h2 { @apply text-lg font-semibold; }
+  h3 { @apply text-base font-medium; }
+  h4 { @apply text-sm font-medium; }
+  p { @apply text-xs leading-5; }
+  small { @apply text-[0.8125rem]; }
 
   /* Button text */
-  button { @apply text-sm; }
-  .btn-lg { @apply text-base; }
-  .btn-sm { @apply text-xs; }
+  button { @apply text-xs; }
+  .btn-lg { @apply text-sm; }
+  .btn-sm { @apply text-[0.8125rem]; }
 
   /* Form elements */
-  label { @apply text-sm font-medium; }
-  input, textarea, select { @apply text-sm; }
-  .input-help { @apply text-xs text-muted-foreground; }
+  label { @apply text-xs font-medium; }
+  input, textarea, select { @apply text-xs; }
+  .input-help { @apply text-[0.8125rem] text-muted-foreground; }
 
   /* Navigation */
-  nav { @apply text-sm; }
-  .nav-link { @apply text-sm font-medium; }
+  nav { @apply text-xs; }
+  .nav-link { @apply text-xs font-medium; }
 
   /* Cards and panels */
-  .card-title { @apply text-lg font-semibold; }
-  .card-subtitle { @apply text-sm text-muted-foreground; }
+  .card-title { @apply text-base font-semibold; }
+  .card-subtitle { @apply text-xs text-muted-foreground; }
 
   /* Lists and tables */
-  .table-header { @apply text-xs font-medium text-muted-foreground uppercase tracking-wider; }
-  .table-cell { @apply text-sm; }
-  .list-item { @apply text-sm; }
+  .table-header { @apply text-[0.8125rem] font-medium text-muted-foreground uppercase tracking-wider; }
+  .table-cell { @apply text-xs; }
+  .list-item { @apply text-xs; }
 }
 
 @layer components {

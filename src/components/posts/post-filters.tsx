@@ -66,9 +66,9 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
               onClick={() => onFilterChange(filter.key)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-full text-xs font-medium transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                 isActive 
-                  ? 'bg-primary text-primary-foreground border-none shadow-sm' 
+                  ? 'bg-foreground text-background border-none shadow-sm' 
                   : 'bg-transparent text-foreground hover:bg-accent border border-border hover:border-primary'
               }`}
             >
@@ -76,7 +76,7 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
               <span>{filter.label}</span>
               <span className={`px-2 py-0.5 rounded-full text-xs ${
                 isActive 
-                  ? 'text-primary-foreground' 
+                  ? 'text-background' 
                   : 'bg-muted text-foreground'
               }`}>
                 {count}
@@ -90,7 +90,7 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
       <div className="sm:hidden relative">
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center space-x-2 px-4 py-2 rounded-full text-sm bg-muted border border-border hover:bg-accent transition-all duration-200"
+          className="flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs bg-muted border border-border hover:bg-accent transition-all duration-200"
         >
           <span>Posts: {filters.find(f => f.key === activeFilter)?.label}</span>
         </button>

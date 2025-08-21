@@ -61,7 +61,7 @@ export default function LoginPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md mx-auto"
       >
         <div className="bg-card border border-border rounded-lg p-8 shadow-lg">
           {/* Header */}
@@ -70,9 +70,9 @@ export default function LoginPage() {
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, duration: 0.3 }}
-              className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4"
+              className="w-16 h-16 bg-foreground text-background rounded-full flex items-center justify-center mx-auto mb-4"
             >
-              <LogIn className="w-8 h-8 text-primary-foreground" />
+              <LogIn className="w-8 h-8 text-background" />
             </motion.div>
             <h1 className="text-2xl font-bold text-foreground mb-2">
               Welcome Back
@@ -98,7 +98,7 @@ export default function LoginPage() {
                   type="text"
                   value={gymName}
                   onChange={(e) => setGymName(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-input bg-background text-foreground placeholder:text-muted-foreground"
+                  className="block w-full pl-10 pr-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-input bg-background text-foreground placeholder:text-muted-foreground"
                   placeholder="Enter your gym name"
                   disabled={isLoading}
                 />
@@ -119,7 +119,7 @@ export default function LoginPage() {
                   type={showPasscode ? "text" : "password"}
                   value={passcode}
                   onChange={(e) => setPasscode(e.target.value)}
-                  className="block w-full pl-10 pr-12 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-input bg-background text-foreground placeholder:text-muted-foreground"
+                  className="block w-full pl-10 pr-12 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-input bg-background text-foreground placeholder:text-muted-foreground"
                   placeholder="Enter your passcode"
                   disabled={isLoading}
                 />
@@ -143,7 +143,7 @@ export default function LoginPage() {
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="bg-destructive/10 border border-destructive/20 rounded-md p-3"
+                className="bg-destructive/10 border border-destructive/20 rounded-lg p-3"
               >
                 <p className="text-sm text-destructive">{error}</p>
               </motion.div>
@@ -153,13 +153,13 @@ export default function LoginPage() {
             <motion.button
               type="submit"
               disabled={isLoading || !gymName.trim() || !passcode.trim()}
-              className="w-full bg-primary text-primary-foreground py-2 px-4 rounded-md font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="w-full bg-foreground text-background py-2 px-4 rounded-lg font-medium hover:bg-foreground/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-background mr-2"></div>
                   Signing in...
                 </div>
               ) : (
