@@ -1,0 +1,55 @@
+@layer base {
+  :root {
+    --background: 248 247 247;
+    --foreground: 29 28 27;
+    --card: 252 252 252;
+    --card-foreground: 29 28 27;
+    --popover: 252 252 252;
+    --popover-foreground: 29 28 27;
+    --primary: 22 22 24;
+    --primary-foreground: 248 247 247;
+    --secondary: 252 252 252;
+    --secondary-foreground: 29 28 27;
+    --muted: 238 237 237;
+    --muted-foreground: 100 99 99;
+    --accent: 252 252 252;
+    --accent-foreground: 29 28 27;
+    --destructive: 239 68 68;
+    --destructive-foreground: 248 247 247;
+    --border: 232 232 232;
+    --input: 232 232 232;
+    --ring: 22 22 24;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 22 22 24;
+    --foreground: 249 248 246;
+    --card: 37 38 40;
+    --card-foreground: 249 248 246;
+    --popover: 37 38 40;
+    --popover-foreground: 249 248 246;
+    --primary: 249 248 246;
+    --primary-foreground: 22 22 24;
+    --secondary: 37 38 40;
+    --secondary-foreground: 249 248 246;
+    --muted: 40 40 42;
+    --muted-foreground: 181 181 181;
+    --accent: 37 38 40;
+    --accent-foreground: 249 248 246;
+    --destructive: 239 68 68;
+    --destructive-foreground: 248 247 247;
+    --border: 31 31 33;
+    --input: 31 31 33;
+    --ring: 249 248 246;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

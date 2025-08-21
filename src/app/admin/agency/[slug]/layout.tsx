@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useParams } from 'next/navigation'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import '../shadcn-globals.css'
 
 export default function AdminLayout({
   children
