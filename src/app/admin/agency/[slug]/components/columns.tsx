@@ -62,8 +62,7 @@ export const columns: ColumnDef<GymRow>[] = [
       <div className="flex items-center justify-end gap-2">
         <Progress
           value={row.original.approvalRatePct}
-          className="h-2 w-[100px] bg-surface"
-          indicatorClassName="bg-text"
+          className="h-2 w-[100px] bg-surface [&>div]:bg-text"
         />
         <span className="text-sm text-muted-foreground w-[40px]">
           {Math.round(row.original.approvalRatePct)}%
