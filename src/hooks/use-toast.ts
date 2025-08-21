@@ -1,23 +1,28 @@
 'use client'
 
-import { useContext } from 'react'
-import { ToastContext } from '@/contexts/toast-context'
+import { usePathname } from 'next/navigation'
+import { useToast as useShadcnToast } from '@/components/ui/toast/use-toast'
 
 // Fallback toast function that just logs to console
-const fallbackToast = {
-  toast: ({ type = 'info', title = '', message = '' }) => {
-    console.log(`[Toast - ${type}] ${title}: ${message}`)
+const noopToast = {
+  toast: ({ type = 'info', title = '', description = '' }) => {
+    console.log(`[Toast - ${type}] ${title}: ${description}`)
   }
 }
 
 export function useToast() {
-  try {
-    const context = useContext(ToastContext)
-    if (!context) {
-      return fallbackToast
+  const pathname = usePathname()
+  const isAdminRoute = pathname?.startsWith('/admin')
+
+  // Only use real toast in admin routes
+  if (isAdminRoute) {
+    try {
+      return useShadcnToast()
+    } catch (error) {
+      return noopToast
     }
-    return { toast: context.showToast }
-  } catch (error) {
-    return fallbackToast
   }
+
+  // Use noop toast in client routes
+  return noopToast
 }
