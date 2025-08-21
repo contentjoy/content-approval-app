@@ -71,16 +71,32 @@ export default function AdminPage() {
     }
   }, [loadData]) // Reload when filters change
 
-  const handleMonthChange = (newMonth: string) => {
+  const handleMonthChange = async (newMonth: string) => {
     setMonth(newMonth)
-    setIsLoading(true)
-    loadData()
+    try {
+      const apiUrl = `/api/admin/agency/${slug}/gyms?month=${newMonth}&platform=${platform}`
+      const response = await fetch(apiUrl)
+      if (!response.ok) throw new Error('Failed to fetch data')
+      const result = await response.json()
+      setData(result)
+    } catch (error) {
+      console.error('Failed to update data:', error)
+      showToast({ type: 'error', title: 'Error', message: 'Failed to update data' })
+    }
   }
 
-  const handlePlatformChange = (newPlatform: string) => {
+  const handlePlatformChange = async (newPlatform: string) => {
     setPlatform(newPlatform)
-    setIsLoading(true)
-    loadData()
+    try {
+      const apiUrl = `/api/admin/agency/${slug}/gyms?month=${month}&platform=${newPlatform}`
+      const response = await fetch(apiUrl)
+      if (!response.ok) throw new Error('Failed to fetch data')
+      const result = await response.json()
+      setData(result)
+    } catch (error) {
+      console.error('Failed to update data:', error)
+      showToast({ type: 'error', title: 'Error', message: 'Failed to update data' })
+    }
   }
 
   if (isLoading) {
@@ -158,7 +174,7 @@ export default function AdminPage() {
             className="gap-2 text-foreground"
           >
             <Link
-              href={`/onboarding/${slug}`}
+              href={`/onboarding/${slug}/gym-launch`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2"

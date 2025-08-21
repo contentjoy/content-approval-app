@@ -37,7 +37,7 @@ export default function AdminLayout({
         defaultTheme="dark"
         enableSystem
         disableTransitionOnChange
-        forcedTheme="dark"
+
       >
         <TooltipProvider>
           <div className="relative min-h-screen bg-background text-foreground antialiased">
