@@ -159,7 +159,7 @@ export default function AdminPage() {
               href={`/onboarding/${slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-foreground"
+              className="onboarding-button"
             >
               Onboarding Form
               <ArrowUpRight className="h-4 w-4" />

@@ -99,8 +99,8 @@
   --surface: #252628;
   --text: #F9F8F6;
   --muted-text: #B5B5B5;
-  --border: #191A1B;
-  --border-strong: #191A1B;
+  --border: #1F1F21;
+  --border-strong: #1F1F21;
   --hover: #28282A;
   --modal-bg: #3E3F41;
   --modal-surface: #4D4E50;
@@ -473,12 +473,51 @@ p { font-size: var(--fs-base); line-height: 1.7; }
     color: var(--text);
   }
 
+  /* Dropdown menu content styles */
+  [data-theme="dark"] .dropdown-content {
+    background-color: var(--surface);
+    border-color: var(--border);
+  }
+  [data-theme="dark"] .dropdown-content * {
+    color: var(--text);
+  }
+  [data-theme="dark"] .dropdown-content *:hover {
+    background-color: var(--hover);
+    color: var(--text);
+  }
+  [data-theme="light"] .dropdown-content {
+    background-color: var(--surface);
+    border-color: var(--border);
+  }
+  [data-theme="light"] .dropdown-content *:hover {
+    background-color: var(--hover);
+    color: var(--text);
+  }
+
   /* Button hover states */
   .button-hover {
     @apply transition-colors duration-200;
   }
   .button-hover:hover {
     background-color: var(--hover);
+    color: var(--text);
+  }
+
+  /* Onboarding button styles */
+  .onboarding-button {
+    @apply transition-colors duration-200;
+    color: var(--text);
+  }
+  .onboarding-button:hover {
+    background-color: var(--surface);
+    color: var(--text);
+  }
+  [data-theme="dark"] .onboarding-button:hover {
+    background-color: var(--surface);
+    color: var(--text);
+  }
+  [data-theme="light"] .onboarding-button:hover {
+    background-color: var(--surface);
     color: var(--text);
   }
   
