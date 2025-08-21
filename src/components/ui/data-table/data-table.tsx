@@ -32,12 +32,20 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   toolbar?: boolean
+  onMonthChange?: (month: string) => void
+  onPlatformChange?: (platform: string) => void
+  currentMonth?: string
+  currentPlatform?: string
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   toolbar = true,
+  onMonthChange,
+  onPlatformChange,
+  currentMonth,
+  currentPlatform,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -68,7 +76,15 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      {toolbar && <DataTableToolbar table={table} />}
+      {toolbar && (
+        <DataTableToolbar 
+          table={table}
+          onMonthChange={onMonthChange}
+          onPlatformChange={onPlatformChange}
+          currentMonth={currentMonth}
+          currentPlatform={currentPlatform}
+        />
+      )}
       <div className="relative w-full overflow-auto border rounded-lg">
         <Table>
           <TableHeader>

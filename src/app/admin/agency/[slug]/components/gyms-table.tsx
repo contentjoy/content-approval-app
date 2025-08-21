@@ -7,14 +7,34 @@ import { columns } from './columns'
 interface GymsTableProps {
   gyms: GymRow[]
   isLoading?: boolean
+  currentMonth?: string
+  currentPlatform?: string
+  onMonthChange?: (month: string) => void
+  onPlatformChange?: (platform: string) => void
 }
 
-export function GymsTable({ gyms, isLoading }: GymsTableProps) {
+export function GymsTable({ 
+  gyms, 
+  isLoading,
+  currentMonth,
+  currentPlatform,
+  onMonthChange,
+  onPlatformChange
+}: GymsTableProps) {
   if (isLoading) {
     return <GymsTableSkeleton />
   }
 
-  return <DataTable columns={columns} data={gyms} />
+  return (
+    <DataTable 
+      columns={columns} 
+      data={gyms}
+      currentMonth={currentMonth}
+      currentPlatform={currentPlatform}
+      onMonthChange={onMonthChange}
+      onPlatformChange={onPlatformChange}
+    />
+  )
 }
 
 function GymsTableSkeleton() {

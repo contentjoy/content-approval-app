@@ -25,7 +25,8 @@ export default function AdminPage() {
   const { slug } = useParams()
   const [data, setData] = useState<{ branding: AgencyBrand; gyms: GymRow[] } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
+  const [month, setMonth] = useState(startOfMonth(new Date()).toISOString())
+  const [platform, setPlatform] = useState('all')
   const { showToast } = useToast()
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export default function AdminPage() {
     async function loadData() {
       try {
         console.log('🔍 Fetching data for slug:', slug)
-        const apiUrl = `/api/admin/agency/${slug}/gyms?month=${filters.month}`
+        const apiUrl = `/api/admin/agency/${slug}/gyms?month=${month}&platform=${platform}`
         console.log('🔍 API URL:', apiUrl)
         
         const response = await fetch(apiUrl)
@@ -69,7 +70,7 @@ export default function AdminPage() {
     return () => {
       isMounted = false
     }
-  }, [slug, filters.month, showToast]) // Reload when month changes
+  }, [slug, month, platform, showToast]) // Reload when filters change
 
   if (isLoading) {
     return (
@@ -202,11 +203,15 @@ export default function AdminPage() {
         </Card>
       </div>
 
-      {/* Filters */}
-      <Filters filters={filters} onChange={setFilters} />
-
       {/* Gyms Table */}
-      <GymsTable gyms={gyms} isLoading={isLoading} />
+      <GymsTable 
+        gyms={gyms} 
+        isLoading={isLoading}
+        currentMonth={month}
+        currentPlatform={platform}
+        onMonthChange={setMonth}
+        onPlatformChange={setPlatform}
+      />
     </div>
   )
 }

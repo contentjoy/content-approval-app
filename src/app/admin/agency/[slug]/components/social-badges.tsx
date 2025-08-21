@@ -39,7 +39,10 @@ export function SocialBadges({ socials }: SocialBadgesProps) {
   try {
     const ayrshareJson = socials[0]?.ayrshare_profiles
     if (ayrshareJson) {
-      profiles = JSON.parse(ayrshareJson)
+      // Handle both string and object formats
+      profiles = typeof ayrshareJson === 'string' 
+        ? JSON.parse(ayrshareJson)
+        : ayrshareJson
       connectedPlatforms = Object.keys(profiles) as Platform[]
     }
   } catch (e) {
