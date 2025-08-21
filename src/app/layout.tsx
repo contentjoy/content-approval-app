@@ -1,6 +1,7 @@
 'use client'
 
-import { ThemeProvider } from '@/components/theme-provider'
+import { ThemeProvider as ShadcnThemeProvider } from '@/components/theme-provider'
+import { ThemeProvider as ClientThemeProvider } from '@/contexts/theme-context'
 import { AuthProvider } from '@/contexts/auth-context'
 import { Toaster } from '@/components/ui/toast/toaster'
 import { usePathname } from 'next/navigation'
@@ -14,9 +15,9 @@ export default function RootLayout({
   const pathname = usePathname()
   const isAdminRoute = pathname?.startsWith('/admin')
 
-  // Only wrap admin routes with the new theme provider
+  // Wrap with appropriate theme provider based on route
   const content = isAdminRoute ? (
-    <ThemeProvider
+    <ShadcnThemeProvider
       attribute="class"
       defaultTheme="dark"
       enableSystem
@@ -24,9 +25,11 @@ export default function RootLayout({
     >
       <Toaster />
       {children}
-    </ThemeProvider>
+    </ShadcnThemeProvider>
   ) : (
-    children
+    <ClientThemeProvider>
+      {children}
+    </ClientThemeProvider>
   )
 
   return (
