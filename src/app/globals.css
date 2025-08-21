@@ -488,6 +488,11 @@ p { font-size: var(--fs-base); line-height: 1.7; }
   .select-item:hover {
     background-color: var(--hover) !important;
     color: var(--text) !important;
+    border: none !important;
+  }
+  .select-item[data-state="checked"] {
+    background-color: var(--text) !important;
+    color: var(--bg) !important;
   }
 
   /* Dropdown menu item styles */
@@ -498,6 +503,11 @@ p { font-size: var(--fs-base); line-height: 1.7; }
   .dropdown-menu-item:hover {
     background-color: var(--hover) !important;
     color: var(--text) !important;
+    border: none !important;
+  }
+  .dropdown-menu-item[data-state="checked"] {
+    background-color: var(--text) !important;
+    color: var(--bg) !important;
   }
 
   /* Dark mode specific overrides */
@@ -537,6 +547,7 @@ p { font-size: var(--fs-base); line-height: 1.7; }
   .onboarding-button:hover {
     background-color: var(--surface);
     color: var(--text);
+    text-decoration: none !important;
   }
   [data-theme="dark"] .onboarding-button:hover {
     background-color: var(--surface);
