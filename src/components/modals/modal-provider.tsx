@@ -20,7 +20,15 @@ export const ModalProvider = () => {
   const [isMounted, setIsMounted] = useState(false)
   const { gymSlug } = useParams()
   const { showToast } = useToast()
-  const { modalType, post, carouselPosts, approvedPosts, bulkPosts, closeModal } = useModalStore()
+  const { 
+    isOpen, 
+    modalType, 
+    post, 
+    carouselPosts, 
+    approvedPosts, 
+    bulkPosts, 
+    closeModal 
+  } = useModalStore()
 
   useEffect(() => {
     setIsMounted(true)
@@ -55,16 +63,56 @@ export const ModalProvider = () => {
 
   return (
     <>
-      <UploadModal />
-      <SchedulingModal />
-      <CreatePostModal />
-      <ApprovalModal />
-      <DisapprovalModal />
-      <EditCaptionModal />
-      <EditScheduleModal />
-      <CommentsModal />
-      <RegenerateModal />
-      <FeedbackModal />
+      <UploadModal 
+        isOpen={isOpen && modalType === 'upload'} 
+        onClose={closeModal} 
+      />
+      <SchedulingModal 
+        isOpen={isOpen && modalType === 'schedule'} 
+        onClose={closeModal}
+        posts={approvedPosts}
+      />
+      <CreatePostModal 
+        isOpen={isOpen && modalType === 'create-post'} 
+        onClose={closeModal} 
+      />
+      <ApprovalModal 
+        isOpen={isOpen && modalType === 'approve'} 
+        onClose={closeModal}
+        post={post}
+        carouselPosts={carouselPosts}
+      />
+      <DisapprovalModal 
+        isOpen={isOpen && modalType === 'disapprove'} 
+        onClose={closeModal}
+        post={post}
+        carouselPosts={carouselPosts}
+      />
+      <EditCaptionModal 
+        isOpen={isOpen && modalType === 'edit-caption'} 
+        onClose={closeModal}
+        post={post}
+      />
+      <EditScheduleModal 
+        isOpen={isOpen && modalType === 'edit-schedule'} 
+        onClose={closeModal}
+        post={post}
+      />
+      <CommentsModal 
+        isOpen={isOpen && modalType === 'comments'} 
+        onClose={closeModal}
+        post={post}
+      />
+      <RegenerateModal 
+        isOpen={isOpen && modalType === 'regenerate'} 
+        onClose={closeModal}
+        post={post}
+      />
+      <FeedbackModal 
+        isOpen={isOpen && modalType === 'feedback'} 
+        onClose={closeModal}
+        post={post}
+      />
     </>
   )
 }
