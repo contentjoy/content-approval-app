@@ -52,6 +52,16 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
 
+  // Initialize the socials filter with the current platform
+  React.useEffect(() => {
+    if (currentPlatform && currentPlatform !== 'all') {
+      setColumnFilters(prev => {
+        const existingFilters = prev.filter(f => f.id !== 'socials')
+        return [...existingFilters, { id: 'socials', value: currentPlatform }]
+      })
+    }
+  }, [currentPlatform])
+
   const table = useReactTable({
     data,
     columns,

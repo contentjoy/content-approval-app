@@ -43,8 +43,12 @@ export function DataTableToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0
 
   const handlePlatformChange = (value: string) => {
-    // Update the table's filter
-    table.getColumn('socials')?.setFilterValue(value)
+    // Prevent default form submission
+    if (value === 'all') {
+      table.getColumn('socials')?.setFilterValue(null)
+    } else {
+      table.getColumn('socials')?.setFilterValue(value)
+    }
     // Call the parent's handler if provided
     onPlatformChange?.(value)
   }
