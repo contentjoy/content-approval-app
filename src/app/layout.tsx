@@ -3,7 +3,6 @@
 import { ThemeProvider as ShadcnThemeProvider } from '@/components/theme-provider'
 import { ThemeProvider as ClientThemeProvider } from '@/contexts/theme-context'
 import { AuthProvider } from '@/contexts/auth-context'
-import { Toaster } from '@/components/ui/toast/toaster'
 import { usePathname } from 'next/navigation'
 import './globals.css'
 
@@ -23,7 +22,6 @@ export default function RootLayout({
       enableSystem
       disableTransitionOnChange
     >
-      <Toaster />
       {children}
     </ShadcnThemeProvider>
   ) : (

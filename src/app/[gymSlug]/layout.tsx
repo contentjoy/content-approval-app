@@ -3,10 +3,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useParams, notFound } from 'next/navigation'
 import { BrandingProvider, useBranding } from '@/contexts/branding-context'
-// import { getGymBySlug } from '@/lib/database' // Temporarily unused
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
-// Sidebar removed in favor of horizontal nav
 import { HorizontalNav } from '../../components/layout/horizontal-nav'
 
 interface GymLayoutProps {
@@ -15,11 +13,10 @@ interface GymLayoutProps {
 
 function GymLayoutContent({ children }: GymLayoutProps) {
   const { gymSlug } = useParams()
-  const { error, setGymSlug } = useBranding() // isLoading temporarily unused
+  const { error, setGymSlug } = useBranding()
   const didSetRef = useRef(false)
-  const [isValidGym, setIsValidGym] = useState<boolean | null>(true) // Temporarily start as true to skip loading
+  const [isValidGym, setIsValidGym] = useState<boolean | null>(true)
 
-  // Ensure the gym slug is set in the branding context
   useEffect(() => {
     if (!didSetRef.current && typeof gymSlug === 'string') {
       didSetRef.current = true
@@ -29,31 +26,10 @@ function GymLayoutContent({ children }: GymLayoutProps) {
   }, [gymSlug, setGymSlug])
 
   useEffect(() => {
-    // Temporarily skip gym validation to fix UI loading issue
-    // TODO: Fix getGymBySlug function for proper gym validation
     console.log('🔧 Temporarily skipping gym validation for slug:', gymSlug)
     setIsValidGym(true)
-    
-    // const validateGym = async () => {
-    //   if (typeof gymSlug === 'string') {
-    //     try {
-    //       const gymData = await getGymBySlug(gymSlug)
-    //       if (gymData) {
-    //         setIsValidGym(true)
-    //       } else {
-    //         setIsValidGym(false)
-    //       }
-    //     } catch (error) {
-    //       console.error('Error validating gym:', error)
-    //       setIsValidGym(false)
-    //     }
-    //   }
-    // }
-
-    // validateGym()
   }, [gymSlug])
 
-  // Show loading state while validating gym
   if (isValidGym === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-bg">
@@ -65,12 +41,10 @@ function GymLayoutContent({ children }: GymLayoutProps) {
     )
   }
 
-  // Show 404 if gym not found
   if (isValidGym === false) {
     notFound()
   }
 
-  // Show error state
   if (error) {
     return (
       <div className="min-h-screen flex flex-col">
