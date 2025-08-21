@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useParams, notFound } from 'next/navigation'
 import { BrandingProvider, useBranding } from '@/contexts/branding-context'
-import { ToastProvider } from '@/contexts/toast-context'
 // import { getGymBySlug } from '@/lib/database' // Temporarily unused
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
@@ -115,11 +114,9 @@ export default function GymLayout({ children }: GymLayoutProps) {
 
   return (
     <BrandingProvider initialGymSlug={typeof gymSlug === 'string' ? gymSlug : undefined}>
-      <ToastProvider>
-        <GymLayoutContent>
-          {children}
-        </GymLayoutContent>
-      </ToastProvider>
+      <GymLayoutContent>
+        {children}
+      </GymLayoutContent>
     </BrandingProvider>
   )
 }

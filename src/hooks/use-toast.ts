@@ -3,10 +3,21 @@
 import { useContext } from 'react'
 import { ToastContext } from '@/contexts/toast-context'
 
-export function useToast() {
-  const context = useContext(ToastContext)
-  if (context === undefined) {
-    throw new Error('useToast must be used within a ToastProvider')
+// Fallback toast function that just logs to console
+const fallbackToast = {
+  toast: ({ type = 'info', title = '', message = '' }) => {
+    console.log(`[Toast - ${type}] ${title}: ${message}`)
   }
-  return { toast: context.showToast }
+}
+
+export function useToast() {
+  try {
+    const context = useContext(ToastContext)
+    if (!context) {
+      return fallbackToast
+    }
+    return { toast: context.showToast }
+  } catch (error) {
+    return fallbackToast
+  }
 }

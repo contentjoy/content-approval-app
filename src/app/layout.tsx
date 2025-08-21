@@ -2,7 +2,6 @@
 
 import { ThemeProvider as ShadcnThemeProvider } from '@/components/theme-provider'
 import { ThemeProvider as ClientThemeProvider } from '@/contexts/theme-context'
-import { ToastProvider } from '@/contexts/toast-context'
 import { AuthProvider } from '@/contexts/auth-context'
 import { Toaster } from '@/components/ui/toast/toaster'
 import { usePathname } from 'next/navigation'
@@ -29,9 +28,7 @@ export default function RootLayout({
     </ShadcnThemeProvider>
   ) : (
     <ClientThemeProvider>
-      <ToastProvider>
-        {children}
-      </ToastProvider>
+      {children}
     </ClientThemeProvider>
   )
 
