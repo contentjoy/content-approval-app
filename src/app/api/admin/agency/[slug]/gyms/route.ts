@@ -8,6 +8,8 @@ import { NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
   const slug = request.nextUrl.pathname.match(/\/api\/admin\/agency\/([^\/]+)\/gyms/)?.[1]
+  const searchParams = request.nextUrl.searchParams
+  const month = searchParams.get('month') || startOfMonth(new Date()).toISOString()
   
   if (!slug) {
     return NextResponse.json({ error: 'Invalid agency slug' }, { status: 400 })
@@ -80,8 +82,8 @@ export async function GET(request: NextRequest) {
       logoUrl: agency.logo_url || ''
     }
 
-    // Get start of current month for MTD calculations
-    const startOfThisMonth = startOfMonth(new Date())
+    // Use the provided month for calculations
+    const startOfThisMonth = new Date(month)
 
     // Process the data to match GymRow type
     const formattedGyms: GymRow[] = gyms.map((gym: any) => {

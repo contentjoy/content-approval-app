@@ -30,6 +30,7 @@ export type FilterState = {
   showMissingSocials: boolean
   showLowApproval: boolean
   showZeroDelivered: boolean
+  month: string // ISO date string for start of month
 }
 
 export type AgencyAdminResponse = {

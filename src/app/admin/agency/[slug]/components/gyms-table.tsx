@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { CheckmarkIcon } from './checkmark-icon'
 import { Progress } from '@/components/ui/progress'
 import { SocialBadges } from './social-badges'
 import { format } from 'date-fns'
@@ -41,11 +41,11 @@ export function GymsTable({ gyms, isLoading }: GymsTableProps) {
             <TableHead className="min-w-[200px]">Gym</TableHead>
             <TableHead className="min-w-[120px]">Created</TableHead>
             <TableHead className="min-w-[200px]">Social Connections</TableHead>
-            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Delivered MTD</TableHead>
-            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Approved MTD</TableHead>
+            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Delivered</TableHead>
+            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Approved</TableHead>
             <TableHead className="min-w-[180px]">Approval Rate</TableHead>
-            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Uploads MTD</TableHead>
-            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Scheduled MTD</TableHead>
+            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Uploaded</TableHead>
+            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Scheduled</TableHead>
             <TableHead className="w-[50px]"></TableHead>
           </TableRow>
         </TableHeader>
@@ -53,19 +53,12 @@ export function GymsTable({ gyms, isLoading }: GymsTableProps) {
           {gyms.map((gym) => (
             <TableRow key={gym.gymId}>
               <TableCell className="min-w-[200px]">
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>
-                      {gym.gymName.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <Link
-                    href={`/${gym.gymSlug}`}
-                    className="font-medium hover:underline text-foreground"
-                  >
-                    {gym.gymName}
-                  </Link>
-                </div>
+              <Link
+                href={`/${gym.gymSlug}`}
+                className="font-medium hover:underline text-foreground"
+              >
+                {gym.gymName}
+              </Link>
               </TableCell>
               <TableCell className="min-w-[120px] whitespace-nowrap">
                 {format(new Date(gym.createdAt), 'MMM d, yyyy')}
@@ -86,8 +79,16 @@ export function GymsTable({ gyms, isLoading }: GymsTableProps) {
                   </span>
                 </div>
               </TableCell>
-              <TableCell className="text-right min-w-[100px]">{gym.uploadsMTD}</TableCell>
-              <TableCell className="text-right min-w-[100px]">{gym.scheduledMTD}</TableCell>
+              <TableCell className="min-w-[100px]">
+                <div className="flex justify-end">
+                  <CheckmarkIcon active={gym.uploadsMTD > 0} />
+                </div>
+              </TableCell>
+              <TableCell className="min-w-[100px]">
+                <div className="flex justify-end">
+                  <CheckmarkIcon active={gym.scheduledMTD > 0} />
+                </div>
+              </TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

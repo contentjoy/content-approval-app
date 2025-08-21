@@ -4,6 +4,16 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { FilterState, Platform } from '@/types/agency'
+import { format, startOfMonth, subMonths } from 'date-fns'
+
+// Generate last 12 months for filter
+const MONTHS = Array.from({ length: 12 }, (_, i) => {
+  const date = startOfMonth(subMonths(new Date(), i))
+  return {
+    value: date.toISOString(),
+    label: format(date, 'MMMM yyyy')
+  }
+})
 
 const PLATFORMS = [
   { value: 'all', label: 'All Platforms' },
@@ -33,6 +43,21 @@ export function Filters({ filters, onChange }: FiltersProps) {
           className="w-full sm:w-[300px]"
         />
         <Select
+          value={filters.month}
+          onValueChange={(value) => updateFilter('month', value)}
+        >
+          <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectValue placeholder="Select month" />
+          </SelectTrigger>
+          <SelectContent>
+            {MONTHS.map((month) => (
+              <SelectItem key={month.value} value={month.value}>
+                {month.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
           value={filters.platform}
           onValueChange={(value) => updateFilter('platform', value)}
         >
@@ -54,6 +79,7 @@ export function Filters({ filters, onChange }: FiltersProps) {
           variant={filters.showMissingSocials ? "default" : "outline"}
           size="sm"
           onClick={() => updateFilter('showMissingSocials', !filters.showMissingSocials)}
+          className={filters.showMissingSocials ? "bg-primary hover:bg-primary/90" : "hover:bg-surface"}
         >
           Missing Socials
         </Button>
@@ -61,6 +87,7 @@ export function Filters({ filters, onChange }: FiltersProps) {
           variant={filters.showLowApproval ? "default" : "outline"}
           size="sm"
           onClick={() => updateFilter('showLowApproval', !filters.showLowApproval)}
+          className={filters.showLowApproval ? "bg-primary hover:bg-primary/90" : "hover:bg-surface"}
         >
           Low Approval
         </Button>
@@ -68,6 +95,7 @@ export function Filters({ filters, onChange }: FiltersProps) {
           variant={filters.showZeroDelivered ? "default" : "outline"}
           size="sm"
           onClick={() => updateFilter('showZeroDelivered', !filters.showZeroDelivered)}
+          className={filters.showZeroDelivered ? "bg-primary hover:bg-primary/90" : "hover:bg-surface"}
         >
           Zero Delivered
         </Button>

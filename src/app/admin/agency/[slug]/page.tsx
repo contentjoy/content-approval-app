@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useToast } from '@/components/ui/toast'
 import { AgencyBrand, GymRow, FilterState } from '@/types/agency'
+import { startOfMonth } from 'date-fns'
 import { Filters } from './components/filters'
 import { GymsTable } from '@/app/admin/agency/[slug]/components/gyms-table'
 import { Button } from '@/components/ui/button'
@@ -16,7 +17,8 @@ const DEFAULT_FILTERS: FilterState = {
   platform: 'all',
   showMissingSocials: false,
   showLowApproval: false,
-  showZeroDelivered: false
+  showZeroDelivered: false,
+  month: startOfMonth(new Date()).toISOString()
 }
 
 export default function AdminPage() {
@@ -32,7 +34,7 @@ export default function AdminPage() {
     async function loadData() {
       try {
         console.log('🔍 Fetching data for slug:', slug)
-        const apiUrl = `/api/admin/agency/${slug}/gyms`
+        const apiUrl = `/api/admin/agency/${slug}/gyms?month=${filters.month}`
         console.log('🔍 API URL:', apiUrl)
         
         const response = await fetch(apiUrl)
@@ -67,7 +69,7 @@ export default function AdminPage() {
     return () => {
       isMounted = false
     }
-  }, [slug]) // Removed showToast from deps
+  }, [slug, filters.month]) // Reload when month changes
 
   if (isLoading) {
     return (
@@ -140,12 +142,13 @@ export default function AdminPage() {
           <Button
             asChild
             variant="outline"
-            className="gap-2"
+            className="gap-2 text-foreground"
           >
             <Link
               href={`/onboarding/${slug}`}
               target="_blank"
               rel="noopener noreferrer"
+              className="text-foreground"
             >
               Onboarding Form
               <ArrowUpRight className="h-4 w-4" />
@@ -167,7 +170,7 @@ export default function AdminPage() {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Delivered MTD</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Delivered</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -178,7 +181,7 @@ export default function AdminPage() {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Approved MTD</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Approved</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
