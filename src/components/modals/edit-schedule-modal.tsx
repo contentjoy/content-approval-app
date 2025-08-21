@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Modal } from '@/components/ui/modal'
-import { useToast } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
 import type { SocialMediaPost } from '@/types'
 import { Calendar, Clock, Globe, ChevronDown } from 'lucide-react'
 

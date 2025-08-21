@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { XCircle } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
 import { BrandedButton } from '@/components/ui/branded-button'
-import { useToast } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
 import { updatePostApproval, updateCarouselGroupApproval } from '@/lib/database'
 import type { SocialMediaPost } from '@/types'
 

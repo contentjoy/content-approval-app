@@ -3,8 +3,8 @@
 // Temporary no-op toast until we implement Sonner
 export function useToast() {
   return {
-    toast: ({ title = '', description = '' }) => {
-      console.log(`[Toast] ${title}: ${description}`)
+    showToast: ({ type = 'info', title = '', message = '' }) => {
+      console.log(`[Toast - ${type}] ${title}: ${message}`)
     }
   }
 }

@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { EllipsisHorizontalIcon, ShareIcon, ArrowDownTrayIcon, PencilIcon, ChatBubbleLeftEllipsisIcon, HandThumbUpIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import { useToast } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
 import { useModalStore } from '@/hooks/use-modal-store'
 import type { SocialMediaPost } from '@/types'
 

@@ -6,7 +6,7 @@ import { BrandedButton } from '@/components/ui/branded-button'
 import { Logo } from '@/components/ui/logo'
 import { useParams } from 'next/navigation'
 import { getGymBySlug } from '@/lib/database'
-import { useToast } from '@/components/ui/toast'
+import { useToast } from '@/hooks/use-toast'
 
 type TabType = 'general' | 'team' | 'notifications' | 'integrations'
 
