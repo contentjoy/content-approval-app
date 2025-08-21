@@ -172,43 +172,43 @@ export default function AdminPage() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Gyms</CardTitle>
+            <CardTitle className="text-sm font-medium text-card-foreground">Total Gyms</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{gyms.length}</div>
+            <div className="text-2xl font-bold text-card-foreground">{gyms.length}</div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Delivered</CardTitle>
+            <CardTitle className="text-sm font-medium text-card-foreground">Total Delivered</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-card-foreground">
               {gyms.reduce((sum, gym) => sum + gym.deliveredMTD, 0)}
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Approved</CardTitle>
+            <CardTitle className="text-sm font-medium text-card-foreground">Total Approved</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-card-foreground">
               {gyms.reduce((sum, gym) => sum + gym.approvedMTD, 0)}
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Approval Rate</CardTitle>
+            <CardTitle className="text-sm font-medium text-card-foreground">Avg Approval Rate</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-card-foreground">
               {Math.round(gyms.reduce((sum, gym) => sum + gym.approvalRatePct, 0) / gyms.length)}%
             </div>
           </CardContent>
