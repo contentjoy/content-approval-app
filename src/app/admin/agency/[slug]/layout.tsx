@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useParams } from 'next/navigation'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { ThemeProvider } from '@/components/theme-provider'
+import '@/app/globals.css'
 import '../../shadcn-globals.css'
 
 export default function AdminLayout({
@@ -39,9 +40,9 @@ export default function AdminLayout({
         forcedTheme="dark"
       >
         <TooltipProvider>
-          <div className="min-h-screen bg-background text-foreground">
+          <div className="relative min-h-screen bg-background text-foreground antialiased">
             <div className="relative flex min-h-screen flex-col">
-              {children}
+              <main className="flex-1">{children}</main>
             </div>
           </div>
         </TooltipProvider>
