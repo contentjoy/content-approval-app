@@ -2,7 +2,7 @@
 
 import { ThemeProvider } from '@/components/theme-provider'
 import { AuthProvider } from '@/contexts/auth-context'
-import { Toaster } from '@/components/ui/toast'
+import { Toaster } from '@/components/ui/toast/toaster'
 import './globals.css'
 
 export default function RootLayout({
