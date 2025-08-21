@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase'
 import { useParams } from 'next/navigation'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import '@/app/globals.css'
-import '../../shadcn-globals.css'
 
 export default function AdminLayout({
   children
