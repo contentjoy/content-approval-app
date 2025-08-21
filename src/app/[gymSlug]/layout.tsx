@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useParams, notFound } from 'next/navigation'
 import { BrandingProvider, useBranding } from '@/contexts/branding-context'
 // import { getGymBySlug } from '@/lib/database' // Temporarily unused
-import { Header } from '@/components/layout/header'
+import { ClientHeader } from '@/components/layout/client-header'
 import { Footer } from '@/components/layout/footer'
 // Sidebar removed in favor of horizontal nav
 import { HorizontalNav } from '../../components/layout/horizontal-nav'
@@ -74,7 +74,7 @@ function GymLayoutContent({ children }: GymLayoutProps) {
   if (error) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
+        <ClientHeader />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="text-destructive mb-4">
@@ -99,7 +99,7 @@ function GymLayoutContent({ children }: GymLayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      <ClientHeader />
       <HorizontalNav />
       <main className="flex-1">
         {children}
