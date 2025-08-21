@@ -69,7 +69,7 @@ export default function AdminPage() {
     return () => {
       isMounted = false
     }
-  }, [slug, filters.month]) // Reload when month changes
+  }, [slug, filters.month, showToast]) // Reload when month changes
 
   if (isLoading) {
     return (

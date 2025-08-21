@@ -15,26 +15,19 @@ interface SocialBadgesProps {
 }
 
 const PLATFORM_CONFIG = {
-  instagram: { label: 'Instagram', variant: 'default' },
-  facebook: { label: 'Facebook', variant: 'secondary' },
-  tiktok: { label: 'TikTok', variant: 'destructive' },
-  youtube: { label: 'YouTube', variant: 'outline' }
+  instagram: { label: 'Instagram' },
+  facebook: { label: 'Facebook' },
+  tiktok: { label: 'TikTok' },
+  youtube: { label: 'YouTube' }
 } as const
 
 const ALL_PLATFORMS = Object.keys(PLATFORM_CONFIG) as Platform[]
 
 export function SocialBadges({ socials }: SocialBadgesProps) {
-  const connectedPlatforms = socials.reduce((acc, social) => {
-    acc[social.platform] = {
-      connected_at: social.connected_at,
-      platform_username: social.platform_username
-    }
-    return acc
-  }, {} as Record<Platform, { connected_at?: string; platform_username?: string }>)
+  // Filter out platforms that have a profile_key
+  const connectedPlatforms = socials.filter(social => social.profile_key)
 
-  const connectedSocials = ALL_PLATFORMS.filter(platform => platform in connectedPlatforms)
-
-  if (connectedSocials.length === 0) {
+  if (connectedPlatforms.length === 0) {
     return (
       <div className="text-sm text-muted-foreground">
         No social connections
@@ -44,23 +37,24 @@ export function SocialBadges({ socials }: SocialBadgesProps) {
 
   return (
     <div className="flex flex-wrap gap-2">
-      {connectedSocials.map((platform) => {
-        const config = PLATFORM_CONFIG[platform]
-        const connection = connectedPlatforms[platform]
-
+      {connectedPlatforms.map((social) => {
+        const config = PLATFORM_CONFIG[social.platform]
         return (
-          <Tooltip key={platform}>
+          <Tooltip key={social.platform}>
             <TooltipTrigger>
-              <Badge variant={config.variant}>
+              <Badge 
+                variant="outline"
+                className="bg-surface hover:bg-surface/80 text-foreground"
+              >
                 {config.label}
               </Badge>
             </TooltipTrigger>
             <TooltipContent>
               <div className="text-sm">
-                <p>{connection.platform_username || platform}</p>
-                {connection.connected_at && (
+                <p>{social.platform_username || social.platform}</p>
+                {social.connected_at && (
                   <p className="text-xs text-muted-foreground">
-                    Connected {format(new Date(connection.connected_at), 'MMM d, yyyy')}
+                    Connected {format(new Date(social.connected_at), 'MMM d, yyyy')}
                   </p>
                 )}
               </div>
