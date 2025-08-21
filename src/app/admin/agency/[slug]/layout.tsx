@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useParams } from 'next/navigation'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { ThemeProvider } from '@/components/theme-provider'
 import '../../shadcn-globals.css'
 
 export default function AdminLayout({
@@ -30,10 +31,17 @@ export default function AdminLayout({
   }, [slug])
 
   return (
-    <TooltipProvider>
-      <div className="min-h-screen bg-background">
-        {children}
-      </div>
-    </TooltipProvider>
+          <ThemeProvider
+        attribute="class"
+        defaultTheme="dark"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <TooltipProvider>
+          <div className="min-h-screen bg-background">
+            {children}
+          </div>
+        </TooltipProvider>
+      </ThemeProvider>
   )
 }
