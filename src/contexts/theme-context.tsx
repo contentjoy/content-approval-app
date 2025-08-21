@@ -38,7 +38,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   // Apply theme on first paint (no flash)
   useEffect(() => {
     const html = document.documentElement
-    html.setAttribute('data-theme', theme)
+    html.classList.remove('light', 'dark')
+    html.classList.add(theme)
     
     try {
       window.localStorage.setItem(THEME_KEY, theme)

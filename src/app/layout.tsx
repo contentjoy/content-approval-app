@@ -32,9 +32,9 @@ export default function RootLayout({
   )
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="light">
       <head />
-      <body>
+      <body className="min-h-screen bg-background font-sans antialiased">
         <AuthProvider>
           {content}
           <Toaster richColors closeButton position="top-right" />
