@@ -61,6 +61,11 @@ export const ModalProvider = () => {
     return null
   }
 
+  // Don't render modals that require a post if no post is selected
+  if (modalType && ['approve', 'disapprove', 'edit-caption', 'edit-schedule', 'comments', 'regenerate', 'feedback'].includes(modalType) && !post) {
+    return null
+  }
+
   return (
     <>
       <UploadModal 
@@ -76,43 +81,47 @@ export const ModalProvider = () => {
         isOpen={isOpen && modalType === 'create-post'} 
         onClose={closeModal} 
       />
-      <ApprovalModal 
-        isOpen={isOpen && modalType === 'approve'} 
-        onClose={closeModal}
-        post={post}
-        carouselPosts={carouselPosts}
-      />
-      <DisapprovalModal 
-        isOpen={isOpen && modalType === 'disapprove'} 
-        onClose={closeModal}
-        post={post}
-        carouselPosts={carouselPosts}
-      />
-      <EditCaptionModal 
-        isOpen={isOpen && modalType === 'edit-caption'} 
-        onClose={closeModal}
-        post={post}
-      />
-      <EditScheduleModal 
-        isOpen={isOpen && modalType === 'edit-schedule'} 
-        onClose={closeModal}
-        post={post}
-      />
-      <CommentsModal 
-        isOpen={isOpen && modalType === 'comments'} 
-        onClose={closeModal}
-        post={post}
-      />
-      <RegenerateModal 
-        isOpen={isOpen && modalType === 'regenerate'} 
-        onClose={closeModal}
-        post={post}
-      />
-      <FeedbackModal 
-        isOpen={isOpen && modalType === 'feedback'} 
-        onClose={closeModal}
-        post={post}
-      />
+      {post && (
+        <>
+          <ApprovalModal 
+            isOpen={isOpen && modalType === 'approve'} 
+            onClose={closeModal}
+            post={post}
+            carouselPosts={carouselPosts}
+          />
+          <DisapprovalModal 
+            isOpen={isOpen && modalType === 'disapprove'} 
+            onClose={closeModal}
+            post={post}
+            carouselPosts={carouselPosts}
+          />
+          <EditCaptionModal 
+            isOpen={isOpen && modalType === 'edit-caption'} 
+            onClose={closeModal}
+            post={post}
+          />
+          <EditScheduleModal 
+            isOpen={isOpen && modalType === 'edit-schedule'} 
+            onClose={closeModal}
+            post={post}
+          />
+          <CommentsModal 
+            isOpen={isOpen && modalType === 'comments'} 
+            onClose={closeModal}
+            post={post}
+          />
+          <RegenerateModal 
+            isOpen={isOpen && modalType === 'regenerate'} 
+            onClose={closeModal}
+            post={post}
+          />
+          <FeedbackModal 
+            isOpen={isOpen && modalType === 'feedback'} 
+            onClose={closeModal}
+            post={post}
+          />
+        </>
+      )}
     </>
   )
 }
