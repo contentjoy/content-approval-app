@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { useToast } from '@/components/ui/toast'
+import { useToast } from '@/components/ui/toast/use-toast'
 import { AgencyBrand, GymRow, FilterState } from '@/types/agency'
 import { startOfMonth } from 'date-fns'
 import { Filters } from './components/filters'
