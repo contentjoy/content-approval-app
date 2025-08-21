@@ -153,7 +153,7 @@ export function PostCard({
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
         whileHover={{ y: -2, scale: 1.02 }}
-        className={`group ${className} bg-card border border-border rounded-3xl`}
+        className={`group ${className} bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200`}
       >
         {/* Top Section */}
         <div className="flex items-center justify-between p-4">
@@ -174,21 +174,21 @@ export function PostCard({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -6 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-48 bg-popover rounded-3xl border border-border shadow-xl z-[99999]"
+                  className="absolute right-0 mt-2 w-48 bg-popover rounded-lg border border-border shadow-lg z-[99999]"
                 >
-                  <button onClick={handleShare} className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent transition-all duration-200 rounded-xl">
+                  <button onClick={handleShare} className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent transition-all duration-200 first:rounded-t-lg last:rounded-b-lg">
                     <svg className="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
                     Share
                   </button>
-                  <button onClick={handleDownload} className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent transition-all duration-200 rounded-xl">
+                  <button onClick={handleDownload} className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent transition-all duration-200 first:rounded-t-lg last:rounded-b-lg">
                     <Download className="w-4 h-4 mr-3" />
                     Download
                   </button>
-                  <button onClick={handleEditCaption} className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent transition-all duration-200 rounded-xl">
+                  <button onClick={handleEditCaption} className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent transition-all duration-200 first:rounded-t-lg last:rounded-b-lg">
                     <svg className="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                     Edit Caption
                   </button>
-                  <button onClick={handleRegenerate} className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent transition-all duration-200 rounded-xl">
+                  <button onClick={handleRegenerate} className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent transition-all duration-200 first:rounded-t-lg last:rounded-b-lg">
                     <svg className="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
                     Regenerate
                   </button>
@@ -235,7 +235,7 @@ export function PostCard({
 
           {/* Asset Type Badge - hover */}
           <div className="absolute top-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-card text-foreground border border-border">
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-card text-foreground border border-border shadow-sm">
               <span className="mr-1.5">{badge.icon}</span>
               {post['Carousel Group'] ? 'Carousel' : (post['Asset Type'] || 'Post')}
             </span>
@@ -244,7 +244,7 @@ export function PostCard({
           {/* Carousel Indicator */}
           {post['Carousel Group'] && post['Carousel Order'] && (
             <div className="absolute bottom-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-background text-foreground border border-border">
+              <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-background text-foreground border border-border shadow-sm">
                 {post['Carousel Order']} of {post['Carousel Group']}
               </span>
             </div>

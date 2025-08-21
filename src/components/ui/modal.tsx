@@ -55,7 +55,7 @@ export function Modal({ isOpen, onClose, children, size = 'md' }: ModalProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-foreground/20 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-background/80 backdrop-blur-sm"
           onClick={handleBackdropClick}
         >
           <motion.div
@@ -67,7 +67,7 @@ export function Modal({ isOpen, onClose, children, size = 'md' }: ModalProps) {
             className={cn(
               "w-[calc(100%-12px)] h-auto max-h-[calc(100vh-80px)] mx-1.5 my-4",
               "sm:w-full sm:h-auto sm:mx-0 sm:my-0 sm:max-h-[90vh]",
-              "bg-popover border border-border rounded-3xl overflow-hidden shadow-xl",
+              "bg-foreground border border-border rounded-lg overflow-hidden shadow-lg",
               sizeClasses[size]
             )}
             role="dialog"

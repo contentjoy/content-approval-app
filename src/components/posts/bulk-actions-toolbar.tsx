@@ -91,7 +91,7 @@ export function BulkActionsToolbar({
                   >
                     Deselect all
                   </button>
-                  <hr className="my-1 border-[var(--border)]" />
+                  <hr className="my-1 border-border" />
                   <button
                     onClick={() => {
                       onClearSelection()
@@ -160,7 +160,7 @@ export function BulkActionsToolbar({
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={onClearSelection}
-          className="p-2 text-[var(--muted-text)] hover:text-[var(--text)] hover:bg-[var(--hover)] rounded-[999px] transition-all duration-200"
+          className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-full transition-all duration-200"
           title="Clear selection"
         >
           <X className="w-4 h-4" />
