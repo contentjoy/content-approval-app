@@ -60,9 +60,9 @@ export function DataTableToolbar<TData>({
           <SelectTrigger className="h-8 w-[150px]">
             <SelectValue placeholder="Select month" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="select-content">
             {MONTHS.map((month) => (
-              <SelectItem key={month.value} value={month.value}>
+              <SelectItem key={month.value} value={month.value} className="select-item">
                 {month.label}
               </SelectItem>
             ))}
@@ -75,9 +75,9 @@ export function DataTableToolbar<TData>({
           <SelectTrigger className="h-8 w-[150px]">
             <SelectValue placeholder="Select platform" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="select-content">
             {PLATFORMS.map((platform) => (
-              <SelectItem key={platform.value} value={platform.value}>
+              <SelectItem key={platform.value} value={platform.value} className="select-item">
                 {platform.label}
               </SelectItem>
             ))}

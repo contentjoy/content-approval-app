@@ -473,25 +473,51 @@ p { font-size: var(--fs-base); line-height: 1.7; }
     color: var(--text);
   }
 
-  /* Dropdown menu content styles */
-  [data-theme="dark"] .dropdown-content {
-    background-color: var(--surface);
-    border-color: var(--border);
+  /* Shadcn dropdown styles */
+  .select-content,
+  .dropdown-menu-content {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
   }
-  [data-theme="dark"] .dropdown-content * {
-    color: var(--text);
+
+  /* Select item styles */
+  .select-item {
+    color: var(--text) !important;
   }
-  [data-theme="dark"] .dropdown-content *:hover {
-    background-color: var(--hover);
-    color: var(--text);
+  .select-item[data-highlighted],
+  .select-item:hover {
+    background-color: var(--hover) !important;
+    color: var(--text) !important;
   }
-  [data-theme="light"] .dropdown-content {
-    background-color: var(--surface);
-    border-color: var(--border);
+
+  /* Dropdown menu item styles */
+  .dropdown-menu-item {
+    color: var(--text) !important;
   }
-  [data-theme="light"] .dropdown-content *:hover {
-    background-color: var(--hover);
-    color: var(--text);
+  .dropdown-menu-item[data-highlighted],
+  .dropdown-menu-item:hover {
+    background-color: var(--hover) !important;
+    color: var(--text) !important;
+  }
+
+  /* Dark mode specific overrides */
+  [data-theme="dark"] .select-content,
+  [data-theme="dark"] .dropdown-menu-content {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+  }
+
+  [data-theme="dark"] .select-item,
+  [data-theme="dark"] .dropdown-menu-item {
+    color: var(--text) !important;
+  }
+
+  [data-theme="dark"] .select-item[data-highlighted],
+  [data-theme="dark"] .select-item:hover,
+  [data-theme="dark"] .dropdown-menu-item[data-highlighted],
+  [data-theme="dark"] .dropdown-menu-item:hover {
+    background-color: var(--hover) !important;
+    color: var(--text) !important;
   }
 
   /* Button hover states */
