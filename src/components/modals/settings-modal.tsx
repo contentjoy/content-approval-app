@@ -203,109 +203,112 @@ export function SettingsModal({ isOpen, onClose, gymId, gymSlug, initial, onSave
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Account Settings" size="xl">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-2">Email</label>
-            <input type="email" {...register('email')} className="input-base" placeholder="owner@example.com" />
-            {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-2">Primary Color</label>
-            <div className="flex items-center gap-3">
-              <input type="color" {...register('primaryColor')} className="w-14 h-10 border border-[var(--modal-border)] rounded-md" />
-              <input type="text" {...register('primaryColor')} className="input-base" placeholder="#20B8CD" />
-            </div>
-            {errors.primaryColor && <p className="text-sm text-destructive mt-1">{errors.primaryColor.message}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-2">Brand Choice</label>
-            <input type="text" {...register('brandChoice')} className="input-base" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-2">Address</label>
-            <input type="text" {...register('cityAddress')} className="input-base" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-2">Social handle</label>
-            <input type="text" {...register('socialHandle')} className="input-base" placeholder="@yourgym" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+    <Modal isOpen={isOpen} onClose={onClose} size="xl">
+      <div className="p-6">
+        <h2 className="text-lg font-semibold text-foreground mb-6">Account Settings</h2>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-[var(--text)] mb-2">First name</label>
-              <input type="text" {...register('firstName')} className="input-base" />
+              <label className="block text-sm font-medium text-foreground mb-2">Email</label>
+              <input type="email" {...register('email')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="owner@example.com" />
+              {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-[var(--text)] mb-2">Last name</label>
-              <input type="text" {...register('lastName')} className="input-base" />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-2">Brand Profile</label>
-            <textarea {...register('brandProfile')} className="input-base" rows={4} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-2">Writing Style</label>
-            <textarea {...register('writingStyle')} className="input-base" rows={4} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-2">Client Info</label>
-            <textarea {...register('clientInfo')} className="input-base" rows={4} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-2">Primary offer</label>
-            <input type="text" {...register('primaryOffer')} className="input-base" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-2">Target Demographic</label>
-            <input type="text" {...register('targetDemographic')} className="input-base" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-2">Clients Desired Result</label>
-            <input type="text" {...register('clientsDesiredResult')} className="input-base" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-2">Offerings</label>
-            <textarea {...register('offerings')} className="input-base" rows={3} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-2">Local Hashtags</label>
-            <textarea {...register('localHashtags')} className="input-base" rows={3} placeholder="#fitness #gym" />
-          </div>
-        </div>
-
-        {/* Social platforms */}
-        <div className="border-t border-[var(--modal-border)] pt-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-[var(--text)]">Social Platforms</h3>
-            <BrandedButton type="button" variant="outline" onClick={() => openAyrshareManage()}>Manage Connections</BrandedButton>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {connectedPlatforms.length === 0 && (
-              <span className="text-sm text-[var(--muted-text)]">No connected accounts</span>
-            )}
-            {connectedPlatforms.map((p) => (
-              <div key={p} className="flex items-center gap-2 rounded-md border border-[var(--modal-border)] px-2 py-1 text-sm">
-                <span className="capitalize text-[var(--text)]">{p}</span>
-                <span className="text-[var(--muted-text)]">Connected</span>
-                <button type="button" className="btn-inline" onClick={() => openAyrshareManage(p)}>
-                  Edit
-                </button>
+              <label className="block text-sm font-medium text-foreground mb-2">Primary Color</label>
+              <div className="flex items-center gap-3">
+                <input type="color" {...register('primaryColor')} className="w-14 h-10 border border-border rounded-md" />
+                <input type="text" {...register('primaryColor')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="#20B8CD" />
               </div>
-            ))}
-          </div>
-        </div>
+              {errors.primaryColor && <p className="text-sm text-destructive mt-1">{errors.primaryColor.message}</p>}
+            </div>
 
-        <div className="flex justify-end gap-3 pt-2">
-          <BrandedButton type="button" variant="outline" onClick={onClose}>Cancel</BrandedButton>
-          <BrandedButton type="submit" disabled={isSubmitting}>Save</BrandedButton>
-        </div>
-      </form>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Brand Choice</label>
+              <input type="text" {...register('brandChoice')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Address</label>
+              <input type="text" {...register('cityAddress')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Social handle</label>
+              <input type="text" {...register('socialHandle')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" placeholder="@yourgym" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">First name</label>
+                <input type="text" {...register('firstName')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Last name</label>
+                <input type="text" {...register('lastName')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Brand Profile</label>
+              <textarea {...register('brandProfile')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" rows={4} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Writing Style</label>
+              <textarea {...register('writingStyle')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" rows={4} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Client Info</label>
+              <textarea {...register('clientInfo')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" rows={4} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Primary offer</label>
+              <input type="text" {...register('primaryOffer')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Target Demographic</label>
+              <input type="text" {...register('targetDemographic')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Clients Desired Result</label>
+              <input type="text" {...register('clientsDesiredResult')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Offerings</label>
+              <textarea {...register('offerings')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" rows={3} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Local Hashtags</label>
+              <textarea {...register('localHashtags')} className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" rows={3} placeholder="#fitness #gym" />
+            </div>
+          </div>
+
+          {/* Social platforms */}
+          <div className="border-t border-border pt-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold text-foreground">Social Platforms</h3>
+              <BrandedButton type="button" variant="outline" onClick={() => openAyrshareManage()}>Manage Connections</BrandedButton>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {connectedPlatforms.length === 0 && (
+                <span className="text-sm text-muted-foreground">No connected accounts</span>
+              )}
+              {connectedPlatforms.map((p) => (
+                <div key={p} className="flex items-center gap-2 rounded-md border border-border px-2 py-1 text-sm">
+                  <span className="capitalize text-foreground">{p}</span>
+                  <span className="text-muted-foreground">Connected</span>
+                  <button type="button" className="text-primary hover:text-primary/80 focus:outline-none focus:ring-2 focus:ring-ring" onClick={() => openAyrshareManage(p)}>
+                    Edit
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <BrandedButton type="button" variant="outline" onClick={onClose}>Cancel</BrandedButton>
+            <BrandedButton type="submit" disabled={isSubmitting}>Save</BrandedButton>
+          </div>
+        </form>
+      </div>
     </Modal>
   )
 }
