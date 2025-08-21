@@ -16,7 +16,7 @@ import { PopoutMenu } from './popout-menu'
 import { useAuth } from '@/contexts/auth-context'
 import SettingsModal from '@/components/modals/settings-modal'
 import { useState } from 'react'
-import { useToast } from '@/contexts/toast-context'
+import { useToast } from '@/hooks/use-toast'
 
 export function Header() {
   const { gymName, isLoading } = useBranding()
