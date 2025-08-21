@@ -4,6 +4,7 @@ import { ThemeProvider as ShadcnThemeProvider } from '@/components/theme-provide
 import { ThemeProvider as ClientThemeProvider } from '@/contexts/theme-context'
 import { AuthProvider } from '@/contexts/auth-context'
 import { usePathname } from 'next/navigation'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 export default function RootLayout({
@@ -36,6 +37,7 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           {content}
+          <Toaster richColors closeButton position="top-right" />
         </AuthProvider>
       </body>
     </html>

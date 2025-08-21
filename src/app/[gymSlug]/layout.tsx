@@ -6,6 +6,7 @@ import { BrandingProvider, useBranding } from '@/contexts/branding-context'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { HorizontalNav } from '../../components/layout/horizontal-nav'
+import { ModalProvider } from '@/components/modals/modal-provider'
 
 interface GymLayoutProps {
   children: React.ReactNode
@@ -79,6 +80,7 @@ function GymLayoutContent({ children }: GymLayoutProps) {
         {children}
       </main>
       <Footer />
+      <ModalProvider />
     </div>
   )
 }
