@@ -73,6 +73,7 @@ export default function AdminPage() {
 
   const handleMonthChange = async (newMonth: string) => {
     setMonth(newMonth)
+    setIsLoading(true)
     try {
       const apiUrl = `/api/admin/agency/${slug}/gyms?month=${newMonth}&platform=${platform}`
       const response = await fetch(apiUrl)
@@ -82,11 +83,14 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Failed to update data:', error)
       showToast({ type: 'error', title: 'Error', message: 'Failed to update data' })
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const handlePlatformChange = async (newPlatform: string) => {
     setPlatform(newPlatform)
+    setIsLoading(true)
     try {
       const apiUrl = `/api/admin/agency/${slug}/gyms?month=${month}&platform=${newPlatform}`
       const response = await fetch(apiUrl)
@@ -96,6 +100,8 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Failed to update data:', error)
       showToast({ type: 'error', title: 'Error', message: 'Failed to update data' })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -232,14 +238,21 @@ export default function AdminPage() {
       </div>
 
       {/* Gyms Table */}
-      <GymsTable 
-        gyms={gyms} 
-        isLoading={isLoading}
-        currentMonth={month}
-        currentPlatform={platform}
-        onMonthChange={handleMonthChange}
-        onPlatformChange={handlePlatformChange}
-      />
+      <div className="relative">
+        {isLoading && (
+          <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        )}
+        <GymsTable 
+          gyms={gyms} 
+          isLoading={isLoading}
+          currentMonth={month}
+          currentPlatform={platform}
+          onMonthChange={handleMonthChange}
+          onPlatformChange={handlePlatformChange}
+        />
+      </div>
     </div>
   )
 }
