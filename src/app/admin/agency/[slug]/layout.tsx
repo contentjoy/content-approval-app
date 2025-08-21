@@ -36,10 +36,13 @@ export default function AdminLayout({
         defaultTheme="dark"
         enableSystem
         disableTransitionOnChange
+        forcedTheme="dark"
       >
         <TooltipProvider>
-          <div className="min-h-screen bg-background">
-            {children}
+          <div className="min-h-screen bg-background text-foreground">
+            <div className="relative flex min-h-screen flex-col">
+              {children}
+            </div>
           </div>
         </TooltipProvider>
       </ThemeProvider>
