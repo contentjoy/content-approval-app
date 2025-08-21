@@ -196,7 +196,7 @@ export default function AdminPage() {
             className="gap-2 text-foreground"
           >
             <Link
-              href={`/onboarding/${slug}/gym-launch`}
+              href={`/${slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2"

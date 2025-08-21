@@ -28,7 +28,15 @@ export default function RootLayout({
     </ShadcnThemeProvider>
   ) : (
     <ClientThemeProvider>
-      {children}
+      <ShadcnThemeProvider
+        attribute="class"
+        defaultTheme="dark"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <Toaster />
+        {children}
+      </ShadcnThemeProvider>
     </ClientThemeProvider>
   )
 
