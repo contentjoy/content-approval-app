@@ -133,14 +133,10 @@ export async function GET(request: NextRequest) {
         'instagram',
         'tiktok',
         'youtube'
-      ].map(platform => {
-        const profile = ayrshareProfiles[platform] || {}
-        return {
-          platform: platform as GymRow['socials'][0]['platform'],
-          connected_at: profile.connected_at,
-          profile_key: profile.profile_key
-        }
-      })
+      ].map(platform => ({
+        platform: platform as GymRow['socials'][0]['platform'],
+        ayrshare_profiles: gym.ayrshare_profiles
+      }))
 
       return {
         gymId: gym.id,

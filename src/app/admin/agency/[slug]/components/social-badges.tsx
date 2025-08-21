@@ -9,9 +9,17 @@ import { format } from 'date-fns'
 interface SocialBadgesProps {
   socials: {
     platform: Platform
-    connected_at?: string
-    platform_username?: string
+    ayrshare_profiles?: string | null
   }[]
+}
+
+interface AyrshareProfile {
+  profile_key: string
+  connected_at: string
+}
+
+type AyrshareProfiles = {
+  [key in Platform]?: AyrshareProfile
 }
 
 const PLATFORM_CONFIG = {
@@ -24,8 +32,19 @@ const PLATFORM_CONFIG = {
 const ALL_PLATFORMS = Object.keys(PLATFORM_CONFIG) as Platform[]
 
 export function SocialBadges({ socials }: SocialBadgesProps) {
-  // Filter out platforms that have a profile_key
-  const connectedPlatforms = socials.filter(social => social.profile_key)
+  // Parse ayrshare_profiles from the first social (they all have the same value)
+  let connectedPlatforms: Platform[] = []
+  let profiles: AyrshareProfiles = {}
+
+  try {
+    const ayrshareJson = socials[0]?.ayrshare_profiles
+    if (ayrshareJson) {
+      profiles = JSON.parse(ayrshareJson)
+      connectedPlatforms = Object.keys(profiles) as Platform[]
+    }
+  } catch (e) {
+    console.error('Error parsing ayrshare_profiles:', e)
+  }
 
   if (connectedPlatforms.length === 0) {
     return (
@@ -37,10 +56,11 @@ export function SocialBadges({ socials }: SocialBadgesProps) {
 
   return (
     <div className="flex flex-wrap gap-2">
-      {connectedPlatforms.map((social) => {
-        const config = PLATFORM_CONFIG[social.platform]
+      {connectedPlatforms.map((platform) => {
+        const config = PLATFORM_CONFIG[platform]
+        const profile = profiles[platform]
         return (
-          <Tooltip key={social.platform}>
+          <Tooltip key={platform}>
             <TooltipTrigger>
               <Badge 
                 variant="outline"
@@ -51,10 +71,10 @@ export function SocialBadges({ socials }: SocialBadgesProps) {
             </TooltipTrigger>
             <TooltipContent>
               <div className="text-sm">
-                <p>{social.platform_username || social.platform}</p>
-                {social.connected_at && (
+                <p>{platform}</p>
+                {profile?.connected_at && (
                   <p className="text-xs text-muted-foreground">
-                    Connected {format(new Date(social.connected_at), 'MMM d, yyyy')}
+                    Connected {format(new Date(profile.connected_at), 'MMM d, yyyy')}
                   </p>
                 )}
               </div>
