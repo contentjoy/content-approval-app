@@ -2,11 +2,11 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { useParams, notFound } from 'next/navigation'
-import { BrandingProvider, useBranding } from '@/contexts/branding-context'
+import { useBranding } from '@/contexts/branding-context'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { HorizontalNav } from '../../components/layout/horizontal-nav'
-import { ModalProvider } from '@/components/modals/modal-provider'
+import { ClientProviders } from '@/providers/client-providers'
 
 interface GymLayoutProps {
   children: React.ReactNode
@@ -80,7 +80,6 @@ function GymLayoutContent({ children }: GymLayoutProps) {
         {children}
       </main>
       <Footer />
-      <ModalProvider />
     </div>
   )
 }
@@ -89,10 +88,10 @@ export default function GymLayout({ children }: GymLayoutProps) {
   const { gymSlug } = useParams()
 
   return (
-    <BrandingProvider initialGymSlug={typeof gymSlug === 'string' ? gymSlug : undefined}>
+    <ClientProviders gymSlug={typeof gymSlug === 'string' ? gymSlug : undefined}>
       <GymLayoutContent>
         {children}
       </GymLayoutContent>
-    </BrandingProvider>
+    </ClientProviders>
   )
 }
