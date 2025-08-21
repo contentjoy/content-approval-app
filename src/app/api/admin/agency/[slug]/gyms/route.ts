@@ -113,18 +113,32 @@ export async function GET(request: NextRequest) {
         ? (approvedMTD / deliveredMTD) * 100 
         : 0
 
+      // Parse ayrshare_profiles data
+      let ayrshareProfiles: Record<string, { profile_key?: string; connected_at?: string }> = {}
+      try {
+        if (gym.ayrshare_profiles) {
+          ayrshareProfiles = typeof gym.ayrshare_profiles === 'string' 
+            ? JSON.parse(gym.ayrshare_profiles)
+            : gym.ayrshare_profiles
+        }
+      } catch (e) {
+        console.error('Error parsing ayrshare_profiles:', e)
+      }
+
       // Format social connections
       const socials = [
         'facebook',
         'instagram',
         'tiktok',
         'youtube'
-      ].map(platform => ({
-        platform: platform as GymRow['socials'][0]['platform'],
-        connected_at: gym[`${platform}_connected_at`] || undefined,
-        profile_key: gym[`${platform}_profile_key`] || undefined,
-        platform_username: gym[`${platform}_username`] || undefined
-      }))
+      ].map(platform => {
+        const profile = ayrshareProfiles[platform] || {}
+        return {
+          platform: platform as GymRow['socials'][0]['platform'],
+          connected_at: profile.connected_at,
+          profile_key: profile.profile_key
+        }
+      })
 
       return {
         gymId: gym.id,

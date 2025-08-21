@@ -34,15 +34,15 @@ export function GymsTable({ gyms, isLoading }: GymsTableProps) {
   }
 
   return (
-    <div className="relative w-full overflow-auto">
-      <Table>
+    <div className="relative w-full overflow-x-auto border rounded-lg">
+      <Table className="min-w-[1200px]">
         <TableHeader>
           <TableRow>
             <TableHead className="min-w-[200px]">Gym</TableHead>
             <TableHead className="min-w-[120px]">Created</TableHead>
             <TableHead className="min-w-[200px]">Social Connections</TableHead>
-            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Approved MTD</TableHead>
             <TableHead className="text-right min-w-[100px] whitespace-nowrap">Delivered MTD</TableHead>
+            <TableHead className="text-right min-w-[100px] whitespace-nowrap">Approved MTD</TableHead>
             <TableHead className="min-w-[180px]">Approval Rate</TableHead>
             <TableHead className="text-right min-w-[100px] whitespace-nowrap">Uploads MTD</TableHead>
             <TableHead className="text-right min-w-[100px] whitespace-nowrap">Scheduled MTD</TableHead>
@@ -73,8 +73,8 @@ export function GymsTable({ gyms, isLoading }: GymsTableProps) {
               <TableCell className="min-w-[200px]">
                 <SocialBadges socials={gym.socials} />
               </TableCell>
-              <TableCell className="text-right min-w-[100px]">{gym.approvedMTD}</TableCell>
               <TableCell className="text-right min-w-[100px]">{gym.deliveredMTD}</TableCell>
+              <TableCell className="text-right min-w-[100px]">{gym.approvedMTD}</TableCell>
               <TableCell className="min-w-[180px]">
                 <div className="flex items-center gap-2">
                   <Progress
