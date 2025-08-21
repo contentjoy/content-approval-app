@@ -28,7 +28,7 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [month, setMonth] = useState(startOfMonth(new Date()).toISOString())
   const [platform, setPlatform] = useState('all')
-  const { showToast } = useToast()
+  const { toast } = useToast()
 
   const loadData = useCallback(async () => {
     try {
@@ -54,10 +54,14 @@ export default function AdminPage() {
     } catch (error) {
       console.error('❌ Load data error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      showToast({ type: 'error', title: 'Error', message: `Failed to load agency data: ${errorMessage}` })
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: `Failed to load agency data: ${errorMessage}`
+      })
       setIsLoading(false)
     }
-  }, [slug, month, platform, showToast])
+  }, [slug, month, platform, toast])
 
   useEffect(() => {
     let isMounted = true
@@ -84,7 +88,11 @@ export default function AdminPage() {
       }
     } catch (error) {
       console.error('Failed to update data:', error)
-      showToast({ type: 'error', title: 'Error', message: 'Failed to update data' })
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update data"
+      })
     } finally {
       setIsLoading(false)
     }
@@ -103,7 +111,11 @@ export default function AdminPage() {
       }
     } catch (error) {
       console.error('Failed to update data:', error)
-      showToast({ type: 'error', title: 'Error', message: 'Failed to update data' })
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update data"
+      })
     } finally {
       setIsLoading(false)
     }
