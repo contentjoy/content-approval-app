@@ -155,6 +155,7 @@ export async function GET(request: NextRequest) {
         : null
 
       return {
+        id: gym.id, // Add id field to match updated GymRow type
         gymId: gym.id,
         gymName: gym['Gym Name'],
         gymSlug: gym.slug || gym['Gym Name'].toLowerCase().replace(/\s+/g, '-'),
