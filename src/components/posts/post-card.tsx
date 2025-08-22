@@ -7,7 +7,7 @@ import { MediaDisplay } from './index'
 import type { SocialMediaPost } from '@/types'
 import { useBranding } from '@/contexts/branding-context'
 import { useModalStore } from '@/hooks/use-modal-store'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/toast'
 import { updatePostApproval } from '@/lib/database'
 import { useDownload } from '@/hooks/use-download'
 

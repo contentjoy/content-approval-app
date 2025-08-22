@@ -12,7 +12,7 @@ import { EditScheduleModal } from './edit-schedule-modal'
 import { CommentsModal } from './comments-modal'
 import { RegenerateModal } from './regenerate-modal'
 import { FeedbackModal } from './feedback-modal'
-import { useToast } from '@/hooks/use-toast'
+import { useToast } from '@/components/ui/toast'
 import { supabase } from '@/lib/supabase'
 import { useParams } from 'next/navigation'
 
