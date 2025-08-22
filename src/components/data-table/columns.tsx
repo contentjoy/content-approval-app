@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { IconGripVertical, IconCircleCheckFilled } from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 
 // Create a separate component for the drag handle
 function DragHandle({ id }: { id: string }) {
@@ -103,8 +104,8 @@ export const columns: ColumnDef<GymRow>[] = [
           {connectedPlatforms.map((platform) => (
             <Badge 
               key={platform}
-              variant="outline" 
-              className="capitalize px-1.5 text-xs"
+              variant="secondary" 
+              className="capitalize px-2 py-0.5 text-xs font-medium bg-muted/50"
             >
               {platform}
             </Badge>
@@ -119,14 +120,16 @@ export const columns: ColumnDef<GymRow>[] = [
     cell: ({ row }) => {
       const isActive = row.original.status === "Active"
       return (
-        <div className="flex items-center gap-2">
-          {isActive ? (
-            <IconCircleCheckFilled className="text-green-500 dark:text-green-400 size-4" />
-          ) : null}
-          <span className={isActive ? "text-green-500 dark:text-green-400" : "text-muted-foreground"}>
-            {row.original.status}
-          </span>
-        </div>
+        <Badge 
+          variant={isActive ? "default" : "secondary"}
+          className={cn(
+            "flex w-fit items-center gap-1.5",
+            isActive ? "bg-green-500/10 text-green-500 dark:bg-green-500/20 dark:text-green-400" : "bg-muted/50"
+          )}
+        >
+          {isActive && <IconCircleCheckFilled className="size-3.5" />}
+          {row.original.status}
+        </Badge>
       )
     },
   },
