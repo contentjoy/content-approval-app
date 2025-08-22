@@ -12,6 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
 import { ModeToggle } from '@/components/mode-toggle'
+import { DataTable as ExampleTable } from '@/components/data-table/new-data-table'
+import { data as exampleData } from '@/components/data-table/data'
 
 const DEFAULT_FILTERS: FilterState = {
   search: '',
@@ -260,14 +262,24 @@ export default function AdminPage() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         )}
-        <GymsTable 
-          gyms={gyms} 
-          isLoading={isLoading}
-          currentMonth={month}
-          currentPlatform={platform}
-          onMonthChange={handleMonthChange}
-          onPlatformChange={handlePlatformChange}
-        />
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Our Table</h2>
+            <GymsTable 
+              gyms={gyms} 
+              isLoading={isLoading}
+              currentMonth={month}
+              currentPlatform={platform}
+              onMonthChange={handleMonthChange}
+              onPlatformChange={handlePlatformChange}
+            />
+          </div>
+          
+          <div>
+            <h2 className="text-lg font-semibold mb-4">Example Table</h2>
+            <ExampleTable data={exampleData} />
+          </div>
+        </div>
       </div>
     </div>
   )
