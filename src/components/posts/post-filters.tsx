@@ -66,7 +66,7 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
               onClick={() => onFilterChange(filter.key)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-3 py-1.5 rounded-[var(--radius)] text-xs font-medium transition-all duration-200 ${
                 isActive 
                   ? 'bg-foreground text-background border-none shadow-sm' 
                   : 'bg-transparent text-foreground hover:bg-accent border border-border hover:border-primary'
@@ -74,7 +74,7 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
             >
               <span>{filter.icon}</span>
               <span>{filter.label}</span>
-              <span className={`px-2 py-0.5 rounded-full text-xs ${
+              <span className={`px-2 py-0.5 rounded-[var(--radius)] text-xs ${
                 isActive 
                   ? 'text-background' 
                   : 'bg-muted text-foreground'
@@ -90,12 +90,12 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
       <div className="sm:hidden relative">
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs bg-muted border border-border hover:bg-accent transition-all duration-200"
+          className="flex items-center space-x-2 px-3 py-1.5 rounded-[var(--radius)] text-xs bg-muted border border-border hover:bg-accent transition-all duration-200"
         >
           <span>Posts: {filters.find(f => f.key === activeFilter)?.label}</span>
         </button>
         {open && (
-          <div className="absolute z-20 mt-2 w-56 bg-popover rounded-lg border border-border shadow-lg">
+          <div className="absolute z-20 mt-2 w-56 bg-popover rounded-[var(--radius)] border border-border shadow-lg">
             {filters.map((filter) => {
               const count = getFilterCount(filter.key)
               return (
