@@ -16,24 +16,24 @@ export default function RootLayout({
   const pathname = usePathname()
   const isAdminRoute = pathname?.startsWith('/admin')
 
-  // Wrap with appropriate theme provider based on route
-  const content = isAdminRoute ? (
+  // Always use ShadcnThemeProvider for consistent shadcn styling
+  const content = (
     <ShadcnThemeProvider
       attribute="class"
       defaultTheme="dark"
-      enableSystem
+      enableSystem={false}
       disableTransitionOnChange
     >
-      {children}
+      {isAdminRoute ? children : (
+        <ClientThemeProvider>
+          {children}
+        </ClientThemeProvider>
+      )}
     </ShadcnThemeProvider>
-  ) : (
-    <ClientThemeProvider>
-      {children}
-    </ClientThemeProvider>
   )
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="dark">
       <head />
       <body className="min-h-screen bg-background font-sans antialiased">
         <AuthProvider>

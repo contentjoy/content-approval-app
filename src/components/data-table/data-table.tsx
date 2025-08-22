@@ -81,8 +81,8 @@ function DraggableRow<TData extends GymRow>({ row }: { row: Row<TData> }) {
       data-dragging={isDragging}
       ref={setNodeRef}
       className={cn(
-        "relative border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
-        isDragging ? "z-50 bg-background" : "z-10"
+        "relative border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted h-16",
+        isDragging ? "z-50 bg-muted shadow-lg" : "z-10"
       )}
       style={{
         transform: CSS.Transform.toString(transform),
@@ -92,7 +92,7 @@ function DraggableRow<TData extends GymRow>({ row }: { row: Row<TData> }) {
       {row.getVisibleCells().map((cell) => (
         <TableCell 
           key={cell.id}
-          className="p-2 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+          className="p-4 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
         >
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </TableCell>
@@ -218,8 +218,8 @@ export function DataTable<TData extends GymRow>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-lg border bg-background">
-        <div className="overflow-hidden rounded-lg border">
+      <div className="rounded-md border bg-card">
+        <div className="relative w-full">
           <DndContext
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis]}
@@ -229,15 +229,15 @@ export function DataTable<TData extends GymRow>({
           >
             <div className="relative w-full overflow-auto">
               <Table className="min-w-[1100px] caption-bottom text-sm">
-                <TableHeader>
+                <TableHeader className="bg-muted/50">
                   {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
+                    <TableRow key={headerGroup.id} className="hover:bg-muted/50">
                       {headerGroup.headers.map((header) => {
                         return (
                           <TableHead 
                             key={header.id} 
                             colSpan={header.colSpan}
-                            className="h-10 px-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
+                            className="h-11 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]"
                           >
                             {header.isPlaceholder
                               ? null
