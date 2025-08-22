@@ -33,14 +33,21 @@ export default function RootLayout({
   )
 
   return (
-    <html lang="en" suppressHydrationWarning className="light">
+    <html lang="en" suppressHydrationWarning>
       <head />
       <body className="min-h-screen bg-background font-sans antialiased">
         <AuthProvider>
-          <TooltipProvider>
-            {content}
-            <Toaster richColors closeButton position="top-right" />
-          </TooltipProvider>
+          <ShadcnThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <TooltipProvider>
+              {children}
+              <Toaster richColors closeButton position="top-right" />
+            </TooltipProvider>
+          </ShadcnThemeProvider>
         </AuthProvider>
       </body>
     </html>

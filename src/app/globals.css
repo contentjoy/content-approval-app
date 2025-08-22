@@ -7,9 +7,27 @@
 @layer base {
   :root {
     --radius: 0.625rem;
-  
+    
+    /* Base colors */
     --background: oklch(1 0 0);              /* Page background (light mode) */
     --foreground: oklch(0.145 0 0);          /* Default text color (light mode) */
+
+    /* Component-specific variables */
+    --checkbox-size: 1rem;
+    --checkbox-border-width: 1px;
+    --checkbox-border-radius: calc(var(--radius) * 0.5);
+    
+    /* Table-specific variables */
+    --table-header-height: 2.5rem;
+    --table-cell-padding: 0.75rem;
+    --table-border-width: 1px;
+    --table-row-height: 3rem;
+    
+    /* Button-specific variables */
+    --button-height-sm: 2rem;
+    --button-height: 2.5rem;
+    --button-gap: 0.5rem;
+    --button-icon-size: 1rem;
   
     --card: oklch(1 0 0);                    /* Card/panel surface (light mode) */
     --card-foreground: oklch(0.145 0 0);     /* Text on card surfaces */
@@ -143,16 +161,44 @@
 }
 
 @layer components {
+  /* Table styles */
   .table-row {
-    @apply border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted;
+    @apply relative border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted h-[var(--table-row-height)];
   }
 
   .table-cell {
-    @apply p-4 align-middle [&:has([role=checkbox])]:pr-0;
+    @apply p-[var(--table-cell-padding)] align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px];
   }
 
   .table-header {
-    @apply bg-muted;
+    @apply bg-muted h-[var(--table-header-height)] text-xs font-medium text-muted-foreground;
+  }
+
+  /* Checkbox styles */
+  .checkbox-root {
+    @apply h-[var(--checkbox-size)] w-[var(--checkbox-size)] shrink-0 rounded-[var(--checkbox-border-radius)] border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground;
+  }
+
+  .checkbox-indicator {
+    @apply flex h-full w-full items-center justify-center text-current;
+  }
+
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center gap-2 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
+  }
+
+  /* Button styles */
+  .button-base {
+    @apply inline-flex h-[var(--button-height)] items-center justify-center gap-[var(--button-gap)] rounded-[var(--radius)] px-4 text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .button-sm {
+    @apply h-[var(--button-height-sm)] px-3 text-xs;
+  }
+
+  .button-icon {
+    @apply h-[var(--button-icon-size)] w-[var(--button-icon-size)];
   }
 
   .card {
