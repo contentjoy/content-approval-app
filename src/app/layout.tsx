@@ -5,6 +5,7 @@ import { ThemeProvider as ClientThemeProvider } from '@/contexts/theme-context'
 import { AuthProvider } from '@/contexts/auth-context'
 import { usePathname } from 'next/navigation'
 import { Toaster } from 'sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import './globals.css'
 
 export default function RootLayout({
@@ -36,8 +37,10 @@ export default function RootLayout({
       <head />
       <body className="min-h-screen bg-background font-sans antialiased">
         <AuthProvider>
-          {content}
-          <Toaster richColors closeButton position="top-right" />
+          <TooltipProvider>
+            {content}
+            <Toaster richColors closeButton position="top-right" />
+          </TooltipProvider>
         </AuthProvider>
       </body>
     </html>

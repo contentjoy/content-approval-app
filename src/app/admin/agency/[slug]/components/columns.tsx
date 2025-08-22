@@ -60,20 +60,32 @@ export const columns: ColumnDef<GymRow>[] = [
   {
     accessorKey: 'deliveredMTD',
     header: 'Delivered',
+    size: 120,
+    minSize: 100,
+    maxSize: 150,
+    enableResizing: true,
     cell: ({ row }) => (
-      <div className="text-right">{row.original.deliveredMTD}</div>
+      <div className="text-right whitespace-nowrap">{row.original.deliveredMTD}</div>
     ),
   },
   {
     accessorKey: 'approvedMTD',
     header: 'Approved',
+    size: 120,
+    minSize: 100,
+    maxSize: 150,
+    enableResizing: true,
     cell: ({ row }) => (
-      <div className="text-right">{row.original.approvedMTD}</div>
+      <div className="text-right whitespace-nowrap">{row.original.approvedMTD}</div>
     ),
   },
   {
     accessorKey: 'approvalRatePct',
     header: 'Approval Rate',
+    size: 180,
+    minSize: 150,
+    maxSize: 220,
+    enableResizing: true,
     cell: ({ row }) => (
       <div className="flex items-center justify-end gap-2">
         <Progress
@@ -132,6 +144,10 @@ export const columns: ColumnDef<GymRow>[] = [
   },
   {
     id: 'actions',
+    size: 50,
+    minSize: 40,
+    maxSize: 60,
+    enableResizing: true,
     cell: ({ row }) => {
       return (
         <DropdownMenu>
