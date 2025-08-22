@@ -20,6 +20,7 @@ export type GymRow = {
     connected_at?: string
     profile_key?: string
     platform_username?: string
+    ayrshare_profiles?: string | Record<string, { profile_key?: string; connected_at?: string }>
   }[]
   deliveredMTD: number
   approvedMTD: number

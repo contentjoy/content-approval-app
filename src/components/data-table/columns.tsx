@@ -75,20 +75,29 @@ export const columns: ColumnDef<GymRow>[] = [
       try {
         const profiles = row.original.socials.reduce((acc: Record<string, any>, social) => {
           if (social.platform && social.ayrshare_profiles) {
-            const profileData = typeof social.ayrshare_profiles === 'string' 
-              ? JSON.parse(social.ayrshare_profiles)
-              : social.ayrshare_profiles
+            let profileData: Record<string, any> = {}
+            
+            if (typeof social.ayrshare_profiles === 'string') {
+              try {
+                profileData = JSON.parse(social.ayrshare_profiles)
+              } catch (e) {
+                console.error('Error parsing ayrshare_profiles JSON:', e)
+                return acc
+              }
+            } else {
+              profileData = social.ayrshare_profiles as Record<string, any>
+            }
             
             if (profileData[social.platform]?.profile_key) {
-              acc[social.platform] = profileData[social.platform]
+              acc[social.platform] = true
             }
           }
           return acc
-        }, {})
+        }, {} as Record<string, boolean>)
         
         connectedPlatforms = Object.keys(profiles)
       } catch (e) {
-        console.error('Error parsing social profiles:', e)
+        console.error('Error processing social profiles:', e)
       }
 
       return (
