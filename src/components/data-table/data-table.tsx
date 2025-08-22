@@ -66,7 +66,7 @@ import {
 import { TableFilters } from "./table-filters"
 import { GymRow } from "@/types/agency"
 
-function DraggableRow({ row }: { row: Row<GymRow> }) {
+function DraggableRow<TData extends GymRow>({ row }: { row: Row<TData> }) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: row.original.id,
   })
