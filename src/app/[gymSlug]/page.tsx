@@ -70,34 +70,13 @@ export default function GymPage() {
     })()
   }, [gymSlug])
 
-  // Clean up posts without media URL by deleting them, then remove from view smoothly
+  // Filter out posts without media URL instead of deleting them
   useEffect(() => {
     if (!posts || posts.length === 0) return
-    const candidates = posts.filter(p => (!p['Asset URL'] || String(p['Asset URL']).trim() === '') && p.id && !deletedIds.has(p.id as string))
-    if (candidates.length === 0) return
-    candidates.forEach((p, idx) => {
-      const postId = p.id as string
-      // Stagger deletions for smoother UI updates
-      setTimeout(async () => {
-        try {
-          const res = await fetch('/api/posts/delete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ postId })
-          })
-          if (res.ok) {
-            setDeletedIds(prev => new Set(prev).add(postId))
-            // Remove locally for instant UX
-            setPosts(prev => prev.filter(pp => pp.id !== postId))
-            setFilteredPosts(prev => prev.filter(pp => pp.id !== postId))
-            try {
-              window.dispatchEvent(new CustomEvent('post-deleted', { detail: { id: postId } }))
-            } catch {}
-          }
-        } catch {}
-      }, idx * 100)
-    })
-  }, [posts, deletedIds])
+    const validPosts = posts.filter(p => p['Asset URL'] && String(p['Asset URL']).trim() !== '')
+    setPosts(validPosts)
+    setFilteredPosts(validPosts)
+  }, [posts])
 
   // Remove posts immediately when media deletion event fires
   useEffect(() => {
@@ -422,26 +401,30 @@ export default function GymPage() {
       </div>
 
       {/* Enhanced Filters */}
-      <div className="mb-6 space-y-4">
-        <EnhancedFilters
-          posts={displayPosts}
-          activeFilter={activeFilter}
-          onFilterChange={setActiveFilter}
-          onSearchChange={setSearchQuery}
-          onDateRangeChange={setDateRange}
-          onTagsChange={setSelectedTags}
-          searchQuery={searchQuery}
-          dateRange={dateRange}
-          selectedTags={selectedTags}
-        />
-        
-        {/* Filter Tabs and Bulk Mode Toggle */}
-        <div className="flex items-center justify-between">
-          <PostFilters
+      <div className="mb-4 sm:mb-6 space-y-3 sm:space-y-4">
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <EnhancedFilters
+            posts={displayPosts}
             activeFilter={activeFilter}
             onFilterChange={setActiveFilter}
-            posts={displayPosts}
+            onSearchChange={setSearchQuery}
+            onDateRangeChange={setDateRange}
+            onTagsChange={setSelectedTags}
+            searchQuery={searchQuery}
+            dateRange={dateRange}
+            selectedTags={selectedTags}
           />
+        </div>
+        
+        {/* Filter Tabs and Bulk Mode Toggle */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <PostFilters
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
+              posts={displayPosts}
+            />
+          </div>
           
           {/* Bulk Mode Toggle */}
           <div className="flex items-center space-x-3">
@@ -455,7 +438,7 @@ export default function GymPage() {
                   whileTap={{ scale: 0.95 }}
                   onClick={handleToggleBulkMode}
                   className={`
-                    flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200
+                    flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200
                     ${isBulkMode
                       ? 'bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)]'
                       : 'bg-bg-elev-1 text-text hover:bg-bg'
@@ -463,7 +446,7 @@ export default function GymPage() {
                   `}
                 >
                   <CheckSquare className="w-3.5 h-3.5" />
-                  <span className="text-xs">{isBulkMode ? 'Exit Bulk' : 'Bulk Select'}</span>
+                  <span className="text-xs whitespace-nowrap">{isBulkMode ? 'Exit Bulk' : 'Bulk Select'}</span>
                   {selectedPosts.size > 0 && (
                     <span className="bg-white/20 text-xs px-2 py-0.5 rounded-full">
                       {selectedPosts.size}
@@ -500,7 +483,7 @@ export default function GymPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6"
           >
             {filteredPosts.map((post, index) => {
               // Get carousel posts for this post if it's part of a carousel
