@@ -206,7 +206,7 @@ export default function GymLaunchPage() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="bg-card-bg border border-card-border rounded-lg p-8">
+        <div className="bg-card border border-border rounded-lg p-8 shadow-lg">
           {/* Header */}
           <div className="text-center mb-8">
             {/* Agency Logo */}
@@ -243,10 +243,10 @@ export default function GymLaunchPage() {
                 )}
               </motion.div>
             )}
-            <h1 className="text-2xl font-bold text-text mb-2">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
               {isSignUp ? 'Create Account' : 'Welcome Back'}
             </h1>
-            <p className="text-text-secondary">
+            <p className="text-muted-foreground">
               {isSignUp 
                 ? `Join ${agencyData?.['Partner name'] || 'Gym Launch'} and start managing your content`
                 : `Sign in to your ${agencyData?.['Partner name'] || 'Gym Launch'} dashboard`
@@ -259,7 +259,7 @@ export default function GymLaunchPage() {
             {/* Gym Name Field - Only show during signup */}
             {isSignUp && (
               <div>
-                <label htmlFor="gymName" className="block text-sm font-medium text-text mb-2">
+                <label htmlFor="gymName" className="block text-sm font-medium text-foreground mb-2">
                   Gym Name
                 </label>
                 <div className="relative">
@@ -268,7 +268,7 @@ export default function GymLaunchPage() {
                     type="text"
                     value={gymName}
                     onChange={(e) => setGymName(e.target.value)}
-                    className="block w-full px-3 py-3 border border-card-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-text placeholder-text-secondary bg-background"
+                    className="block w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-input bg-background text-foreground placeholder:text-muted-foreground"
                     placeholder="Enter your gym name"
                     disabled={isLoading}
                   />
@@ -278,19 +278,19 @@ export default function GymLaunchPage() {
 
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-text mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
                 Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-text-secondary" />
+                  <Mail className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-card-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-text placeholder-text-secondary bg-background"
+                                      className="block w-full pl-10 pr-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-input bg-background text-foreground placeholder:text-muted-foreground"
                   placeholder="Enter your email"
                   disabled={isLoading}
                 />
@@ -299,32 +299,32 @@ export default function GymLaunchPage() {
 
             {/* Passcode Field */}
             <div>
-              <label htmlFor="passcode" className="block text-sm font-medium text-text mb-2">
+              <label htmlFor="passcode" className="block text-sm font-medium text-foreground mb-2">
                 Passcode
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-text-secondary" />
+                  <Lock className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <input
                   id="passcode"
                   type={showPasscode ? "text" : "password"}
                   value={passcode}
                   onChange={(e) => setPasscode(e.target.value)}
-                  className="block w-full pl-10 pr-12 py-3 border border-card-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-text placeholder-text-secondary bg-background"
+                                      className="block w-full pl-10 pr-12 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-input bg-background text-foreground placeholder:text-muted-foreground"
                   placeholder="Enter your passcode"
                   disabled={isLoading}
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground"
                   onClick={() => setShowPasscode(!showPasscode)}
                   disabled={isLoading}
                 >
                   {showPasscode ? (
-                    <EyeOff className="h-5 w-5 text-text-secondary" />
+                    <EyeOff className="h-5 w-5" />
                   ) : (
-                    <Eye className="h-5 w-5 text-text-secondary" />
+                    <Eye className="h-5 w-5" />
                   )}
                 </button>
               </div>
@@ -335,9 +335,9 @@ export default function GymLaunchPage() {
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="bg-red-50 border border-red-200 rounded-lg p-3"
+                className="bg-destructive/10 border border-destructive/20 rounded-lg p-3"
               >
-                <p className="text-sm text-red-600">{error}</p>
+                <p className="text-sm text-destructive">{error}</p>
               </motion.div>
             )}
 
@@ -345,7 +345,7 @@ export default function GymLaunchPage() {
             <motion.button
               type="submit"
               disabled={isLoading || !email.trim() || !passcode.trim() || (isSignUp && !gymName.trim())}
-              className="w-full text-white py-3 px-4 rounded-lg font-medium hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="w-full bg-foreground text-background py-2 px-4 rounded-lg font-medium hover:bg-foreground/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               style={{ 
                 backgroundColor: agencyData?.['Primary Color'] || '#000000',
                 '--tw-ring-color': agencyData?.['Primary Color'] || '#000000'
@@ -355,7 +355,7 @@ export default function GymLaunchPage() {
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-background mr-2"></div>
                   {isSignUp ? 'Creating Account...' : 'Signing In...'}
                 </div>
               ) : (
@@ -371,7 +371,7 @@ export default function GymLaunchPage() {
                 setIsSignUp(!isSignUp)
                 setError('')
               }}
-              className="text-sm hover:underline"
+              className="text-sm text-foreground hover:underline"
               style={{ color: agencyData?.['Primary Color'] || '#000000' }}
             >
               {isSignUp 
@@ -383,7 +383,7 @@ export default function GymLaunchPage() {
 
           {/* Footer */}
           <div className="mt-8 text-center">
-            <p className="text-sm text-text-secondary">
+            <p className="text-sm text-muted-foreground">
               Need help? Contact your agency administrator
             </p>
           </div>
