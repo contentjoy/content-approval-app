@@ -1,8 +1,7 @@
 'use client'
 
 import { GymRow } from '@/types/agency'
-import { DataTable } from '@/components/data-table/data-table'
-import { columns } from '@/components/data-table/columns'
+import { DataTable } from '@/components/data-table/new-data-table'
 
 interface GymsTableProps {
   gyms: GymRow[]
@@ -32,10 +31,7 @@ export function GymsTable({
   }))
 
   return (
-    <DataTable 
-      columns={columns} 
-      data={tableData}
-    />
+    <DataTable data={tableData} />
   )
 }
 
