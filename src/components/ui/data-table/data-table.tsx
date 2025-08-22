@@ -71,6 +71,7 @@ export function DataTable<TData, TValue>({
       rowSelection,
       columnFilters,
     },
+    columnResizeMode: 'onEnd',
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
@@ -84,6 +85,16 @@ export function DataTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
+  // Compute column size CSS variables
+  const columnSizeVars = React.useMemo(() => {
+    const headers = table.getFlatHeaders()
+    const colSizes: Record<string, number> = {}
+    for (const header of headers) {
+      colSizes[`--col-${header.id}-size`] = header.getSize()
+    }
+    return colSizes
+  }, [table.getState().columnSizingInfo, table.getState().columnSizing])
+
   return (
     <div className="space-y-4">
       {toolbar && (
@@ -96,19 +107,33 @@ export function DataTable<TData, TValue>({
         />
       )}
       <div className="relative w-full overflow-auto border rounded-lg">
-        <Table>
+        <Table style={columnSizeVars} className="min-w-[1100px]">
           <TableHeader className="bg-surface">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} colSpan={header.colSpan}>
+                    <TableHead 
+                      key={header.id} 
+                      colSpan={header.colSpan}
+                      style={{ width: `var(--col-${header.id}-size)` }}
+                      className="relative"
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
                             header.getContext()
                           )}
+                      {header.column.getCanResize() && (
+                        <div
+                          onMouseDown={header.getResizeHandler()}
+                          onTouchStart={header.getResizeHandler()}
+                          className={`absolute right-0 top-0 h-full w-1 cursor-col-resize select-none touch-none ${
+                            header.column.getIsResizing() ? 'bg-primary' : 'bg-border'
+                          }`}
+                        />
+                      )}
                     </TableHead>
                   )
                 })}
@@ -123,7 +148,10 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell 
+                      key={cell.id}
+                      style={{ width: `var(--col-${cell.column.id}-size)` }}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

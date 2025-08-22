@@ -20,6 +20,10 @@ export const columns: ColumnDef<GymRow>[] = [
   {
     accessorKey: 'gymName',
     header: 'Gym',
+    size: 250,
+    minSize: 200,
+    maxSize: 400,
+    enableResizing: true,
     cell: ({ row }) => {
       return (
         <Link
@@ -34,11 +38,19 @@ export const columns: ColumnDef<GymRow>[] = [
   {
     accessorKey: 'createdAt',
     header: 'Created',
+    size: 220,
+    minSize: 180,
+    maxSize: 320,
+    enableResizing: true,
     cell: ({ row }) => format(new Date(row.original.createdAt), 'MMM d, yyyy'),
   },
   {
     accessorKey: 'socials',
     header: 'Social Connections',
+    size: 200,
+    minSize: 150,
+    maxSize: 300,
+    enableResizing: true,
     cell: ({ row }) => <SocialBadges socials={row.original.socials} />,
     filterFn: (row, id, filterValue) => {
       const socials = row.getValue(id) as string[]
@@ -75,22 +87,48 @@ export const columns: ColumnDef<GymRow>[] = [
     ),
   },
   {
-    accessorKey: 'uploadsMTD',
-    header: 'Uploaded',
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <CheckmarkIcon active={row.original.uploadsMTD > 0} />
-      </div>
-    ),
+    accessorKey: 'lastUploadDate',
+    header: 'Last Upload',
+    cell: ({ row }) => row.original.lastUploadDate 
+      ? format(new Date(row.original.lastUploadDate), 'MMM d, yyyy')
+      : '—',
+    size: 200,
+    minSize: 180,
+    maxSize: 250,
+    enableResizing: true,
   },
   {
-    accessorKey: 'scheduledMTD',
-    header: 'Scheduled',
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <CheckmarkIcon active={row.original.scheduledMTD > 0} />
-      </div>
-    ),
+    accessorKey: 'lastDeliveryDate',
+    header: 'Last Delivery',
+    cell: ({ row }) => row.original.lastDeliveryDate
+      ? format(new Date(row.original.lastDeliveryDate), 'MMM d, yyyy')
+      : '—',
+    size: 200,
+    minSize: 180,
+    maxSize: 250,
+    enableResizing: true,
+  },
+  {
+    accessorKey: 'lastScheduleDate',
+    header: 'Last Scheduled',
+    cell: ({ row }) => row.original.lastScheduleDate
+      ? format(new Date(row.original.lastScheduleDate), 'MMM d, yyyy')
+      : '—',
+    size: 200,
+    minSize: 180,
+    maxSize: 250,
+    enableResizing: true,
+  },
+  {
+    accessorKey: 'lastPostScheduled',
+    header: 'Last Post',
+    cell: ({ row }) => row.original.lastPostScheduled
+      ? format(new Date(row.original.lastPostScheduled), 'MMM d, yyyy')
+      : '—',
+    size: 200,
+    minSize: 180,
+    maxSize: 250,
+    enableResizing: true,
   },
   {
     id: 'actions',

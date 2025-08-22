@@ -14,7 +14,7 @@ const BrandedButton = React.forwardRef<HTMLButtonElement, BrandedButtonProps>(
   ({ className, variant = 'default', size = 'md', children, ...props }, ref) => {
     const { primaryColor, isLoading } = useBranding()
 
-    const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-all duration-200 focus-ring disabled:opacity-50 disabled:pointer-events-none'
+    const baseStyles = 'inline-flex items-center justify-center rounded-[var(--radius)] font-medium transition-all duration-200 focus-ring disabled:opacity-50 disabled:pointer-events-none'
     
     const getVariantStyles = () => {
       if (primaryColor && variant === 'default') {

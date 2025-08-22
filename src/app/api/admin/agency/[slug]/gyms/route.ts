@@ -43,9 +43,13 @@ export async function GET(request: NextRequest) {
       .from('gyms')
       .select(`
         *,
+        last_upload_date,
+        last_delivery_date,
+        last_schedule_date,
         social_media_posts (
           *,
           "Approval Status",
+          "Scheduled",
           created_at
         )
       `)
@@ -138,11 +142,27 @@ export async function GET(request: NextRequest) {
         ayrshare_profiles: gym.ayrshare_profiles
       }))
 
+      // Find the latest scheduled post date
+      const lastPostScheduled = posts.length > 0
+        ? posts.reduce((latest: string | null, post: any) => {
+            const scheduled = post['Scheduled']
+            if (!scheduled) return latest
+            if (!latest || new Date(scheduled) > new Date(latest)) {
+              return scheduled
+            }
+            return latest
+          }, null)
+        : null
+
       return {
         gymId: gym.id,
         gymName: gym['Gym Name'],
         gymSlug: gym.slug || gym['Gym Name'].toLowerCase().replace(/\s+/g, '-'),
         createdAt: gym.created_at || new Date().toISOString(),
+        lastUploadDate: gym.last_upload_date,
+        lastDeliveryDate: gym.last_delivery_date,
+        lastScheduleDate: gym.last_schedule_date,
+        lastPostScheduled,
         socials,
         deliveredMTD,
         approvedMTD,

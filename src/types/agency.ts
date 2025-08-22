@@ -9,6 +9,10 @@ export type GymRow = {
   gymName: string
   gymSlug: string
   createdAt: string
+  lastUploadDate: string | null
+  lastDeliveryDate: string | null
+  lastScheduleDate: string | null
+  lastPostScheduled: string | null
   socials: {
     platform: 'facebook' | 'instagram' | 'tiktok' | 'youtube'
     connected_at?: string
