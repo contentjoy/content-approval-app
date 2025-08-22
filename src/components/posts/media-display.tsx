@@ -61,7 +61,7 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
           <VideoPlayer
             src={assetUrl}
             poster={undefined}
-            aspect="responsive"
+            aspect="9/16"
             className="w-full h-full"
             onLoaded={() => setIsLoading(false)}
             onError={handleVideoError}
