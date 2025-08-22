@@ -34,17 +34,18 @@ export function ChartContainer({
   )
 }
 
-interface ChartTooltipProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ChartTooltipProps {
   indicator?: "dot" | "line"
   content?: React.ComponentType<any>
   cursor?: boolean
+  className?: string
 }
 
 export function ChartTooltip({
   indicator = "line",
-  children,
+  content: Content,
   className,
-  ...props
+  cursor
 }: ChartTooltipProps) {
   return (
     <div
@@ -52,9 +53,8 @@ export function ChartTooltip({
         "rounded-lg border bg-background p-2 shadow-md",
         className
       )}
-      {...props}
     >
-      {children}
+      {Content && <Content indicator={indicator} />}
     </div>
   )
 }
