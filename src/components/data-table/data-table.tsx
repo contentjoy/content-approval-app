@@ -57,7 +57,7 @@ export function DataTable<TData extends { id?: string }, TValue>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [columnSizing, setColumnSizing] = useState<Record<string, number | string>>({});
+  const [columnSizing, setColumnSizing] = useState<Record<string, number>>({});
 
   const table = useReactTable({
     data,
@@ -83,9 +83,13 @@ export function DataTable<TData extends { id?: string }, TValue>({
 
   // CSS variable sizing for performance
   const columnSizeVars = useMemo(() => {
+    const headers = table.getFlatHeaders();
     const vars: Record<string, string> = {};
-    for (const header of table.getFlatHeaders()) {
-      vars[`--col-${header.id}-size`] = `${header.getSize()}px`;
+    for (const header of headers) {
+      const size = header.getSize();
+      if (typeof size === 'number') {
+        vars[`--col-${header.id}-size`] = `${size}px`;
+      }
     }
     return vars;
   }, [table.getState().columnSizing]);
