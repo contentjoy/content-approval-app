@@ -158,6 +158,7 @@ export async function GET(request: NextRequest) {
         id: gym.id, // Add id field to match updated GymRow type
         gymId: gym.id,
         gymName: gym['Gym Name'],
+        status: gym['Status'] || 'Active', // Include status field with default
         gymSlug: gym.slug || gym['Gym Name'].toLowerCase().replace(/\s+/g, '-'),
         createdAt: gym.created_at || new Date().toISOString(),
         lastUploadDate: gym.last_upload_date,

@@ -8,6 +8,7 @@ export type GymRow = {
   id: string
   gymId: string
   gymName: string
+  status: "Active" | "Off-Boarded"
   gymSlug: string
   createdAt: string
   lastUploadDate: string | null

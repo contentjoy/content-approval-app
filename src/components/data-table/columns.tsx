@@ -83,11 +83,18 @@ export const columns: ColumnDef<GymRow>[] = [
     cell: ({ row }) => {
       const isActive = row.original.status === "Active"
       return (
-        <Badge variant="outline" className="text-muted-foreground px-1.5">
+        <Badge 
+          variant="outline" 
+          className={`px-1.5 flex items-center gap-1 ${
+            isActive 
+              ? "text-green-500 dark:text-green-400" 
+              : "text-muted-foreground"
+          }`}
+        >
           {isActive ? (
-            <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
+            <IconCircleCheckFilled className="size-4 fill-green-500 dark:fill-green-400" />
           ) : (
-            <IconLoader />
+            <IconLoader className="size-4" />
           )}
           {row.original.status}
         </Badge>
