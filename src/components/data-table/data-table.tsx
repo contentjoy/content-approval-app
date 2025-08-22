@@ -81,8 +81,8 @@ function DraggableRow<TData extends GymRow>({ row }: { row: Row<TData> }) {
       data-dragging={isDragging}
       ref={setNodeRef}
       className={cn(
-        "relative z-0 border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
-        isDragging && "z-10 opacity-50"
+        "relative border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+        isDragging ? "z-50 bg-background" : "z-10"
       )}
       style={{
         transform: CSS.Transform.toString(transform),
@@ -123,8 +123,17 @@ export function DataTable<TData extends GymRow>({
   })
   const sortableId = React.useId()
   const sensors = useSensors(
-    useSensor(MouseSensor, {}),
-    useSensor(TouchSensor, {}),
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
+    }),
     useSensor(KeyboardSensor, {})
   )
 
@@ -175,7 +184,7 @@ export function DataTable<TData extends GymRow>({
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-end gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="ml-auto">
@@ -209,7 +218,7 @@ export function DataTable<TData extends GymRow>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border bg-card">
+      <div className="rounded-lg border bg-background">
         <div className="overflow-hidden rounded-lg border">
           <DndContext
             collisionDetection={closestCenter}
