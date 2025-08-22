@@ -36,6 +36,8 @@ export function ChartContainer({
 
 interface ChartTooltipProps extends React.HTMLAttributes<HTMLDivElement> {
   indicator?: "dot" | "line"
+  content?: React.ComponentType<any>
+  cursor?: boolean
 }
 
 export function ChartTooltip({
