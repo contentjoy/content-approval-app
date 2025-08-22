@@ -6,6 +6,7 @@ import { BrandingProvider } from '@/contexts/branding-context'
 import { ThemeProvider } from '@/contexts/theme-context'
 import { ModalProvider } from '@/components/modals/modal-provider'
 import { Toaster } from 'sonner'
+import { Toaster as ShadcnToaster } from '@/components/ui/toast/toaster'
 
 interface ClientProvidersProps {
   children: ReactNode
@@ -20,6 +21,7 @@ export function ClientProviders({ children, gymSlug }: ClientProvidersProps) {
           {children}
           <ModalProvider />
           <Toaster richColors closeButton position="top-right" />
+          <ShadcnToaster />
         </UploadProvider>
       </ThemeProvider>
     </BrandingProvider>
