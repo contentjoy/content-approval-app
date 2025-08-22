@@ -56,14 +56,27 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
   // Handle video with 9:16 aspect ratio
   if (isVideo && assetUrl) {
     return (
-      <VideoPlayer
-        src={assetUrl}
-        poster={undefined}
-        aspect="9/16"
-        className={className}
-        onLoaded={() => setIsLoading(false)}
-        onError={handleVideoError}
-      />
+      <div className={`relative w-full ${className}`} style={{ aspectRatio: '9/16' }}>
+        <AnimatePresence>
+          {isLoading && (
+            <motion.div
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 flex items-center justify-center z-10 bg-bg-elev-1/50 backdrop-blur-sm"
+            >
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <VideoPlayer
+          src={assetUrl}
+          poster={undefined}
+          aspect="9/16"
+          className="w-full h-full"
+          onLoaded={() => setIsLoading(false)}
+          onError={handleVideoError}
+        />
+      </div>
     )
   }
 
@@ -76,7 +89,7 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
             <motion.div
               initial={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 flex items-center justify-center"
+              className="absolute inset-0 flex items-center justify-center z-10 bg-bg-elev-1/50 backdrop-blur-sm"
             >
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
             </motion.div>
@@ -102,7 +115,7 @@ export function MediaDisplay({ post, className = '', priority = false, carouselP
             onLoad={handleImageLoad}
             onError={handleImageError}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            quality={85}
+            quality={75}
             placeholder="blur"
             blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxAAPwCdABmX/9k="
           />

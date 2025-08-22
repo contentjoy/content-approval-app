@@ -413,7 +413,7 @@ export default function GymPage() {
   }
 
     return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6">
             {/* Compact Header - Just the title */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-text">
@@ -500,7 +500,7 @@ export default function GymPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
           >
             {filteredPosts.map((post, index) => {
               // Get carousel posts for this post if it's part of a carousel
