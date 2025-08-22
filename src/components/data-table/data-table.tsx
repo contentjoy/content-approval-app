@@ -52,6 +52,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Table,
   TableBody,
   TableCell,
@@ -59,10 +66,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import {
-  Tabs,
-  TabsContent,
-} from "@/components/ui/tabs"
 import { TableFilters } from "./table-filters"
 import { GymRow } from "@/types/agency"
 
@@ -164,49 +167,43 @@ export function DataTable<TData extends GymRow>({
   }
 
   return (
-    <Tabs defaultValue="all" className="w-full flex-col justify-start gap-6">
-      <div className="flex items-center justify-between px-4 lg:px-6">
-        <TableFilters table={table} />
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <IconLayoutColumns className="h-4 w-4" />
-                <span className="hidden lg:inline ml-2">Customize Columns</span>
-                <span className="lg:hidden">Columns</span>
-                <IconChevronDown className="h-4 w-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              {table
-                .getAllColumns()
-                .filter(
-                  (column) =>
-                    typeof column.accessorFn !== "undefined" &&
-                    column.getCanHide()
+    <div className="w-full space-y-4">
+      <div className="flex items-center justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <IconLayoutColumns className="h-4 w-4" />
+              <span className="hidden lg:inline ml-2">Customize Columns</span>
+              <span className="lg:hidden">Columns</span>
+              <IconChevronDown className="h-4 w-4 ml-2" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            {table
+              .getAllColumns()
+              .filter(
+                (column) =>
+                  typeof column.accessorFn !== "undefined" &&
+                  column.getCanHide()
+              )
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
                 )
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  )
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-      <TabsContent
-        value="all"
-        className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
-      >
+      <div className="rounded-md border">
         <div className="overflow-hidden rounded-lg border">
           <DndContext
             collisionDetection={closestCenter}
@@ -216,12 +213,12 @@ export function DataTable<TData extends GymRow>({
             id={sortableId}
           >
             <Table className="min-w-[1100px]">
-              <TableHeader className="bg-muted sticky top-0 z-10">
+              <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id} colSpan={header.colSpan}>
+                        <TableHead key={header.id} colSpan={header.colSpan} className="text-xs">
                           {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -234,7 +231,7 @@ export function DataTable<TData extends GymRow>({
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody className="**:data-[slot=table-cell]:first:w-8">
+              <TableBody>
                 {table.getRowModel().rows?.length ? (
                   <SortableContext
                     items={dataIds}
@@ -258,17 +255,37 @@ export function DataTable<TData extends GymRow>({
             </Table>
           </DndContext>
         </div>
-        <div className="flex items-center justify-between px-4">
-          <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
+        <div className="flex items-center justify-between px-4 py-2 border-t">
+          <div className="text-muted-foreground text-sm">
             {table.getFilteredSelectedRowModel().rows.length} of{" "}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>
-          <div className="flex w-full items-center gap-8 lg:w-fit">
-            <div className="flex w-fit items-center justify-center text-sm font-medium">
+          <div className="flex items-center space-x-6 lg:space-x-8">
+            <div className="flex items-center space-x-2">
+              <p className="text-sm font-medium">Rows per page</p>
+              <Select
+                value={`${table.getState().pagination.pageSize}`}
+                onValueChange={(value) => {
+                  table.setPageSize(Number(value))
+                }}
+              >
+                <SelectTrigger className="h-8 w-[70px]">
+                  <SelectValue placeholder={table.getState().pagination.pageSize} />
+                </SelectTrigger>
+                <SelectContent side="top">
+                  {[10, 20, 30, 40, 50].map((pageSize) => (
+                    <SelectItem key={pageSize} value={`${pageSize}`}>
+                      {pageSize}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex w-[100px] items-center justify-center text-sm font-medium">
               Page {table.getState().pagination.pageIndex + 1} of{" "}
               {table.getPageCount()}
             </div>
-            <div className="ml-auto flex items-center gap-2 lg:ml-0">
+            <div className="flex items-center space-x-2">
               <Button
                 variant="outline"
                 className="hidden h-8 w-8 p-0 lg:flex"
@@ -308,7 +325,7 @@ export function DataTable<TData extends GymRow>({
             </div>
           </div>
         </div>
-      </TabsContent>
-    </Tabs>
+      </div>
+    </div>
   )
 }
