@@ -354,7 +354,7 @@ function NotificationSettings() {
 }
 
 function AyrshareIntegrationSettings() {
-  const { showToast } = useToast()
+  const { toast } = useToast()
   const { gymSlug } = useParams()
   const [gymId, setGymId] = useState<string | null>(null)
   const [profileKey, setProfileKey] = useState<string | null>(null)
@@ -438,10 +438,10 @@ function AyrshareIntegrationSettings() {
 
   const handleConnectPlatform = async (platform: string) => {
     if (!gymId) {
-      showToast({
-        type: 'error',
+      toast({
+        variant: 'destructive',
         title: 'Error',
-        message: 'Gym ID not found. Please refresh the page.',
+        description: 'Gym ID not found. Please refresh the page.',
       })
       return
     }
@@ -464,20 +464,19 @@ function AyrshareIntegrationSettings() {
         if (event.data?.type === 'AYRSHARE_AUTH_SUCCESS') {
           if (event.data.platform === platform) {
             setConnectedPlatforms(prev => [...prev, platform])
-            showToast({
-              type: 'success',
+            toast({
               title: `${platform} Connected!`,
-              message: `Your ${platform} account has been successfully connected.`,
+              description: `Your ${platform} account has been successfully connected.`,
             })
             popup.close()
             window.removeEventListener('message', messageHandler)
           }
         } else if (event.data?.type === 'AYRSHARE_AUTH_ERROR') {
           setError(event.data.error || 'Authentication failed')
-          showToast({
-            type: 'error',
+          toast({
+            variant: 'destructive',
             title: 'Connection Failed',
-            message: event.data.error || 'Failed to connect to Ayrshare.',
+            description: event.data.error || 'Failed to connect to Ayrshare.',
           })
           popup.close()
           window.removeEventListener('message', messageHandler)
@@ -497,10 +496,10 @@ function AyrshareIntegrationSettings() {
     } catch (err) {
       console.error('Failed to connect platform:', err)
       setError(err instanceof Error ? err.message : 'Failed to connect platform')
-      showToast({
-        type: 'error',
+      toast({
+        variant: 'destructive',
         title: 'Connection Failed',
-        message: err instanceof Error ? err.message : 'Failed to connect platform',
+        description: err instanceof Error ? err.message : 'Failed to connect platform',
       })
     } finally {
       setIsLoading(false)
@@ -555,21 +554,21 @@ function AyrshareIntegrationSettings() {
       
       // Check again after reload
       if (!gymId) {
-        showToast({
-          type: 'error',
-          title: 'Error',
-          message: 'Gym ID not loaded. Please refresh the page.',
-        })
+              toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Gym ID not loaded. Please refresh the page.',
+      })
         return
       }
     }
     
     if (!profileKey) {
       console.error('❌ Cannot sync profiles: profileKey is undefined')
-      showToast({
-        type: 'error',
+      toast({
+        variant: 'destructive',
         title: 'Error',
-        message: 'Profile key not found. Please complete onboarding first.',
+        description: 'Profile key not found. Please complete onboarding first.',
       })
       return
     }
@@ -592,29 +591,28 @@ function AyrshareIntegrationSettings() {
       console.log('🔄 sync-profiles API response:', result)
 
       if (response.ok) {
-        showToast({
-          type: 'success',
+        toast({
           title: 'Profiles synced successfully!',
-          message: 'Your social media profiles have been successfully synced.',
+          description: 'Your social media profiles have been successfully synced.',
         })
         // Refresh the connected platforms
         await loadExistingAccounts()
       } else {
         console.error('❌ sync-profiles API error:', result)
         setError(result.error || 'Failed to sync profiles')
-        showToast({
-          type: 'error',
+        toast({
+          variant: 'destructive',
           title: 'Sync Failed',
-          message: result.error || 'Failed to sync profiles',
+          description: result.error || 'Failed to sync profiles',
         })
       }
     } catch (error) {
       console.error('❌ sync-profiles request failed:', error)
       setError('Network error occurred')
-      showToast({
-        type: 'error',
+      toast({
+        variant: 'destructive',
         title: 'Sync Failed',
-        message: 'Network error occurred',
+        description: 'Network error occurred',
       })
     } finally {
       setIsLoading(false)
