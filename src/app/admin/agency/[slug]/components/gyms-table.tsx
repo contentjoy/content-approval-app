@@ -1,8 +1,8 @@
 'use client'
 
 import { GymRow } from '@/types/agency'
-import { DataTable } from '@/components/ui/data-table/data-table'
-import { columns } from './columns'
+import { DataTable } from '@/components/data-table/data-table'
+import { columns } from '@/components/data-table/columns'
 
 interface GymsTableProps {
   gyms: GymRow[]
@@ -25,14 +25,16 @@ export function GymsTable({
     return <GymsTableSkeleton />
   }
 
+  // Map gymId to id for table
+  const tableData = gyms.map(gym => ({
+    ...gym,
+    id: gym.gymId
+  }))
+
   return (
     <DataTable 
       columns={columns} 
-      data={gyms}
-      currentMonth={currentMonth}
-      currentPlatform={currentPlatform}
-      onMonthChange={onMonthChange}
-      onPlatformChange={onPlatformChange}
+      data={tableData}
     />
   )
 }

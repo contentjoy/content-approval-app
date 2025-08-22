@@ -5,6 +5,7 @@ export type AgencyBrand = {
 }
 
 export type GymRow = {
+  id: string
   gymId: string
   gymName: string
   gymSlug: string
