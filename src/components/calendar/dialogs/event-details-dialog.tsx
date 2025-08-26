@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
+import { formatInTimeZone } from 'date-fns-tz';
 import { Calendar, Clock, Text, Image, Video, Grid3X3, ExternalLink } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
@@ -148,9 +149,9 @@ export function EventDetailsDialog({ event, children }: IProps) {
 								<div>
 									<p className="text-sm font-medium">Time</p>
 									<p className="text-sm text-muted-foreground">
-										{format(startDate, "h:mm a")}
+										{formatInTimeZone(startDate, Intl.DateTimeFormat().resolvedOptions().timeZone, "h:mm a zzz")}
 										{isMultiDay && (
-											<span> - {format(endDate, "h:mm a")}</span>
+											<span> - {formatInTimeZone(endDate, Intl.DateTimeFormat().resolvedOptions().timeZone, "h:mm a zzz")}</span>
 										)}
 									</p>
 								</div>

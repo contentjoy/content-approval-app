@@ -1,6 +1,7 @@
 import type { ScheduledPostSummary } from "@/lib/database";
 import type { IEvent, IUser } from "./interfaces";
 import type { TEventColor } from "./types";
+import { formatInTimeZone } from 'date-fns-tz';
 
 // Map asset types to colors - prioritize asset type over content type
 const assetTypeToColor: Record<string, TEventColor> = {
@@ -50,20 +51,21 @@ export function convertPostToEvent(post: ScheduledPostSummary, gymName: string):
 		title = `${title} #${carouselOrder}`;
 	}
 
-	// Create start and end dates - preserve local time
+	// Get user's timezone
+	const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+	// Create start and end dates - handle UTC to local conversion
 	let scheduledDate: Date;
 	if (post.Scheduled) {
-		// Parse the ISO string and preserve local time
-		const parsed = new Date(post.Scheduled);
-		// Create a new date with the local components to avoid timezone shifts
-		scheduledDate = new Date(
-			parsed.getFullYear(),
-			parsed.getMonth(),
-			parsed.getDate(),
-			parsed.getHours(),
-			parsed.getMinutes(),
-			parsed.getSeconds()
-		);
+		try {
+			// Treat the timestamp as UTC by appending 'Z'
+			const utcTimestamp = post.Scheduled.endsWith('Z') ? post.Scheduled : `${post.Scheduled}Z`;
+			// Parse as UTC and let the browser handle timezone conversion
+			scheduledDate = new Date(utcTimestamp);
+		} catch (error) {
+			console.error('Invalid timestamp:', post.Scheduled, error);
+			scheduledDate = new Date(); // Fallback to current time
+		}
 	} else {
 		scheduledDate = new Date();
 	}
