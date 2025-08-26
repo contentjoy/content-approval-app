@@ -5,9 +5,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Modal } from '@/components/ui/modal'
-import { BrandedButton } from '@/components/ui/branded-button'
 import { useToast } from '@/components/ui/toast'
 import { supabase } from '@/lib/supabase'
+import { cn } from '@/lib/utils'
 import type { SocialMediaPost } from '@/types'
 
 const captionSchema = z.object({
@@ -75,12 +75,11 @@ export function EditCaptionModal({ isOpen, onClose, post, onSuccess }: EditCapti
   }
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Edit Caption"
-      size="md"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} size="md">
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-foreground">Edit Caption</h2>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Caption */}
         <div>
@@ -91,7 +90,12 @@ export function EditCaptionModal({ isOpen, onClose, post, onSuccess }: EditCapti
             id="caption"
             rows={Math.min(18, Math.max(10, Math.ceil((watchedCaption?.length || 0) / 90)))}
             {...register('caption')}
-            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-[var(--modal-surface)] text-text placeholder:text-muted-text resize min-h-[10rem] max-h-[60vh]"
+            className={cn(
+              "w-full px-3 py-2 border border-border rounded-xl",
+              "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+              "bg-muted text-foreground placeholder:text-muted-foreground",
+              "resize min-h-[10rem] max-h-[60vh]"
+            )}
             placeholder="Write your post caption here..."
           />
           {errors.caption && (
@@ -102,7 +106,7 @@ export function EditCaptionModal({ isOpen, onClose, post, onSuccess }: EditCapti
               {watchedCaption.length}/2200 characters
             </p>
             {watchedCaption.length > 2000 && (
-              <p className="text-sm text-accent-strong">
+              <p className="text-sm text-destructive">
                 {watchedCaption.length > 2200 ? 'Over limit' : 'Approaching limit'}
               </p>
             )}
@@ -111,12 +115,12 @@ export function EditCaptionModal({ isOpen, onClose, post, onSuccess }: EditCapti
 
         {/* Character Count Warning */}
         {watchedCaption.length > 2000 && (
-          <div className="bg-accent-strong/10 rounded-lg p-4 border border-accent-strong/20">
+          <div className="bg-destructive/10 rounded-xl p-4 border border-destructive/20">
             <div className="flex items-center space-x-2">
-              <svg className="w-5 h-5 text-accent-strong" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
-              <p className="text-sm text-accent-strong">
+              <p className="text-sm text-destructive">
                 {watchedCaption.length > 2200 
                   ? 'Caption exceeds the maximum character limit'
                   : 'Caption is approaching the maximum character limit'
@@ -132,18 +136,26 @@ export function EditCaptionModal({ isOpen, onClose, post, onSuccess }: EditCapti
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="h-12 px-6 py-3 rounded-[999px] bg-transparent border border-[var(--border)] text-[var(--text)] transition-all duration-200 hover:bg-[var(--modal-surface)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className={cn(
+              "h-12 px-6 py-3 rounded-full",
+              "bg-background border border-border text-foreground",
+              "transition-all duration-200 hover:bg-accent disabled:opacity-50"
+            )}
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isLoading || watchedCaption.length === 0 || watchedCaption.length > 2200}
-            className="h-12 px-6 py-3 rounded-[999px] bg-[#111113] dark:bg-[#FCFCFC] text-[#FCFCFC] dark:text-[#111113] transition-all duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={cn(
+              "h-12 px-6 py-3 rounded-full",
+              "bg-primary text-primary-foreground",
+              "transition-all duration-200 hover:bg-primary/90 disabled:opacity-50"
+            )}
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#FCFCFC] dark:border-[#111113]"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
                 <span>Saving...</span>
               </div>
             ) : (

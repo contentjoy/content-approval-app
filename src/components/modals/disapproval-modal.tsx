@@ -6,9 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { XCircle } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
-import { BrandedButton } from '@/components/ui/branded-button'
 import { useToast } from '@/components/ui/toast'
 import { updatePostApproval, updateCarouselGroupApproval } from '@/lib/database'
+import { cn } from '@/lib/utils'
 import type { SocialMediaPost } from '@/types'
 
 const disapprovalSchema = z.object({
@@ -98,15 +98,14 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
   }
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Disapprove Content"
-      size="lg"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-foreground">Disapprove Content</h2>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Post Preview */}
-        <div className="bg-[var(--modal-surface)] rounded-lg p-4 border border-[var(--modal-border)]">
+        <div className="bg-muted rounded-lg p-4 border border-border">
           <div className="flex items-center space-x-3 mb-3">
             <div className="w-10 h-10 bg-destructive/10 rounded-lg flex items-center justify-center flex-shrink-0">
               <XCircle className="w-5 h-5 text-destructive" />
@@ -130,20 +129,25 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
 
         {/* Feedback */}
         <div>
-          <label htmlFor="feedback" className="block text-sm font-medium text-[var(--text)] mb-2">
-            Feedback <span className="text-[var(--muted-text)]">(optional)</span>
+          <label htmlFor="feedback" className="block text-sm font-medium text-foreground mb-2">
+            Feedback <span className="text-muted-foreground">(optional)</span>
           </label>
           <textarea
             id="feedback"
             rows={12}
             {...register('feedback')}
-            className="w-full px-3 py-2 border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--surface)] focus:border-transparent bg-[var(--modal-surface)] text-[var(--text)] placeholder:text-[var(--muted-text)] resize min-h-[10rem] max-h-[60vh] transition-all duration-200"
+            className={cn(
+              "w-full px-3 py-2 border border-border rounded-xl",
+              "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+              "bg-muted text-foreground placeholder:text-muted-foreground",
+              "resize min-h-[10rem] max-h-[60vh] transition-all duration-200"
+            )}
             placeholder="Optionally provide feedback on why this content is being disapproved..."
           />
           {errors.feedback && (
             <p className="mt-1 text-sm text-destructive">{errors.feedback.message}</p>
           )}
-          <p className="mt-1 text-sm text-[var(--muted-text)]">
+          <p className="mt-1 text-sm text-muted-foreground">
             {watchedFeedback.length} characters
           </p>
         </div>
@@ -151,7 +155,7 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
         {/* Carousel Options */}
         {isCarousel && (
           <div>
-            <label className="block text-sm font-medium text-[var(--text)] mb-3">
+            <label className="block text-sm font-medium text-foreground mb-3">
               Carousel Action:
             </label>
             <div className="space-y-3">
@@ -160,11 +164,11 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
                   type="radio"
                   value="current"
                   {...register('carouselAction')}
-                  className="text-[var(--surface)] focus:ring-[var(--surface)]"
+                  className="text-accent focus:ring-accent"
                 />
                 <div>
-                  <div className="font-medium text-[var(--text)]">Disapprove current slide</div>
-                  <div className="text-sm text-[var(--muted-text)]">Only disapprove this slide ({post['Carousel Order']} of {carouselPosts.length})</div>
+                  <div className="font-medium text-foreground">Disapprove current slide</div>
+                  <div className="text-sm text-muted-foreground">Only disapprove this slide ({post['Carousel Order']} of {carouselPosts.length})</div>
                 </div>
               </label>
               <label className="flex items-center space-x-3">
@@ -172,11 +176,11 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
                   type="radio"
                   value="all"
                   {...register('carouselAction')}
-                  className="text-[var(--surface)] focus:ring-[var(--surface)]"
+                  className="text-accent focus:ring-accent"
                 />
                 <div>
-                  <div className="font-medium text-[var(--text)]">Disapprove all slides</div>
-                  <div className="text-sm text-[var(--muted-text)]">Disapprove all {carouselPosts.length} slides in this carousel</div>
+                  <div className="font-medium text-foreground">Disapprove all slides</div>
+                  <div className="text-sm text-muted-foreground">Disapprove all {carouselPosts.length} slides in this carousel</div>
                 </div>
               </label>
             </div>
@@ -187,9 +191,9 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
         )}
 
         {/* Summary */}
-        <div className="bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] p-4">
-          <h4 className="font-medium text-[var(--text)] mb-2">Summary</h4>
-          <p className="text-sm text-[var(--muted-text)]">
+        <div className="bg-muted border border-border rounded-xl p-4">
+          <h4 className="font-medium text-foreground mb-2">Summary</h4>
+          <p className="text-sm text-muted-foreground">
             {isCarousel && watchedCarouselAction === 'all' 
               ? `Disapprove all ${carouselPosts.length} carousel slides`
               : `Disapprove ${isCarousel ? 'current slide' : 'post'}`
@@ -198,23 +202,31 @@ export function DisapprovalModal({ isOpen, onClose, post, carouselPosts, onSucce
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-[var(--modal-border)]">
+        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-border">
           <button
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="h-12 px-6 py-3 rounded-[999px] bg-transparent border border-[var(--border)] text-[var(--text)] transition-all duration-200 hover:bg-[var(--modal-surface)] disabled:opacity-50"
+            className={cn(
+              "h-12 px-6 py-3 rounded-full",
+              "bg-background border border-border text-foreground",
+              "transition-all duration-200 hover:bg-accent disabled:opacity-50"
+            )}
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="h-12 px-6 py-3 rounded-[999px] bg-[#111113] dark:bg-[#FCFCFC] text-[#FCFCFC] dark:text-[#111113] border border-[var(--modal-border)] transition-all duration-200 hover:opacity-90 disabled:opacity-50"
+            className={cn(
+              "h-12 px-6 py-3 rounded-full",
+              "bg-primary text-primary-foreground border border-border",
+              "transition-all duration-200 hover:bg-primary/90 disabled:opacity-50"
+            )}
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#FCFCFC] dark:border-[#111113]"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
                 <span>Submitting...</span>
               </div>
             ) : (

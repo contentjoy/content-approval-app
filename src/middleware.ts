@@ -5,8 +5,8 @@ import { supabase } from '@/lib/supabase'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Skip middleware for API routes, static files, and auth pages
-  const skipRoutes = ['/api', '/_next', '/favicon.ico', '/login']
+  // Skip middleware for API routes, static files, auth pages, and admin routes
+  const skipRoutes = ['/api', '/_next', '/favicon.ico', '/login', '/admin']
   const shouldSkip = skipRoutes.some(route => pathname.startsWith(route))
   
   if (shouldSkip) {

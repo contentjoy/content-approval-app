@@ -174,7 +174,7 @@ export function CarouselDisplay({ post, className = '', carouselPosts = [], prio
           {/* Previous Button */}
           <button
             onClick={prevSlide}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-75 transition-all duration-200 z-20"
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-background/50 text-foreground rounded-[var(--radius)] flex items-center justify-center hover:bg-background/75 transition-all duration-200 z-20"
           >
             <ChevronLeftIcon className="w-4 h-4" />
           </button>
@@ -182,7 +182,7 @@ export function CarouselDisplay({ post, className = '', carouselPosts = [], prio
           {/* Next Button */}
           <button
             onClick={nextSlide}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black bg-opacity-50 text-white rounded-full flex items-center justify-center hover:bg-opacity-75 transition-all duration-200 z-20"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-background/50 text-foreground rounded-[var(--radius)] flex items-center justify-center hover:bg-background/75 transition-all duration-200 z-20"
           >
             <ChevronRightIcon className="w-4 h-4" />
           </button>
@@ -196,7 +196,7 @@ export function CarouselDisplay({ post, className = '', carouselPosts = [], prio
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-200 ${
+              className={`w-2 h-2 rounded-[var(--radius)] transition-all duration-200 ${
                 index === currentSlide
                   ? 'bg-white scale-125'
                   : 'bg-white bg-opacity-50 hover:bg-opacity-75'
@@ -208,7 +208,7 @@ export function CarouselDisplay({ post, className = '', carouselPosts = [], prio
 
       {/* Slide Counter */}
       {totalSlides > 1 && (
-        <div className="absolute top-3 right-3 bg-black bg-opacity-50 text-white px-2 py-1 rounded-full text-xs font-medium z-20">
+        <div className="absolute top-3 right-3 bg-background/50 text-foreground px-2 py-1 rounded-[var(--radius)] text-xs font-medium z-20">
           {currentSlide + 1} of {totalSlides}
         </div>
       )}

@@ -50,7 +50,7 @@ export default function SettingsPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
                     activeTab === tab.id
-                      ? 'bg-[var(--brand-primary)] text-white'
+                      ? 'bg-primary text-primary-foreground'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -100,7 +100,7 @@ function GeneralSettings() {
             type="text"
             value={settings.gymName}
             onChange={(e) => setSettings(prev => ({ ...prev, gymName: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
+            className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-input"
           />
         </div>
 
@@ -112,7 +112,7 @@ function GeneralSettings() {
             type="email"
             value={settings.email}
             onChange={(e) => setSettings(prev => ({ ...prev, email: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
+            className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-input"
           />
         </div>
 
@@ -123,7 +123,7 @@ function GeneralSettings() {
           <select
             value={settings.timezone}
             onChange={(e) => setSettings(prev => ({ ...prev, timezone: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
+            className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-input"
           >
             <option value="UTC">UTC</option>
             <option value="America/New_York">Eastern Time</option>
@@ -140,7 +140,7 @@ function GeneralSettings() {
           <select
             value={settings.language}
             onChange={(e) => setSettings(prev => ({ ...prev, language: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] focus:border-transparent"
+            className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:border-input"
           >
             <option value="en">English</option>
             <option value="es">Spanish</option>
@@ -155,7 +155,7 @@ function GeneralSettings() {
               type="checkbox"
               checked={settings.autoPublish}
               onChange={(e) => setSettings(prev => ({ ...prev, autoPublish: e.target.checked }))}
-              className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+              className="text-primary focus:ring-ring"
             />
             <div>
               <div className="font-medium text-gray-900">Auto-publish approved content</div>
@@ -168,7 +168,7 @@ function GeneralSettings() {
               type="checkbox"
               checked={settings.approvalRequired}
               onChange={(e) => setSettings(prev => ({ ...prev, approvalRequired: e.target.checked }))}
-              className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+              className="text-primary focus:ring-ring"
             />
             <div>
               <div className="font-medium text-gray-900">Require approval for all content</div>
@@ -210,8 +210,8 @@ function TeamSettings() {
         {teamMembers.map((member) => (
           <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-[var(--brand-primary)] bg-opacity-10 rounded-full flex items-center justify-center">
-                <span className="text-[var(--brand-primary)] font-semibold">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <span className="text-primary font-semibold">
                   {member.name.split(' ').map(n => n[0]).join('')}
                 </span>
               </div>
@@ -267,7 +267,7 @@ function NotificationSettings() {
                 type="checkbox"
                 checked={notifications.emailNotifications}
                 onChange={(e) => setNotifications(prev => ({ ...prev, emailNotifications: e.target.checked }))}
-                className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                className="text-primary focus:ring-ring"
               />
             </label>
 
@@ -280,7 +280,7 @@ function NotificationSettings() {
                 type="checkbox"
                 checked={notifications.pushNotifications}
                 onChange={(e) => setNotifications(prev => ({ ...prev, pushNotifications: e.target.checked }))}
-                className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                className="text-primary focus:ring-ring"
               />
             </label>
           </div>
@@ -298,7 +298,7 @@ function NotificationSettings() {
                 type="checkbox"
                 checked={notifications.approvalRequests}
                 onChange={(e) => setNotifications(prev => ({ ...prev, approvalRequests: e.target.checked }))}
-                className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                className="text-primary focus:ring-ring"
               />
             </label>
 
@@ -311,7 +311,7 @@ function NotificationSettings() {
                 type="checkbox"
                 checked={notifications.contentPublished}
                 onChange={(e) => setNotifications(prev => ({ ...prev, contentPublished: e.target.checked }))}
-                className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                className="text-primary focus:ring-ring"
               />
             </label>
 
@@ -324,7 +324,7 @@ function NotificationSettings() {
                 type="checkbox"
                 checked={notifications.weeklyReports}
                 onChange={(e) => setNotifications(prev => ({ ...prev, weeklyReports: e.target.checked }))}
-                className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                className="text-primary focus:ring-ring"
               />
             </label>
 
@@ -337,7 +337,7 @@ function NotificationSettings() {
                 type="checkbox"
                 checked={notifications.dailyDigest}
                 onChange={(e) => setNotifications(prev => ({ ...prev, dailyDigest: e.target.checked }))}
-                className="text-[var(--brand-primary)] focus:ring-[var(--brand-primary)]"
+                className="text-primary focus:ring-ring"
               />
             </label>
           </div>
@@ -555,11 +555,11 @@ function AyrshareIntegrationSettings() {
       
       // Check again after reload
       if (!gymId) {
-        showToast({
-          type: 'error',
-          title: 'Error',
-          message: 'Gym ID not loaded. Please refresh the page.',
-        })
+              showToast({
+        type: 'error',
+        title: 'Error',
+        message: 'Gym ID not loaded. Please refresh the page.',
+      })
         return
       }
     }

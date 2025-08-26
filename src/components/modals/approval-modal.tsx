@@ -6,9 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { CheckCircle } from 'lucide-react'
 import { Modal } from '@/components/ui/modal'
-import { BrandedButton } from '@/components/ui/branded-button'
 import { useToast } from '@/components/ui/toast'
 import { updatePostApproval, updateCarouselGroupApproval } from '@/lib/database'
+import { cn } from '@/lib/utils'
 import type { SocialMediaPost } from '@/types'
 
 const approvalSchema = z.object({
@@ -58,13 +58,6 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
 
       if (bulkPosts.length > 1) {
         // Bulk approval across mixed selection (carousels + singles)
-        const allIds: string[] = []
-        for (const p of bulkPosts) {
-          if (p['Carousel Group']) {
-            // In bulk, approve entire group for any carousel item
-            // We rely on updateCarouselGroupApproval for each unique group
-          }
-        }
         const uniqueGroups = Array.from(new Set(bulkPosts.filter(p => p['Carousel Group']).map(p => p['Carousel Group'] as string)))
         for (const group of uniqueGroups) {
           await updateCarouselGroupApproval(group, 'Approved', { contentType: contentTypeOverride })
@@ -114,12 +107,15 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Approve Content"
       size="md"
     >
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-foreground">Approve Content</h2>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Post Preview */}
-        <div className="bg-[var(--modal-surface)] rounded-2xl p-4 border border-[var(--modal-border)]">
+        <div className="bg-muted rounded-2xl p-4 border border-border">
           <div className="flex items-center space-x-3 mb-3">
             <div className="w-10 h-10 bg-accent rounded-2xl flex items-center justify-center flex-shrink-0">
               <CheckCircle className="w-5 h-5 text-white" />
@@ -135,7 +131,7 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
           </div>
           
           {post['Post Caption'] && (
-            <p className="text-sm text-muted-text line-clamp-2">
+            <p className="text-sm text-muted-foreground line-clamp-2">
               {post['Post Caption']}
             </p>
           )}
@@ -143,7 +139,7 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
 
         {/* Approval Type */}
         <div>
-          <label className="block text-sm font-medium text-text mb-3">
+          <label className="block text-sm font-medium text-foreground mb-3">
             Approve as:
           </label>
           <div className="space-y-3">
@@ -155,8 +151,8 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
                 className="text-accent focus:ring-accent"
               />
               <div>
-                <div className="font-medium text-text">Post</div>
-                <div className="text-sm text-muted-text">Regular social media post</div>
+                <div className="font-medium text-foreground">Post</div>
+                <div className="text-sm text-muted-foreground">Regular social media post</div>
               </div>
             </label>
             <label className="flex items-center space-x-3">
@@ -167,8 +163,8 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
                 className="text-accent focus:ring-accent"
               />
               <div>
-                <div className="font-medium text-text">Story</div>
-                <div className="text-sm text-muted-text">24-hour story content</div>
+                <div className="font-medium text-foreground">Story</div>
+                <div className="text-sm text-muted-foreground">24-hour story content</div>
               </div>
             </label>
           </div>
@@ -180,7 +176,7 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
         {/* Carousel Options */}
         {isCarousel && (
           <div>
-            <label className="block text-sm font-medium text-text mb-3">
+            <label className="block text-sm font-medium text-foreground mb-3">
               Carousel Action:
             </label>
             <div className="space-y-3">
@@ -192,8 +188,8 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
                   className="text-accent focus:ring-accent"
                 />
                 <div>
-                  <div className="font-medium text-text">Approve current slide</div>
-                  <div className="text-sm text-muted-text">Only approve this slide ({post['Carousel Order']} of {carouselPosts.length})</div>
+                  <div className="font-medium text-foreground">Approve current slide</div>
+                  <div className="text-sm text-muted-foreground">Only approve this slide ({post['Carousel Order']} of {carouselPosts.length})</div>
                 </div>
               </label>
               <label className="flex items-center space-x-3">
@@ -204,8 +200,8 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
                   className="text-accent focus:ring-accent"
                 />
                 <div>
-                  <div className="font-medium text-text">Approve all slides</div>
-                  <div className="text-sm text-muted-text">Approve all {carouselPosts.length} slides in this carousel</div>
+                  <div className="font-medium text-foreground">Approve all slides</div>
+                  <div className="text-sm text-muted-foreground">Approve all {carouselPosts.length} slides in this carousel</div>
                 </div>
               </label>
             </div>
@@ -216,9 +212,9 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
         )}
 
         {/* Summary */}
-        <div className="bg-[var(--modal-surface)] rounded-2xl p-4 border border-[var(--modal-border)]">
-          <h4 className="font-medium text-text mb-2">Summary</h4>
-          <p className="text-sm text-muted-text">
+        <div className="bg-muted rounded-2xl p-4 border border-border">
+          <h4 className="font-medium text-foreground mb-2">Summary</h4>
+          <p className="text-sm text-muted-foreground">
             {isCarousel && watchedCarouselAction === 'all' 
               ? `Approve all ${carouselPosts.length} carousel slides as ${watchedApprovalType}`
               : `Approve ${isCarousel ? 'current slide' : 'post'} as ${watchedApprovalType}`
@@ -232,18 +228,26 @@ export function ApprovalModal({ isOpen, onClose, post, carouselPosts, onSuccess,
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="h-12 px-6 py-3 rounded-[999px] bg-transparent border border-[var(--border)] text-[var(--text)] transition-all duration-200 hover:bg-[var(--modal-surface)] disabled:opacity-50"
+            className={cn(
+              "h-12 px-6 py-3 rounded-full",
+              "bg-background border border-border text-foreground",
+              "transition-all duration-200 hover:bg-accent disabled:opacity-50"
+            )}
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="h-12 px-6 py-3 rounded-[999px] bg-[#111113] dark:bg-[#FCFCFC] text-[#FCFCFC] dark:text-[#111113] transition-all duration-200 hover:opacity-90 disabled:opacity-50"
+            className={cn(
+              "h-12 px-6 py-3 rounded-full",
+              "bg-primary text-primary-foreground",
+              "transition-all duration-200 hover:bg-primary/90 disabled:opacity-50"
+            )}
           >
             {isLoading ? (
               <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#FCFCFC] dark:border-[#111113]"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
                 <span>Approving...</span>
               </div>
             ) : (

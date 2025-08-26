@@ -8,6 +8,7 @@ import { Modal } from '@/components/ui/modal'
 import { useToast } from '@/components/ui/toast'
 import type { SocialMediaPost } from '@/types'
 import { Calendar, Clock, Globe, ChevronDown } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 const schema = z.object({
   date: z.string().min(1),
@@ -44,7 +45,7 @@ export function EditScheduleModal({ isOpen, onClose, post, onSuccess }: { isOpen
       showToast({ type: 'success', title: 'Post updated', message: 'Post has been updated' })
       onSuccess?.()
       onClose()
-    } catch (e) {
+    } catch {
       showToast({ type: 'error', title: 'Update failed', message: 'Unable to update post' })
     }
   }
@@ -66,43 +67,76 @@ export function EditScheduleModal({ isOpen, onClose, post, onSuccess }: { isOpen
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Schedule" size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-foreground">Edit Schedule</h2>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Date, Time, Timezone */}
         <div className="grid grid-cols-1 gap-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Scheduled Date <span className="text-destructive">*</span></label>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Scheduled Date <span className="text-destructive">*</span>
+            </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Calendar className="h-4 w-4 text-[var(--muted-text)]" />
+                <Calendar className="h-4 w-4 text-muted-foreground" />
               </div>
-              <input type="date" {...register('date')} className="w-full pl-10 pr-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200" />
+              <input
+                type="date"
+                {...register('date')}
+                className={cn(
+                  "w-full pl-10 pr-3 py-2 bg-muted border border-border rounded-xl",
+                  "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                  "transition-all duration-200"
+                )}
+              />
             </div>
             {errors.date && <p className="mt-1 text-sm text-destructive">{errors.date.message}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Scheduled Time <span className="text-destructive">*</span></label>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Scheduled Time <span className="text-destructive">*</span>
+            </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Clock className="h-4 w-4 text-[var(--muted-text)]" />
+                <Clock className="h-4 w-4 text-muted-foreground" />
               </div>
-              <input type="time" {...register('time')} className="w-full pl-10 pr-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200" />
+              <input
+                type="time"
+                {...register('time')}
+                className={cn(
+                  "w-full pl-10 pr-3 py-2 bg-muted border border-border rounded-xl",
+                  "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                  "transition-all duration-200"
+                )}
+              />
             </div>
             {errors.time && <p className="mt-1 text-sm text-destructive">{errors.time.message}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Timezone <span className="text-destructive">*</span></label>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Timezone <span className="text-destructive">*</span>
+            </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Globe className="h-4 w-4 text-[var(--muted-text)]" />
+                <Globe className="h-4 w-4 text-muted-foreground" />
               </div>
-              <select {...register('timezone')} className="w-full pl-10 pr-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 appearance-none cursor-pointer">
+              <select
+                {...register('timezone')}
+                className={cn(
+                  "w-full pl-10 pr-3 py-2 bg-muted border border-border rounded-xl",
+                  "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                  "transition-all duration-200 appearance-none cursor-pointer"
+                )}
+              >
                 {TIMEZONE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <ChevronDown className="h-4 w-4 text-[var(--muted-text)]" />
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </div>
             </div>
             {errors.timezone && <p className="mt-1 text-sm text-destructive">{errors.timezone.message}</p>}
@@ -112,15 +146,52 @@ export function EditScheduleModal({ isOpen, onClose, post, onSuccess }: { isOpen
         {/* Caption */}
         <div className="grid grid-cols-1 gap-2">
           <label className="block text-sm font-medium text-foreground">Caption</label>
-          <textarea rows={8} {...register('caption')} className="w-full px-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200" />
+          <textarea
+            rows={8}
+            {...register('caption')}
+            className={cn(
+              "w-full px-3 py-2 bg-muted border border-border rounded-xl",
+              "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+              "transition-all duration-200"
+            )}
+          />
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-[var(--modal-border)]">
-          <button type="button" onClick={onDelete} className="h-12 px-6 py-3 rounded-[999px] border border-[var(--modal-border)] text-destructive bg-transparent transition-all duration-200 hover:bg-[var(--modal-surface)]">Delete</button>
+        <div className="flex items-center justify-between pt-4 border-t border-border">
+          <button
+            type="button"
+            onClick={onDelete}
+            className={cn(
+              "h-12 px-6 py-3 rounded-full",
+              "border border-border text-destructive bg-background",
+              "transition-all duration-200 hover:bg-accent"
+            )}
+          >
+            Delete
+          </button>
           <div className="flex items-center gap-3">
-            <button type="button" onClick={onClose} className="h-12 px-6 py-3 rounded-[999px] border border-[var(--border)] text-[var(--text)] bg-transparent transition-all duration-200 hover:bg-[var(--modal-surface)]">Cancel</button>
-            <button type="submit" className="h-12 px-6 py-3 rounded-[999px] bg-[#111113] dark:bg-[#FCFCFC] text-[#FCFCFC] dark:text-[#111113] border border-[var(--modal-border)] transition-all duration-200 hover:opacity-90">Confirm</button>
+            <button
+              type="button"
+              onClick={onClose}
+              className={cn(
+                "h-12 px-6 py-3 rounded-full",
+                "bg-background border border-border text-foreground",
+                "transition-all duration-200 hover:bg-accent"
+              )}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className={cn(
+                "h-12 px-6 py-3 rounded-full",
+                "bg-primary text-primary-foreground border border-border",
+                "transition-all duration-200 hover:bg-primary/90"
+              )}
+            >
+              Confirm
+            </button>
           </div>
         </div>
       </form>
@@ -142,5 +213,3 @@ const TIMEZONE_OPTIONS = [
   { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
   { value: 'Australia/Sydney', label: 'Sydney (AEST)' },
 ]
-
-

@@ -49,7 +49,7 @@ module.exports = {
         'card-border': 'var(--card-border)',
         'pill-bg': 'var(--pill-bg)',
         'pill-border': 'var(--pill-border)',
-        'brand-primary': 'var(--brand-primary)',
+
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
@@ -111,5 +111,9 @@ module.exports = {
       },
     }
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms')({
+      strategy: 'class',
+    }),
+  ],
 };

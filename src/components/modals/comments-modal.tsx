@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import { Modal } from '@/components/ui/modal'
-import { BrandedButton } from '@/components/ui/branded-button'
 import { getCommentsForPost, addCommentToPost } from '@/lib/database'
+import { cn } from '@/lib/utils'
 import type { SocialMediaPost } from '@/types'
 
 interface CommentsModalProps {
@@ -43,19 +43,23 @@ export function CommentsModal({ isOpen, onClose, post, onSuccess }: CommentsModa
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Comments" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} size="md">
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-foreground">Comments</h2>
+      </div>
+
       <div className="space-y-4">
         <div className="max-h-72 overflow-auto space-y-3 pr-1">
           {comments.length === 0 ? (
-            <p className="text-sm text-muted-text">No comments yet.</p>
+            <p className="text-sm text-muted-foreground">No comments yet.</p>
           ) : (
             comments.map((c) => (
               <div key={c.id} className="border border-border rounded-xl p-3">
-                <div className="text-sm font-medium text-text">
+                <div className="text-sm font-medium text-foreground">
                   {c.author_first_name} {c.author_last_name}
-                  <span className="text-muted-text text-xs ml-2">{new Date(c.created_at).toLocaleString()}</span>
+                  <span className="text-muted-foreground text-xs ml-2">{new Date(c.created_at).toLocaleString()}</span>
                 </div>
-                <div className="text-sm text-text mt-1 whitespace-pre-wrap">{c.comment}</div>
+                <div className="text-sm text-foreground mt-1 whitespace-pre-wrap">{c.comment}</div>
               </div>
             ))
           )}
@@ -66,13 +70,22 @@ export function CommentsModal({ isOpen, onClose, post, onSuccess }: CommentsModa
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Add a comment..."
-            className="w-full border border-border rounded-md px-3 py-2 bg-[var(--modal-surface)] focus:outline-none focus:ring-2 focus:ring-accent resize-y min-h-[8rem] max-h-[50vh]"
+            className={cn(
+              "w-full border border-border rounded-lg px-3 py-2 bg-muted",
+              "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+              "resize-y min-h-[8rem] max-h-[50vh]"
+            )}
           />
           <div className="flex justify-end">
             <button 
               onClick={handleAdd} 
               disabled={isLoading || !input.trim()}
-              className="h-12 px-6 py-3 rounded-[999px] bg-[#111113] dark:bg-[#FCFCFC] text-[#FCFCFC] dark:text-[#111113] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
+              className={cn(
+                "h-12 px-6 py-3 rounded-full",
+                "bg-primary text-primary-foreground",
+                "hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed",
+                "transition-all duration-200 font-medium"
+              )}
             >
               {isLoading ? 'Adding...' : 'Add Comment'}
             </button>
@@ -82,5 +95,3 @@ export function CommentsModal({ isOpen, onClose, post, onSuccess }: CommentsModa
     </Modal>
   )
 }
-
-

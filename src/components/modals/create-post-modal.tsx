@@ -1,14 +1,14 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Modal } from '@/components/ui/modal'
 import { useToast } from '@/components/ui/toast'
-import { Calendar, Clock, Globe, ChevronDown, Image as ImageIcon, Video as VideoIcon } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { Calendar, Clock, Globe, ChevronDown } from 'lucide-react'
 import { useAuth } from '@/contexts/auth-context'
+import { cn } from '@/lib/utils'
 
 const schema = z.object({
   caption: z.string().min(1, 'Caption is required'),
@@ -109,25 +109,8 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
       const { H, M } = parseTime12h(data.time)
       const utcDate = zonedWallTimeToUTC(Y, Mo, D, H, M, data.timezone)
       const scheduleDateISO = utcDate.toISOString().replace('.000Z','Z')
-      const scheduleDB = `${data.date} ${data.time}:00`
 
-      // Upload selected files to Supabase Storage bucket 'post-media' and get public URLs
-      const mediaUrls: string[] = []
-      if (files.length > 0) {
-        const bucket = 'post-media'
-        for (const f of files) {
-          const safeName = f.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-          const folder = user?.gymId || (typeof window !== 'undefined' ? (window.location.pathname.split('/')[1] || 'unknown') : 'unknown')
-          const path = `${folder}/${Date.now()}_${safeName}`
-          const { error: upErr } = await supabase.storage.from(bucket).upload(path, f, { contentType: f.type })
-          if (upErr) throw new Error(`Upload failed: ${upErr.message}`)
-          const { data: pub } = supabase.storage.from(bucket).getPublicUrl(path)
-          if (pub?.publicUrl) mediaUrls.push(pub.publicUrl)
-        }
-      }
-      // TODO: Integrate Drive upload flow; for now skip upload and rely on links when available
-
-      // Call backend to create Ayrshare post (new endpoint could be added later). For now, perform direct call here.
+      // Call backend to create post
       const r = await fetch('/api/ayrshare/create-post', {
         method: 'POST',
         headers: {
@@ -139,7 +122,7 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
           post: data.caption,
           title: data.title,
           platforms: data.platforms,
-          mediaUrls,
+          mediaUrls: previewUrls,
           scheduleDate: scheduleDateISO,
           timezone: data.timezone
         })
@@ -156,26 +139,28 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
       showToast({ type: 'success', title: 'Success', message: 'Post scheduled successfully' })
       onSuccess?.()
       onClose()
-    } catch (e) {
+    } catch {
       showToast({ type: 'error', title: 'Failed', message: 'Could not create post' })
     }
   }
 
-  const tz = watch('timezone')
-
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create Post" size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg">
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold text-foreground">Create Post</h2>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Media + Caption (responsive) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
           {/* Media (1/3 on desktop) */}
-          <div className="bg-[var(--modal-surface)] rounded-[16px] p-4 border border-[var(--modal-border)] md:col-span-1 md:min-h-[460px] flex flex-col">
+          <div className="bg-muted rounded-xl p-4 border border-border md:col-span-1 md:min-h-[460px] flex flex-col">
             <label className="block text-sm font-medium text-foreground mb-2">Media</label>
-            <div className="w-full aspect-[4/5] md:h-full rounded-[16px] border border-[var(--modal-border)] bg-[var(--bg)] flex items-center justify-center overflow-hidden">
+            <div className="w-full aspect-[4/5] md:h-full rounded-xl border border-border bg-background flex items-center justify-center overflow-hidden">
               {files.length === 0 ? (
                 <label className="w-full h-full flex items-center justify-center cursor-pointer">
                   <input type="file" multiple accept="image/*,video/*" onChange={onSelectFiles} className="hidden" />
-                  <div className="text-center text-[var(--muted-text)]">
+                  <div className="text-center text-muted-foreground">
                     <div className="text-sm mb-1">Tap to upload photo or video</div>
                     <div className="text-xs">Recommended 4:5 or 9:16</div>
                   </div>
@@ -208,13 +193,21 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
               type="text"
               placeholder="Title"
               {...register('title')}
-              className="w-full px-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200"
+              className={cn(
+                "w-full px-3 py-3 bg-muted border border-border rounded-xl",
+                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                "transition-all duration-200"
+              )}
             />
             <textarea
               rows={10}
               placeholder="Write your caption here..."
               {...register('caption')}
-              className="w-full px-3 py-3 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 resize-none md:flex-1"
+              className={cn(
+                "w-full px-3 py-3 bg-muted border border-border rounded-xl",
+                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                "transition-all duration-200 resize-none md:flex-1"
+              )}
             />
           </div>
         </div>
@@ -223,11 +216,11 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">Platforms</label>
           {platformOptions.length === 0 ? (
-            <p className="text-sm text-[var(--muted-text)]">No connected platforms found. Connect via Settings.</p>
+            <p className="text-sm text-muted-foreground">No connected platforms found. Connect via Settings.</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {platformOptions.map(opt => (
-                <label key={opt.id} className="inline-flex items-center gap-2 px-3 py-2 border border-[var(--modal-border)] rounded-[999px] cursor-pointer text-sm">
+                <label key={opt.id} className="inline-flex items-center gap-2 px-3 py-2 border border-border rounded-full cursor-pointer text-sm">
                   <input type="checkbox" value={opt.id} {...register('platforms')} className="accent-current" />
                   <span>{opt.label}</span>
                 </label>
@@ -243,15 +236,22 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
             <label className="block text-sm font-medium text-foreground mb-2">Timezone <span className="text-destructive">*</span></label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Globe className="h-4 w-4 text-[var(--muted-text)]" />
+                <Globe className="h-4 w-4 text-muted-foreground" />
               </div>
-              <select {...register('timezone')} className="w-full pl-10 pr-3 py-2 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 appearance-none cursor-pointer">
+              <select
+                {...register('timezone')}
+                className={cn(
+                  "w-full pl-10 pr-3 py-2 bg-muted border border-border rounded-xl",
+                  "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                  "transition-all duration-200 appearance-none cursor-pointer"
+                )}
+              >
                 {TIMEZONE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <ChevronDown className="h-4 w-4 text-[var(--muted-text)]" />
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </div>
             </div>
             {errors.timezone && <p className="mt-1 text-sm text-destructive">{errors.timezone.message}</p>}
@@ -261,9 +261,17 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
               <label className="block text-sm font-medium text-foreground mb-2">Date <span className="text-destructive">*</span></label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Calendar className="h-4 w-4 text-[var(--muted-text)]" />
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <input type="date" {...register('date')} className="w-full pl-10 pr-3 py-4 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 font-normal box-border" />
+                <input
+                  type="date"
+                  {...register('date')}
+                  className={cn(
+                    "w-full pl-10 pr-3 py-4 bg-muted border border-border rounded-xl",
+                    "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                    "transition-all duration-200 font-normal box-border"
+                  )}
+                />
               </div>
               {errors.date && <p className="mt-1 text-sm text-destructive">{errors.date.message}</p>}
             </div>
@@ -271,9 +279,17 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
               <label className="block text-sm font-medium text-foreground mb-2">Time <span className="text-destructive">*</span></label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Clock className="h-4 w-4 text-[var(--muted-text)]" />
+                  <Clock className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <input type="time" {...register('time')} className="w-full pl-10 pr-3 py-4 bg-[var(--modal-surface)] border border-[var(--modal-border)] rounded-[12px] focus:outline-none focus:ring-2 focus:ring-[var(--modal-surface)] focus:border-transparent transition-all duration-200 font-normal box-border" />
+                <input
+                  type="time"
+                  {...register('time')}
+                  className={cn(
+                    "w-full pl-10 pr-3 py-4 bg-muted border border-border rounded-xl",
+                    "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                    "transition-all duration-200 font-normal box-border"
+                  )}
+                />
               </div>
               {errors.time && <p className="mt-1 text-sm text-destructive">{errors.time.message}</p>}
             </div>
@@ -281,9 +297,28 @@ export function CreatePostModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-[var(--modal-border)] pb-4">
-          <button type="button" onClick={onClose} className="h-12 px-6 py-3 rounded-[999px] border border-[var(--border)] text-[var(--text)] bg-transparent transition-all duration-200 hover:bg-[var(--modal-surface)]">Cancel</button>
-          <button type="submit" className="h-12 px-6 py-3 rounded-[999px] bg-[#111113] dark:bg-[#FCFCFC] text-[#FCFCFC] dark:text-[#111113] border border-[var(--modal-border)] transition-all duration-200 hover:opacity-90">Schedule Post</button>
+        <div className="flex items-center justify-end space-x-3 pt-4 border-t border-border">
+          <button
+            type="button"
+            onClick={onClose}
+            className={cn(
+              "h-12 px-6 py-3 rounded-full",
+              "bg-background border border-border text-foreground",
+              "transition-all duration-200 hover:bg-accent"
+            )}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className={cn(
+              "h-12 px-6 py-3 rounded-full",
+              "bg-primary text-primary-foreground border border-border",
+              "transition-all duration-200 hover:bg-primary/90"
+            )}
+          >
+            Schedule Post
+          </button>
         </div>
       </form>
     </Modal>
@@ -303,5 +338,3 @@ const TIMEZONE_OPTIONS = [
   { value: 'Asia/Tokyo', label: 'Tokyo (JST)' },
   { value: 'Australia/Sydney', label: 'Sydney (AEST)' },
 ]
-
-

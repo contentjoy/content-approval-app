@@ -64,88 +64,24 @@ export function BrandingProvider({ children, initialGymSlug }: BrandingProviderP
   }, [])
 
   const applyBrandingToCSS = useCallback((data: BrandingData) => {
-    const root = document.documentElement
-    
+    // No need to set custom CSS variables anymore since we're using shadcn tokens
+    // We'll keep the validation logic for the data but not apply any CSS variables
     if (data.primaryColor) {
-      // Validate hex color format
       const hexColor = data.primaryColor.trim()
       if (!/^#[0-9A-Fa-f]{6}$/.test(hexColor)) {
         console.warn('Invalid hex color format:', hexColor, 'using default color')
         data.primaryColor = '#6B7280' // fallback to default
       }
-      
-      // Set the primary color CSS variable
-      root.style.setProperty('--primary-color', data.primaryColor)
-      root.style.setProperty('--primary', data.primaryColor)
-      
-      // Convert hex to RGB for CSS custom properties
-      const hex = data.primaryColor.replace('#', '')
-      const r = parseInt(hex.substring(0, 2), 16)
-      const g = parseInt(hex.substring(2, 4), 16)
-      const b = parseInt(hex.substring(4, 6), 16)
-      
-      // Validate RGB values
-      if (isNaN(r) || isNaN(g) || isNaN(b)) {
-        console.warn('Invalid RGB values from hex:', hex, 'using default color')
-        data.primaryColor = '#6B7280' // fallback to default
-        root.style.setProperty('--primary-color', data.primaryColor)
-        root.style.setProperty('--primary', data.primaryColor)
-        return
-      }
-      
-      // Set legacy brand colors for compatibility
-      root.style.setProperty('--brand-primary', data.primaryColor)
-      root.style.setProperty('--brand-primary-rgb', `${r}, ${g}, ${b}`)
-      root.style.setProperty('--brand-primary-light', lightenColor(data.primaryColor, 0.1))
-      root.style.setProperty('--brand-primary-dark', darkenColor(data.primaryColor, 0.1))
-      
-      // Provide fallback color mixing for browsers that don't support color-mix
-      try {
-        // Lightweight darken/lighten fallback
-        const toRGB = (h: string) => {
-          const m = h.replace('#','')
-          const bigint = parseInt(m.length === 3 ? m.split('').map(c=>c+c).join('') : m, 16)
-          return { r: (bigint>>16)&255, g: (bigint>>8)&255, b: bigint&255 }
-        }
-        const clamp = (v:number)=>Math.min(255,Math.max(0,v))
-        const mix = (rgb:{r:number,g:number,b:number}, pct:number, base:'black'|'white') => {
-          const t = base==='black'?0:255
-          return `rgb(${clamp(rgb.r+(t-rgb.r)*pct)}, ${clamp(rgb.g+(t-rgb.g)*pct)}, ${clamp(rgb.b+(t-rgb.b)*pct)})`
-        }
-        const rgb = toRGB(data.primaryColor)
-        root.style.setProperty('--accent-strong', mix(rgb, 0.2, 'black')) // ~20% darker
-        root.style.setProperty('--accent-soft', mix(rgb, 0.4, 'white'))   // ~40% lighter
-      } catch {}
-    } else {
-      // Default colors if no branding: light/dark grey depending on theme
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
-      const defaultColor = isDark ? '#6B7280' : '#D1D5DB'
-      const rgb = defaultColor.replace('#','')
-      const r = parseInt(rgb.substring(0,2),16)
-      const g = parseInt(rgb.substring(2,2),16)
-      const b = parseInt(rgb.substring(4,2),16)
-      root.style.setProperty('--primary-color', defaultColor)
-      root.style.setProperty('--brand-primary', defaultColor)
-      root.style.setProperty('--primary', defaultColor)
-      root.style.setProperty('--brand-primary-rgb', `${r}, ${g}, ${b}`)
-      root.style.setProperty('--brand-primary-light', lightenColor(defaultColor, 0.1))
-      root.style.setProperty('--brand-primary-dark', darkenColor(defaultColor, 0.1))
     }
 
-    // Set gym primary color CSS variable
     if (data.gymPrimaryColor) {
-      // Validate gym primary color format
       const gymHexColor = data.gymPrimaryColor.trim()
       if (!/^#[0-9A-Fa-f]{6}$/.test(gymHexColor)) {
         console.warn('Invalid gym hex color format:', gymHexColor, 'using primary color')
-        root.style.setProperty('--gym-primary-color', 'var(--primary-color)')
-      } else {
-        root.style.setProperty('--gym-primary-color', data.gymPrimaryColor)
+        data.gymPrimaryColor = data.primaryColor || '#6B7280'
       }
-    } else {
-      root.style.setProperty('--gym-primary-color', 'var(--primary-color)')
     }
-  }, [lightenColor, darkenColor])
+  }, [])
 
   const fetchBranding = useCallback(async (slug: string) => {
     setBrandingData((prev: BrandingData) => ({ ...prev, isLoading: true, error: null }))

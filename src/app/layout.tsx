@@ -1,73 +1,55 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+'use client'
 
-import { BrandingProvider } from "@/contexts/branding-context";
-import { AuthProvider } from "@/contexts/auth-context";
-import { ThemeProvider } from "@/contexts/theme-context";
-import { ToastProvider } from "@/components/ui/toast";
-import { ModalContainer } from "@/components/modals/modal-container";
-import { UploadProvider } from "@/contexts/upload-context";
-import { FabCreatePost } from "@/components/ui/fab-create-post";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "Content Approval App",
-  description: "Manage and approve social media content",
-};
+import { ThemeProvider as ShadcnThemeProvider } from '@/components/theme-provider'
+import { ThemeProvider as ClientThemeProvider } from '@/contexts/theme-context'
+import { AuthProvider } from '@/contexts/auth-context'
+import { usePathname } from 'next/navigation'
+import { Toaster } from 'sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import './globals.css'
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
+  const pathname = usePathname()
+  const isAdminRoute = pathname?.startsWith('/admin')
+
+  // Always use ShadcnThemeProvider for consistent shadcn styling
+  const content = (
+    <ShadcnThemeProvider
+      attribute="class"
+      defaultTheme="dark"
+      enableSystem={false}
+      disableTransitionOnChange
+    >
+      {isAdminRoute ? children : (
+        <ClientThemeProvider>
+          {children}
+        </ClientThemeProvider>
+      )}
+    </ShadcnThemeProvider>
+  )
+
   return (
-    <html lang="en">
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var t = localStorage.getItem('theme');
-                  var theme = (t === 'dark' || t === 'light') ? t : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                  document.documentElement.setAttribute('data-theme', theme || 'light');
-                } catch(e) {
-                  document.documentElement.setAttribute('data-theme', 'light');
-                }
-              })();
-            `,
-          }}
-        />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
-      >
-        <ThemeProvider>
-          <AuthProvider>
-            <ToastProvider>
-              <BrandingProvider>
-                <UploadProvider>
-                  <main className="flex-1">
-                    {children}
-                  </main>
-                  <FabCreatePost />
-                  <ModalContainer />
-                </UploadProvider>
-              </BrandingProvider>
-            </ToastProvider>
-          </AuthProvider>
-        </ThemeProvider>
+    <html lang="en" suppressHydrationWarning className="dark">
+      <head />
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <AuthProvider>
+          <ShadcnThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <TooltipProvider>
+              {children}
+              <Toaster richColors closeButton position="top-right" />
+            </TooltipProvider>
+          </ShadcnThemeProvider>
+        </AuthProvider>
       </body>
     </html>
-  );
+  )
 }

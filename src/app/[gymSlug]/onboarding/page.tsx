@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, DragEvent } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
@@ -17,60 +17,8 @@ import {
 import { supabase } from '@/lib/supabase'
 import { updateGymProfileKey } from '@/lib/database'
 import toast from 'react-hot-toast'
-
-interface FormData {
-  // Business Details
-  firstName: string
-  lastName: string
-  phone: string
-  website: string
-  city: string
-  address: string
-  
-  // Brand Identity
-  brandColor: string
-  brandStyle: string
-  
-  // Audience & Services
-  audience: string
-  services: string
-  results: string
-  
-  // Links & Socials
-  googleMapUrl: string
-  instagramUrl: string
-  
-  // Marketing & Content
-  cta: string
-  testimonial: string
-  
-  // Media - now store File objects locally
-  whiteLogoFile: File | null
-  blackLogoFile: File | null
-  whiteLogoUrl: string
-  blackLogoUrl: string
-}
-
-const steps = [
-  { id: 1, title: 'Business Details', icon: Building },
-  { id: 2, title: 'Brand Identity', icon: Palette },
-  { id: 3, title: 'Audience & Services', icon: Users },
-  { id: 4, title: 'Links & Socials', icon: LinkIcon },
-  { id: 5, title: 'Marketing & Content', icon: Megaphone },
-]
-
-const brandStyles = [
-  'F45',
-  'Peloton',
-  'Nike',
-  'Orangetheory',
-  'CrossFit HQ',
-  'Barry\'s',
-  'SoulCycle',
-  'Equinox',
-  'Gymshark',
-  'Rumble Boxing'
-]
+import { FormData, steps, brandStyles } from './types'
+import { StepContent } from './step-content'
 
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(1)
@@ -1061,10 +1009,10 @@ export default function OnboardingPage() {
         {/* Progress bar (mobile-friendly) */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-text-secondary">Step {currentStep} of {steps.length}</span>
-            <span className="text-sm text-text-secondary">{Math.round((currentStep/steps.length)*100)}%</span>
+            <span className="text-sm text-muted-foreground">Step {currentStep} of {steps.length}</span>
+            <span className="text-sm text-muted-foreground">{Math.round((currentStep/steps.length)*100)}%</span>
           </div>
-          <div className="w-full h-2 rounded-md bg-[var(--surface)] border border-border overflow-hidden">
+          <div className="w-full h-2 rounded-md bg-muted border border-border overflow-hidden">
             <div
               className="h-full bg-primary transition-all duration-500"
               style={{ width: `${(currentStep/steps.length)*100}%` }}
@@ -1078,19 +1026,25 @@ export default function OnboardingPage() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
-          className="bg-card-bg border border-card-border rounded-md p-8 mb-8"
+          className="bg-card border border-border rounded-lg p-8 mb-8"
         >
           <div className="flex items-center mb-6">
             <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mr-4">
-              {React.createElement(steps[currentStep - 1].icon, { className: "w-6 h-6 text-white" })}
+              {React.createElement(steps[currentStep - 1].icon, { className: "w-6 h-6 text-primary-foreground" })}
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-text">{steps[currentStep - 1].title}</h2>
-              <p className="text-text-secondary">Step {currentStep} of {steps.length}</p>
+              <h2 className="text-2xl font-bold text-foreground">{steps[currentStep - 1].title}</h2>
+              <p className="text-muted-foreground">Step {currentStep} of {steps.length}</p>
             </div>
           </div>
 
-          {renderStepContent()}
+          <StepContent
+            currentStep={currentStep}
+            formData={formData}
+            updateFormData={updateFormData}
+            gymSlug={gymSlug}
+            brandStyles={brandStyles}
+          />
         </motion.div>
 
         {/* Navigation */}
@@ -1098,7 +1052,7 @@ export default function OnboardingPage() {
           <button
             onClick={prevStep}
             disabled={currentStep === 1}
-            className="flex items-center px-6 py-3 text-text-secondary hover:text-text disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center px-6 py-3 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Previous
@@ -1108,7 +1062,7 @@ export default function OnboardingPage() {
             <button
               onClick={handleSubmit}
               disabled={!isStepValid() || isSubmitting}
-              className="flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {isSubmitting ? (
                 <>
@@ -1126,7 +1080,7 @@ export default function OnboardingPage() {
             <button
               onClick={nextStep}
               disabled={!isStepValid()}
-              className="flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               Next
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -1155,7 +1109,7 @@ export default function OnboardingPage() {
                   toast.error('Failed to start social connection')
                 }
               }}
-              className="px-6 py-3 rounded-lg bg-[var(--brand-primary)] text-white hover:opacity-90 disabled:opacity-50"
+              className="px-6 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               disabled={creatingProfile}
             >
               {creatingProfile ? 'Preparing…' : 'Connect Social Account'}
@@ -1201,7 +1155,7 @@ function LogoUploader({
     onFileSelected(file, logoType)
   }
 
-  const onDrop = (e: DragEvent<HTMLDivElement>) => {
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     const file = e.dataTransfer.files?.[0]
     if (file) handleFiles(file)
@@ -1219,14 +1173,14 @@ function LogoUploader({
           <img 
             src={selectedFile ? URL.createObjectURL(selectedFile) : currentUrl} 
             alt={`${logoType} logo`} 
-            className="w-16 h-16 rounded-lg object-contain border border-card-border bg-[var(--background)]" 
+            className="w-16 h-16 rounded-lg object-contain border border-border bg-background" 
           />
           <div className="flex-1">
-            <span className="text-sm text-text-secondary block">
+            <span className="text-sm text-muted-foreground block">
               {selectedFile ? 'Selected' : 'Current'} {logoType} logo
             </span>
             {selectedFile && (
-              <span className="text-xs text-text-secondary block">
+              <span className="text-xs text-muted-foreground block">
                 {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)}MB)
               </span>
             )}
@@ -1234,7 +1188,7 @@ function LogoUploader({
           {selectedFile && (
             <button
               onClick={removeFile}
-              className="text-red-500 hover:text-red-700 text-sm"
+              className="text-destructive hover:text-destructive/90 text-sm"
             >
               Remove
             </button>
@@ -1245,11 +1199,11 @@ function LogoUploader({
         onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
         onDragLeave={() => setDragOver(false)}
         onDrop={onDrop}
-        className={`border-2 ${dragOver ? 'border-primary' : 'border-dashed border-card-border'} rounded-lg p-4 text-center bg-card-bg`}
+        className={`border-2 ${dragOver ? 'border-primary' : 'border-dashed border-border'} rounded-lg p-4 text-center bg-card`}
       >
-        <p className="text-sm text-text mb-2">Drag and drop a {logoType} logo here, or</p>
+        <p className="text-sm text-foreground mb-2">Drag and drop a {logoType} logo here, or</p>
         <label className="inline-block">
-          <span className="px-3 py-2 rounded-lg bg-primary text-white cursor-pointer">Choose file</span>
+          <span className="px-3 py-2 rounded-lg bg-primary text-primary-foreground cursor-pointer">Choose file</span>
           <input
             type="file"
             accept="image/*"
@@ -1260,7 +1214,7 @@ function LogoUploader({
             }}
           />
         </label>
-        <p className="text-xs text-text-secondary mt-2">PNG, JPG, GIF up to 10MB</p>
+        <p className="text-xs text-muted-foreground mt-2">PNG, JPG, GIF up to 10MB</p>
       </div>
     </div>
   )

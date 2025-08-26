@@ -18,11 +18,7 @@ export function FabCreatePost({ hidden }: { hidden?: boolean }) {
           transition={{ duration: 0.2 }}
           onClick={() => openModal('create-post')}
           aria-label="Create Post"
-          className="fixed z-40 rounded-full shadow-lg border border-[var(--modal-border)] bottom-[calc(16px+env(safe-area-inset-bottom))] right-4 p-4 md:p-5"
-          style={{
-            background: 'var(--fab-bg)',
-            color: 'var(--fab-fg)'
-          }}
+          className="fixed z-40 rounded-[999px] shadow-lg border border-border bg-foreground text-background hover:bg-foreground/90 transition-colors bottom-[calc(16px+env(safe-area-inset-bottom))] right-4 p-4 md:p-5"
         >
           <Pencil className="w-5 h-5" />
         </motion.button>

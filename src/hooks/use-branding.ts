@@ -38,7 +38,7 @@ export function useBranding() {
  *   
  *   return (
  *     <div style={{
- *       backgroundColor: `var(--brand-primary)`,
+ *       backgroundColor: `hsl(var(--primary))`,
  *       color: `var(--brand-primary-light)`
  *     }}>
  *       Branded content
@@ -51,10 +51,10 @@ export function useBrandColors() {
   const { primaryColor } = useBranding()
   
   return {
-    primary: primaryColor ? 'var(--brand-primary)' : '#3b82f6',
-    primaryLight: primaryColor ? 'var(--brand-primary-light)' : '#60a5fa',
-    primaryDark: primaryColor ? 'var(--brand-primary-dark)' : '#2563eb',
-    primaryRgb: primaryColor ? 'var(--brand-primary-rgb)' : '59, 130, 246'
+    primary: 'hsl(var(--primary))',
+    primaryLight: 'hsl(var(--primary))',
+    primaryDark: 'hsl(var(--primary))',
+    primaryRgb: '59, 130, 246' // Default blue RGB value
   }
 }
 

@@ -66,18 +66,18 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
               onClick={() => onFilterChange(filter.key)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-[999px] text-xs font-medium transition-all duration-200 ${
+              className={`flex items-center space-x-2 px-3 py-1.5 rounded-[var(--radius)] text-xs font-medium transition-all duration-200 ${
                 isActive 
-                  ? 'bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)] shadow-sm' 
-                  : 'bg-transparent text-[var(--text)] hover:bg-[var(--hover)] border border-[var(--border)] hover:border-[var(--border-strong)]'
+                  ? 'bg-foreground text-background border-none shadow-sm' 
+                  : 'bg-transparent text-foreground hover:bg-accent border border-border hover:border-primary'
               }`}
             >
               <span>{filter.icon}</span>
               <span>{filter.label}</span>
-              <span className={`px-2 py-0.5 rounded-[999px] text-xs ${
+              <span className={`px-2 py-0.5 rounded-[var(--radius)] text-xs ${
                 isActive 
-                  ? 'text-[var(--text)]' 
-                  : 'bg-[var(--surface)] text-[var(--foreground)]'
+                  ? 'text-background' 
+                  : 'bg-muted text-foreground'
               }`}>
                 {count}
               </span>
@@ -90,25 +90,25 @@ export function PostFilters({ activeFilter, onFilterChange, posts, className = '
       <div className="sm:hidden relative">
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center space-x-2 px-4 py-2 rounded-[999px] text-sm bg-[var(--surface)] border border-[var(--border)] hover:bg-[var(--hover)] transition-all duration-200"
+          className="flex items-center space-x-2 px-3 py-1.5 rounded-[var(--radius)] text-xs bg-muted border border-border hover:bg-accent transition-all duration-200"
         >
           <span>Posts: {filters.find(f => f.key === activeFilter)?.label}</span>
         </button>
         {open && (
-          <div className="absolute z-20 mt-2 w-56 bg-[var(--surface)] rounded-[12px] border border-[var(--border)] shadow-xl">
+          <div className="absolute z-20 mt-2 w-56 bg-popover rounded-[var(--radius)] border border-border shadow-lg">
             {filters.map((filter) => {
               const count = getFilterCount(filter.key)
               return (
                 <button
                   key={filter.key}
                   onClick={() => { onFilterChange(filter.key); setOpen(false) }}
-                  className="w-full flex items-center justify-between px-4 py-3 text-sm text-[var(--text)] hover:bg-[var(--hover)] transition-colors duration-200"
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm text-foreground hover:bg-accent transition-colors duration-200"
                 >
                   <span className="flex items-center space-x-2">
                     <span>{filter.icon}</span>
                     <span>{filter.label}</span>
                   </span>
-                  <span className="text-xs text-[var(--muted-text)]">{count}</span>
+                  <span className="text-xs text-muted-foreground">{count}</span>
                 </button>
               )
             })}

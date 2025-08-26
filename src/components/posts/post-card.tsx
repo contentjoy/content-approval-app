@@ -153,8 +153,7 @@ export function PostCard({
         exit={{ opacity: 0, y: -20, scale: 0.95 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
         whileHover={{ y: -2, scale: 1.02 }}
-        className={`group ${className}`}
-        style={{ backgroundColor: 'var(--card-bg)', borderRadius: '24px', border: '1px solid var(--card-border)' }}
+        className={`group ${className} bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200`}
       >
         {/* Top Section */}
         <div className="flex items-center justify-between p-4">
@@ -162,10 +161,10 @@ export function PostCard({
             <div className="profile-icon profile-icon-md">
               {(post['Gym Name'] || gymName || 'G').charAt(0).toUpperCase()}
             </div>
-            <span className="text-sm font-semibold text-text">{post['Gym Name'] || gymName || 'Gym'}</span>
+            <span className="text-sm font-semibold text-foreground">{post['Gym Name'] || gymName || 'Gym'}</span>
           </div>
           <div className="relative" ref={menuRef}>
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-[999px] hover:bg-[var(--hover)] text-[var(--text)] hover:text-[var(--accent)] transition-all duration-200">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 rounded-full hover:bg-accent text-foreground hover:text-accent-foreground transition-all duration-200">
               <MoreVertical className="w-5 h-5" />
             </button>
             <AnimatePresence>
@@ -175,21 +174,21 @@ export function PostCard({
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -6 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-48 bg-[var(--modal-bg)] rounded-[24px] border border-[var(--border)] shadow-xl z-[99999]"
+                  className="absolute right-0 mt-2 w-48 bg-popover rounded-lg border border-border shadow-lg z-[99999]"
                 >
-                  <button onClick={handleShare} className="w-full flex items-center px-4 py-3 text-sm text-[var(--text)] hover:bg-[var(--modal-surface)] transition-all duration-200 rounded-[12px]">
+                  <button onClick={handleShare} className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent transition-all duration-200 first:rounded-t-lg last:rounded-b-lg">
                     <svg className="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
                     Share
                   </button>
-                  <button onClick={handleDownload} className="w-full flex items-center px-4 py-3 text-sm text-[var(--text)] hover:bg-[var(--modal-surface)] transition-all duration-200 rounded-[12px]">
+                  <button onClick={handleDownload} className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent transition-all duration-200 first:rounded-t-lg last:rounded-b-lg">
                     <Download className="w-4 h-4 mr-3" />
                     Download
                   </button>
-                  <button onClick={handleEditCaption} className="w-full flex items-center px-4 py-3 text-sm text-[var(--text)] hover:bg-[var(--modal-surface)] transition-all duration-200 rounded-[12px]">
+                  <button onClick={handleEditCaption} className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent transition-all duration-200 first:rounded-t-lg last:rounded-b-lg">
                     <svg className="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                     Edit Caption
                   </button>
-                  <button onClick={handleRegenerate} className="w-full flex items-center px-4 py-3 text-sm text-[var(--text)] hover:bg-[var(--modal-surface)] transition-all duration-200 rounded-[12px]">
+                  <button onClick={handleRegenerate} className="w-full flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent transition-all duration-200 first:rounded-t-lg last:rounded-b-lg">
                     <svg className="w-4 h-4 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
                     Regenerate
                   </button>
@@ -221,10 +220,10 @@ export function PostCard({
                   />
                   <div className={`
                     w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200
-                    ${isSelected ? 'bg-[var(--surface)] border-[var(--surface)]' : 'bg-black/40 border-white/80 text-white'}
+                    ${isSelected ? 'bg-primary border-primary-foreground' : 'bg-black/40 border-white/80 text-white'}
                   `}>
                     {isSelected && (
-                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-3 h-3 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     )}
@@ -236,7 +235,7 @@ export function PostCard({
 
           {/* Asset Type Badge - hover */}
           <div className="absolute top-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className={`inline-flex items-center px-3 py-1.5 rounded-[24px] text-xs font-semibold bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)]`}>
+            <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-card text-foreground border border-border shadow-sm">
               <span className="mr-1.5">{badge.icon}</span>
               {post['Carousel Group'] ? 'Carousel' : (post['Asset Type'] || 'Post')}
             </span>
@@ -245,7 +244,7 @@ export function PostCard({
           {/* Carousel Indicator */}
           {post['Carousel Group'] && post['Carousel Order'] && (
             <div className="absolute bottom-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <span className="inline-flex items-center px-3 py-1.5 rounded-[24px] text-xs font-semibold bg-background text-foreground border border-border">
+              <span className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-background text-foreground border border-border shadow-sm">
                 {post['Carousel Order']} of {post['Carousel Group']}
               </span>
             </div>
@@ -257,15 +256,15 @@ export function PostCard({
           <div className="flex items-center space-x-4">
             <button
               onClick={handleApproveToggle}
-              className={`transition-colors ${isApproved ? 'text-[#ff3041]' : 'text-gray-500 hover:text-[#ff3041]'}`}
+              className={`transition-colors ${isApproved ? 'text-destructive' : 'text-muted-foreground hover:text-destructive'}`}
               aria-label="Approve"
             >
               <Heart className={`w-5 h-5 ${isApproved ? 'fill-current' : ''}`} />
             </button>
-            <button onClick={handleDisapprove} className="text-gray-500 hover:text-destructive transition-colors" aria-label="Disapprove">
+            <button onClick={handleDisapprove} className="text-muted-foreground hover:text-destructive transition-colors" aria-label="Disapprove">
               <XIcon className="w-6 h-6" />
             </button>
-            <button onClick={handleComments} className="text-gray-500 hover:text-[var(--surface)] transition-colors" aria-label="Comments">
+            <button onClick={handleComments} className="text-muted-foreground hover:text-primary transition-colors" aria-label="Comments">
               <MessageCircle className="w-5 h-5" />
             </button>
           </div>
@@ -277,7 +276,7 @@ export function PostCard({
               await downloadMedia(assetUrl, fileName)
             }}
             disabled={isDownloading}
-            className={`text-gray-500 hover:text-[var(--surface)] transition-colors ${isDownloading ? 'opacity-50' : ''}`}
+            className={`text-muted-foreground hover:text-primary transition-colors ${isDownloading ? 'opacity-50' : ''}`}
             aria-label="Download"
           >
             <Download className="w-6 h-6" />
@@ -289,24 +288,24 @@ export function PostCard({
           {post['Post Caption'] && (
             <div className="mb-2">
               <p
-                className={`text-text text-sm leading-relaxed ${isExpanded ? '' : 'line-clamp-3'}`}
+                className={`text-foreground text-sm leading-relaxed ${isExpanded ? '' : 'line-clamp-3'}`}
                 dangerouslySetInnerHTML={{
                   __html: (post['Post Caption'] || '')
-                    .replace(/(#[\w\p{L}\p{Mn}\p{Pd}\d_]+)/gu, '<span class="text-muted-text">$1</span>')
+                    .replace(/(#[\w\p{L}\p{Mn}\p{Pd}\d_]+)/gu, '<span class="text-muted-foreground">$1</span>')
                     .replace(/\n/g, '<br/>')
                 }}
               />
               {post['Post Caption'].length > 150 && (
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="text-text text-xs font-semibold mt-1 hover:underline transition-colors"
+                  className="text-foreground text-xs font-semibold mt-1 hover:underline transition-colors"
                 >
                   {isExpanded ? 'Show less' : 'Read more'}
                 </button>
               )}
             </div>
           )}
-          <div className="text-xs text-muted-text mt-1">
+          <div className="text-xs text-muted-foreground mt-1">
             {formatTimestamp(post.created_at || post.updated_at)}
           </div>
         </div>

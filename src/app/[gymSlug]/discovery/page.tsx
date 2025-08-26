@@ -60,15 +60,15 @@ export default function DiscoveryPage() {
     load()
   }, [])
 
-  if (loading) return <div className="text-center p-6 text-muted-text">Loading…</div>
+  if (loading) return <div className="text-center p-6 text-muted-foreground">Loading…</div>
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-semibold text-text mb-1">Discovery</h1>
-      <p className="text-sm text-muted-text mb-6">Posts discovered this month</p>
+      <h1 className="text-2xl font-semibold text-foreground mb-1">Discovery</h1>
+      <p className="text-sm text-muted-foreground mb-6">Posts discovered this month</p>
 
       {items.length === 0 ? (
-        <div className="text-muted-text">No items for this month.</div>
+        <div className="text-muted-foreground">No items for this month.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((item, index) => (
@@ -77,7 +77,7 @@ export default function DiscoveryPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.06 }}
-              className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-4"
+              className="bg-card border border-border rounded-lg p-4"
             >
               {/* Title hidden for now per request */}
               {embedStates[item.id] === 'loading' && (
