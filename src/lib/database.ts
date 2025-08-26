@@ -680,12 +680,11 @@ export interface ScheduledPostSummary {
 }
 
 export async function getScheduledPosts(gymSlug: string, startDate: Date, endDate: Date): Promise<ScheduledPostSummary[]> {
-  // Base query by date range only; we will add the gym filter branch below
+  // Get all scheduled posts (not null) and order by date
   const base = supabase
     .from('social_media_posts')
     .select('id, "Gym Name", "Asset URL", "Asset Type", "Post Caption", Scheduled, gym_id, "Carousel Group", "Carousel Order", "Content Type"')
-    .gte('Scheduled', startDate.toISOString())
-    .lt('Scheduled', endDate.toISOString())
+    .not('Scheduled', 'is', null)
     .order('Scheduled', { ascending: true })
 
   // Detect whether slug is a UUID (gym_id) or a gym name slug (e.g., kokoro-demo)

@@ -6,28 +6,15 @@ import { getScheduledPosts, type ScheduledPostSummary } from '@/lib/database'
 import { Calendar, CalendarSkeleton } from '@/components/calendar'
 import { convertPostsToEvents } from '@/components/calendar/utils'
 
-function startOfMonth(date: Date) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1, 0, 0, 0))
-}
-function addMonths(date: Date, n: number) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + n, 1, 0, 0, 0))
-}
 
 export default function CalendarPage() {
   const params = useParams()
   const gymSlug = (params?.gymSlug as string) || ''
 
-  const [currentDate] = useState(new Date())
+
   const [posts, setPosts] = useState<ScheduledPostSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  // range for current month (UTC)
-  const range = useMemo(() => {
-    const start = startOfMonth(currentDate)
-    const end = addMonths(start, 1)
-    return { start, end }
-  }, [currentDate])
 
   useEffect(() => {
     let mounted = true
@@ -35,7 +22,8 @@ export default function CalendarPage() {
       setLoading(true)
       setError(null)
       try {
-        const data = await getScheduledPosts(gymSlug, range.start, range.end)
+        // Pass current date range but the function will ignore it and return all scheduled posts
+        const data = await getScheduledPosts(gymSlug, new Date(), new Date())
         if (mounted) setPosts(data)
       } catch {
         if (mounted) setError('Failed to load scheduled posts')
@@ -45,7 +33,7 @@ export default function CalendarPage() {
     }
     load()
     return () => { mounted = false }
-  }, [gymSlug, range.start, range.end])
+  }, [gymSlug])
 
   // Convert posts to calendar events
   const events = useMemo(() => {
